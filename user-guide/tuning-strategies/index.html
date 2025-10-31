@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="TabTune Development Team" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Tuning Strategies - TabTune Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Tuning Strategies";
+        var mkdocs_page_input_path = "user-guide/tuning-strategies.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../assets/tabtune.svg" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quick-start/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../getting-started/basic-concepts.md">Basic Concepts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline-overview/">TabularPipeline Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-processing/">Data Processing</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Tuning Strategies</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-overview">1. Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-inference-strategy">2. Inference Strategy</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#definition">Definition</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-cases">Use Cases</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#workflow">Workflow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#advantages">Advantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#disadvantages">Disadvantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#performance-profile">Performance Profile</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#example-with-all-models">Example with All Models</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-base-fine-tuning-strategy-base-ft">3. Base Fine-Tuning Strategy (base-ft)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#definition_1">Definition</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-cases_1">Use Cases</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#workflow_1">Workflow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#implementation_1">Implementation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#supported-parameters">Supported Parameters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#advantages_1">Advantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#disadvantages_1">Disadvantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#performance-profile_1">Performance Profile</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#training-loop-details">Training Loop Details</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#example-full-training-pipeline">Example: Full Training Pipeline</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-peft-fine-tuning-strategy-peft">4. PEFT Fine-Tuning Strategy (peft)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#definition_2">Definition</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#how-lora-works">How LoRA Works</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-cases_2">Use Cases</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#workflow_2">Workflow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#implementation_2">Implementation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#peft-parameters">PEFT Parameters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#model-specific-lora-targets">Model-Specific LoRA Targets</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#advantages_2">Advantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#disadvantages_2">Disadvantages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#performance-profile_2">Performance Profile</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#parameter-tuning-guidelines">Parameter Tuning Guidelines</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#example-peft-training-with-hyperparameter-tuning">Example: PEFT Training with Hyperparameter Tuning</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-strategy-comparison-decision-tree">5. Strategy Comparison &amp; Decision Tree</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#quick-comparison-table">Quick Comparison Table</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#decision-tree">Decision Tree</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-best-practices">6. Best Practices</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-troubleshooting">7. Troubleshooting</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-cuda-out-of-memory">Issue: "CUDA out of memory"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-accuracy-decreasing-during-training">Issue: "Accuracy decreasing during training"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-model-not-improving-after-training">Issue: "Model not improving after training"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-peft-not-significantly-faster">Issue: "PEFT not significantly faster"</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-next-steps">8. Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model-selection/">Model Selection</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saving-loading/">Saving and Loading</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../leaderboard/">Model Comparison</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabpfn/">TabPFN</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabicl/">TabICL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../models/tabbiaxial.md">TabBiaxial</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabdpt/">TabDPT</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/mitra/">Mitra</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/contexttab/">ConTextTab</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/peft-lora/">PEFT & LoRA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../api/pipeline.md">TabularPipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/data-processor.md">DataProcessor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/tuning-manager.md">TuningManager</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/leaderboard.md">TabularLeaderboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/peft-utils.md">PEFT Utils</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/classification/">Classification Tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/large-datasets/">Large Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../examples/benchmarking.md">Benchmarking</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../contributing/setup.md">Development Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/standards.md">Code Standards</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/new-models.md">Adding New Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/documentation.md">Documentation Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../about/release-notes.md">Release Notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/roadmap.md">Roadmap</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/faq.md">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/license.md">License</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TabTune Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Tuning Strategies</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/tuning-strategies.md">Edit on Lexsi-Labs/TabTune_Internal</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="tuning-strategies">Tuning Strategies<a class="headerlink" href="#tuning-strategies" title="Permanent link">&para;</a></h1>
+<p>TabTune provides three distinct tuning strategies to accommodate different use cases, computational budgets, and performance requirements. This guide explains each strategy in detail, including when to use them and their tradeoffs.</p>
+<hr />
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Training</th>
+<th>Use Case</th>
+<th>Memory</th>
+<th>Speed</th>
+<th>Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>inference</strong></td>
+<td>None</td>
+<td>Baseline, zero-shot</td>
+<td>Minimal</td>
+<td>Fast</td>
+<td>Baseline</td>
+</tr>
+<tr>
+<td><strong>base-ft</strong></td>
+<td>Full params</td>
+<td>High accuracy, ample resources</td>
+<td>High</td>
+<td>Slow</td>
+<td>Highest</td>
+</tr>
+<tr>
+<td><strong>peft</strong></td>
+<td>LoRA adapters</td>
+<td>Memory-constrained, iteration</td>
+<td>Low</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-inference-strategy">2. Inference Strategy<a class="headerlink" href="#2-inference-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="definition">Definition<a class="headerlink" href="#definition" title="Permanent link">&para;</a></h3>
+<p><strong>Zero-shot inference</strong> using pre-trained model weights without any training on your data.</p>
+<h3 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Quick baseline comparisons</li>
+<li>Evaluating out-of-the-box model performance</li>
+<li>Time-constrained scenarios</li>
+<li>Testing data preprocessing pipeline</li>
+</ul>
+<h3 id="workflow">Workflow<a class="headerlink" href="#workflow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>flowchart LR
+    A[Raw Data] --&gt; B[DataProcessor]
+    B --&gt; C[Load Pre-trained Model]
+    C --&gt; D[Forward Pass Only]
+    D --&gt; E[Predictions]
+</code></pre></div>
+<h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># No training occurs</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># fit() only applies preprocessing; no model training</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Direct prediction on test data</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="advantages">Advantages<a class="headerlink" href="#advantages" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ No training time needed</li>
+<li>✅ Minimal memory footprint</li>
+<li>✅ Immediate results</li>
+<li>✅ Good for baseline comparisons</li>
+</ul>
+<h3 id="disadvantages">Disadvantages<a class="headerlink" href="#disadvantages" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ Generic pre-trained weights may not fit your data</li>
+<li>❌ Typically lower accuracy than fine-tuned models</li>
+<li>❌ Cannot adapt to task-specific patterns</li>
+</ul>
+<h3 id="performance-profile">Performance Profile<a class="headerlink" href="#performance-profile" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Training time</strong>: 0 seconds</li>
+<li><strong>Memory usage</strong>: 2-4 GB (model + data)</li>
+<li><strong>Inference latency</strong>: 10-50 ms per batch</li>
+</ul>
+<h3 id="example-with-all-models">Example with All Models<a class="headerlink" href="#example-with-all-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span> <span class="s1">&#39;TabICL&#39;</span><span class="p">,</span> <span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span> <span class="s1">&#39;Mitra&#39;</span><span class="p">,</span> <span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span> <span class="s1">&#39;TabBiaxial&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span>
+    <span class="p">)</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> - Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="3-base-fine-tuning-strategy-base-ft">3. Base Fine-Tuning Strategy (<code>base-ft</code>)<a class="headerlink" href="#3-base-fine-tuning-strategy-base-ft" title="Permanent link">&para;</a></h2>
+<h3 id="definition_1">Definition<a class="headerlink" href="#definition_1" title="Permanent link">&para;</a></h3>
+<p><strong>Full-parameter fine-tuning</strong> where all model weights are updated during training.</p>
+<h3 id="use-cases_1">Use Cases<a class="headerlink" href="#use-cases_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Maximum accuracy is priority</li>
+<li>Abundant computational resources (GPU, RAM)</li>
+<li>Large training datasets (&gt;100K samples)</li>
+<li>Production models requiring best performance</li>
+<li>Transfer learning from related domains</li>
+</ul>
+<h3 id="workflow_1">Workflow<a class="headerlink" href="#workflow_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>flowchart LR
+    A[Raw Data] --&gt; B[DataProcessor]
+    B --&gt; C[Load Pre-trained Model]
+    C --&gt; D[Update ALL Parameters]
+    D --&gt; E[Training Loop]
+    E --&gt; F[Fine-tuned Model]
+    F --&gt; G[Predictions]
+</code></pre></div>
+<h3 id="implementation_1">Implementation<a class="headerlink" href="#implementation_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;gradient_accumulation_steps&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># optional</span>
+        <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span>  <span class="c1"># optional</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Full training occurs during fit()</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Use fine-tuned model for predictions</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="supported-parameters">Supported Parameters<a class="headerlink" href="#supported-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>device</code></td>
+<td>str</td>
+<td>'cpu'</td>
+<td>'cuda' or 'cpu'</td>
+</tr>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td>3</td>
+<td>Number of training epochs</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td>2e-5</td>
+<td>Optimizer learning rate</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>int</td>
+<td>32</td>
+<td>Samples per batch</td>
+</tr>
+<tr>
+<td><code>optimizer</code></td>
+<td>str</td>
+<td>'adamw'</td>
+<td>'adamw' or 'sgd'</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Display training progress bar</td>
+</tr>
+</tbody>
+</table>
+<h3 id="advantages_1">Advantages<a class="headerlink" href="#advantages_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Highest accuracy potential</li>
+<li>✅ Fully adapts to task-specific patterns</li>
+<li>✅ Works with any dataset size</li>
+<li>✅ Best for production models</li>
+<li>✅ Supports all hyperparameter tuning</li>
+</ul>
+<h3 id="disadvantages_1">Disadvantages<a class="headerlink" href="#disadvantages_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ High memory consumption (8-16GB+)</li>
+<li>❌ Long training time (hours for large models)</li>
+<li>❌ Risk of overfitting on small datasets</li>
+<li>❌ Requires careful hyperparameter tuning</li>
+<li>❌ GPU memory can become bottleneck</li>
+</ul>
+<h3 id="performance-profile_1">Performance Profile<a class="headerlink" href="#performance-profile_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Training time</strong>: 30 minutes - 2 hours (depending on dataset)</li>
+<li><strong>Memory usage</strong>: 12-24 GB (full model + gradients + optimizer states)</li>
+<li><strong>Inference latency</strong>: 10-50 ms per batch</li>
+</ul>
+<h3 id="training-loop-details">Training Loop Details<a class="headerlink" href="#training-loop-details" title="Permanent link">&para;</a></h3>
+<p>The training process follows this pattern:</p>
+<ol>
+<li><strong>Initialize optimizer</strong> (AdamW with weight decay)</li>
+<li><strong>For each epoch</strong>:</li>
+<li>Shuffle training data</li>
+<li><strong>For each batch</strong>:<ul>
+<li>Forward pass through model</li>
+<li>Compute loss</li>
+<li>Backward pass (compute gradients)</li>
+<li>Clip gradients if specified</li>
+<li>Update weights</li>
+<li>Update learning rate scheduler</li>
+</ul>
+</li>
+<li>Validate on development set (if available)</li>
+<li><strong>Save best checkpoint</strong> based on validation metric</li>
+<li><strong>Return fine-tuned model</strong></li>
+</ol>
+<h3 id="example-full-training-pipeline">Example: Full Training Pipeline<a class="headerlink" href="#example-full-training-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Load and split data</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_your_dataset</span><span class="p">()</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="c1"># Configure base fine-tuning</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">&#39;scheduler&#39;</span><span class="p">:</span> <span class="s1">&#39;cosine&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;warmup_steps&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+        <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;save_checkpoint_path&#39;</span><span class="p">:</span> <span class="s1">&#39;best_model.pt&#39;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Train on training data</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Evaluate on validation set</span>
+<span class="n">val_metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Accuracy: </span><span class="si">{</span><span class="n">val_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save for later use</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;fintuned_pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="4-peft-fine-tuning-strategy-peft">4. PEFT Fine-Tuning Strategy (<code>peft</code>)<a class="headerlink" href="#4-peft-fine-tuning-strategy-peft" title="Permanent link">&para;</a></h2>
+<h3 id="definition_2">Definition<a class="headerlink" href="#definition_2" title="Permanent link">&para;</a></h3>
+<p><strong>Parameter-Efficient Fine-Tuning using LoRA (Low-Rank Adaptation)</strong> where only small adapter weights are trained while base model is frozen.</p>
+<h3 id="how-lora-works">How LoRA Works<a class="headerlink" href="#how-lora-works" title="Permanent link">&para;</a></h3>
+<!-- Instead of updating all weights, LoRA adds trainable low-rank matrices:
+
+\[
+\text{output} = W_0 \cdot x + \frac{\alpha}{r} \cdot B(A \cdot x)
+\]
+
+Where:
+- \(W_0\) is the frozen pre-trained weight
+- \(A \in \mathbb{R}^{d_{in} \times r}\) and \(B \in \mathbb{R}^{r \times d_{out}}\) are trainable
+- \(r \ll \min(d_{in}, d_{out})\) is the rank
+
+This reduces trainable parameters from millions to thousands. -->
+
+<h3 id="use-cases_2">Use Cases<a class="headerlink" href="#use-cases_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Limited GPU memory (&lt; 8 GB)</li>
+<li>Quick iteration cycles</li>
+<li>Fine-tuning multiple models simultaneously</li>
+<li>Rapid experimentation</li>
+<li>Deployment with minimal storage</li>
+</ul>
+<h3 id="workflow_2">Workflow<a class="headerlink" href="#workflow_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>flowchart LR
+    A[Raw Data] --&gt; B[DataProcessor]
+    B --&gt; C[Load Pre-trained Model]
+    C --&gt; D[Inject LoRA Adapters]
+    D --&gt; E[Update ONLY Adapters]
+    E --&gt; F[Training Loop]
+    F --&gt; G[Model + LoRA Weights]
+    G --&gt; H[Predictions]
+</code></pre></div>
+<h3 id="implementation_2">Implementation<a class="headerlink" href="#implementation_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;Mitra&#39;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="s1">&#39;target_modules&#39;</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># Uses model defaults if None</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Training with LoRA adapters</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Predictions with adapted model</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="peft-parameters">PEFT Parameters<a class="headerlink" href="#peft-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>r</code></td>
+<td>int</td>
+<td>8</td>
+<td>LoRA rank (lower = more compression)</td>
+</tr>
+<tr>
+<td><code>lora_alpha</code></td>
+<td>int</td>
+<td>16</td>
+<td>Scaling factor for LoRA output</td>
+</tr>
+<tr>
+<td><code>lora_dropout</code></td>
+<td>float</td>
+<td>0.05</td>
+<td>Dropout applied to LoRA input</td>
+</tr>
+<tr>
+<td><code>target_modules</code></td>
+<td>list</td>
+<td>None</td>
+<td>Which linear layers to adapt (None = use defaults)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="model-specific-lora-targets">Model-Specific LoRA Targets<a class="headerlink" href="#model-specific-lora-targets" title="Permanent link">&para;</a></h3>
+<p>TabTune pre-configures optimal target modules per model:</p>
+<p><strong>TabICL/TabBiaxial</strong>:
+<div class="highlight"><pre><span></span><code>col_embedder.tf_col, row_interactor, icl_predictor.tf_icl, icl_predictor.decoder
+</code></pre></div></p>
+<p><strong>TabDPT</strong>:
+<div class="highlight"><pre><span></span><code>transformer_encoder, encoder, y_encoder, head
+</code></pre></div></p>
+<p><strong>Mitra</strong>:
+<div class="highlight"><pre><span></span><code>x_embedding, layers, final_layer
+</code></pre></div></p>
+<p><strong>ContextTab</strong>:
+<div class="highlight"><pre><span></span><code>in_context_encoder, dense, output_head, embeddings
+</code></pre></div></p>
+<p><strong>TabPFN</strong> (⚠️ Experimental):
+<div class="highlight"><pre><span></span><code>encoder.5.layer, y_encoder.2.layer, transformer_encoder.layers, decoder_dict.standard
+</code></pre></div></p>
+<h3 id="advantages_2">Advantages<a class="headerlink" href="#advantages_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ 90% memory reduction vs base-ft</li>
+<li>✅ 2-3x faster training</li>
+<li>✅ Only stores small adapter weights</li>
+<li>✅ Can run on 4GB GPUs</li>
+<li>✅ Fast iteration for experimentation</li>
+</ul>
+<h3 id="disadvantages_2">Disadvantages<a class="headerlink" href="#disadvantages_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ Slightly lower accuracy than base-ft (~2-5% in practice)</li>
+<li>❌ Not all model layers adapted (frozen backbone limits flexibility)</li>
+<li>❌ May struggle with very different tasks</li>
+<li>❌ Experimental support on TabPFN and ContextTab</li>
+</ul>
+<h3 id="performance-profile_2">Performance Profile<a class="headerlink" href="#performance-profile_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Training time</strong>: 10-30 minutes</li>
+<li><strong>Memory usage</strong>: 3-6 GB (adapters + activations only)</li>
+<li><strong>Inference latency</strong>: 10-50 ms per batch</li>
+<li><strong>Model size</strong>: Original model size + 1-2% (adapters)</li>
+</ul>
+<h3 id="parameter-tuning-guidelines">Parameter Tuning Guidelines<a class="headerlink" href="#parameter-tuning-guidelines" title="Permanent link">&para;</a></h3>
+<p><strong>Rank Selection</strong>:
+<div class="highlight"><pre><span></span><code>r = 4   → Highest compression, faster, lower accuracy
+r = 8   → Good balance (default)
+r = 16  → More expressive, slower, higher accuracy
+r = 32  → Close to base-ft, but still compressed
+</code></pre></div></p>
+<p><strong>Alpha Selection</strong>:
+<div class="highlight"><pre><span></span><code>lora_alpha should typically be 2x the rank
+r=8 → lora_alpha=16
+r=16 → lora_alpha=32
+</code></pre></div></p>
+<p><strong>Dropout Selection</strong>:
+<div class="highlight"><pre><span></span><code>lora_dropout=0.0  → No regularization
+lora_dropout=0.05 → Light regularization (default)
+lora_dropout=0.1  → Strong regularization
+</code></pre></div></p>
+<h3 id="example-peft-training-with-hyperparameter-tuning">Example: PEFT Training with Hyperparameter Tuning<a class="headerlink" href="#example-peft-training-with-hyperparameter-tuning" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Experiment with different LoRA ranks</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">]:</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+            <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span>
+                <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span>
+                <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rank </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">: Accuracy = </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="5-strategy-comparison-decision-tree">5. Strategy Comparison &amp; Decision Tree<a class="headerlink" href="#5-strategy-comparison-decision-tree" title="Permanent link">&para;</a></h2>
+<h3 id="quick-comparison-table">Quick Comparison Table<a class="headerlink" href="#quick-comparison-table" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>inference</th>
+<th>base-ft</th>
+<th>peft</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Training</td>
+<td>No</td>
+<td>Yes, all params</td>
+<td>Yes, adapters only</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Accuracy</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Free</td>
+<td>High GPU cost</td>
+<td>Low GPU cost</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision-tree">Decision Tree<a class="headerlink" href="#decision-tree" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Start: Which strategy?
+│
+├─ &quot;I want instant results, no training&quot; → inference
+│  └─ Best for: Baseline, quick exploration
+│
+├─ &quot;I have limited resources (&lt;8GB GPU)&quot; → peft
+│  └─ Best for: Rapid iteration, memory-constrained
+│
+└─ &quot;I need best accuracy, have resources&quot; → base-ft
+   └─ Best for: Production, large datasets, high accuracy
+</code></pre></div>
+<hr />
+<h2 id="6-best-practices">6. Best Practices<a class="headerlink" href="#6-best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Start with inference</strong> to establish baseline</li>
+<li><strong>Use PEFT for exploration</strong> when resources are limited</li>
+<li><strong>Switch to base-ft for production</strong> models</li>
+<li><strong>Monitor for overfitting</strong> on small datasets</li>
+<li><strong>Save checkpoints</strong> for long training runs</li>
+<li><strong>Use validation set</strong> to track progress</li>
+<li><strong>Start with default hyperparameters</strong> then tune</li>
+</ol>
+<hr />
+<h2 id="7-troubleshooting">7. Troubleshooting<a class="headerlink" href="#7-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="issue-cuda-out-of-memory">Issue: "CUDA out of memory"<a class="headerlink" href="#issue-cuda-out-of-memory" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Reduce batch size or use PEFT strategy</p>
+<h3 id="issue-accuracy-decreasing-during-training">Issue: "Accuracy decreasing during training"<a class="headerlink" href="#issue-accuracy-decreasing-during-training" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Lower learning rate, reduce epochs, use regularization</p>
+<h3 id="issue-model-not-improving-after-training">Issue: "Model not improving after training"<a class="headerlink" href="#issue-model-not-improving-after-training" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Increase learning rate, use different scheduler, increase epochs</p>
+<h3 id="issue-peft-not-significantly-faster">Issue: "PEFT not significantly faster"<a class="headerlink" href="#issue-peft-not-significantly-faster" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Use lower rank (r=4), verify LoRA is actually applied</p>
+<hr />
+<h2 id="8-next-steps">8. Next Steps<a class="headerlink" href="#8-next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../advanced/peft-lora/">PEFT &amp; LoRA Details</a> - Deep dive into LoRA theory</li>
+<li><a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a> - Optimize model performance</li>
+<li><a href="../model-selection/">Model Selection</a> - Choose right model for your task</li>
+</ul>
+<hr />
+<p>Choose the right strategy for your use case and resource constraints!</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../data-processing/" class="btn btn-neutral float-left" title="Data Processing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../model-selection/" class="btn btn-neutral float-right" title="Model Selection">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal" class="fa fa-code-fork" style="color: #fcfcfc"> Lexsi-Labs/TabTune_Internal</a>
+        </span>
+    
+    
+      <span><a href="../data-processing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../model-selection/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

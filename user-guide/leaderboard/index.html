@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="TabTune Development Team" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Model Comparison - TabTune Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Model Comparison";
+        var mkdocs_page_input_path = "user-guide/leaderboard.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../assets/tabtune.svg" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quick-start/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../getting-started/basic-concepts.md">Basic Concepts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline-overview/">TabularPipeline Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-processing/">Data Processing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tuning-strategies/">Tuning Strategies</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model-selection/">Model Selection</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saving-loading/">Saving and Loading</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Model Comparison</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-overview">1. Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-core-concepts">2. Core Concepts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#21-workflow">2.1 Workflow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#22-key-components">2.2 Key Components</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-basic-usage">3. Basic Usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#31-initialize-leaderboard">3.1 Initialize Leaderboard</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#32-add-models-to-leaderboard">3.2 Add Models to Leaderboard</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#33-run-benchmarks">3.3 Run Benchmarks</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-complete-example">4. Complete Example</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#41-full-comparison-workflow">4.1 Full Comparison Workflow</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-class-reference">5. Class Reference</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#51-tabularleaderboard-constructor">5.1 TabularLeaderboard Constructor</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#52-add_model-method">5.2 add_model() Method</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#53-run-method">5.3 run() Method</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-advanced-usage">6. Advanced Usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#61-custom-model-names">6.1 Custom Model Names</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#62-hyperparameter-grid">6.2 Hyperparameter Grid</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#63-strategy-comparison">6.3 Strategy Comparison</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#64-cross-validation">6.4 Cross-Validation</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-evaluation-metrics">7. Evaluation Metrics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-best-practices">8. Best Practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dos">✅ Do's</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#donts">❌ Don'ts</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#9-complete-workflow-example">9. Complete Workflow Example</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#10-next-steps">10. Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabpfn/">TabPFN</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabicl/">TabICL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../models/tabbiaxial.md">TabBiaxial</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabdpt/">TabDPT</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/mitra/">Mitra</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/contexttab/">ConTextTab</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/peft-lora/">PEFT & LoRA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../api/pipeline.md">TabularPipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/data-processor.md">DataProcessor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/tuning-manager.md">TuningManager</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/leaderboard.md">TabularLeaderboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/peft-utils.md">PEFT Utils</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/classification/">Classification Tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/large-datasets/">Large Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../examples/benchmarking.md">Benchmarking</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../contributing/setup.md">Development Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/standards.md">Code Standards</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/new-models.md">Adding New Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/documentation.md">Documentation Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../about/release-notes.md">Release Notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/roadmap.md">Roadmap</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/faq.md">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/license.md">License</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TabTune Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Model Comparison</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/leaderboard.md">Edit on Lexsi-Labs/TabTune_Internal</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="model-comparison-with-tabularleaderboard">Model Comparison with TabularLeaderboard<a class="headerlink" href="#model-comparison-with-tabularleaderboard" title="Permanent link">&para;</a></h1>
+<p>The <code>TabularLeaderboard</code> is a powerful benchmarking tool that enables systematic comparison of multiple models and tuning strategies on your dataset. This guide shows how to use it effectively.</p>
+<hr />
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p><code>TabularLeaderboard</code> simplifies the process of comparing different TabTune models and strategies:</p>
+<ul>
+<li>✅ Compare multiple models simultaneously</li>
+<li>✅ Test different tuning strategies (inference, base-ft, peft)</li>
+<li>✅ Rank results by any evaluation metric</li>
+<li>✅ Export results for analysis</li>
+<li>✅ Track experiment metadata</li>
+<li>✅ Visualize performance comparisons</li>
+</ul>
+<hr />
+<h2 id="2-core-concepts">2. Core Concepts<a class="headerlink" href="#2-core-concepts" title="Permanent link">&para;</a></h2>
+<h3 id="21-workflow">2.1 Workflow<a class="headerlink" href="#21-workflow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>flowchart LR
+    A[Initialize Leaderboard] --&gt; B[Add Models]
+    B --&gt; C[Configure Strategies]
+    C --&gt; D[Run Benchmarks]
+    D --&gt; E[Evaluate &amp; Rank]
+    E --&gt; F[Export Results]
+</code></pre></div>
+<h3 id="22-key-components">2.2 Key Components<a class="headerlink" href="#22-key-components" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Leaderboard</strong>: Container for managing multiple model configurations</li>
+<li><strong>Model Entry</strong>: Single model + strategy + hyperparameter combination</li>
+<li><strong>Benchmark</strong>: Complete evaluation run across all added models</li>
+<li><strong>Results</strong>: Ranked comparison with metrics and metadata</li>
+</ul>
+<hr />
+<h2 id="3-basic-usage">3. Basic Usage<a class="headerlink" href="#3-basic-usage" title="Permanent link">&para;</a></h2>
+<h3 id="31-initialize-leaderboard">3.1 Initialize Leaderboard<a class="headerlink" href="#31-initialize-leaderboard" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Prepare data splits</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_your_data</span><span class="p">()</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Initialize leaderboard</span>
+<span class="n">leaderboard</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">X_test</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">y_test</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="32-add-models-to-leaderboard">3.2 Add Models to Leaderboard<a class="headerlink" href="#32-add-models-to-leaderboard" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add single model with default settings</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Add model with custom tuning parameters</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Add same model with different strategy</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="33-run-benchmarks">3.3 Run Benchmarks<a class="headerlink" href="#33-run-benchmarks" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run all added models</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># Run with custom settings</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;roc_auc_score&#39;</span><span class="p">,</span>  <span class="c1"># Metric to rank by</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># Print progress</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span>                   <span class="c1"># Parallel jobs (1 = sequential)</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="4-complete-example">4. Complete Example<a class="headerlink" href="#4-complete-example" title="Permanent link">&para;</a></h2>
+<h3 id="41-full-comparison-workflow">4.1 Full Comparison Workflow<a class="headerlink" href="#41-full-comparison-workflow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># 1. Load data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+
+<span class="c1"># 2. Split data</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="c1"># 3. Initialize leaderboard</span>
+<span class="n">leaderboard</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="c1"># 4. Add models - Inference Baseline</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span> <span class="s1">&#39;inference&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TabPFN-Inference&#39;</span><span class="p">)</span>
+
+<span class="c1"># 5. Add models - PEFT Strategies</span>
+<span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span> <span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span> <span class="s1">&#39;Mitra&#39;</span><span class="p">]:</span>
+    <span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1">-PEFT&#39;</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+<span class="c1"># 6. Add models - Base Fine-Tuning (for comparison)</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TabICL-BaseFT&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># 7. Run benchmarks</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="5-class-reference">5. Class Reference<a class="headerlink" href="#5-class-reference" title="Permanent link">&para;</a></h2>
+<h3 id="51-tabularleaderboard-constructor">5.1 TabularLeaderboard Constructor<a class="headerlink" href="#51-tabularleaderboard-constructor" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">TabularLeaderboard</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">X_test</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_test</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="n">validation_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X_train</code></td>
+<td>DataFrame</td>
+<td>Required</td>
+<td>Training features</td>
+</tr>
+<tr>
+<td><code>X_test</code></td>
+<td>DataFrame</td>
+<td>Required</td>
+<td>Test features</td>
+</tr>
+<tr>
+<td><code>y_train</code></td>
+<td>Series</td>
+<td>Required</td>
+<td>Training labels</td>
+</tr>
+<tr>
+<td><code>y_test</code></td>
+<td>Series</td>
+<td>Required</td>
+<td>Test labels</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td>'classification'</td>
+<td>'classification' or 'regression'</td>
+</tr>
+<tr>
+<td><code>validation_split</code></td>
+<td>float</td>
+<td>0.1</td>
+<td>Fraction for validation</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>int</td>
+<td>42</td>
+<td>Random seed for reproducibility</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-add_model-method">5.2 add_model() Method<a class="headerlink" href="#52-add_model-method" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">processor_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model_name</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Model to add (TabPFN, TabICL, etc.)</td>
+</tr>
+<tr>
+<td><code>tuning_strategy</code></td>
+<td>str</td>
+<td>Required</td>
+<td>'inference', 'base-ft', or 'peft'</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>str</td>
+<td>None</td>
+<td>Custom name for leaderboard (auto-generated if None)</td>
+</tr>
+<tr>
+<td><code>model_params</code></td>
+<td>dict</td>
+<td>None</td>
+<td>Model-specific hyperparameters</td>
+</tr>
+<tr>
+<td><code>tuning_params</code></td>
+<td>dict</td>
+<td>None</td>
+<td>Training hyperparameters</td>
+</tr>
+<tr>
+<td><code>processor_params</code></td>
+<td>dict</td>
+<td>None</td>
+<td>Preprocessing parameters</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-run-method">5.3 run() Method<a class="headerlink" href="#53-run-method" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">rank_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rank_by</code></td>
+<td>str</td>
+<td>'accuracy'</td>
+<td>Metric to rank models</td>
+</tr>
+<tr>
+<td><code>verbose</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Print progress</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>float</td>
+<td>None</td>
+<td>Timeout per model in seconds</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Return</strong>: <code>LeaderboardResults</code> object with all benchmarks</p>
+<hr />
+<h2 id="6-advanced-usage">6. Advanced Usage<a class="headerlink" href="#6-advanced-usage" title="Permanent link">&para;</a></h2>
+<h3 id="61-custom-model-names">6.1 Custom Model Names<a class="headerlink" href="#61-custom-model-names" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add with meaningful names</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TabICL-PEFT-r8&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}}</span>
+<span class="p">)</span>
+
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TabICL-PEFT-r16&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}}</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="62-hyperparameter-grid">6.2 Hyperparameter Grid<a class="headerlink" href="#62-hyperparameter-grid" title="Permanent link">&para;</a></h3>
+<p>Test multiple hyperparameter combinations:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+
+<span class="c1"># Define hyperparameter grid</span>
+<span class="n">learning_rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">]</span>
+<span class="n">ranks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+
+<span class="c1"># Grid search</span>
+<span class="k">for</span> <span class="n">lr</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">learning_rates</span><span class="p">,</span> <span class="n">ranks</span><span class="p">):</span>
+    <span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+        <span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;TabICL-lr</span><span class="si">{</span><span class="n">lr</span><span class="si">}</span><span class="s1">-r</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="n">lr</span><span class="p">,</span>
+            <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">get_ranking</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="63-strategy-comparison">6.3 Strategy Comparison<a class="headerlink" href="#63-strategy-comparison" title="Permanent link">&para;</a></h3>
+<p>Compare all three strategies for a model:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;TabDPT&#39;</span>
+
+<span class="c1"># Inference baseline</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;inference&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1">-Inference&#39;</span><span class="p">)</span>
+
+<span class="c1"># Base fine-tuning</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1">-BaseFT&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># PEFT fine-tuning</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1">-PEFT&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}}</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># Extract strategy comparison</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">strategy</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="64-cross-validation">6.4 Cross-Validation<a class="headerlink" href="#64-cross-validation" title="Permanent link">&para;</a></h3>
+<p>Test stability across multiple folds:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="n">kf</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">fold_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+    <span class="n">X_train_fold</span><span class="p">,</span> <span class="n">X_test_fold</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span>
+    <span class="n">y_train_fold</span><span class="p">,</span> <span class="n">y_test_fold</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span>
+
+    <span class="c1"># Create leaderboard for this fold</span>
+    <span class="n">lb</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train_fold</span><span class="p">,</span> <span class="n">X_test_fold</span><span class="p">,</span> <span class="n">y_train_fold</span><span class="p">,</span> <span class="n">y_test_fold</span><span class="p">)</span>
+
+    <span class="c1"># Add models</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span> <span class="s1">&#39;peft&#39;</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span> <span class="s1">&#39;base-ft&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Run and store</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">fold_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="c1"># Aggregate results</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="n">all_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">fold_results</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">all_results</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</code></pre></div>
+<hr />
+<h2 id="7-evaluation-metrics">7. Evaluation Metrics<a class="headerlink" href="#7-evaluation-metrics" title="Permanent link">&para;</a></h2>
+<p>Supported metrics for ranking:</p>
+<p><strong>Classification Metrics</strong>:
+- <code>accuracy</code>: Fraction of correct predictions
+- <code>f1_score</code>: Harmonic mean of precision and recall (weighted)
+- <code>roc_auc_score</code>: Area under ROC curve
+- <code>precision_score</code>: True positives / (TP + FP)
+- <code>recall_score</code>: True positives / (TP + FN)
+- <code>balanced_accuracy</code>: Average per-class accuracy</p>
+<p><strong>Regression Metrics</strong>:
+- <code>mse</code>: Mean squared error (lower is better)
+- <code>rmse</code>: Root mean squared error
+- <code>mae</code>: Mean absolute error
+- <code>r2_score</code>: Coefficient of determination</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Rank by different metrics</span>
+<span class="n">results_acc</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+<span class="n">results_f1</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;f1_score&#39;</span><span class="p">)</span>
+<span class="n">results_auc</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;roc_auc_score&#39;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<hr />
+<h2 id="8-best-practices">8. Best Practices<a class="headerlink" href="#8-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Use consistent data splits across all models</li>
+<li>✅ Fix random seed for reproducibility</li>
+<li>✅ Include inference baseline for comparison</li>
+<li>✅ Test multiple strategies for each model</li>
+<li>✅ Save results to disk</li>
+<li>✅ Use reasonable timeout values</li>
+<li>✅ Export results as CSV for further analysis</li>
+</ul>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ Don't change data between runs</li>
+<li>❌ Don't use training data for validation</li>
+<li>❌ Don't tune hyperparameters on test set</li>
+<li>❌ Don't mix different task types in one leaderboard</li>
+<li>❌ Don't run without timeout protection</li>
+<li>❌ Don't forget to save best model config</li>
+</ul>
+<hr />
+<h2 id="9-complete-workflow-example">9. Complete Workflow Example<a class="headerlink" href="#9-complete-workflow-example" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Step 1: Load and prepare data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading data...&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Step 2: Initialize leaderboard</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Initializing leaderboard...&quot;</span><span class="p">)</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="c1"># Step 3: Add baseline</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Adding inference baseline...&quot;</span><span class="p">)</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span> <span class="s1">&#39;inference&#39;</span><span class="p">)</span>
+
+<span class="c1"># Step 4: Add PEFT models</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Adding PEFT models...&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span> <span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span> <span class="s1">&#39;TabDPT&#39;</span><span class="p">]:</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}}</span>
+    <span class="p">)</span>
+
+<span class="c1"># Step 5: Run benchmarks</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running benchmarks...&quot;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="10-next-steps">10. Next Steps<a class="headerlink" href="#10-next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../model-selection/">Model Selection</a> - Guide for choosing models</li>
+<li><a href="../tuning-strategies/">Tuning Strategies</a> - Deep dive into strategies</li>
+<li><a href="../examples/benchmarking.md">Examples</a> - More examples</li>
+</ul>
+<hr />
+<p>The <code>TabularLeaderboard</code> streamlines model selection by enabling systematic, reproducible benchmarking!</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../saving-loading/" class="btn btn-neutral float-left" title="Saving and Loading"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../models/overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal" class="fa fa-code-fork" style="color: #fcfcfc"> Lexsi-Labs/TabTune_Internal</a>
+        </span>
+    
+    
+      <span><a href="../saving-loading/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../models/overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

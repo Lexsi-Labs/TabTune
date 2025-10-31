@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="TabTune Development Team" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Saving and Loading - TabTune Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Saving and Loading";
+        var mkdocs_page_input_path = "user-guide/saving-loading.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../assets/tabtune.svg" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quick-start/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../getting-started/basic-concepts.md">Basic Concepts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline-overview/">TabularPipeline Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-processing/">Data Processing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tuning-strategies/">Tuning Strategies</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model-selection/">Model Selection</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Saving and Loading</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-overview">1. Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#21-saving-a-pipeline">2.1 Saving a Pipeline</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#22-loading-a-pipeline">2.2 Loading a Pipeline</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#23-size-optimization">2.3 Size Optimization</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#31-saving-model-weights">3.1 Saving Model Weights</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#32-loading-model-weights">3.2 Loading Model Weights</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-checkpoint-management">4. Checkpoint Management</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-peft-specific-serialization">5. PEFT-Specific Serialization</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#51-save-with-peft-adapters">5.1 Save with PEFT Adapters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#52-load-peft-pipeline">5.2 Load PEFT Pipeline</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-configuration-serialization">6. Configuration Serialization</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#61-save-configuration-to-yaml">6.1 Save Configuration to YAML</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-best-practices">7. Best Practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dos">✅ Do's</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#donts">❌ Don'ts</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-troubleshooting">8. Troubleshooting</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#9-summary-table">9. Summary Table</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#10-next-steps">10. Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../leaderboard/">Model Comparison</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabpfn/">TabPFN</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabicl/">TabICL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../models/tabbiaxial.md">TabBiaxial</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabdpt/">TabDPT</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/mitra/">Mitra</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/contexttab/">ConTextTab</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/peft-lora/">PEFT & LoRA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../api/pipeline.md">TabularPipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/data-processor.md">DataProcessor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/tuning-manager.md">TuningManager</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/leaderboard.md">TabularLeaderboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/peft-utils.md">PEFT Utils</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/classification/">Classification Tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/large-datasets/">Large Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../examples/benchmarking.md">Benchmarking</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../contributing/setup.md">Development Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/standards.md">Code Standards</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/new-models.md">Adding New Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/documentation.md">Documentation Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../about/release-notes.md">Release Notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/roadmap.md">Roadmap</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/faq.md">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/license.md">License</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TabTune Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Saving and Loading</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/saving-loading.md">Edit on Lexsi-Labs/TabTune_Internal</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="saving-and-loading-pipelines">Saving and Loading Pipelines<a class="headerlink" href="#saving-and-loading-pipelines" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to persist TabTune pipelines for production deployment, reproducibility, and continued training.</p>
+<hr />
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>TabTune supports multiple serialization formats for different use cases:</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Extension</th>
+<th>Use Case</th>
+<th>Size</th>
+<th>Compatibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>joblib</strong></td>
+<td><code>.joblib</code></td>
+<td>Production, complete pipeline</td>
+<td>~100-500MB</td>
+<td>Python only</td>
+</tr>
+<tr>
+<td><strong>PyTorch</strong></td>
+<td><code>.pt</code></td>
+<td>Model weights only</td>
+<td>~50-200MB</td>
+<td>PyTorch ecosystems</td>
+</tr>
+<tr>
+<td><strong>Checkpoint</strong></td>
+<td><code>.pt</code></td>
+<td>Training resume, intermediate states</td>
+<td>~50-200MB</td>
+<td>Development</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)<a class="headerlink" href="#2-pipeline-serialization-joblib" title="Permanent link">&para;</a></h2>
+<h3 id="21-saving-a-pipeline">2.1 Saving a Pipeline<a class="headerlink" href="#21-saving-a-pipeline" title="Permanent link">&para;</a></h3>
+<p>Save the complete fitted pipeline including model, preprocessor, and configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Train pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span> <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Save entire pipeline</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>What Gets Saved</strong>:
+- ✅ Trained model weights
+- ✅ DataProcessor state (imputer, encoder, scaler)
+- ✅ Model configuration
+- ✅ Tuning parameters
+- ✅ Label encoder for target variable
+- ✅ PEFT adapter weights (if applicable)</p>
+<h3 id="22-loading-a-pipeline">2.2 Loading a Pipeline<a class="headerlink" href="#22-loading-a-pipeline" title="Permanent link">&para;</a></h3>
+<p>Load a saved pipeline for inference or continued training:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Load pipeline</span>
+<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+
+<span class="c1"># Make predictions immediately</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Or continue training with new data</span>
+<span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_new_train</span><span class="p">,</span> <span class="n">y_new_train</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="23-size-optimization">2.3 Size Optimization<a class="headerlink" href="#23-size-optimization" title="Permanent link">&para;</a></h3>
+<p>If pipeline file is too large, compress it:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+
+<span class="c1"># Save with compression</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># compression=0-9</span>
+
+<span class="c1"># Load compressed pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)<a class="headerlink" href="#3-model-only-serialization-pytorch" title="Permanent link">&para;</a></h2>
+<p>For minimal storage or deployment, save only model weights:</p>
+<h3 id="31-saving-model-weights">3.1 Saving Model Weights<a class="headerlink" href="#31-saving-model-weights" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># Save model weights only</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;model_weights.pt&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="32-loading-model-weights">3.2 Loading Model Weights<a class="headerlink" href="#32-loading-model-weights" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Create new pipeline with same config</span>
+<span class="n">new_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Load weights into model</span>
+<span class="n">state_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;model_weights.pt&#39;</span><span class="p">)</span>
+<span class="n">new_pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
+
+<span class="c1"># Ready for inference</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">new_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Advantages</strong>:
+- ✅ Smaller file size (50-200MB)
+- ✅ Faster loading
+- ✅ Cross-platform compatible</p>
+<p><strong>Disadvantages</strong>:
+- ❌ Requires manual DataProcessor setup
+- ❌ Must know original configuration
+- ❌ No automatic version compatibility</p>
+<hr />
+<h2 id="4-checkpoint-management">4. Checkpoint Management<a class="headerlink" href="#4-checkpoint-management" title="Permanent link">&para;</a></h2>
+<p>For long training runs, save intermediate checkpoints:</p>
+<h3 id="41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training<a class="headerlink" href="#41-automatic-checkpointing-during-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s1">&#39;save_checkpoint_path&#39;</span><span class="p">:</span> <span class="s1">&#39;checkpoints/best_model.pt&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;save_every_n_epochs&#39;</span><span class="p">:</span> <span class="mi">5</span>  <span class="c1"># Save every 5 epochs</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Checkpoints saved as:</span>
+<span class="c1"># checkpoints/best_model.pt (best validation score)</span>
+<span class="c1"># checkpoints/checkpoint_epoch_5.pt</span>
+<span class="c1"># checkpoints/checkpoint_epoch_10.pt</span>
+<span class="c1"># checkpoints/checkpoint_epoch_15.pt</span>
+<span class="c1"># checkpoints/checkpoint_epoch_20.pt</span>
+</code></pre></div>
+<h3 id="42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking<a class="headerlink" href="#42-best-checkpoint-tracking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;checkpoints&#39;</span><span class="p">)</span>
+<span class="n">checkpoint_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Find best checkpoint</span>
+<span class="n">best_checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">checkpoint_file</span> <span class="ow">in</span> <span class="n">checkpoint_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.pt&#39;</span><span class="p">):</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">checkpoint_file</span><span class="p">))</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+        <span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="n">best_checkpoint</span> <span class="o">=</span> <span class="n">checkpoint_file</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best checkpoint: </span><span class="si">{</span><span class="n">best_checkpoint</span><span class="si">}</span><span class="s2"> with score </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="5-peft-specific-serialization">5. PEFT-Specific Serialization<a class="headerlink" href="#5-peft-specific-serialization" title="Permanent link">&para;</a></h2>
+<p>When using PEFT (LoRA), save and manage adapter weights:</p>
+<h3 id="51-save-with-peft-adapters">5.1 Save with PEFT Adapters<a class="headerlink" href="#51-save-with-peft-adapters" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Train with PEFT</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+        <span class="s1">&#39;save_checkpoint_path&#39;</span><span class="p">:</span> <span class="s1">&#39;peft_model.joblib&#39;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Save includes both base model and LoRA adapters</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;peft_pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="52-load-peft-pipeline">5.2 Load PEFT Pipeline<a class="headerlink" href="#52-load-peft-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Load includes automatic adapter reconstruction</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;peft_pipeline.joblib&#39;</span><span class="p">)</span>
+
+<span class="c1"># Adapters are already injected</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only<a class="headerlink" href="#53-extract-lora-adapters-only" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># Save only adapter weights (minimal size)</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;lora_A&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;lora_B&#39;</span><span class="p">):</span>
+    <span class="n">adapter_state</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;lora_A&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_A</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="s1">&#39;lora_B&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_B</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">adapter_state</span><span class="p">,</span> <span class="s1">&#39;adapters.pt&#39;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="6-configuration-serialization">6. Configuration Serialization<a class="headerlink" href="#6-configuration-serialization" title="Permanent link">&para;</a></h2>
+<p>Save pipeline configuration for reproducibility:</p>
+<h3 id="61-save-configuration-to-yaml">6.1 Save Configuration to YAML<a class="headerlink" href="#61-save-configuration-to-yaml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
+    <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+    <span class="s1">&#39;tuning_strategy&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_strategy</span><span class="p">,</span>
+    <span class="s1">&#39;tuning_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_params</span><span class="p">,</span>
+    <span class="s1">&#39;processor_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">processor_params</span><span class="p">,</span>
+    <span class="s1">&#39;model_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_params</span>
+<span class="p">}</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;pipeline_config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Example Config File</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">model_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TabICL</span>
+<span class="nt">task_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">classification</span>
+<span class="nt">tuning_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peft</span>
+<span class="nt">tuning_params</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span>
+<span class="w">  </span><span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2e-4</span>
+<span class="w">  </span><span class="nt">peft_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">r</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">    </span><span class="nt">lora_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+<span class="w">    </span><span class="nt">lora_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="nt">processor_params</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">imputation_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">median</span>
+<span class="w">  </span><span class="nt">categorical_encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">onehot</span>
+<span class="w">  </span><span class="nt">scaling_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span>
+<span class="nt">model_params</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">n_estimators</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+</code></pre></div></p>
+<h3 id="62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration<a class="headerlink" href="#62-load-pipeline-from-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Load config</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;pipeline_config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># Recreate pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="7-best-practices">7. Best Practices<a class="headerlink" href="#7-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Save full pipelines for production deployment</li>
+<li>✅ Use checkpoints for long training runs</li>
+<li>✅ Store configuration separately for reproducibility</li>
+<li>✅ Version control YAML/JSON configs</li>
+<li>✅ Keep multiple backups at different timestamps</li>
+<li>✅ Document model metadata and creation date</li>
+<li>✅ Test loading on different systems</li>
+</ul>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ Don't save only model weights without config</li>
+<li>❌ Don't overwrite checkpoints without backup</li>
+<li>❌ Don't forget to compress large pipelines</li>
+<li>❌ Don't hardcode paths in production code</li>
+<li>❌ Don't commit large <code>.joblib</code> files to git (use git-lfs)</li>
+</ul>
+<hr />
+<h2 id="8-troubleshooting">8. Troubleshooting<a class="headerlink" href="#8-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"<a class="headerlink" href="#issue-modulenotfounderror-when-loading-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Ensure TabTune is installed in the target environment</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>tabtune
+</code></pre></div>
+<h3 id="issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"<a class="headerlink" href="#issue-pickle-protocol-version-mismatch" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Use compatible Python and PyTorch versions</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save with older protocol for compatibility</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;compatible.joblib&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"<a class="headerlink" href="#issue-cuda-error-when-loading-on-cpu" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Specify device when loading</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"<a class="headerlink" href="#issue-pipeline-file-corrupted-or-incomplete" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Restore from backup</p>
+<div class="highlight"><pre><span></span><code><span class="n">restored</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;backups/pipeline_backup_20250101_120000.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="9-summary-table">9. Summary Table<a class="headerlink" href="#9-summary-table" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Method</th>
+<th>File Size</th>
+<th>Compatibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full pipeline backup</td>
+<td><code>.save()</code></td>
+<td>~300MB</td>
+<td>joblib only</td>
+</tr>
+<tr>
+<td>Model weights only</td>
+<td><code>torch.save(state_dict)</code></td>
+<td>~100MB</td>
+<td>PyTorch</td>
+</tr>
+<tr>
+<td>Configuration only</td>
+<td>YAML/JSON</td>
+<td>&lt;1MB</td>
+<td>Any language</td>
+</tr>
+<tr>
+<td>Training checkpoint</td>
+<td><code>.pt</code></td>
+<td>~150MB</td>
+<td>Development</td>
+</tr>
+<tr>
+<td>Production package</td>
+<td><code>.joblib</code> + config</td>
+<td>~300MB+</td>
+<td>Python</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-next-steps">10. Next Steps<a class="headerlink" href="#10-next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../advanced/memory-optimization/">Advanced Topics</a> - Optimize for deployment</li>
+<li><a href="../api/pipeline.md">API Reference</a> - Complete API documentation</li>
+<li><a href="../../examples/classification/">Examples</a> - Real-world examples</li>
+</ul>
+<hr />
+<p>Properly saving and loading pipelines ensures reproducibility, enables production deployment, and protects your trained models!</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../model-selection/" class="btn btn-neutral float-left" title="Model Selection"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../leaderboard/" class="btn btn-neutral float-right" title="Model Comparison">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal" class="fa fa-code-fork" style="color: #fcfcfc"> Lexsi-Labs/TabTune_Internal</a>
+        </span>
+    
+    
+      <span><a href="../model-selection/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../leaderboard/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

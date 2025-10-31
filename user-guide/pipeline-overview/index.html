@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="TabTune Development Team" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>TabularPipeline Overview - TabTune Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "TabularPipeline Overview";
+        var mkdocs_page_input_path = "user-guide/pipeline-overview.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../assets/tabtune.svg" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quick-start/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../getting-started/basic-concepts.md">Basic Concepts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">TabularPipeline Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-architecture-diagram">1. Architecture Diagram</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-class-signature">2. Class Signature</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-core-methods">3. Core Methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#31-fitx-y">3.1 .fit(X, y)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#32-predictx">3.2 .predict(X)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#33-evaluatex-y">3.3 .evaluate(X, y)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#34-savepath">3.4 .save(path)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#35-loadpath">3.5 .load(path)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-configuration-best-practices">4. Configuration Best Practices</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-example-usage">5. Example Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-error-handling">6. Error Handling</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-extending-tabularpipeline">7. Extending TabularPipeline</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-processing/">Data Processing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tuning-strategies/">Tuning Strategies</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model-selection/">Model Selection</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saving-loading/">Saving and Loading</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../leaderboard/">Model Comparison</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabpfn/">TabPFN</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabicl/">TabICL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../models/tabbiaxial.md">TabBiaxial</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/tabdpt/">TabDPT</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/mitra/">Mitra</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/contexttab/">ConTextTab</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/peft-lora/">PEFT & LoRA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../api/pipeline.md">TabularPipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/data-processor.md">DataProcessor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/tuning-manager.md">TuningManager</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/leaderboard.md">TabularLeaderboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/peft-utils.md">PEFT Utils</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/classification/">Classification Tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/large-datasets/">Large Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../examples/benchmarking.md">Benchmarking</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../contributing/setup.md">Development Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/standards.md">Code Standards</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/new-models.md">Adding New Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/documentation.md">Documentation Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../about/release-notes.md">Release Notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/roadmap.md">Roadmap</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/faq.md">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/license.md">License</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TabTune Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">TabularPipeline Overview</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/pipeline-overview.md">Edit on Lexsi-Labs/TabTune_Internal</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="tabularpipeline-overview">TabularPipeline Overview<a class="headerlink" href="#tabularpipeline-overview" title="Permanent link">&para;</a></h1>
+<p>This document provides an in-depth look at the <code>TabularPipeline</code> class—the central entry point for using TabTune’s end-to-end workflows.</p>
+<hr />
+<h2 id="1-architecture-diagram">1. Architecture Diagram<a class="headerlink" href="#1-architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>flowchart LR
+  A[Raw Data: Pandas DataFrame] --&gt; B[DataProcessor]
+  B --&gt; C[Transformed Data: Dataset / DataLoader]
+  C --&gt; D[TuningManager]
+  D --&gt; E[Model Training / Inference]
+  E --&gt; F[Predictions / Metrics]
+</code></pre></div>
+<ul>
+<li><strong>DataProcessor</strong>: Prepares input features and labels for models.</li>
+<li><strong>TuningManager</strong>: Executes the specified strategy (<code>inference</code>, <code>base-ft</code>, <code>peft</code>).</li>
+<li><strong>Model</strong>: Underlying tabular foundation model (e.g., TabPFN, TabICL).</li>
+<li><strong>Output</strong>: Predictions and evaluation metrics.</li>
+</ul>
+<hr />
+<h2 id="2-class-signature">2. Class Signature<a class="headerlink" href="#2-class-signature" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TabularPipeline</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;inference&#39;</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">processor_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model_checkpoint_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span>
+</code></pre></div>
+<ul>
+<li><strong>model_name</strong>: Name of the model to instantiate (e.g., <code>TabPFN</code>, <code>TabICL</code>).</li>
+<li><strong>task_type</strong>: Either <code>classification</code> or <code>regression</code>.</li>
+<li><strong>tuning_strategy</strong>: One of <code>inference</code>, <code>base-ft</code>, or <code>peft</code>.</li>
+<li><strong>tuning_params</strong>: Hyperparameters for training/inference (device, epochs, learning_rate, etc.).</li>
+<li><strong>processor_params</strong>: Options for data preprocessing (imputation, scaling, encoding).</li>
+<li><strong>model_params</strong>: Direct parameters for the model constructor.</li>
+<li><strong>model_checkpoint_path</strong>: Path to load pre-trained weights.</li>
+</ul>
+<hr />
+<h2 id="3-core-methods">3. Core Methods<a class="headerlink" href="#3-core-methods" title="Permanent link">&para;</a></h2>
+<h3 id="31-fitx-y">3.1 .fit(X, y)<a class="headerlink" href="#31-fitx-y" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_train</span><span class="p">:</span> <span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+- <strong>Description</strong>: Runs preprocessing and training.
+- <strong>Workflow</strong>:
+  1. Fit <code>DataProcessor</code> on <code>X_train, y_train</code>.
+  2. Create PyTorch <code>Dataset</code> and <code>DataLoader</code>.
+  3. Execute <code>TuningManager</code> training loop if strategy != <code>inference</code>.</p>
+<h3 id="32-predictx">3.2 .predict(X)<a class="headerlink" href="#32-predictx" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</code></pre></div>
+- <strong>Description</strong>: Preprocesses <code>X_test</code> and returns model predictions.
+- <strong>Notes</strong>: In <code>inference</code> mode, loads pre-trained model and runs forward passes.</p>
+<h3 id="33-evaluatex-y">3.3 .evaluate(X, y)<a class="headerlink" href="#33-evaluatex-y" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">y_test</span><span class="p">:</span> <span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</code></pre></div>
+- <strong>Description</strong>: Calls <code>.predict()</code>, then computes specified metrics.
+- <strong>Default Metrics</strong>: Accuracy, Weighted F1, ROC AUC.</p>
+<h3 id="34-savepath">3.4 .save(path)<a class="headerlink" href="#34-savepath" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+- <strong>Description</strong>: Serializes the pipeline including processor, model state, and config.</p>
+<h3 id="35-loadpath">3.5 .load(path)<a class="headerlink" href="#35-loadpath" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">loaded</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;pipeline.joblib&#39;</span><span class="p">)</span>
+</code></pre></div>
+- <strong>Description</strong>: Loads a saved pipeline for inference or continued training.</p>
+<hr />
+<h2 id="4-configuration-best-practices">4. Configuration Best Practices<a class="headerlink" href="#4-configuration-best-practices" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Use config files</strong>: YAML/JSON to record experiments reproducibly.</li>
+<li><strong>Version control</strong>: Commit <code>tuning_params</code> and <code>processor_params</code> along with code.</li>
+<li><strong>Checkpointing</strong>: Save intermediate checkpoints via <code>model_checkpoint_path</code> for long runs.</li>
+</ul>
+<hr />
+<h2 id="5-example-usage">5. Example Usage<a class="headerlink" href="#5-example-usage" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Setup pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span><span class="s1">&#39;cuda&#39;</span><span class="p">,</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span><span class="mf">2e-4</span><span class="p">},</span>
+    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;imputation_strategy&#39;</span><span class="p">:</span><span class="s1">&#39;median&#39;</span><span class="p">},</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span><span class="mi">16</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Train</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Predict &amp; evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="6-error-handling">6. Error Handling<a class="headerlink" href="#6-error-handling" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Invalid model_name</strong>: Raises <code>ValueError</code> with supported model list.</li>
+<li><strong>Unsupported strategy</strong>: Raises <code>ValueError</code> advising available strategies.</li>
+<li><strong>Missing data</strong>: Raises <code>DataValidationError</code> if nulls present after imputation.</li>
+</ul>
+<hr />
+<h2 id="7-extending-tabularpipeline">7. Extending TabularPipeline<a class="headerlink" href="#7-extending-tabularpipeline" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Custom pipeline</strong>: Subclass <code>TabularPipeline</code> and override <code>_setup_processors</code> or <code>_setup_manager</code>.</li>
+<li><strong>Custom metrics</strong>: Pass <code>metrics=[your_metric_fn]</code> to <code>.evaluate()</code>.</li>
+<li><strong>Callbacks</strong>: Integrate PyTorch Lightning callbacks via <code>tuning_params</code>.</li>
+</ul>
+<p>This overview should help you understand and utilize <code>TabularPipeline</code> for all your tabular modeling needs.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../getting-started/quick-start/" class="btn btn-neutral float-left" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../data-processing/" class="btn btn-neutral float-right" title="Data Processing">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal" class="fa fa-code-fork" style="color: #fcfcfc"> Lexsi-Labs/TabTune_Internal</a>
+        </span>
+    
+    
+      <span><a href="../../getting-started/quick-start/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../data-processing/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

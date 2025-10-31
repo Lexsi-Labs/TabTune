@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="TabTune Development Team" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Overview - TabTune Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "models/overview.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../assets/tabtune.svg" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quick-start/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../getting-started/basic-concepts.md">Basic Concepts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data-processing/">Data Processing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/model-selection/">Model Selection</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/saving-loading/">Saving and Loading</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/leaderboard/">Model Comparison</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Models</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-model-ecosystem">1. Model Ecosystem</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-model-comparison-matrix">2. Model Comparison Matrix</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-detailed-model-profiles">3. Detailed Model Profiles</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#31-tabpfn-prior-fitted-network">3.1 TabPFN (Prior-Fitted Network)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#32-tabicl-in-context-learning">3.2 TabICL (In-Context Learning)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#33-tabbiaxial">3.3 TabBiaxial</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#34-tabdpt-denoising-pre-trained-transformer">3.4 TabDPT (Denoising Pre-trained Transformer)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#35-mitra-tab2d">3.5 Mitra (Tab2D)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#36-contexttab">3.6 ContextTab</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-feature-support-matrix">4. Feature Support Matrix</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-selection-decision-tree">5. Selection Decision Tree</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-quick-reference">7. Quick Reference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-next-steps">7. Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tabpfn/">TabPFN</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tabicl/">TabICL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../tabbiaxial.md">TabBiaxial</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tabdpt/">TabDPT</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../mitra/">Mitra</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../contexttab/">ConTextTab</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/peft-lora/">PEFT & LoRA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../api/pipeline.md">TabularPipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/data-processor.md">DataProcessor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/tuning-manager.md">TuningManager</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/leaderboard.md">TabularLeaderboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../api/peft-utils.md">PEFT Utils</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/classification/">Classification Tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/large-datasets/">Large Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../examples/benchmarking.md">Benchmarking</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../contributing/setup.md">Development Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/standards.md">Code Standards</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/new-models.md">Adding New Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../contributing/documentation.md">Documentation Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="" href="../../about/release-notes.md">Release Notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/roadmap.md">Roadmap</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/faq.md">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../about/license.md">License</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TabTune Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Models</li>
+      <li class="breadcrumb-item active">Overview</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/models/overview.md">Edit on Lexsi-Labs/TabTune_Internal</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="supported-models-overview">Supported Models Overview<a class="headerlink" href="#supported-models-overview" title="Permanent link">&para;</a></h1>
+<p>TabTune integrates six state-of-the-art tabular foundation models, each with unique architectural properties, strengths, and use cases. This document provides a comprehensive overview of all supported models.</p>
+<hr />
+<h2 id="1-model-ecosystem">1. Model Ecosystem<a class="headerlink" href="#1-model-ecosystem" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>flowchart TD
+    A[Tabular Foundation Models] --&gt; B[ICL-Based Models]
+    A --&gt; C[Transformer-Based Models]
+    A --&gt; D[PFN-Based Models]
+
+    B --&gt; E[TabICL]
+    B --&gt; F[TabBiaxial]
+    B --&gt; G[Mitra]
+    B --&gt; H[ContextTab]
+
+    C --&gt; I[TabDPT]
+
+    D --&gt; J[TabPFN]
+</code></pre></div>
+<hr />
+<h2 id="2-model-comparison-matrix">2. Model Comparison Matrix<a class="headerlink" href="#2-model-comparison-matrix" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Paradigm</th>
+<th>Architecture</th>
+<th>Best For</th>
+<th>Scaling</th>
+<th>Speed</th>
+<th>Memory</th>
+<th>PEFT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TabPFN</strong></td>
+<td>PFN/ICL</td>
+<td>Approximate Bayesian</td>
+<td>Small datasets</td>
+<td>&lt;10K</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td><strong>TabICL</strong></td>
+<td>Scalable ICL</td>
+<td>Column-Row Attention</td>
+<td>Balanced</td>
+<td>10K-1M</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>TabBiaxial</strong></td>
+<td>Scalable ICL</td>
+<td>Biaxial Attention</td>
+<td>High Accuracy</td>
+<td>10K-1M</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>TabDPT</strong></td>
+<td>Denoising</td>
+<td>Transformer</td>
+<td>Large Datasets</td>
+<td>100K-5M</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Mitra</strong></td>
+<td>2D Attention</td>
+<td>Cross-Attention</td>
+<td>Complex Patterns</td>
+<td>10K-500K</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>ContextTab</strong></td>
+<td>Semantic ICL</td>
+<td>Text + Embeddings</td>
+<td>Text-Heavy Features</td>
+<td>10K-500K</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-detailed-model-profiles">3. Detailed Model Profiles<a class="headerlink" href="#3-detailed-model-profiles" title="Permanent link">&para;</a></h2>
+<h3 id="31-tabpfn-prior-fitted-network">3.1 TabPFN (Prior-Fitted Network)<a class="headerlink" href="#31-tabpfn-prior-fitted-network" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: Prior-Fitted Network with approximate Bayesian inference</p>
+<p><strong>Architecture Overview</strong>:
+- Pre-trained on synthetic task distributions
+- Approximate Bayesian posterior inference
+- In-context learning capabilities
+- Ensemble-based predictions</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Extremely fast (no fine-tuning needed)
+- <strong>Scalability</strong>: Limited to ~10K rows, ~100 features
+- <strong>Memory</strong>: Very lightweight
+- <strong>Uncertainty</strong>: Built-in uncertainty quantification</p>
+<p><strong>Strengths</strong>:
+- ⭐ Zero-shot performance without training
+- ⭐ Excellent for small datasets (&lt;10K)
+- ⭐ Bayesian uncertainty estimates
+- ⭐ Robust to hyperparameter choices
+- ⭐ Fastest inference time</p>
+<p><strong>Limitations</strong>:
+- ❌ Cannot handle large datasets
+- ❌ Limited to ~100 features
+- ❌ PEFT support experimental
+- ❌ Binary/multi-class classification only</p>
+<p><strong>Recommended Use Cases</strong>:
+- Quick baseline establishment
+- Small-scale competition problems
+- Rapid prototyping</p>
+<p><strong>Inference Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>           <span class="c1"># Ensemble size</span>
+    <span class="s1">&#39;softmax_temperature&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>   <span class="c1"># Prediction confidence</span>
+    <span class="s1">&#39;average_logits&#39;</span><span class="p">:</span> <span class="kc">True</span>        <span class="c1"># Average logits vs probabilities</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ⚠️ Experimental - Batched inference conflicts with LoRA adapters</p>
+<hr />
+<h3 id="32-tabicl-in-context-learning">3.2 TabICL (In-Context Learning)<a class="headerlink" href="#32-tabicl-in-context-learning" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: Scalable In-Context Learning with two-stage attention</p>
+<p><strong>Architecture Overview</strong>:
+- Column embedder: Processes individual features
+- Row interactor: Captures feature interactions
+- ICL predictor: Makes context-aware predictions
+- Episodic training for adaptation</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Fast training and inference
+- <strong>Scalability</strong>: 10K - 1M rows effectively
+- <strong>Memory</strong>: Moderate requirements
+- <strong>Ensemble</strong>: Multiple views for robustness</p>
+<p><strong>Strengths</strong>:
+- ⭐ Balanced speed and accuracy
+- ⭐ Scales to large datasets
+- ⭐ Full PEFT support
+- ⭐ Ensemble-based robustness
+- ⭐ Episodic training flexibility</p>
+<p><strong>Limitations</strong>:
+- ⚠️ Requires episodic training for adaptation
+- ⚠️ Slower inference with high ensemble size
+- ⚠️ More memory than TabPFN</p>
+<p><strong>Recommended Use Cases</strong>:
+- General-purpose tabular classification
+- Medium to large datasets
+- Production systems
+- Model adaptation on new tasks</p>
+<p><strong>Inference Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>              <span class="c1"># Ensemble size</span>
+    <span class="s1">&#39;softmax_temperature&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>      <span class="c1"># Prediction confidence</span>
+    <span class="s1">&#39;average_logits&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>          <span class="c1"># Aggregation method</span>
+    <span class="s1">&#39;norm_methods&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;power&#39;</span><span class="p">],</span>  <span class="c1"># Feature normalization</span>
+    <span class="s1">&#39;feat_shuffle_method&#39;</span><span class="p">:</span> <span class="s1">&#39;latin&#39;</span>   <span class="c1"># Feature permutation</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Fine-Tuning Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>              <span class="c1"># Context samples</span>
+    <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>                <span class="c1"># Prediction samples</span>
+    <span class="s1">&#39;n_episodes&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>              <span class="c1"># Training episodes</span>
+    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>PEFT Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s1">&#39;target_modules&#39;</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># Uses defaults</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ✅ Full Support</p>
+<hr />
+<h3 id="33-tabbiaxial">3.3 TabBiaxial<a class="headerlink" href="#33-tabbiaxial" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: Enhanced in-context learning with biaxial attention</p>
+<p><strong>Architecture Overview</strong>:
+- Extends TabICL with custom biaxial attention mechanisms
+- Improved feature-feature interactions
+- Better handling of complex patterns
+- Advanced context-aware processing</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Slower than TabICL
+- <strong>Scalability</strong>: 10K - 1M rows
+- <strong>Memory</strong>: Higher than TabICL
+- <strong>Accuracy</strong>: Higher than TabICL</p>
+<p><strong>Strengths</strong>:
+- ⭐ Higher accuracy than TabICL
+- ⭐ Better feature interactions
+- ⭐ Full PEFT support
+- ⭐ Production-grade performance</p>
+<p><strong>Limitations</strong>:
+- ❌ Slower training than TabICL
+- ❌ Higher memory requirements
+- ❌ More hyperparameters to tune</p>
+<p><strong>Recommended Use Cases</strong>:
+- High-stakes applications (finance, healthcare)
+- Complex feature interactions
+- Accuracy-critical tasks
+- Production models with tuning budget</p>
+<p><strong>Fine-Tuning Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
+    <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s1">&#39;n_episodes&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ✅ Full Support</p>
+<hr />
+<h3 id="34-tabdpt-denoising-pre-trained-transformer">3.4 TabDPT (Denoising Pre-trained Transformer)<a class="headerlink" href="#34-tabdpt-denoising-pre-trained-transformer" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: Denoising pre-training with k-NN context selection</p>
+<p><strong>Architecture Overview</strong>:
+- Pre-trained on masked feature prediction
+- k-NN based context selection
+- Transformer backbone
+- Robust to noisy features</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Moderate training, slower inference
+- <strong>Scalability</strong>: 100K - 5M+ rows (best for large)
+- <strong>Memory</strong>: High memory requirements
+- <strong>Robustness</strong>: Excellent noise handling</p>
+<p><strong>Strengths</strong>:
+- ⭐ Scales to very large datasets
+- ⭐ Robust to noisy features
+- ⭐ Strong generalization
+- ⭐ Full PEFT support
+- ⭐ Pre-trained on diverse data</p>
+<p><strong>Limitations</strong>:
+- ❌ Requires large training sets
+- ❌ Longer training time
+- ❌ High memory usage
+- ❌ Complex hyperparameters</p>
+<p><strong>Recommended Use Cases</strong>:
+- Large-scale production systems
+- Datasets with noisy/missing features
+- Long-term deployed models
+- High-accuracy requirements</p>
+<p><strong>Inference Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_ensembles&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>           <span class="c1"># Multiple runs</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>         <span class="c1"># Prediction confidence</span>
+    <span class="s1">&#39;context_size&#39;</span><span class="p">:</span> <span class="mi">2048</span>        <span class="c1"># k-NN context</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Fine-Tuning Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>       <span class="c1"># Large context</span>
+    <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="s1">&#39;steps_per_epoch&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>PEFT Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">&#39;target_modules&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;transformer_encoder&#39;</span><span class="p">,</span> <span class="s1">&#39;encoder&#39;</span><span class="p">,</span> <span class="s1">&#39;head&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ✅ Full Support</p>
+<hr />
+<h3 id="35-mitra-tab2d">3.5 Mitra (Tab2D)<a class="headerlink" href="#35-mitra-tab2d" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: 2D cross-attention with synthetic priors</p>
+<p><strong>Architecture Overview</strong>:
+- Row embeddings (sample-wise)
+- Column embeddings (feature-wise)
+- 2D cross-attention mechanism
+- Synthetic prior integration</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Slowest training
+- <strong>Scalability</strong>: 10K - 500K rows
+- <strong>Memory</strong>: Highest memory usage
+- <strong>Interaction</strong>: Captures row-column dependencies</p>
+<p><strong>Strengths</strong>:
+- ⭐ Best for mixed-type features
+- ⭐ Captures 2D dependencies
+- ⭐ Full PEFT support
+- ⭐ Excellent on structured data</p>
+<p><strong>Limitations</strong>:
+- ❌ Slowest training
+- ❌ Highest memory consumption
+- ❌ Small batch sizes required
+- ❌ Limited scalability</p>
+<p><strong>Recommended Use Cases</strong>:
+- Structured databases
+- Scientific datasets
+- Time-series tabular data
+- Complex multi-variate relationships</p>
+<p><strong>Fine-Tuning Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="s1">&#39;steps_per_epoch&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Small batch required</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>PEFT Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">&#39;target_modules&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;x_embedding&#39;</span><span class="p">,</span> <span class="s1">&#39;layers&#39;</span><span class="p">,</span> <span class="s1">&#39;final_layer&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;Mitra&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ✅ Full Support</p>
+<hr />
+<h3 id="36-contexttab">3.6 ContextTab<a class="headerlink" href="#36-contexttab" title="Permanent link">&para;</a></h3>
+<p><strong>Paradigm</strong>: Semantics-aware in-context learning with text embeddings</p>
+<p><strong>Architecture Overview</strong>:
+- Text encoder for feature names/descriptions
+- Semantic embeddings integration
+- Column context understanding
+- Mixed modality handling</p>
+<p><strong>Key Characteristics</strong>:
+- <strong>Speed</strong>: Moderate (embedding overhead)
+- <strong>Scalability</strong>: 10K - 500K rows
+- <strong>Memory</strong>: Moderate to high
+- <strong>Semantics</strong>: Leverages feature semantics</p>
+<p><strong>Strengths</strong>:
+- ⭐ Best for text-heavy features
+- ⭐ Semantic understanding
+- ⭐ Handles heterogeneous data
+- ⭐ Pre-trained on diverse corpora</p>
+<p><strong>Limitations</strong>:
+- ❌ Requires HuggingFace Hub access
+- ❌ PEFT support experimental
+- ❌ Slower inference
+- ❌ Limited feature type support</p>
+<p><strong>Recommended Use Cases</strong>:
+- Datasets with text columns
+- Survey/feedback data
+- Product catalogs
+- Mixed structured/unstructured</p>
+<p><strong>Fine-Tuning Parameters</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Note</strong>: ContextTab requires gated model access via HuggingFace</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Set HF token first</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HF_TOKEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your_token_here&#39;</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>  <span class="c1"># PEFT not recommended</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>PEFT Status</strong>: ⚠️ Experimental - Complex embedding pipeline may cause issues</p>
+<hr />
+<h2 id="4-feature-support-matrix">4. Feature Support Matrix<a class="headerlink" href="#4-feature-support-matrix" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>TabPFN</th>
+<th>TabICL</th>
+<th>TabBiaxial</th>
+<th>TabDPT</th>
+<th>Mitra</th>
+<th>ContextTab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Numerical Features</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Categorical Features</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Missing Values</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Text Features</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Large Datasets (&gt;1M)</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Small Datasets (&lt;10K)</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PEFT Support</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Multi-GPU Training</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-selection-decision-tree">5. Selection Decision Tree<a class="headerlink" href="#5-selection-decision-tree" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>What is your dataset size?
+
+├─ &lt; 10K rows
+│  └─ Best: TabPFN (inference)
+│     Alternative: TabICL (base-ft)
+│
+├─ 10K - 100K rows
+│  ├─ Focus: Speed?     → TabICL (PEFT)
+│  ├─ Focus: Accuracy?  → TabBiaxial (base-ft)
+│  └─ Focus: Complexity → Mitra (base-ft)
+│
+├─ 100K - 1M rows
+│  ├─ Focus: Speed?     → TabICL (base-ft)
+│  ├─ Focus: Accuracy?  → TabDPT (base-ft)
+│  └─ Focus: Robust?    → TabDPT (PEFT)
+│
+└─ &gt; 1M rows
+   └─ Best: TabDPT (base-ft)
+</code></pre></div>
+<hr />
+<h2 id="7-quick-reference">7. Quick Reference<a class="headerlink" href="#7-quick-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>If You Need</th>
+<th>Choose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fastest results</td>
+<td>TabPFN</td>
+</tr>
+<tr>
+<td>Best generalization</td>
+<td>TabDPT</td>
+</tr>
+<tr>
+<td>Best accuracy</td>
+<td>TabBiaxial</td>
+</tr>
+<tr>
+<td>Memory efficient</td>
+<td>TabICL (PEFT)</td>
+</tr>
+<tr>
+<td>Complex interactions</td>
+<td>Mitra</td>
+</tr>
+<tr>
+<td>Text features</td>
+<td>ContextTab</td>
+</tr>
+<tr>
+<td>Production deployment</td>
+<td>TabBiaxial or TabDPT</td>
+</tr>
+<tr>
+<td>Small datasets</td>
+<td>TabPFN or TabICL</td>
+</tr>
+<tr>
+<td>Large datasets</td>
+<td>TabDPT</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-next-steps">7. Next Steps<a class="headerlink" href="#7-next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../user-guide/model-selection/">Model Selection Guide</a> - How to choose models</li>
+<li><a href="../tabpfn/">Individual Model Docs</a> - Detailed model documentation</li>
+<li><a href="../../examples/classification/">Examples</a> - Model-specific examples</li>
+</ul>
+<hr />
+<p>Each model excels in different scenarios. Use this overview to understand their strengths and select the best fit for your task!</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../user-guide/leaderboard/" class="btn btn-neutral float-left" title="Model Comparison"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../tabpfn/" class="btn btn-neutral float-right" title="TabPFN">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Lexsi-Labs/TabTune_Internal" class="fa fa-code-fork" style="color: #fcfcfc"> Lexsi-Labs/TabTune_Internal</a>
+        </span>
+    
+    
+      <span><a href="../../user-guide/leaderboard/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../tabpfn/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
