@@ -1,459 +1,289 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>ConTextTab - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>ConTextTab - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown active">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li class="active">
-    <a href="./">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../advanced/peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="prev" href="../mitra/">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="next" href="../../advanced/peft-lora/">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/models/contexttab.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#contexttab-semantics-aware-in-context-learning">ContextTab: Semantics-Aware In-Context Learning</a></li>
-            <li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
-                
-            <li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
-                
-                <li class="third-level"><a href="#21-high-level-design">2.1 High-Level Design</a></li>
-                <li class="third-level"><a href="#23-semantic-processing-pipeline">2.3 Semantic Processing Pipeline</a></li>
-            <li class="second-level"><a href="#3-inference-parameters">3. Inference Parameters</a></li>
-                
-                <li class="third-level"><a href="#31-complete-parameter-reference">3.1 Complete Parameter Reference</a></li>
-                <li class="third-level"><a href="#32-parameter-descriptions">3.2 Parameter Descriptions</a></li>
-                <li class="third-level"><a href="#33-text-encoder-options">3.3 Text Encoder Options</a></li>
-            <li class="second-level"><a href="#4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab</a></li>
-                
-                <li class="third-level"><a href="#41-fine-tuning-parameters">4.1 Fine-Tuning Parameters</a></li>
-                <li class="third-level"><a href="#42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices</a></li>
-                <li class="third-level"><a href="#43-fine-tuning-stability">4.3 Fine-Tuning Stability</a></li>
-            <li class="second-level"><a href="#5-setup-requirements">5. Setup Requirements</a></li>
-                
-                <li class="third-level"><a href="#51-huggingface-hub-access">5.1 HuggingFace Hub Access</a></li>
-                <li class="third-level"><a href="#52-verify-setup">5.2 Verify Setup</a></li>
-                <li class="third-level"><a href="#53-model-download">5.3 Model Download</a></li>
-            <li class="second-level"><a href="#6-usage-patterns">6. Usage Patterns</a></li>
-                
-                <li class="third-level"><a href="#61-inference-only">6.1 Inference Only</a></li>
-                <li class="third-level"><a href="#62-base-fine-tuning">6.2 Base Fine-Tuning</a></li>
-                <li class="third-level"><a href="#63-peft-fine-tuning-experimental">6.3 PEFT Fine-Tuning (Experimental)</a></li>
-            <li class="second-level"><a href="#7-lora-target-modules-experimental">7. LoRA Target Modules (Experimental)</a></li>
-                
-                <li class="third-level"><a href="#71-peft-status">7.1 PEFT Status</a></li>
-            <li class="second-level"><a href="#8-complete-examples">8. Complete Examples</a></li>
-                
-                <li class="third-level"><a href="#81-text-heavy-dataset">8.1 Text-Heavy Dataset</a></li>
-                <li class="third-level"><a href="#82-semantic-feature-names">8.2 Semantic Feature Names</a></li>
-                <li class="third-level"><a href="#83-production-deployment-saving-using-joblib">8.3 Production Deployment - Saving using joblib</a></li>
-            <li class="second-level"><a href="#9-performance-characteristics">9. Performance Characteristics</a></li>
-                
-                <li class="third-level"><a href="#91-speed-benchmarks">9.1 Speed Benchmarks</a></li>
-                <li class="third-level"><a href="#92-memory-usage">9.2 Memory Usage</a></li>
-            <li class="second-level"><a href="#11-troubleshooting">11. Troubleshooting</a></li>
-                
-                <li class="third-level"><a href="#issue-huggingface-login-required">Issue: "HuggingFace login required"</a></li>
-                <li class="third-level"><a href="#issue-model-download-fails">Issue: "Model download fails"</a></li>
-                <li class="third-level"><a href="#issue-slow-inference-due-to-text-encoding">Issue: "Slow inference due to text encoding"</a></li>
-                <li class="third-level"><a href="#issue-training-unstable-or-diverging">Issue: "Training unstable or diverging"</a></li>
-                <li class="third-level"><a href="#issue-out-of-memory-during-training">Issue: "Out of memory during training"</a></li>
-            <li class="second-level"><a href="#12-best-practices">12. Best Practices</a></li>
-                
-                <li class="third-level"><a href="#dos">✅ Do's</a></li>
-                <li class="third-level"><a href="#donts">❌ Don'ts</a></li>
-            <li class="second-level"><a href="#13-when-to-use-contexttab">13. When to Use ContextTab</a></li>
-                
-            <li class="second-level"><a href="#14-comparison-with-other-models">14. Comparison with Other Models</a></li>
-                
-            <li class="second-level"><a href="#15-quick-reference">15. Quick Reference</a></li>
-                
-            <li class="second-level"><a href="#16-next-steps">16. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../overview/">Overview</a>
+</li>
+<li>
+<a href="../tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../mitra/">Mitra</a>
+</li>
+<li class="active">
+<a href="./">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../mitra/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../advanced/peft-lora/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/models/contexttab.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#contexttab-semantics-aware-in-context-learning">ContextTab: Semantics-Aware In-Context Learning</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
+<li class="third-level"><a href="#21-high-level-design">2.1 High-Level Design</a></li>
+<li class="third-level"><a href="#23-semantic-processing-pipeline">2.3 Semantic Processing Pipeline</a></li>
+<li class="second-level"><a href="#3-inference-parameters">3. Inference Parameters</a></li>
+<li class="third-level"><a href="#31-complete-parameter-reference">3.1 Complete Parameter Reference</a></li>
+<li class="third-level"><a href="#32-parameter-descriptions">3.2 Parameter Descriptions</a></li>
+<li class="third-level"><a href="#33-text-encoder-options">3.3 Text Encoder Options</a></li>
+<li class="second-level"><a href="#4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab</a></li>
+<li class="third-level"><a href="#41-fine-tuning-parameters">4.1 Fine-Tuning Parameters</a></li>
+<li class="third-level"><a href="#42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices</a></li>
+<li class="third-level"><a href="#43-fine-tuning-stability">4.3 Fine-Tuning Stability</a></li>
+<li class="second-level"><a href="#5-setup-requirements">5. Setup Requirements</a></li>
+<li class="third-level"><a href="#51-huggingface-hub-access">5.1 HuggingFace Hub Access</a></li>
+<li class="third-level"><a href="#52-verify-setup">5.2 Verify Setup</a></li>
+<li class="third-level"><a href="#53-model-download">5.3 Model Download</a></li>
+<li class="second-level"><a href="#6-usage-patterns">6. Usage Patterns</a></li>
+<li class="third-level"><a href="#61-inference-only">6.1 Inference Only</a></li>
+<li class="third-level"><a href="#62-base-fine-tuning">6.2 Base Fine-Tuning</a></li>
+<li class="third-level"><a href="#63-peft-fine-tuning-experimental">6.3 PEFT Fine-Tuning (Experimental)</a></li>
+<li class="second-level"><a href="#7-lora-target-modules-experimental">7. LoRA Target Modules (Experimental)</a></li>
+<li class="third-level"><a href="#71-peft-status">7.1 PEFT Status</a></li>
+<li class="second-level"><a href="#8-complete-examples">8. Complete Examples</a></li>
+<li class="third-level"><a href="#81-text-heavy-dataset">8.1 Text-Heavy Dataset</a></li>
+<li class="third-level"><a href="#82-semantic-feature-names">8.2 Semantic Feature Names</a></li>
+<li class="third-level"><a href="#83-production-deployment-saving-using-joblib">8.3 Production Deployment - Saving using joblib</a></li>
+<li class="second-level"><a href="#9-performance-characteristics">9. Performance Characteristics</a></li>
+<li class="third-level"><a href="#91-speed-benchmarks">9.1 Speed Benchmarks</a></li>
+<li class="third-level"><a href="#92-memory-usage">9.2 Memory Usage</a></li>
+<li class="second-level"><a href="#11-troubleshooting">11. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-huggingface-login-required">Issue: "HuggingFace login required"</a></li>
+<li class="third-level"><a href="#issue-model-download-fails">Issue: "Model download fails"</a></li>
+<li class="third-level"><a href="#issue-slow-inference-due-to-text-encoding">Issue: "Slow inference due to text encoding"</a></li>
+<li class="third-level"><a href="#issue-training-unstable-or-diverging">Issue: "Training unstable or diverging"</a></li>
+<li class="third-level"><a href="#issue-out-of-memory-during-training">Issue: "Out of memory during training"</a></li>
+<li class="second-level"><a href="#12-best-practices">12. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#13-when-to-use-contexttab">13. When to Use ContextTab</a></li>
+<li class="second-level"><a href="#14-comparison-with-other-models">14. Comparison with Other Models</a></li>
+<li class="second-level"><a href="#15-quick-reference">15. Quick Reference</a></li>
+<li class="second-level"><a href="#16-next-steps">16. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="contexttab-semantics-aware-in-context-learning">ContextTab: Semantics-Aware In-Context Learning<a class="headerlink" href="#contexttab-semantics-aware-in-context-learning" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="contexttab-semantics-aware-in-context-learning">ContextTab: Semantics-Aware In-Context Learning<a class="headerlink" href="#contexttab-semantics-aware-in-context-learning" title="Permanent link">¶</a></h1>
 <p>ContextTab is a semantically-aware tabular model that integrates modality-specific embeddings to leverage semantic information from feature names, descriptions, and mixed data types. This document provides comprehensive guidance for using ContextTab with TabTune.</p>
-<hr />
-<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
 <p><strong>What is ContextTab?</strong></p>
 <p>ContextTab (ConTextTabClassifier) is an advanced in-context learning model uniquely designed to:</p>
 <ul>
@@ -464,10 +294,10 @@
 <li><strong>Heterogeneous Data</strong>: Mixed numerical, categorical, and text features</li>
 </ul>
 <p><strong>Key Innovation</strong>: Combines tabular features with semantic embeddings of feature names, enabling the model to understand what features represent semantically.</p>
-<hr />
-<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">&para;</a></h2>
-<h3 id="21-high-level-design">2.1 High-Level Design<a class="headerlink" href="#21-high-level-design" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>flowchart LR
+<hr/>
+<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
+<h3 id="21-high-level-design">2.1 High-Level Design<a class="headerlink" href="#21-high-level-design" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
     A[Raw Data] --&gt; B[Feature Names]
     A --&gt; C[Feature Values]
     B --&gt; D[Text Encoder]
@@ -479,7 +309,7 @@
     H --&gt; I[ICL Module]
     I --&gt; J[Context Processing]
     J --&gt; K[Predictions]
-</code></pre></div>
+</div>
 <!-- 
 ### 2.2 Core Components
 
@@ -504,8 +334,7 @@
    - In-context learning head
    - Context-aware predictions
    - Support/query set handling -->
-
-<h3 id="23-semantic-processing-pipeline">2.3 Semantic Processing Pipeline<a class="headerlink" href="#23-semantic-processing-pipeline" title="Permanent link">&para;</a></h3>
+<h3 id="23-semantic-processing-pipeline">2.3 Semantic Processing Pipeline<a class="headerlink" href="#23-semantic-processing-pipeline" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code>Feature Names         Feature Values
      ↓                      ↓
   Text Encoder        Value Encoder
@@ -520,28 +349,28 @@ Semantic Vectors     Value Vectors
            ↓
       Predictions
 </code></pre></div>
-<hr />
-<h2 id="3-inference-parameters">3. Inference Parameters<a class="headerlink" href="#3-inference-parameters" title="Permanent link">&para;</a></h2>
-<h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="3-inference-parameters">3. Inference Parameters<a class="headerlink" href="#3-inference-parameters" title="Permanent link">¶</a></h2>
+<h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># Text encoding</span>
-    <span class="s1">&#39;text_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;sentence-transformers/all-MiniLM-L6-v2&#39;</span><span class="p">,</span>  <span class="c1"># BERT model</span>
-    <span class="s1">&#39;text_dim&#39;</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>                       <span class="c1"># Text embedding dimension</span>
+    <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>  <span class="c1"># BERT model</span>
+    <span class="s1">'text_dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>                       <span class="c1"># Text embedding dimension</span>
 
     <span class="c1"># Value encoding</span>
-    <span class="s1">&#39;value_dim&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>                       <span class="c1"># Value embedding dimension</span>
-    <span class="s1">&#39;categorical_encoding&#39;</span><span class="p">:</span> <span class="s1">&#39;embedding&#39;</span><span class="p">,</span>   <span class="c1"># &#39;embedding&#39; or &#39;onehot&#39;</span>
+    <span class="s1">'value_dim'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>                       <span class="c1"># Value embedding dimension</span>
+    <span class="s1">'categorical_encoding'</span><span class="p">:</span> <span class="s1">'embedding'</span><span class="p">,</span>   <span class="c1"># 'embedding' or 'onehot'</span>
 
     <span class="c1"># Fusion and processing</span>
-    <span class="s1">&#39;fusion_dim&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                     <span class="c1"># Fused embedding dimension</span>
-    <span class="s1">&#39;dropout&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout rate</span>
+    <span class="s1">'fusion_dim'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                     <span class="c1"># Fused embedding dimension</span>
+    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout rate</span>
 
     <span class="c1"># Training behavior</span>
-    <span class="s1">&#39;use_cache&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                     <span class="c1"># Cache embeddings</span>
-    <span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
+    <span class="s1">'use_cache'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                     <span class="c1"># Cache embeddings</span>
+    <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="32-parameter-descriptions">3.2 Parameter Descriptions<a class="headerlink" href="#32-parameter-descriptions" title="Permanent link">&para;</a></h3>
+<h3 id="32-parameter-descriptions">3.2 Parameter Descriptions<a class="headerlink" href="#32-parameter-descriptions" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -602,41 +431,41 @@ Semantic Vectors     Value Vectors
 </tr>
 </tbody>
 </table>
-<h3 id="33-text-encoder-options">3.3 Text Encoder Options<a class="headerlink" href="#33-text-encoder-options" title="Permanent link">&para;</a></h3>
+<h3 id="33-text-encoder-options">3.3 Text Encoder Options<a class="headerlink" href="#33-text-encoder-options" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Different pre-trained models (trade-off: speed vs quality)</span>
 <span class="n">text_encoders</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;all-MiniLM-L6-v2&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;dim&#39;</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
-        <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="s1">&#39;Fast&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;quality&#39;</span><span class="p">:</span> <span class="s1">&#39;Good&#39;</span>
+    <span class="s1">'all-MiniLM-L6-v2'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
+        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Fast'</span><span class="p">,</span>
+        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Good'</span>
     <span class="p">},</span>
-    <span class="s1">&#39;all-MiniLM-L12-v2&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;dim&#39;</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
-        <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="s1">&#39;Medium&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;quality&#39;</span><span class="p">:</span> <span class="s1">&#39;Better&#39;</span>
+    <span class="s1">'all-MiniLM-L12-v2'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
+        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Medium'</span><span class="p">,</span>
+        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Better'</span>
     <span class="p">},</span>
-    <span class="s1">&#39;all-mpnet-base-v2&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;dim&#39;</span><span class="p">:</span> <span class="mi">768</span><span class="p">,</span>
-        <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="s1">&#39;Slow&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;quality&#39;</span><span class="p">:</span> <span class="s1">&#39;Best&#39;</span>
+    <span class="s1">'all-mpnet-base-v2'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">768</span><span class="p">,</span>
+        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Slow'</span><span class="p">,</span>
+        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Best'</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<hr />
-<h2 id="4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab<a class="headerlink" href="#4-fine-tuning-with-contexttab" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab<a class="headerlink" href="#4-fine-tuning-with-contexttab" title="Permanent link">¶</a></h2>
 <p>ContextTab supports <strong>base fine-tuning</strong> via episodic training.</p>
-<h3 id="41-fine-tuning-parameters">4.1 Fine-Tuning Parameters<a class="headerlink" href="#41-fine-tuning-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="41-fine-tuning-parameters">4.1 Fine-Tuning Parameters<a class="headerlink" href="#41-fine-tuning-parameters" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>                         <span class="c1"># More epochs typically needed</span>
-    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>                <span class="c1"># Higher than other models</span>
-    <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="s1">&#39;adamw&#39;</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>                         <span class="c1"># More epochs typically needed</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>                <span class="c1"># Higher than other models</span>
+    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
 
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Standard batch size</span>
-    <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Standard batch size</span>
+    <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices<a class="headerlink" href="#42-fine-tuning-best-practices" title="Permanent link">&para;</a></h3>
+<h3 id="42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices<a class="headerlink" href="#42-fine-tuning-best-practices" title="Permanent link">¶</a></h3>
 <ul>
 <li><strong>Epochs</strong>: 5-15 (longer than most models)</li>
 <li><strong>Learning Rate</strong>: 1e-4 to 5e-4 (higher than TabICL)</li>
@@ -644,22 +473,22 @@ Semantic Vectors     Value Vectors
 <li><strong>Scheduler</strong>: Use cosine decay for better convergence</li>
 <li><strong>Early Stopping</strong>: Important due to text embedding complexity</li>
 </ul>
-<h3 id="43-fine-tuning-stability">4.3 Fine-Tuning Stability<a class="headerlink" href="#43-fine-tuning-stability" title="Permanent link">&para;</a></h3>
+<h3 id="43-fine-tuning-stability">4.3 Fine-Tuning Stability<a class="headerlink" href="#43-fine-tuning-stability" title="Permanent link">¶</a></h3>
 <p>ContextTab training can be unstable due to:
 - Complex text-value fusion
 - High-dimensional embeddings
 - Cross-modality interactions</p>
 <p><strong>Recommendations</strong>:
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
-    <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<hr />
-<h2 id="5-setup-requirements">5. Setup Requirements<a class="headerlink" href="#5-setup-requirements" title="Permanent link">&para;</a></h2>
-<h3 id="51-huggingface-hub-access">5.1 HuggingFace Hub Access<a class="headerlink" href="#51-huggingface-hub-access" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="5-setup-requirements">5. Setup Requirements<a class="headerlink" href="#5-setup-requirements" title="Permanent link">¶</a></h2>
+<h3 id="51-huggingface-hub-access">5.1 HuggingFace Hub Access<a class="headerlink" href="#51-huggingface-hub-access" title="Permanent link">¶</a></h3>
 <p>ContextTab requires access to gated models on Hugging Face:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Install HuggingFace CLI</span>
 pip<span class="w"> </span>install<span class="w"> </span>huggingface-hub
@@ -668,77 +497,77 @@ pip<span class="w"> </span>install<span class="w"> </span>huggingface-hub
 huggingface-cli<span class="w"> </span>login
 
 <span class="c1"># Or set environment variable</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s1">&#39;your_token_here&#39;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s1">'your_token_here'</span>
 </code></pre></div>
-<h3 id="52-verify-setup">5.2 Verify Setup<a class="headerlink" href="#52-verify-setup" title="Permanent link">&para;</a></h3>
+<h3 id="52-verify-setup">5.2 Verify Setup<a class="headerlink" href="#52-verify-setup" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">login</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="c1"># Check token</span>
-<span class="n">hf_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;HF_TOKEN&#39;</span><span class="p">)</span>
+<span class="n">hf_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">'HF_TOKEN'</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">hf_token</span><span class="p">:</span>
     <span class="n">login</span><span class="p">(</span><span class="n">hf_token</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Logged into Hugging Face Hub&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"✅ Logged into Hugging Face Hub"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ HF_TOKEN not set - may fail for gated models&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"⚠️ HF_TOKEN not set - may fail for gated models"</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="53-model-download">5.3 Model Download<a class="headerlink" href="#53-model-download" title="Permanent link">&para;</a></h3>
+<h3 id="53-model-download">5.3 Model Download<a class="headerlink" href="#53-model-download" title="Permanent link">¶</a></h3>
 <p>First-time usage downloads model (~2GB):
 <div class="highlight"><pre><span></span><code><span class="c1"># First use will download model</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">)</span>
 <span class="c1"># ... downloads and caches model</span>
 </code></pre></div></p>
-<hr />
-<h2 id="6-usage-patterns">6. Usage Patterns<a class="headerlink" href="#6-usage-patterns" title="Permanent link">&para;</a></h2>
-<h3 id="61-inference-only">6.1 Inference Only<a class="headerlink" href="#61-inference-only" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="6-usage-patterns">6. Usage Patterns<a class="headerlink" href="#6-usage-patterns" title="Permanent link">¶</a></h2>
+<h3 id="61-inference-only">6.1 Inference Only<a class="headerlink" href="#61-inference-only" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="c1"># Set HF token</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HF_TOKEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your_token&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'HF_TOKEN'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'your_token'</span>
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;text_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;sentence-transformers/all-MiniLM-L6-v2&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;fusion_dim&#39;</span><span class="p">:</span> <span class="mi">128</span>
+        <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>
+        <span class="s1">'fusion_dim'</span><span class="p">:</span> <span class="mi">128</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="62-base-fine-tuning">6.2 Base Fine-Tuning<a class="headerlink" href="#62-base-fine-tuning" title="Permanent link">&para;</a></h3>
+<h3 id="62-base-fine-tuning">6.2 Base Fine-Tuning<a class="headerlink" href="#62-base-fine-tuning" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
-        <span class="s1">&#39;warmup_steps&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-        <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="63-peft-fine-tuning-experimental">6.3 PEFT Fine-Tuning (Experimental)<a class="headerlink" href="#63-peft-fine-tuning-experimental" title="Permanent link">&para;</a></h3>
+<h3 id="63-peft-fine-tuning-experimental">6.3 PEFT Fine-Tuning (Experimental)<a class="headerlink" href="#63-peft-fine-tuning-experimental" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># ⚠️ PEFT support is experimental for ContextTab</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-            <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
@@ -746,30 +575,30 @@ huggingface-cli<span class="w"> </span>login
 <span class="c1"># May have issues - base-ft recommended</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="7-lora-target-modules-experimental">7. LoRA Target Modules (Experimental)<a class="headerlink" href="#7-lora-target-modules-experimental" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="7-lora-target-modules-experimental">7. LoRA Target Modules (Experimental)<a class="headerlink" href="#7-lora-target-modules-experimental" title="Permanent link">¶</a></h2>
 <p>When using PEFT, ContextTab targets:</p>
 <div class="highlight"><pre><span></span><code><span class="n">target_modules</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;in_context_encoder&#39;</span><span class="p">,</span>      <span class="c1"># Text encoder</span>
-    <span class="s1">&#39;dense&#39;</span><span class="p">,</span>                   <span class="c1"># Value encoder</span>
-    <span class="s1">&#39;output_head&#39;</span><span class="p">,</span>             <span class="c1"># Prediction head</span>
-    <span class="s1">&#39;embeddings&#39;</span>               <span class="c1"># Embedding layers</span>
+    <span class="s1">'in_context_encoder'</span><span class="p">,</span>      <span class="c1"># Text encoder</span>
+    <span class="s1">'dense'</span><span class="p">,</span>                   <span class="c1"># Value encoder</span>
+    <span class="s1">'output_head'</span><span class="p">,</span>             <span class="c1"># Prediction head</span>
+    <span class="s1">'embeddings'</span>               <span class="c1"># Embedding layers</span>
 <span class="p">]</span>
 </code></pre></div>
-<h3 id="71-peft-status">7.1 PEFT Status<a class="headerlink" href="#71-peft-status" title="Permanent link">&para;</a></h3>
+<h3 id="71-peft-status">7.1 PEFT Status<a class="headerlink" href="#71-peft-status" title="Permanent link">¶</a></h3>
 <p><strong>⚠️ Experimental</strong>: PEFT support for ContextTab is experimental because:
 - Complex embedding pipeline
 - Cross-modality fusion issues
 - Potential prediction inconsistencies</p>
 <p><strong>Recommendation</strong>: Use <code>base-ft</code> strategy instead of <code>peft</code></p>
-<hr />
-<h2 id="8-complete-examples">8. Complete Examples<a class="headerlink" href="#8-complete-examples" title="Permanent link">&para;</a></h2>
-<h3 id="81-text-heavy-dataset">8.1 Text-Heavy Dataset<a class="headerlink" href="#81-text-heavy-dataset" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="8-complete-examples">8. Complete Examples<a class="headerlink" href="#8-complete-examples" title="Permanent link">¶</a></h2>
+<h3 id="81-text-heavy-dataset">8.1 Text-Heavy Dataset<a class="headerlink" href="#81-text-heavy-dataset" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="c1"># Example: Customer survey data with text responses</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HF_TOKEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your_token&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'HF_TOKEN'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'your_token'</span>
 
 <span class="c1"># X contains columns like:</span>
 <span class="c1"># - age (numerical)</span>
@@ -778,53 +607,53 @@ huggingface-cli<span class="w"> </span>login
 <span class="c1"># - rating (numerical)</span>
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
-        <span class="s1">&#39;warmup_steps&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="s1">&#39;show_progress&#39;</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="82-semantic-feature-names">8.2 Semantic Feature Names<a class="headerlink" href="#82-semantic-feature-names" title="Permanent link">&para;</a></h3>
+<h3 id="82-semantic-feature-names">8.2 Semantic Feature Names<a class="headerlink" href="#82-semantic-feature-names" title="Permanent link">¶</a></h3>
 <p>ContextTab leverages meaningful feature names:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Good: Descriptive feature names (ContextTab works well)</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">&#39;customer_age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
-    <span class="s1">&#39;total_purchases_amount&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
-    <span class="s1">&#39;years_as_customer&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
-    <span class="s1">&#39;product_category_preference&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;electronics&#39;</span><span class="p">,</span> <span class="s1">&#39;books&#39;</span><span class="p">,</span> <span class="s1">&#39;home&#39;</span><span class="p">]</span>
+    <span class="s1">'customer_age'</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+    <span class="s1">'total_purchases_amount'</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
+    <span class="s1">'years_as_customer'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="s1">'product_category_preference'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'electronics'</span><span class="p">,</span> <span class="s1">'books'</span><span class="p">,</span> <span class="s1">'home'</span><span class="p">]</span>
 <span class="p">})</span>
 
 <span class="c1"># Less Good: Generic feature names (ContextTab has less semantic info)</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
-    <span class="s1">&#39;f2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
-    <span class="s1">&#39;f3&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
-    <span class="s1">&#39;f4&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;electronics&#39;</span><span class="p">,</span> <span class="s1">&#39;books&#39;</span><span class="p">,</span> <span class="s1">&#39;home&#39;</span><span class="p">]</span>
+    <span class="s1">'f1'</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+    <span class="s1">'f2'</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
+    <span class="s1">'f3'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="s1">'f4'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'electronics'</span><span class="p">,</span> <span class="s1">'books'</span><span class="p">,</span> <span class="s1">'home'</span><span class="p">]</span>
 <span class="p">})</span>
 </code></pre></div>
-<h3 id="83-production-deployment-saving-using-joblib">8.3 Production Deployment - Saving using joblib<a class="headerlink" href="#83-production-deployment-saving-using-joblib" title="Permanent link">&para;</a></h3>
+<h3 id="83-production-deployment-saving-using-joblib">8.3 Production Deployment - Saving using joblib<a class="headerlink" href="#83-production-deployment-saving-using-joblib" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HF_TOKEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your_token&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'HF_TOKEN'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'your_token'</span>
 
 <span class="c1"># Train</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
@@ -832,15 +661,15 @@ huggingface-cli<span class="w"> </span>login
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 
 <span class="c1"># Save</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;contexttab_production.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">'contexttab_production.joblib'</span><span class="p">)</span>
 
 <span class="c1"># In production (ensure HF_TOKEN is set)</span>
-<span class="n">loaded</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;contexttab_production.joblib&#39;</span><span class="p">)</span>
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'contexttab_production.joblib'</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="9-performance-characteristics">9. Performance Characteristics<a class="headerlink" href="#9-performance-characteristics" title="Permanent link">&para;</a></h2>
-<h3 id="91-speed-benchmarks">9.1 Speed Benchmarks<a class="headerlink" href="#91-speed-benchmarks" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="9-performance-characteristics">9. Performance Characteristics<a class="headerlink" href="#9-performance-characteristics" title="Permanent link">¶</a></h2>
+<h3 id="91-speed-benchmarks">9.1 Speed Benchmarks<a class="headerlink" href="#91-speed-benchmarks" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -872,7 +701,7 @@ huggingface-cli<span class="w"> </span>login
 </tr>
 </tbody>
 </table>
-<h3 id="92-memory-usage">9.2 Memory Usage<a class="headerlink" href="#92-memory-usage" title="Permanent link">&para;</a></h3>
+<h3 id="92-memory-usage">9.2 Memory Usage<a class="headerlink" href="#92-memory-usage" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -913,7 +742,7 @@ huggingface-cli<span class="w"> </span>login
 | Mixed + text | 90%+ | Excels here |
 | Semantic names | +2-3% | Better with meaningful names |
  -->
-<hr />
+<hr/>
 <!-- ## 10. Special Handling
 
 ### 10.1 Text Columns
@@ -946,48 +775,48 @@ ContextTab handles missing values naturally:
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>  <span class="c1"># Works seamlessly</span>
 </code></pre></div>
  -->
-<hr />
-<h2 id="11-troubleshooting">11. Troubleshooting<a class="headerlink" href="#11-troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="issue-huggingface-login-required">Issue: "HuggingFace login required"<a class="headerlink" href="#issue-huggingface-login-required" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="11-troubleshooting">11. Troubleshooting<a class="headerlink" href="#11-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-huggingface-login-required">Issue: "HuggingFace login required"<a class="headerlink" href="#issue-huggingface-login-required" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s1">&#39;hf_xxxxxxxxxxxx&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s1">'hf_xxxxxxxxxxxx'</span>
 <span class="c1"># or</span>
 huggingface-cli<span class="w"> </span>login
 </code></pre></div></p>
-<h3 id="issue-model-download-fails">Issue: "Model download fails"<a class="headerlink" href="#issue-model-download-fails" title="Permanent link">&para;</a></h3>
+<h3 id="issue-model-download-fails">Issue: "Model download fails"<a class="headerlink" href="#issue-model-download-fails" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Check internet and token
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_info</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="n">model_info</span><span class="p">(</span><span class="s1">&#39;sentence-transformers/all-MiniLM-L6-v2&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Model accessible&quot;</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">model_info</span><span class="p">(</span><span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"✅ Model accessible"</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Model access failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"❌ Model access failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="issue-slow-inference-due-to-text-encoding">Issue: "Slow inference due to text encoding"<a class="headerlink" href="#issue-slow-inference-due-to-text-encoding" title="Permanent link">&para;</a></h3>
+<h3 id="issue-slow-inference-due-to-text-encoding">Issue: "Slow inference due to text encoding"<a class="headerlink" href="#issue-slow-inference-due-to-text-encoding" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Use faster text encoder
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;text_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;sentence-transformers/all-MiniLM-L6-v2&#39;</span><span class="p">,</span>  <span class="c1"># Fastest</span>
-    <span class="c1"># instead of &#39;all-mpnet-base-v2&#39;  # Slowest</span>
+    <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>  <span class="c1"># Fastest</span>
+    <span class="c1"># instead of 'all-mpnet-base-v2'  # Slowest</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<h3 id="issue-training-unstable-or-diverging">Issue: "Training unstable or diverging"<a class="headerlink" href="#issue-training-unstable-or-diverging" title="Permanent link">&para;</a></h3>
+<h3 id="issue-training-unstable-or-diverging">Issue: "Training unstable or diverging"<a class="headerlink" href="#issue-training-unstable-or-diverging" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Increase regularization
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">5e-5</span><span class="p">,</span>  <span class="c1"># Reduce</span>
-    <span class="s1">&#39;warmup_steps&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>    <span class="c1"># Increase</span>
-    <span class="s1">&#39;weight_decay&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>    <span class="c1"># Increase</span>
-    <span class="s1">&#39;gradient_clip_value&#39;</span><span class="p">:</span> <span class="mf">0.5</span>  <span class="c1"># Tighter</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">5e-5</span><span class="p">,</span>  <span class="c1"># Reduce</span>
+    <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>    <span class="c1"># Increase</span>
+    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>    <span class="c1"># Increase</span>
+    <span class="s1">'gradient_clip_value'</span><span class="p">:</span> <span class="mf">0.5</span>  <span class="c1"># Tighter</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<h3 id="issue-out-of-memory-during-training">Issue: "Out of memory during training"<a class="headerlink" href="#issue-out-of-memory-during-training" title="Permanent link">&para;</a></h3>
+<h3 id="issue-out-of-memory-during-training">Issue: "Out of memory during training"<a class="headerlink" href="#issue-out-of-memory-during-training" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Reduce batch size
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Instead of 8</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Instead of 8</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<hr />
-<h2 id="12-best-practices">12. Best Practices<a class="headerlink" href="#12-best-practices" title="Permanent link">&para;</a></h2>
-<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="12-best-practices">12. Best Practices<a class="headerlink" href="#12-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
 <ul>
 <li>✅ Use descriptive feature names</li>
 <li>✅ Include text columns when available</li>
@@ -996,7 +825,7 @@ huggingface-cli<span class="w"> </span>login
 <li>✅ Include longer warmup phases</li>
 <li>✅ Cache embeddings for repeated use</li>
 </ul>
-<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
 <ul>
 <li>❌ Don't use PEFT (experimental)</li>
 <li>❌ Don't use on pure numerical data (use TabICL)</li>
@@ -1005,8 +834,8 @@ huggingface-cli<span class="w"> </span>login
 <li>❌ Don't skip gradient clipping</li>
 <li>❌ Don't use without semantic feature names</li>
 </ul>
-<hr />
-<h2 id="13-when-to-use-contexttab">13. When to Use ContextTab<a class="headerlink" href="#13-when-to-use-contexttab" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="13-when-to-use-contexttab">13. When to Use ContextTab<a class="headerlink" href="#13-when-to-use-contexttab" title="Permanent link">¶</a></h2>
 <p><strong>Use ContextTab when</strong>:
 - ✅ Dataset has text columns/features
 - ✅ Feature names are semantic/meaningful
@@ -1019,8 +848,8 @@ huggingface-cli<span class="w"> </span>login
 - ❌ Memory-constrained environments
 - ❌ When you need fast training
 - ❌ Without HuggingFace access</p>
-<hr />
-<h2 id="14-comparison-with-other-models">14. Comparison with Other Models<a class="headerlink" href="#14-comparison-with-other-models" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="14-comparison-with-other-models">14. Comparison with Other Models<a class="headerlink" href="#14-comparison-with-other-models" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -1083,7 +912,7 @@ huggingface-cli<span class="w"> </span>login
 </tr>
 </tbody>
 </table>
-<hr />
+<hr/>
 <!-- ## 15. Advanced Topics
 
 ### 15.1 Custom Text Encoders
@@ -1112,9 +941,8 @@ X_train = pd.DataFrame({
 # ContextTab will use column names, so rename:
 X_train.columns = ['customer_age', 'purchase_amount', 'category']
 ``` -->
-
-<hr />
-<h2 id="15-quick-reference">15. Quick Reference<a class="headerlink" href="#15-quick-reference" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="15-quick-reference">15. Quick Reference<a class="headerlink" href="#15-quick-reference" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -1157,114 +985,140 @@ X_train.columns = ['customer_age', 'purchase_amount', 'category']
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="16-next-steps">16. Next Steps<a class="headerlink" href="#16-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="16-next-steps">16. Next Steps<a class="headerlink" href="#16-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../../user-guide/model-selection/">Model Selection</a> - Compare with other models</li>
 <li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - Fine-tuning details</li>
 <li><a href="../../user-guide/leaderboard/">TabularLeaderboard</a> - Benchmark ContextTab</li>
 <li><a href="https://huggingface.co">HuggingFace Hub</a> - Access gated models</li>
 </ul>
-<hr />
+<hr/>
 <p>ContextTab excels with text-enriched tabular data and semantic feature understanding. Use it when your data includes text or has meaningful feature names!</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
 </html>

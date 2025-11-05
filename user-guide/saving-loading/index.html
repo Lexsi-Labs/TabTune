@@ -1,440 +1,275 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>Saving and Loading - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Saving and Loading - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown active">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li class="active">
-    <a href="./">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../advanced/peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="prev" href="../model-selection/">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="next" href="../leaderboard/">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/saving-loading.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#saving-and-loading-pipelines">Saving and Loading Pipelines</a></li>
-            <li class="second-level"><a href="#1-overview">1. Overview</a></li>
-                
-            <li class="second-level"><a href="#2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)</a></li>
-                
-                <li class="third-level"><a href="#21-saving-a-pipeline">2.1 Saving a Pipeline</a></li>
-                <li class="third-level"><a href="#22-loading-a-pipeline">2.2 Loading a Pipeline</a></li>
-                <li class="third-level"><a href="#23-size-optimization">2.3 Size Optimization</a></li>
-            <li class="second-level"><a href="#3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)</a></li>
-                
-                <li class="third-level"><a href="#31-saving-model-weights">3.1 Saving Model Weights</a></li>
-                <li class="third-level"><a href="#32-loading-model-weights">3.2 Loading Model Weights</a></li>
-            <li class="second-level"><a href="#4-checkpoint-management">4. Checkpoint Management</a></li>
-                
-                <li class="third-level"><a href="#41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training</a></li>
-                <li class="third-level"><a href="#42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking</a></li>
-            <li class="second-level"><a href="#5-peft-specific-serialization">5. PEFT-Specific Serialization</a></li>
-                
-                <li class="third-level"><a href="#51-save-with-peft-adapters">5.1 Save with PEFT Adapters</a></li>
-                <li class="third-level"><a href="#52-load-peft-pipeline">5.2 Load PEFT Pipeline</a></li>
-                <li class="third-level"><a href="#53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only</a></li>
-            <li class="second-level"><a href="#6-configuration-serialization">6. Configuration Serialization</a></li>
-                
-                <li class="third-level"><a href="#61-save-configuration-to-yaml">6.1 Save Configuration to YAML</a></li>
-                <li class="third-level"><a href="#62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration</a></li>
-            <li class="second-level"><a href="#7-best-practices">7. Best Practices</a></li>
-                
-                <li class="third-level"><a href="#dos">✅ Do's</a></li>
-                <li class="third-level"><a href="#donts">❌ Don'ts</a></li>
-            <li class="second-level"><a href="#8-troubleshooting">8. Troubleshooting</a></li>
-                
-                <li class="third-level"><a href="#issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"</a></li>
-                <li class="third-level"><a href="#issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"</a></li>
-                <li class="third-level"><a href="#issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"</a></li>
-                <li class="third-level"><a href="#issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"</a></li>
-            <li class="second-level"><a href="#9-summary-table">9. Summary Table</a></li>
-                
-            <li class="second-level"><a href="#10-next-steps">10. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li class="active">
+<a href="./">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../model-selection/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../leaderboard/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/saving-loading.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#saving-and-loading-pipelines">Saving and Loading Pipelines</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="second-level"><a href="#2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)</a></li>
+<li class="third-level"><a href="#21-saving-a-pipeline">2.1 Saving a Pipeline</a></li>
+<li class="third-level"><a href="#22-loading-a-pipeline">2.2 Loading a Pipeline</a></li>
+<li class="third-level"><a href="#23-size-optimization">2.3 Size Optimization</a></li>
+<li class="second-level"><a href="#3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)</a></li>
+<li class="third-level"><a href="#31-saving-model-weights">3.1 Saving Model Weights</a></li>
+<li class="third-level"><a href="#32-loading-model-weights">3.2 Loading Model Weights</a></li>
+<li class="second-level"><a href="#4-checkpoint-management">4. Checkpoint Management</a></li>
+<li class="third-level"><a href="#41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training</a></li>
+<li class="third-level"><a href="#42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking</a></li>
+<li class="second-level"><a href="#5-peft-specific-serialization">5. PEFT-Specific Serialization</a></li>
+<li class="third-level"><a href="#51-save-with-peft-adapters">5.1 Save with PEFT Adapters</a></li>
+<li class="third-level"><a href="#52-load-peft-pipeline">5.2 Load PEFT Pipeline</a></li>
+<li class="third-level"><a href="#53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only</a></li>
+<li class="second-level"><a href="#6-configuration-serialization">6. Configuration Serialization</a></li>
+<li class="third-level"><a href="#61-save-configuration-to-yaml">6.1 Save Configuration to YAML</a></li>
+<li class="third-level"><a href="#62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration</a></li>
+<li class="second-level"><a href="#7-best-practices">7. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#8-troubleshooting">8. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"</a></li>
+<li class="third-level"><a href="#issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"</a></li>
+<li class="third-level"><a href="#issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"</a></li>
+<li class="third-level"><a href="#issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"</a></li>
+<li class="second-level"><a href="#9-summary-table">9. Summary Table</a></li>
+<li class="second-level"><a href="#10-next-steps">10. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="saving-and-loading-pipelines">Saving and Loading Pipelines<a class="headerlink" href="#saving-and-loading-pipelines" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="saving-and-loading-pipelines">Saving and Loading Pipelines<a class="headerlink" href="#saving-and-loading-pipelines" title="Permanent link">¶</a></h1>
 <p>This guide explains how to persist TabTune pipelines for production deployment, reproducibility, and continued training.</p>
-<hr />
-<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
 <p>TabTune supports multiple serialization formats for different use cases:</p>
 <table>
 <thead>
@@ -470,22 +305,22 @@
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)<a class="headerlink" href="#2-pipeline-serialization-joblib" title="Permanent link">&para;</a></h2>
-<h3 id="21-saving-a-pipeline">2.1 Saving a Pipeline<a class="headerlink" href="#21-saving-a-pipeline" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="2-pipeline-serialization-joblib">2. Pipeline Serialization (joblib)<a class="headerlink" href="#2-pipeline-serialization-joblib" title="Permanent link">¶</a></h2>
+<h3 id="21-saving-a-pipeline">2.1 Saving a Pipeline<a class="headerlink" href="#21-saving-a-pipeline" title="Permanent link">¶</a></h3>
 <p>Save the complete fitted pipeline including model, preprocessor, and configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Train pipeline</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
-    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span> <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span> <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Save entire pipeline</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">'my_pipeline.joblib'</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>What Gets Saved</strong>:
 - ✅ Trained model weights
@@ -494,12 +329,12 @@
 - ✅ Tuning parameters
 - ✅ Label encoder for target variable
 - ✅ PEFT adapter weights (if applicable)</p>
-<h3 id="22-loading-a-pipeline">2.2 Loading a Pipeline<a class="headerlink" href="#22-loading-a-pipeline" title="Permanent link">&para;</a></h3>
+<h3 id="22-loading-a-pipeline">2.2 Loading a Pipeline<a class="headerlink" href="#22-loading-a-pipeline" title="Permanent link">¶</a></h3>
 <p>Load a saved pipeline for inference or continued training:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Load pipeline</span>
-<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'my_pipeline.joblib'</span><span class="p">)</span>
 
 <span class="c1"># Make predictions immediately</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -507,37 +342,37 @@
 <span class="c1"># Or continue training with new data</span>
 <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_new_train</span><span class="p">,</span> <span class="n">y_new_train</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="23-size-optimization">2.3 Size Optimization<a class="headerlink" href="#23-size-optimization" title="Permanent link">&para;</a></h3>
+<h3 id="23-size-optimization">2.3 Size Optimization<a class="headerlink" href="#23-size-optimization" title="Permanent link">¶</a></h3>
 <p>If pipeline file is too large, compress it:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
 
 <span class="c1"># Save with compression</span>
-<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># compression=0-9</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">'my_pipeline.joblib'</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># compression=0-9</span>
 
 <span class="c1"># Load compressed pipeline</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;my_pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'my_pipeline.joblib'</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)<a class="headerlink" href="#3-model-only-serialization-pytorch" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="3-model-only-serialization-pytorch">3. Model-Only Serialization (PyTorch)<a class="headerlink" href="#3-model-only-serialization-pytorch" title="Permanent link">¶</a></h2>
 <p>For minimal storage or deployment, save only model weights:</p>
-<h3 id="31-saving-model-weights">3.1 Saving Model Weights<a class="headerlink" href="#31-saving-model-weights" title="Permanent link">&para;</a></h3>
+<h3 id="31-saving-model-weights">3.1 Saving Model Weights<a class="headerlink" href="#31-saving-model-weights" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="c1"># Save model weights only</span>
-<span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;model_weights.pt&#39;</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">'model_weights.pt'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="32-loading-model-weights">3.2 Loading Model Weights<a class="headerlink" href="#32-loading-model-weights" title="Permanent link">&para;</a></h3>
+<h3 id="32-loading-model-weights">3.2 Loading Model Weights<a class="headerlink" href="#32-loading-model-weights" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Create new pipeline with same config</span>
 <span class="n">new_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span>
 <span class="p">)</span>
 
 <span class="c1"># Load weights into model</span>
-<span class="n">state_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;model_weights.pt&#39;</span><span class="p">)</span>
+<span class="n">state_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'model_weights.pt'</span><span class="p">)</span>
 <span class="n">new_pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
 
 <span class="c1"># Ready for inference</span>
@@ -551,18 +386,18 @@
 - ❌ Requires manual DataProcessor setup
 - ❌ Must know original configuration
 - ❌ No automatic version compatibility</p>
-<hr />
-<h2 id="4-checkpoint-management">4. Checkpoint Management<a class="headerlink" href="#4-checkpoint-management" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="4-checkpoint-management">4. Checkpoint Management<a class="headerlink" href="#4-checkpoint-management" title="Permanent link">¶</a></h2>
 <p>For long training runs, save intermediate checkpoints:</p>
-<h3 id="41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training<a class="headerlink" href="#41-automatic-checkpointing-during-training" title="Permanent link">&para;</a></h3>
+<h3 id="41-automatic-checkpointing-during-training">4.1 Automatic Checkpointing During Training<a class="headerlink" href="#41-automatic-checkpointing-during-training" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabDPT'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
-        <span class="s1">&#39;save_checkpoint_path&#39;</span><span class="p">:</span> <span class="s1">&#39;checkpoints/best_model.pt&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;save_every_n_epochs&#39;</span><span class="p">:</span> <span class="mi">5</span>  <span class="c1"># Save every 5 epochs</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s1">'save_checkpoint_path'</span><span class="p">:</span> <span class="s1">'checkpoints/best_model.pt'</span><span class="p">,</span>
+        <span class="s1">'save_every_n_epochs'</span><span class="p">:</span> <span class="mi">5</span>  <span class="c1"># Save every 5 epochs</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
@@ -575,80 +410,80 @@
 <span class="c1"># checkpoints/checkpoint_epoch_15.pt</span>
 <span class="c1"># checkpoints/checkpoint_epoch_20.pt</span>
 </code></pre></div>
-<h3 id="42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking<a class="headerlink" href="#42-best-checkpoint-tracking" title="Permanent link">&para;</a></h3>
+<h3 id="42-best-checkpoint-tracking">4.2 Best Checkpoint Tracking<a class="headerlink" href="#42-best-checkpoint-tracking" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;checkpoints&#39;</span><span class="p">)</span>
+<span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">'checkpoints'</span><span class="p">)</span>
 <span class="n">checkpoint_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Find best checkpoint</span>
 <span class="n">best_checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
 
-<span class="k">for</span> <span class="n">checkpoint_file</span> <span class="ow">in</span> <span class="n">checkpoint_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.pt&#39;</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">checkpoint_file</span> <span class="ow">in</span> <span class="n">checkpoint_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">'*.pt'</span><span class="p">):</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">checkpoint_file</span><span class="p">))</span>
-    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
         <span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
         <span class="n">best_checkpoint</span> <span class="o">=</span> <span class="n">checkpoint_file</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best checkpoint: </span><span class="si">{</span><span class="n">best_checkpoint</span><span class="si">}</span><span class="s2"> with score </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best checkpoint: </span><span class="si">{</span><span class="n">best_checkpoint</span><span class="si">}</span><span class="s2"> with score </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="5-peft-specific-serialization">5. PEFT-Specific Serialization<a class="headerlink" href="#5-peft-specific-serialization" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="5-peft-specific-serialization">5. PEFT-Specific Serialization<a class="headerlink" href="#5-peft-specific-serialization" title="Permanent link">¶</a></h2>
 <p>When using PEFT (LoRA), save and manage adapter weights:</p>
-<h3 id="51-save-with-peft-adapters">5.1 Save with PEFT Adapters<a class="headerlink" href="#51-save-with-peft-adapters" title="Permanent link">&para;</a></h3>
+<h3 id="51-save-with-peft-adapters">5.1 Save with PEFT Adapters<a class="headerlink" href="#51-save-with-peft-adapters" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Train with PEFT</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
-        <span class="s1">&#39;save_checkpoint_path&#39;</span><span class="p">:</span> <span class="s1">&#39;peft_model.joblib&#39;</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+        <span class="s1">'save_checkpoint_path'</span><span class="p">:</span> <span class="s1">'peft_model.joblib'</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Save includes both base model and LoRA adapters</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;peft_pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">'peft_pipeline.joblib'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="52-load-peft-pipeline">5.2 Load PEFT Pipeline<a class="headerlink" href="#52-load-peft-pipeline" title="Permanent link">&para;</a></h3>
+<h3 id="52-load-peft-pipeline">5.2 Load PEFT Pipeline<a class="headerlink" href="#52-load-peft-pipeline" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Load includes automatic adapter reconstruction</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;peft_pipeline.joblib&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'peft_pipeline.joblib'</span><span class="p">)</span>
 
 <span class="c1"># Adapters are already injected</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only<a class="headerlink" href="#53-extract-lora-adapters-only" title="Permanent link">&para;</a></h3>
+<h3 id="53-extract-lora-adapters-only">5.3 Extract LoRA Adapters Only<a class="headerlink" href="#53-extract-lora-adapters-only" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="c1"># Save only adapter weights (minimal size)</span>
-<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;lora_A&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;lora_B&#39;</span><span class="p">):</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">'lora_A'</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">'lora_B'</span><span class="p">):</span>
     <span class="n">adapter_state</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;lora_A&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_A</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-        <span class="s1">&#39;lora_B&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_B</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="s1">'lora_A'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_A</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="s1">'lora_B'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_B</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
     <span class="p">}</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">adapter_state</span><span class="p">,</span> <span class="s1">&#39;adapters.pt&#39;</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">adapter_state</span><span class="p">,</span> <span class="s1">'adapters.pt'</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="6-configuration-serialization">6. Configuration Serialization<a class="headerlink" href="#6-configuration-serialization" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="6-configuration-serialization">6. Configuration Serialization<a class="headerlink" href="#6-configuration-serialization" title="Permanent link">¶</a></h2>
 <p>Save pipeline configuration for reproducibility:</p>
-<h3 id="61-save-configuration-to-yaml">6.1 Save Configuration to YAML<a class="headerlink" href="#61-save-configuration-to-yaml" title="Permanent link">&para;</a></h3>
+<h3 id="61-save-configuration-to-yaml">6.1 Save Configuration to YAML<a class="headerlink" href="#61-save-configuration-to-yaml" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
-    <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
-    <span class="s1">&#39;tuning_strategy&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_strategy</span><span class="p">,</span>
-    <span class="s1">&#39;tuning_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_params</span><span class="p">,</span>
-    <span class="s1">&#39;processor_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">processor_params</span><span class="p">,</span>
-    <span class="s1">&#39;model_params&#39;</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_params</span>
+    <span class="s1">'model_name'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
+    <span class="s1">'task_type'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+    <span class="s1">'tuning_strategy'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_strategy</span><span class="p">,</span>
+    <span class="s1">'tuning_params'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">tuning_params</span><span class="p">,</span>
+    <span class="s1">'processor_params'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">processor_params</span><span class="p">,</span>
+    <span class="s1">'model_params'</span><span class="p">:</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model_params</span>
 <span class="p">}</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;pipeline_config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'pipeline_config.yaml'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>Example Config File</strong>:
@@ -670,20 +505,20 @@
 <span class="nt">model_params</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">n_estimators</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
 </code></pre></div></p>
-<h3 id="62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration<a class="headerlink" href="#62-load-pipeline-from-configuration" title="Permanent link">&para;</a></h3>
+<h3 id="62-load-pipeline-from-configuration">6.2 Load Pipeline from Configuration<a class="headerlink" href="#62-load-pipeline-from-configuration" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Load config</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;pipeline_config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'pipeline_config.yaml'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
 <span class="c1"># Recreate pipeline</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="7-best-practices">7. Best Practices<a class="headerlink" href="#7-best-practices" title="Permanent link">&para;</a></h2>
-<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="7-best-practices">7. Best Practices<a class="headerlink" href="#7-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
 <ul>
 <li>✅ Save full pipelines for production deployment</li>
 <li>✅ Use checkpoints for long training runs</li>
@@ -693,7 +528,7 @@
 <li>✅ Document model metadata and creation date</li>
 <li>✅ Test loading on different systems</li>
 </ul>
-<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
 <ul>
 <li>❌ Don't save only model weights without config</li>
 <li>❌ Don't overwrite checkpoints without backup</li>
@@ -701,29 +536,29 @@
 <li>❌ Don't hardcode paths in production code</li>
 <li>❌ Don't commit large <code>.joblib</code> files to git (use git-lfs)</li>
 </ul>
-<hr />
-<h2 id="8-troubleshooting">8. Troubleshooting<a class="headerlink" href="#8-troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"<a class="headerlink" href="#issue-modulenotfounderror-when-loading-pipeline" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="8-troubleshooting">8. Troubleshooting<a class="headerlink" href="#8-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-modulenotfounderror-when-loading-pipeline">Issue: "ModuleNotFoundError when loading pipeline"<a class="headerlink" href="#issue-modulenotfounderror-when-loading-pipeline" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Ensure TabTune is installed in the target environment</p>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>tabtune
 </code></pre></div>
-<h3 id="issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"<a class="headerlink" href="#issue-pickle-protocol-version-mismatch" title="Permanent link">&para;</a></h3>
+<h3 id="issue-pickle-protocol-version-mismatch">Issue: "Pickle protocol version mismatch"<a class="headerlink" href="#issue-pickle-protocol-version-mismatch" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Use compatible Python and PyTorch versions</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Save with older protocol for compatibility</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
-<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;compatible.joblib&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="s1">'compatible.joblib'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"<a class="headerlink" href="#issue-cuda-error-when-loading-on-cpu" title="Permanent link">&para;</a></h3>
+<h3 id="issue-cuda-error-when-loading-on-cpu">Issue: "CUDA error when loading on CPU"<a class="headerlink" href="#issue-cuda-error-when-loading-on-cpu" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Specify device when loading</p>
-<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;pipeline.joblib&#39;</span><span class="p">)</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'pipeline.joblib'</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">'cpu'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"<a class="headerlink" href="#issue-pipeline-file-corrupted-or-incomplete" title="Permanent link">&para;</a></h3>
+<h3 id="issue-pipeline-file-corrupted-or-incomplete">Issue: "Pipeline file corrupted or incomplete"<a class="headerlink" href="#issue-pipeline-file-corrupted-or-incomplete" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Restore from backup</p>
-<div class="highlight"><pre><span></span><code><span class="n">restored</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;backups/pipeline_backup_20250101_120000.joblib&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">restored</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'backups/pipeline_backup_20250101_120000.joblib'</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="9-summary-table">9. Summary Table<a class="headerlink" href="#9-summary-table" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="9-summary-table">9. Summary Table<a class="headerlink" href="#9-summary-table" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -766,113 +601,136 @@
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="10-next-steps">10. Next Steps<a class="headerlink" href="#10-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="10-next-steps">10. Next Steps<a class="headerlink" href="#10-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../../advanced/memory-optimization/">Advanced Topics</a> - Optimize for deployment</li>
-<li><a href="../api/pipeline.md">API Reference</a> - Complete API documentation</li>
+<li><a href="../../api/pipeline/">API Reference</a> - Complete API documentation</li>
 <li><a href="../../examples/classification/">Examples</a> - Real-world examples</li>
 </ul>
-<hr />
+<hr/>
 <p>Properly saving and loading pipelines ensures reproducibility, enables production deployment, and protects your trained models!</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
 </html>

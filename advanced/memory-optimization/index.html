@@ -1,440 +1,283 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>Memory Optimization: Techniques for Training Large Models - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Memory Optimization - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/advanced/memory-optimization.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#memory-optimization-techniques-for-training-large-models">Memory Optimization: Techniques for Training Large Models</a></li>
-            <li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
-                
-            <li class="second-level"><a href="#2-memory-profiling">2. Memory Profiling</a></li>
-                
-                <li class="third-level"><a href="#21-understanding-memory-usage">2.1 Understanding Memory Usage</a></li>
-                <li class="third-level"><a href="#22-profiling-tools">2.2 Profiling Tools</a></li>
-            <li class="second-level"><a href="#3-optimization-techniques">3. Optimization Techniques</a></li>
-                
-                <li class="third-level"><a href="#31-peft-lora-primary-technique">3.1 PEFT (LoRA) - Primary Technique</a></li>
-                <li class="third-level"><a href="#32-batch-size-reduction">3.2 Batch Size Reduction</a></li>
-                <li class="third-level"><a href="#33-gradient-accumulation">3.3 Gradient Accumulation</a></li>
-                <li class="third-level"><a href="#34-mixed-precision-training">3.4 Mixed Precision Training</a></li>
-                <li class="third-level"><a href="#35-gradient-checkpointing">3.5 Gradient Checkpointing</a></li>
-                <li class="third-level"><a href="#36-data-loading-optimization">3.6 Data Loading Optimization</a></li>
-                <li class="third-level"><a href="#37-model-architecture-reduction">3.7 Model Architecture Reduction</a></li>
-            <li class="second-level"><a href="#4-optimization-strategies-by-constraint">4. Optimization Strategies by Constraint</a></li>
-                
-                <li class="third-level"><a href="#41-severe-constraint-2gb-gpu">4.1 Severe Constraint (2GB GPU)</a></li>
-                <li class="third-level"><a href="#42-moderate-constraint-4gb-gpu">4.2 Moderate Constraint (4GB GPU)</a></li>
-                <li class="third-level"><a href="#43-comfortable-8gb-gpu">4.3 Comfortable (8GB+ GPU)</a></li>
-            <li class="second-level"><a href="#5-advanced-techniques">5. Advanced Techniques</a></li>
-                
-                <li class="third-level"><a href="#51-activation-checkpointing">5.1 Activation Checkpointing</a></li>
-                <li class="third-level"><a href="#52-quantization">5.2 Quantization</a></li>
-                <li class="third-level"><a href="#53-parameter-sharing">5.3 Parameter Sharing</a></li>
-                <li class="third-level"><a href="#54-knowledge-distillation">5.4 Knowledge Distillation</a></li>
-            <li class="second-level"><a href="#6-memory-time-trade-offs">6. Memory-Time Trade-offs</a></li>
-                
-                <li class="third-level"><a href="#61-time-memory-pareto-frontier">6.1 Time-Memory Pareto Frontier</a></li>
-                <li class="third-level"><a href="#62-choosing-configuration">6.2 Choosing Configuration</a></li>
-            <li class="second-level"><a href="#7-monitoring-during-training">7. Monitoring During Training</a></li>
-                
-                <li class="third-level"><a href="#71-real-time-memory-tracking">7.1 Real-time Memory Tracking</a></li>
-            <li class="second-level"><a href="#8-debugging-memory-issues">8. Debugging Memory Issues</a></li>
-                
-                <li class="third-level"><a href="#81-oom-out-of-memory-error-handling">8.1 OOM (Out of Memory) Error Handling</a></li>
-                <li class="third-level"><a href="#82-memory-leak-detection">8.2 Memory Leak Detection</a></li>
-            <li class="second-level"><a href="#9-complete-example-memory-optimized-training">9. Complete Example: Memory-Optimized Training</a></li>
-                
-            <li class="second-level"><a href="#10-quick-reference">10. Quick Reference</a></li>
-                
-                <li class="third-level"><a href="#memory-reduction-techniques-by-impact">Memory Reduction Techniques (by impact)</a></li>
-            <li class="second-level"><a href="#11-best-practices">11. Best Practices</a></li>
-                
-                <li class="third-level"><a href="#dos">✅ Do's</a></li>
-                <li class="third-level"><a href="#donts">❌ Don'ts</a></li>
-            <li class="second-level"><a href="#12-next-steps">12. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li class="active">
+<a href="./">Memory Optimization</a>
+</li>
+<li>
+<a href="../multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../hyperparameter-tuning/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../multi-gpu/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/advanced/memory-optimization.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#memory-optimization-techniques-for-training-large-models">Memory Optimization: Techniques for Training Large Models</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-memory-profiling">2. Memory Profiling</a></li>
+<li class="third-level"><a href="#21-understanding-memory-usage">2.1 Understanding Memory Usage</a></li>
+<li class="third-level"><a href="#22-profiling-tools">2.2 Profiling Tools</a></li>
+<li class="second-level"><a href="#3-optimization-techniques">3. Optimization Techniques</a></li>
+<li class="third-level"><a href="#31-peft-lora-primary-technique">3.1 PEFT (LoRA) - Primary Technique</a></li>
+<li class="third-level"><a href="#32-batch-size-reduction">3.2 Batch Size Reduction</a></li>
+<li class="third-level"><a href="#33-gradient-accumulation">3.3 Gradient Accumulation</a></li>
+<li class="third-level"><a href="#34-mixed-precision-training">3.4 Mixed Precision Training</a></li>
+<li class="third-level"><a href="#35-gradient-checkpointing">3.5 Gradient Checkpointing</a></li>
+<li class="third-level"><a href="#36-data-loading-optimization">3.6 Data Loading Optimization</a></li>
+<li class="third-level"><a href="#37-model-architecture-reduction">3.7 Model Architecture Reduction</a></li>
+<li class="second-level"><a href="#4-optimization-strategies-by-constraint">4. Optimization Strategies by Constraint</a></li>
+<li class="third-level"><a href="#41-severe-constraint-2gb-gpu">4.1 Severe Constraint (2GB GPU)</a></li>
+<li class="third-level"><a href="#42-moderate-constraint-4gb-gpu">4.2 Moderate Constraint (4GB GPU)</a></li>
+<li class="third-level"><a href="#43-comfortable-8gb-gpu">4.3 Comfortable (8GB+ GPU)</a></li>
+<li class="second-level"><a href="#5-advanced-techniques">5. Advanced Techniques</a></li>
+<li class="third-level"><a href="#51-activation-checkpointing">5.1 Activation Checkpointing</a></li>
+<li class="third-level"><a href="#52-quantization">5.2 Quantization</a></li>
+<li class="third-level"><a href="#53-parameter-sharing">5.3 Parameter Sharing</a></li>
+<li class="third-level"><a href="#54-knowledge-distillation">5.4 Knowledge Distillation</a></li>
+<li class="second-level"><a href="#6-memory-time-trade-offs">6. Memory-Time Trade-offs</a></li>
+<li class="third-level"><a href="#61-time-memory-pareto-frontier">6.1 Time-Memory Pareto Frontier</a></li>
+<li class="third-level"><a href="#62-choosing-configuration">6.2 Choosing Configuration</a></li>
+<li class="second-level"><a href="#7-monitoring-during-training">7. Monitoring During Training</a></li>
+<li class="third-level"><a href="#71-real-time-memory-tracking">7.1 Real-time Memory Tracking</a></li>
+<li class="second-level"><a href="#8-debugging-memory-issues">8. Debugging Memory Issues</a></li>
+<li class="third-level"><a href="#81-oom-out-of-memory-error-handling">8.1 OOM (Out of Memory) Error Handling</a></li>
+<li class="third-level"><a href="#82-memory-leak-detection">8.2 Memory Leak Detection</a></li>
+<li class="second-level"><a href="#9-complete-example-memory-optimized-training">9. Complete Example: Memory-Optimized Training</a></li>
+<li class="second-level"><a href="#10-quick-reference">10. Quick Reference</a></li>
+<li class="third-level"><a href="#memory-reduction-techniques-by-impact">Memory Reduction Techniques (by impact)</a></li>
+<li class="second-level"><a href="#11-best-practices">11. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#12-next-steps">12. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="memory-optimization-techniques-for-training-large-models">Memory Optimization: Techniques for Training Large Models<a class="headerlink" href="#memory-optimization-techniques-for-training-large-models" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="memory-optimization-techniques-for-training-large-models">Memory Optimization: Techniques for Training Large Models<a class="headerlink" href="#memory-optimization-techniques-for-training-large-models" title="Permanent link">¶</a></h1>
 <p>This document provides comprehensive strategies for optimizing memory usage when training TabTune models, enabling efficient use of limited GPU/CPU resources.</p>
-<hr />
-<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
 <p>Memory optimization is critical for:</p>
 <ul>
 <li>Training on GPUs with limited VRAM (&lt; 8GB)</li>
@@ -444,9 +287,9 @@
 <li>Deploying in resource-constrained environments</li>
 </ul>
 <p>This guide covers techniques, tools, and trade-offs for memory efficiency.</p>
-<hr />
-<h2 id="2-memory-profiling">2. Memory Profiling<a class="headerlink" href="#2-memory-profiling" title="Permanent link">&para;</a></h2>
-<h3 id="21-understanding-memory-usage">2.1 Understanding Memory Usage<a class="headerlink" href="#21-understanding-memory-usage" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="2-memory-profiling">2. Memory Profiling<a class="headerlink" href="#2-memory-profiling" title="Permanent link">¶</a></h2>
+<h3 id="21-understanding-memory-usage">2.1 Understanding Memory Usage<a class="headerlink" href="#21-understanding-memory-usage" title="Permanent link">¶</a></h3>
 <p><strong>Memory Breakdown</strong> (typical forward/backward pass):</p>
 <div class="highlight"><pre><span></span><code>Model weights:        40-50% (frozen in PEFT)
 Optimizer states:     20-30% (momentum, variance)
@@ -456,8 +299,8 @@ DataLoader buffers:   5-10%
 ─────────────────────────────
 Total:               100%
 </code></pre></div>
-<h3 id="22-profiling-tools">2.2 Profiling Tools<a class="headerlink" href="#22-profiling-tools" title="Permanent link">&para;</a></h3>
-<h4 id="pytorch-memory-profiler">PyTorch Memory Profiler<a class="headerlink" href="#pytorch-memory-profiler" title="Permanent link">&para;</a></h4>
+<h3 id="22-profiling-tools">2.2 Profiling Tools<a class="headerlink" href="#22-profiling-tools" title="Permanent link">¶</a></h3>
+<h4 id="pytorch-memory-profiler">PyTorch Memory Profiler<a class="headerlink" href="#pytorch-memory-profiler" title="Permanent link">¶</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.profiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">profile</span><span class="p">,</span> <span class="n">record_function</span><span class="p">,</span> <span class="n">ProfilerActivity</span>
 
@@ -469,8 +312,8 @@ Total:               100%
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Print memory stats</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peak memory: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current memory: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Peak memory: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current memory: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB"</span><span class="p">)</span>
 
 <span class="c1"># Detailed profiling</span>
 <span class="k">with</span> <span class="n">profile</span><span class="p">(</span>
@@ -479,21 +322,21 @@ Total:               100%
 <span class="p">)</span> <span class="k">as</span> <span class="n">prof</span><span class="p">:</span>
     <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">key_averages</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;cuda_memory_usage&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">key_averages</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="s2">"cuda_memory_usage"</span><span class="p">))</span>
 </code></pre></div>
-<h4 id="memory-monitoring-script">Memory Monitoring Script<a class="headerlink" href="#memory-monitoring-script" title="Permanent link">&para;</a></h4>
+<h4 id="memory-monitoring-script">Memory Monitoring Script<a class="headerlink" href="#memory-monitoring-script" title="Permanent link">¶</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">nvidia_smi</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MemoryMonitor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor memory usage during training.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Monitor memory usage during training."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_gpu</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_cpu</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record current memory usage.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Record current memory usage."""</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">nvidia_smi</span><span class="o">.</span><span class="n">nvmlInit</span><span class="p">()</span>
             <span class="n">handle</span> <span class="o">=</span> <span class="n">nvidia_smi</span><span class="o">.</span><span class="n">nvmlDeviceGetHandleByIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -512,9 +355,9 @@ Total:               100%
         <span class="k">return</span> <span class="n">gpu_mem</span><span class="p">,</span> <span class="n">cpu_mem</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print memory report.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peak GPU: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peak CPU: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_cpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Print memory report."""</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Peak GPU: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Peak CPU: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_cpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB"</span><span class="p">)</span>
 
 <span class="c1"># Usage</span>
 <span class="n">monitor</span> <span class="o">=</span> <span class="n">MemoryMonitor</span><span class="p">()</span>
@@ -522,30 +365,30 @@ Total:               100%
 <span class="c1"># Periodically call during training</span>
 <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
     <span class="n">gpu_mem</span><span class="p">,</span> <span class="n">cpu_mem</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: GPU </span><span class="si">{</span><span class="n">gpu_mem</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB, CPU </span><span class="si">{</span><span class="n">cpu_mem</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: GPU </span><span class="si">{</span><span class="n">gpu_mem</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB, CPU </span><span class="si">{</span><span class="n">cpu_mem</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB"</span><span class="p">)</span>
 
 <span class="n">monitor</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
 </code></pre></div>
-<hr />
-<h2 id="3-optimization-techniques">3. Optimization Techniques<a class="headerlink" href="#3-optimization-techniques" title="Permanent link">&para;</a></h2>
-<h3 id="31-peft-lora-primary-technique">3.1 PEFT (LoRA) - Primary Technique<a class="headerlink" href="#31-peft-lora-primary-technique" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="3-optimization-techniques">3. Optimization Techniques<a class="headerlink" href="#3-optimization-techniques" title="Permanent link">¶</a></h2>
+<h3 id="31-peft-lora-primary-technique">3.1 PEFT (LoRA) - Primary Technique<a class="headerlink" href="#31-peft-lora-primary-technique" title="Permanent link">¶</a></h3>
 <p><strong>Impact</strong>: 60-90% memory reduction</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Base fine-tuning: high memory</span>
 <span class="n">pipeline_base</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
-    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span> <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span> <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="c1"># Memory: ~12 GB for 100K samples</span>
 
 <span class="c1"># PEFT fine-tuning: low memory</span>
 <span class="n">pipeline_peft</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
 <span class="c1"># Memory: ~4 GB for same task</span>
@@ -553,81 +396,81 @@ Total:               100%
 <p><strong>Choosing PEFT config for memory</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Ultra-constrained (2GB GPU)</span>
 <span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.2</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.2</span>
 <span class="p">}</span>
 
 <span class="c1"># Memory-constrained (4GB GPU)</span>
 <span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.1</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.1</span>
 <span class="p">}</span>
 
 <span class="c1"># Moderate constraint (6GB GPU)</span>
 <span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-    <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="32-batch-size-reduction">3.2 Batch Size Reduction<a class="headerlink" href="#32-batch-size-reduction" title="Permanent link">&para;</a></h3>
+<h3 id="32-batch-size-reduction">3.2 Batch Size Reduction<a class="headerlink" href="#32-batch-size-reduction" title="Permanent link">¶</a></h3>
 <p><strong>Impact</strong>: 20-40% memory reduction per halving</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Large batch (high memory)</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">512</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">512</span>
 <span class="p">}</span>
 <span class="c1"># Memory: ~12 GB</span>
 
 <span class="c1"># Reduced batch (medium memory)</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">256</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">256</span>
 <span class="p">}</span>
 <span class="c1"># Memory: ~6 GB</span>
 
 <span class="c1"># Small batch (low memory)</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">64</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">64</span>
 <span class="p">}</span>
 <span class="c1"># Memory: ~2 GB</span>
 </code></pre></div>
 <p><strong>Trade-offs</strong>:
 - Smaller batch: More gradient noise, longer convergence
 - Larger batch: Faster convergence, higher memory</p>
-<h3 id="33-gradient-accumulation">3.3 Gradient Accumulation<a class="headerlink" href="#33-gradient-accumulation" title="Permanent link">&para;</a></h3>
+<h3 id="33-gradient-accumulation">3.3 Gradient Accumulation<a class="headerlink" href="#33-gradient-accumulation" title="Permanent link">¶</a></h3>
 <p>Simulate larger batch without increased memory:</p>
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Actual batch</span>
-    <span class="s1">&#39;gradient_accumulation_steps&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>     <span class="c1"># Accumulate 4x</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Actual batch</span>
+    <span class="s1">'gradient_accumulation_steps'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>     <span class="c1"># Accumulate 4x</span>
     <span class="c1"># Effective batch = 32</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span>
 <span class="p">}</span>
 
 <span class="c1"># Memory cost: Similar to batch_size=8</span>
 <span class="c1"># Effective batch size benefit: batch_size=32</span>
 </code></pre></div>
-<h3 id="34-mixed-precision-training">3.4 Mixed Precision Training<a class="headerlink" href="#34-mixed-precision-training" title="Permanent link">&para;</a></h3>
+<h3 id="34-mixed-precision-training">3.4 Mixed Precision Training<a class="headerlink" href="#34-mixed-precision-training" title="Permanent link">¶</a></h3>
 <p><strong>Impact</strong>: 20-30% memory reduction</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Standard (float32): high memory</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># Full precision</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'mixed_precision'</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># Full precision</span>
 <span class="p">}</span>
 
 <span class="c1"># Half precision (float16): lower memory</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span>  <span class="c1"># Use 16-bit floats</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'mixed_precision'</span><span class="p">:</span> <span class="s1">'fp16'</span>  <span class="c1"># Use 16-bit floats</span>
 <span class="p">}</span>
 
 <span class="c1"># BFloat16 (better stability)</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;bf16&#39;</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'mixed_precision'</span><span class="p">:</span> <span class="s1">'bf16'</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Implementation</strong>:</p>
@@ -645,127 +488,127 @@ Total:               100%
 <span class="n">scaler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
 <span class="n">scaler</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="35-gradient-checkpointing">3.5 Gradient Checkpointing<a class="headerlink" href="#35-gradient-checkpointing" title="Permanent link">&para;</a></h3>
+<h3 id="35-gradient-checkpointing">3.5 Gradient Checkpointing<a class="headerlink" href="#35-gradient-checkpointing" title="Permanent link">¶</a></h3>
 <p>Trade computation for memory:</p>
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;gradient_checkpoint&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># Save memory at cost of computation</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'gradient_checkpoint'</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># Save memory at cost of computation</span>
 <span class="p">}</span>
 
 <span class="c1"># Memory reduction: ~30-50%</span>
 <span class="c1"># Computation increase: ~20-30% (recompute activations)</span>
 </code></pre></div>
-<h3 id="36-data-loading-optimization">3.6 Data Loading Optimization<a class="headerlink" href="#36-data-loading-optimization" title="Permanent link">&para;</a></h3>
+<h3 id="36-data-loading-optimization">3.6 Data Loading Optimization<a class="headerlink" href="#36-data-loading-optimization" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Efficient data loading</span>
 <span class="n">loader_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-    <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>           <span class="c1"># Parallel loading</span>
-    <span class="s1">&#39;pin_memory&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>         <span class="c1"># Faster CPU→GPU transfer</span>
-    <span class="s1">&#39;persistent_workers&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Keep workers alive</span>
-    <span class="s1">&#39;prefetch_factor&#39;</span><span class="p">:</span> <span class="mi">2</span>        <span class="c1"># Prefetch next batches</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>           <span class="c1"># Parallel loading</span>
+    <span class="s1">'pin_memory'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>         <span class="c1"># Faster CPU→GPU transfer</span>
+    <span class="s1">'persistent_workers'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Keep workers alive</span>
+    <span class="s1">'prefetch_factor'</span><span class="p">:</span> <span class="mi">2</span>        <span class="c1"># Prefetch next batches</span>
 <span class="p">}</span>
 
 <span class="c1"># Or with TabTune</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s1">&#39;pin_memory&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span>
+    <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">'pin_memory'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="37-model-architecture-reduction">3.7 Model Architecture Reduction<a class="headerlink" href="#37-model-architecture-reduction" title="Permanent link">&para;</a></h3>
+<h3 id="37-model-architecture-reduction">3.7 Model Architecture Reduction<a class="headerlink" href="#37-model-architecture-reduction" title="Permanent link">¶</a></h3>
 <p>Reduce model complexity:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Large model: high memory</span>
 <span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;d_model&#39;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>      <span class="c1"># Embedding dimension</span>
-    <span class="s1">&#39;num_layers&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>     <span class="c1"># Transformer layers</span>
-    <span class="s1">&#39;num_heads&#39;</span><span class="p">:</span> <span class="mi">16</span>      <span class="c1"># Attention heads</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>      <span class="c1"># Embedding dimension</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>     <span class="c1"># Transformer layers</span>
+    <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">16</span>      <span class="c1"># Attention heads</span>
 <span class="p">}</span>
 
 <span class="c1"># Medium model: medium memory</span>
 <span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;d_model&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
-    <span class="s1">&#39;num_layers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s1">&#39;num_heads&#39;</span><span class="p">:</span> <span class="mi">8</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">8</span>
 <span class="p">}</span>
 
 <span class="c1"># Small model: low memory</span>
 <span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;d_model&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="s1">&#39;num_layers&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;num_heads&#39;</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">4</span>
 <span class="p">}</span>
 </code></pre></div>
-<hr />
-<h2 id="4-optimization-strategies-by-constraint">4. Optimization Strategies by Constraint<a class="headerlink" href="#4-optimization-strategies-by-constraint" title="Permanent link">&para;</a></h2>
-<h3 id="41-severe-constraint-2gb-gpu">4.1 Severe Constraint (2GB GPU)<a class="headerlink" href="#41-severe-constraint-2gb-gpu" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="4-optimization-strategies-by-constraint">4. Optimization Strategies by Constraint<a class="headerlink" href="#4-optimization-strategies-by-constraint" title="Permanent link">¶</a></h2>
+<h3 id="41-severe-constraint-2gb-gpu">4.1 Severe Constraint (2GB GPU)<a class="headerlink" href="#41-severe-constraint-2gb-gpu" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">8</span>  <span class="c1"># Reduce ensemble</span>
+        <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="mi">8</span>  <span class="c1"># Reduce ensemble</span>
     <span class="p">},</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>           <span class="c1"># Very small</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>        <span class="c1"># Small context</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-        <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span><span class="p">,</span> <span class="c1"># Use half precision</span>
-        <span class="s1">&#39;gradient_checkpoint&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>          <span class="c1"># No parallel loading</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                <span class="c1"># Very low rank</span>
-            <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-            <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.2</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>           <span class="c1"># Very small</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>        <span class="c1"># Small context</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s1">'mixed_precision'</span><span class="p">:</span> <span class="s1">'fp16'</span><span class="p">,</span> <span class="c1"># Use half precision</span>
+        <span class="s1">'gradient_checkpoint'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>          <span class="c1"># No parallel loading</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                <span class="c1"># Very low rank</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.2</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="42-moderate-constraint-4gb-gpu">4.2 Moderate Constraint (4GB GPU)<a class="headerlink" href="#42-moderate-constraint-4gb-gpu" title="Permanent link">&para;</a></h3>
+<h3 id="42-moderate-constraint-4gb-gpu">4.2 Moderate Constraint (4GB GPU)<a class="headerlink" href="#42-moderate-constraint-4gb-gpu" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;mixed_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-            <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.1</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-4</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'mixed_precision'</span><span class="p">:</span> <span class="s1">'fp16'</span><span class="p">,</span>
+        <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.1</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="43-comfortable-8gb-gpu">4.3 Comfortable (8GB+ GPU)<a class="headerlink" href="#43-comfortable-8gb-gpu" title="Permanent link">&para;</a></h3>
+<h3 id="43-comfortable-8gb-gpu">4.3 Comfortable (8GB+ GPU)<a class="headerlink" href="#43-comfortable-8gb-gpu" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>  <span class="c1"># Full fine-tuning possible</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>  <span class="c1"># Full fine-tuning possible</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-        <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="s1">&#39;gradient_accumulation_steps&#39;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">'gradient_accumulation_steps'</span><span class="p">:</span> <span class="mi">2</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="5-advanced-techniques">5. Advanced Techniques<a class="headerlink" href="#5-advanced-techniques" title="Permanent link">&para;</a></h2>
-<h3 id="51-activation-checkpointing">5.1 Activation Checkpointing<a class="headerlink" href="#51-activation-checkpointing" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="5-advanced-techniques">5. Advanced Techniques<a class="headerlink" href="#5-advanced-techniques" title="Permanent link">¶</a></h2>
+<h3 id="51-activation-checkpointing">5.1 Activation Checkpointing<a class="headerlink" href="#51-activation-checkpointing" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch.utils.checkpoint</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">checkpoint</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CheckpointedModel</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap model with checkpointing.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Wrap model with checkpointing."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -779,12 +622,12 @@ Total:               100%
             <span class="n">use_reentrant</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
 </code></pre></div>
-<h3 id="52-quantization">5.2 Quantization<a class="headerlink" href="#52-quantization" title="Permanent link">&para;</a></h3>
+<h3 id="52-quantization">5.2 Quantization<a class="headerlink" href="#52-quantization" title="Permanent link">¶</a></h3>
 <p>Reduce model precision:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch.quantization</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">quantization</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">quantize_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;fbgemm&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quantize model to int8.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quantize_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">'fbgemm'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Quantize model to int8."""</span>
     <span class="n">model</span><span class="o">.</span><span class="n">qconfig</span> <span class="o">=</span> <span class="n">quantization</span><span class="o">.</span><span class="n">get_default_qconfig</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
     <span class="n">quantization</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># Calibrate on data...</span>
@@ -794,10 +637,10 @@ Total:               100%
 <span class="c1"># Usage</span>
 <span class="n">quantized_pipeline</span> <span class="o">=</span> <span class="n">quantize_model</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="53-parameter-sharing">5.3 Parameter Sharing<a class="headerlink" href="#53-parameter-sharing" title="Permanent link">&para;</a></h3>
+<h3 id="53-parameter-sharing">5.3 Parameter Sharing<a class="headerlink" href="#53-parameter-sharing" title="Permanent link">¶</a></h3>
 <p>Share weights across layers:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterSharingModel</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model with shared parameters.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Model with shared parameters."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared_layer</span><span class="p">,</span> <span class="n">num_repeats</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -809,14 +652,14 @@ Total:               100%
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span>
 </code></pre></div>
-<h3 id="54-knowledge-distillation">5.4 Knowledge Distillation<a class="headerlink" href="#54-knowledge-distillation" title="Permanent link">&para;</a></h3>
+<h3 id="54-knowledge-distillation">5.4 Knowledge Distillation<a class="headerlink" href="#54-knowledge-distillation" title="Permanent link">¶</a></h3>
 <p>Train smaller student model from larger teacher:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Large teacher model (high accuracy)</span>
-<span class="n">teacher</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">)</span>
+<span class="n">teacher</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'TabDPT'</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">)</span>
 <span class="n">teacher</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Small student model (low memory)</span>
-<span class="n">student</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">)</span>
+<span class="n">student</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">)</span>
 
 <span class="c1"># Distillation: train student to match teacher</span>
 <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
@@ -830,65 +673,65 @@ Total:               100%
     <span class="p">)</span>
     <span class="c1"># ... optimize ...</span>
 </code></pre></div>
-<hr />
-<h2 id="6-memory-time-trade-offs">6. Memory-Time Trade-offs<a class="headerlink" href="#6-memory-time-trade-offs" title="Permanent link">&para;</a></h2>
-<h3 id="61-time-memory-pareto-frontier">6.1 Time-Memory Pareto Frontier<a class="headerlink" href="#61-time-memory-pareto-frontier" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="6-memory-time-trade-offs">6. Memory-Time Trade-offs<a class="headerlink" href="#6-memory-time-trade-offs" title="Permanent link">¶</a></h2>
+<h3 id="61-time-memory-pareto-frontier">6.1 Time-Memory Pareto Frontier<a class="headerlink" href="#61-time-memory-pareto-frontier" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">configurations</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Max Speed&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-        <span class="s1">&#39;precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp32&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>      <span class="c1"># minutes</span>
-        <span class="s1">&#39;memory&#39;</span><span class="p">:</span> <span class="mi">16</span>     <span class="c1"># GB</span>
+        <span class="s1">'name'</span><span class="p">:</span> <span class="s1">'Max Speed'</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'precision'</span><span class="p">:</span> <span class="s1">'fp32'</span><span class="p">,</span>
+        <span class="s1">'time'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>      <span class="c1"># minutes</span>
+        <span class="s1">'memory'</span><span class="p">:</span> <span class="mi">16</span>     <span class="c1"># GB</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Balanced&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp32&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
-        <span class="s1">&#39;memory&#39;</span><span class="p">:</span> <span class="mi">12</span>
+        <span class="s1">'name'</span><span class="p">:</span> <span class="s1">'Balanced'</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'precision'</span><span class="p">:</span> <span class="s1">'fp32'</span><span class="p">,</span>
+        <span class="s1">'time'</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+        <span class="s1">'memory'</span><span class="p">:</span> <span class="mi">12</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Efficient&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-        <span class="s1">&#39;precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-        <span class="s1">&#39;memory&#39;</span><span class="p">:</span> <span class="mi">6</span>
+        <span class="s1">'name'</span><span class="p">:</span> <span class="s1">'Efficient'</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s1">'precision'</span><span class="p">:</span> <span class="s1">'fp16'</span><span class="p">,</span>
+        <span class="s1">'time'</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="s1">'memory'</span><span class="p">:</span> <span class="mi">6</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Ultra-Efficient&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-        <span class="s1">&#39;precision&#39;</span><span class="p">:</span> <span class="s1">&#39;fp16&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;peft&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
-        <span class="s1">&#39;memory&#39;</span><span class="p">:</span> <span class="mi">3</span>
+        <span class="s1">'name'</span><span class="p">:</span> <span class="s1">'Ultra-Efficient'</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">'precision'</span><span class="p">:</span> <span class="s1">'fp16'</span><span class="p">,</span>
+        <span class="s1">'peft'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">'time'</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
+        <span class="s1">'memory'</span><span class="p">:</span> <span class="mi">3</span>
     <span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
-<h3 id="62-choosing-configuration">6.2 Choosing Configuration<a class="headerlink" href="#62-choosing-configuration" title="Permanent link">&para;</a></h3>
+<h3 id="62-choosing-configuration">6.2 Choosing Configuration<a class="headerlink" href="#62-choosing-configuration" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">choose_config</span><span class="p">(</span><span class="n">gpu_memory_gb</span><span class="p">,</span> <span class="n">time_budget_hours</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose config based on constraints.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Choose config based on constraints."""</span>
 
     <span class="k">if</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;peft&#39;</span>  <span class="c1"># Must use PEFT</span>
+        <span class="k">return</span> <span class="s1">'peft'</span>  <span class="c1"># Must use PEFT</span>
     <span class="k">elif</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;fp16_batch16&#39;</span>
+        <span class="k">return</span> <span class="s1">'fp16_batch16'</span>
     <span class="k">elif</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;fp16_batch32&#39;</span>
+        <span class="k">return</span> <span class="s1">'fp16_batch32'</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;base_ft&#39;</span>
+        <span class="k">return</span> <span class="s1">'base_ft'</span>
 
 <span class="c1"># Usage</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">choose_config</span><span class="p">(</span><span class="n">gpu_memory_gb</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_budget</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="7-monitoring-during-training">7. Monitoring During Training<a class="headerlink" href="#7-monitoring-during-training" title="Permanent link">&para;</a></h2>
-<h3 id="71-real-time-memory-tracking">7.1 Real-time Memory Tracking<a class="headerlink" href="#71-real-time-memory-tracking" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="7-monitoring-during-training">7. Monitoring During Training<a class="headerlink" href="#7-monitoring-during-training" title="Permanent link">¶</a></h2>
+<h3 id="71-real-time-memory-tracking">7.1 Real-time Memory Tracking<a class="headerlink" href="#71-real-time-memory-tracking" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MemoryTracker</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Track memory throughout training.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Track memory throughout training."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_interval</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="o">=</span> <span class="n">log_interval</span>
@@ -896,7 +739,7 @@ Total:               100%
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call after each training step.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Call after each training step."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -904,25 +747,25 @@ Total:               100%
             <span class="n">current</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1e9</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s1">&#39;iteration&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
-                <span class="s1">&#39;peak&#39;</span><span class="p">:</span> <span class="n">peak</span><span class="p">,</span>
-                <span class="s1">&#39;current&#39;</span><span class="p">:</span> <span class="n">current</span><span class="p">,</span>
-                <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="s1">'iteration'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+                <span class="s1">'peak'</span><span class="p">:</span> <span class="n">peak</span><span class="p">,</span>
+                <span class="s1">'current'</span><span class="p">:</span> <span class="n">current</span><span class="p">,</span>
+                <span class="s1">'time'</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
             <span class="p">})</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2">] Peak: </span><span class="si">{</span><span class="n">peak</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB, Current: </span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2">] Peak: </span><span class="si">{</span><span class="n">peak</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB, Current: </span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot memory over time.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Plot memory over time."""</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-        <span class="n">iterations</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;iteration&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
-        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;peak&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
+        <span class="n">iterations</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s1">'iteration'</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s1">'peak'</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">iterations</span><span class="p">,</span> <span class="n">peaks</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Peak Memory (GB)&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;GPU Memory Usage Over Time&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">'Iteration'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">'Peak Memory (GB)'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">'GPU Memory Usage Over Time'</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># Usage</span>
@@ -934,11 +777,11 @@ Total:               100%
 
 <span class="n">tracker</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<hr />
-<h2 id="8-debugging-memory-issues">8. Debugging Memory Issues<a class="headerlink" href="#8-debugging-memory-issues" title="Permanent link">&para;</a></h2>
-<h3 id="81-oom-out-of-memory-error-handling">8.1 OOM (Out of Memory) Error Handling<a class="headerlink" href="#81-oom-out-of-memory-error-handling" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="8-debugging-memory-issues">8. Debugging Memory Issues<a class="headerlink" href="#8-debugging-memory-issues" title="Permanent link">¶</a></h2>
+<h3 id="81-oom-out-of-memory-error-handling">8.1 OOM (Out of Memory) Error Handling<a class="headerlink" href="#81-oom-out-of-memory-error-handling" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">safe_train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Train with automatic memory adaptation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Train with automatic memory adaptation."""</span>
 
     <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
 
@@ -952,10 +795,10 @@ Total:               100%
             <span class="k">return</span>  <span class="c1"># Success</span>
 
         <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;out of memory&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">'out of memory'</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                 <span class="c1"># Reduce batch size and retry</span>
                 <span class="n">batch_size</span> <span class="o">//=</span> <span class="mi">2</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OOM detected. Retrying with batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OOM detected. Retrying with batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
                 <span class="c1"># Clear cache</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
@@ -968,9 +811,9 @@ Total:               100%
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span>
 
-    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed after </span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2"> attempts&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed after </span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2"> attempts"</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="82-memory-leak-detection">8.2 Memory Leak Detection<a class="headerlink" href="#82-memory-leak-detection" title="Permanent link">&para;</a></h3>
+<h3 id="82-memory-leak-detection">8.2 Memory Leak Detection<a class="headerlink" href="#82-memory-leak-detection" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tracemalloc</span>
 
 <span class="n">tracemalloc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -979,18 +822,18 @@ Total:               100%
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="n">current</span><span class="p">,</span> <span class="n">peak</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current: </span><span class="si">{</span><span class="n">current</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB; Peak: </span><span class="si">{</span><span class="n">peak</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current: </span><span class="si">{</span><span class="n">current</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB; Peak: </span><span class="si">{</span><span class="n">peak</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">GB"</span><span class="p">)</span>
 
 <span class="c1"># Find top memory allocations</span>
 <span class="n">snapshot</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">take_snapshot</span><span class="p">()</span>
-<span class="n">top_stats</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">statistics</span><span class="p">(</span><span class="s1">&#39;lineno&#39;</span><span class="p">)</span>
+<span class="n">top_stats</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">statistics</span><span class="p">(</span><span class="s1">'lineno'</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ Top 10 ]&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"[ Top 10 ]"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">top_stats</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">stat</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="9-complete-example-memory-optimized-training">9. Complete Example: Memory-Optimized Training<a class="headerlink" href="#9-complete-example-memory-optimized-training" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="9-complete-example-memory-optimized-training">9. Complete Example: Memory-Optimized Training<a class="headerlink" href="#9-complete-example-memory-optimized-training" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
@@ -998,20 +841,20 @@ Total:               100%
     <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
     <span class="n">gpu_memory_gb</span><span class="o">=</span><span class="mi">4</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Train with automatic memory optimization.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Train with automatic memory optimization."""</span>
 
     <span class="c1"># Determine configuration</span>
     <span class="k">if</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">use_peft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="n">support_size</span> <span class="o">=</span> <span class="mi">32</span>
-        <span class="n">mixed_precision</span> <span class="o">=</span> <span class="s1">&#39;fp16&#39;</span>
+        <span class="n">mixed_precision</span> <span class="o">=</span> <span class="s1">'fp16'</span>
         <span class="n">rank</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="k">elif</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
         <span class="n">use_peft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">8</span>
         <span class="n">support_size</span> <span class="o">=</span> <span class="mi">64</span>
-        <span class="n">mixed_precision</span> <span class="o">=</span> <span class="s1">&#39;fp16&#39;</span>
+        <span class="n">mixed_precision</span> <span class="o">=</span> <span class="s1">'fp16'</span>
         <span class="n">rank</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">use_peft</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1021,41 +864,41 @@ Total:               100%
         <span class="n">rank</span> <span class="o">=</span> <span class="mi">8</span>
 
     <span class="c1"># Create pipeline</span>
-    <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;peft&#39;</span> <span class="k">if</span> <span class="n">use_peft</span> <span class="k">else</span> <span class="s1">&#39;base-ft&#39;</span>
+    <span class="n">strategy</span> <span class="o">=</span> <span class="s1">'peft'</span> <span class="k">if</span> <span class="n">use_peft</span> <span class="k">else</span> <span class="s1">'base-ft'</span>
 
     <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-4</span> <span class="k">if</span> <span class="n">use_peft</span> <span class="k">else</span> <span class="mf">2e-5</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="n">support_size</span><span class="p">,</span>
-        <span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s1">&#39;pin_memory&#39;</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-4</span> <span class="k">if</span> <span class="n">use_peft</span> <span class="k">else</span> <span class="mf">2e-5</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="n">support_size</span><span class="p">,</span>
+        <span class="s1">'num_workers'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">'pin_memory'</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">gpu_memory_gb</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">True</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">mixed_precision</span><span class="p">:</span>
-        <span class="n">tuning_params</span><span class="p">[</span><span class="s1">&#39;mixed_precision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixed_precision</span>
+        <span class="n">tuning_params</span><span class="p">[</span><span class="s1">'mixed_precision'</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixed_precision</span>
 
     <span class="k">if</span> <span class="n">use_peft</span><span class="p">:</span>
-        <span class="n">tuning_params</span><span class="p">[</span><span class="s1">&#39;peft_config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">rank</span><span class="p">,</span>
-            <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span><span class="p">,</span>
-            <span class="s1">&#39;lora_dropout&#39;</span><span class="p">:</span> <span class="mf">0.05</span>
+        <span class="n">tuning_params</span><span class="p">[</span><span class="s1">'peft_config'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="n">rank</span><span class="p">,</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span>
         <span class="p">}</span>
 
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
         <span class="n">tuning_strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">,</span>
         <span class="n">tuning_params</span><span class="o">=</span><span class="n">tuning_params</span>
     <span class="p">)</span>
 
     <span class="c1"># Train with monitoring</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training with strategy=</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">, batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Training with strategy=</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">, batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
     <span class="c1"># Evaluate</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">pipeline</span>
 
@@ -1065,9 +908,9 @@ Total:               100%
     <span class="n">gpu_memory_gb</span><span class="o">=</span><span class="mi">4</span>
 <span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="10-quick-reference">10. Quick Reference<a class="headerlink" href="#10-quick-reference" title="Permanent link">&para;</a></h2>
-<h3 id="memory-reduction-techniques-by-impact">Memory Reduction Techniques (by impact)<a class="headerlink" href="#memory-reduction-techniques-by-impact" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="10-quick-reference">10. Quick Reference<a class="headerlink" href="#10-quick-reference" title="Permanent link">¶</a></h2>
+<h3 id="memory-reduction-techniques-by-impact">Memory Reduction Techniques (by impact)<a class="headerlink" href="#memory-reduction-techniques-by-impact" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -1116,9 +959,9 @@ Total:               100%
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="11-best-practices">11. Best Practices<a class="headerlink" href="#11-best-practices" title="Permanent link">&para;</a></h2>
-<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="11-best-practices">11. Best Practices<a class="headerlink" href="#11-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
 <ul>
 <li>✅ Profile memory before optimization</li>
 <li>✅ Use PEFT for memory-constrained environments</li>
@@ -1128,7 +971,7 @@ Total:               100%
 <li>✅ Empty cache between experiments</li>
 <li>✅ Use gradient accumulation for large effective batches</li>
 </ul>
-<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
 <ul>
 <li>❌ Don't forget to clear cache between runs</li>
 <li>❌ Don't use full precision when half works</li>
@@ -1136,114 +979,137 @@ Total:               100%
 <li>❌ Don't tune without monitoring memory</li>
 <li>❌ Don't ignore OOM errors</li>
 </ul>
-<hr />
-<h2 id="12-next-steps">12. Next Steps<a class="headerlink" href="#12-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="12-next-steps">12. Next Steps<a class="headerlink" href="#12-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - PEFT details</li>
 <li><a href="../peft-lora/">PEFT &amp; LoRA</a> - Memory-efficient fine-tuning</li>
 <li><a href="../peft-lora/">Advanced Topics</a> - Advanced optimizations</li>
 <li><a href="../multi-gpu/">Multi-GPU</a> - Distributed training</li>
 </ul>
-<hr />
+<hr/>
 <p>Optimize memory strategically to train powerful models on limited resources!</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
 </html>

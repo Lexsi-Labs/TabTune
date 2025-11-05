@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
+    <meta name="description" content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models">
+    <meta name="author" content="Lexsi Labs">
     
     <link rel="shortcut icon" href="/img/favicon.ico">
 
@@ -29,6 +29,7 @@
         
     
     <link href="/assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="/assets/overrides.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -70,12 +71,6 @@
                 <ul class="nav navbar-nav">
                 
                 
-                    <li >
-                        <a href="/.">Home</a>
-                    </li>
-                
-                
-                
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
                         <ul class="dropdown-menu">
@@ -94,7 +89,7 @@
                         
                             
 <li >
-    <a href="/getting-started/basic-concepts.md">Basic Concepts</a>
+    <a href="/getting-started/basic-concepts/">Basic Concepts</a>
 </li>
 
                         
@@ -143,6 +138,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="/user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -172,7 +173,13 @@
                         
                             
 <li >
-    <a href="/models/tabbiaxial.md">TabBiaxial</a>
+    <a href="/models/orion-msp/">Orion MSP</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="/models/orion-bix/">Orion BIX</a>
 </li>
 
                         
@@ -211,7 +218,25 @@
                         
                             
 <li >
+    <a href="/advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+
+                        
+                            
+<li >
     <a href="/advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="/advanced/memory-optimization/">Memory Optimization</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="/advanced/multi-gpu/">Multi-GPU Training</a>
 </li>
 
                         
@@ -226,31 +251,31 @@
                         
                             
 <li >
-    <a href="/api/pipeline.md">TabularPipeline</a>
+    <a href="/api/pipeline/">TabularPipeline</a>
 </li>
 
                         
                             
 <li >
-    <a href="/api/data-processor.md">DataProcessor</a>
+    <a href="/api/data-processor/">DataProcessor</a>
 </li>
 
                         
                             
 <li >
-    <a href="/api/tuning-manager.md">TuningManager</a>
+    <a href="/api/tuning-manager/">TuningManager</a>
 </li>
 
                         
                             
 <li >
-    <a href="/api/leaderboard.md">TabularLeaderboard</a>
+    <a href="/api/leaderboard/">TabularLeaderboard</a>
 </li>
 
                         
                             
 <li >
-    <a href="/api/peft-utils.md">PEFT Utils</a>
+    <a href="/api/peft-utils/">PEFT Utils</a>
 </li>
 
                         
@@ -271,19 +296,13 @@
                         
                             
 <li >
-    <a href="/examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
     <a href="/examples/peft-examples/">PEFT Fine-Tuning</a>
 </li>
 
                         
                             
 <li >
-    <a href="/examples/benchmarking.md">Benchmarking</a>
+    <a href="/examples/benchmarking/">Benchmarking</a>
 </li>
 
                         
@@ -293,64 +312,73 @@
                 
                 
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
                             
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
 <li >
-    <a href="/contributing/setup.md">Development Setup</a>
+    <a href="/contributing/setup/">Development Setup</a>
 </li>
+
+        
+            
+<li >
+    <a href="/contributing/standards/">Code Standards</a>
+</li>
+
+        
+            
+<li >
+    <a href="/contributing/new-models/">Adding New Models</a>
+</li>
+
+        
+            
+<li >
+    <a href="/contributing/documentation/">Documentation Guide</a>
+</li>
+
+        
+    </ul>
+  </li>
 
                         
                             
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">About</a>
+    <ul class="dropdown-menu">
+        
+            
 <li >
-    <a href="/contributing/standards.md">Code Standards</a>
+    <a href="/about/release-notes/">Release Notes</a>
 </li>
 
-                        
-                            
+        
+            
 <li >
-    <a href="/contributing/new-models.md">Adding New Models</a>
+    <a href="/about/roadmap/">Roadmap</a>
 </li>
 
-                        
-                            
+        
+            
 <li >
-    <a href="/contributing/documentation.md">Documentation Guide</a>
+    <a href="/about/faq/">FAQ</a>
 </li>
 
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
+        
+            
 <li >
-    <a href="/about/release-notes.md">Release Notes</a>
+    <a href="/about/license/">License</a>
 </li>
 
-                        
-                            
-<li >
-    <a href="/about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="/about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="/about/license.md">License</a>
-</li>
+        
+    </ul>
+  </li>
 
                         
                         </ul>
@@ -366,7 +394,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal">Lexsi-Labs/TabTune_Internal</a>
+                        <a href="https://github.com/Lexsi-Labs/TabTune">Lexsi-Labs/TabTune</a>
                     </li>
             </ul>
         </div>
@@ -406,6 +434,9 @@
 
     
     <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
         
     <script>hljs.initHighlightingOnLoad();</script>
     

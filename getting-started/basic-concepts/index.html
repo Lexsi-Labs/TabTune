@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Basic Concepts - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../installation/">Installation</a>
+</li>
+<li>
+<a href="../quick-start/">Quick Start</a>
+</li>
+<li class="active">
+<a href="./">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../quick-start/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../user-guide/pipeline-overview/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/getting-started/basic-concepts.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#basic-concepts">Basic Concepts</a></li>
+<li class="second-level"><a href="#1-tasks">1. Tasks</a></li>
+<li class="second-level"><a href="#2-core-components">2. Core Components</a></li>
+<li class="third-level"><a href="#21-tabularpipeline">2.1 TabularPipeline</a></li>
+<li class="third-level"><a href="#22-dataprocessor">2.2 DataProcessor</a></li>
+<li class="third-level"><a href="#23-tuningmanager">2.3 TuningManager</a></li>
+<li class="third-level"><a href="#24-tabularleaderboard">2.4 TabularLeaderboard</a></li>
+<li class="second-level"><a href="#3-component-relationships">3. Component Relationships</a></li>
+<li class="second-level"><a href="#4-workflow">4. Workflow</a></li>
+<li class="third-level"><a href="#step-1-prepare-your-data">Step 1: Prepare Your Data</a></li>
+<li class="third-level"><a href="#step-2-initialize-the-pipeline">Step 2: Initialize the Pipeline</a></li>
+<li class="third-level"><a href="#step-3-train-the-model">Step 3: Train the Model</a></li>
+<li class="third-level"><a href="#step-4-make-predictions">Step 4: Make Predictions</a></li>
+<li class="third-level"><a href="#step-5-save-and-reload">Step 5: Save and Reload</a></li>
+<li class="second-level"><a href="#5-models">5. Models</a></li>
+<li class="second-level"><a href="#6-tuning-strategies-explained">6. Tuning Strategies Explained</a></li>
+<li class="third-level"><a href="#inference-inference">Inference (inference)</a></li>
+<li class="third-level"><a href="#base-fine-tuning-base-ft">Base Fine-Tuning (base-ft)</a></li>
+<li class="third-level"><a href="#peft-peft">PEFT (peft)</a></li>
+<li class="second-level"><a href="#7-key-principles">7. Key Principles</a></li>
+<li class="second-level"><a href="#8-next-steps">8. Next Steps</a></li>
+<li class="second-level"><a href="#9-common-patterns">9. Common Patterns</a></li>
+<li class="third-level"><a href="#pattern-1-quick-baseline">Pattern 1: Quick Baseline</a></li>
+<li class="third-level"><a href="#pattern-2-production-model">Pattern 2: Production Model</a></li>
+<li class="third-level"><a href="#pattern-3-memory-efficient-training">Pattern 3: Memory-Efficient Training</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="basic-concepts">Basic Concepts<a class="headerlink" href="#basic-concepts" title="Permanent link">¶</a></h1>
+<p>This page introduces the core ideas, architecture, and workflow used across TabTune. Understanding these concepts will help you effectively use TabTune for your tabular machine learning tasks.</p>
+<hr/>
+<h2 id="1-tasks">1. Tasks<a class="headerlink" href="#1-tasks" title="Permanent link">¶</a></h2>
+<p>TabTune currently focuses on <strong>classification</strong> tasks:</p>
+<ul>
+<li><strong>Classification</strong>: Multi-class and binary classification (fully supported)</li>
+<li><strong>Regression</strong>: Planned for future releases</li>
+</ul>
+<hr/>
+<h2 id="2-core-components">2. Core Components<a class="headerlink" href="#2-core-components" title="Permanent link">¶</a></h2>
+<p>TabTune is built on four main components that work together seamlessly:</p>
+<h3 id="21-tabularpipeline">2.1 TabularPipeline<a class="headerlink" href="#21-tabularpipeline" title="Permanent link">¶</a></h3>
+<p>The main user-facing interface that provides a scikit-learn-compatible API.</p>
+<p><strong>Key Methods:</strong>
+- <code>.fit(X, y)</code>: Train/preprocess the pipeline on training data
+- <code>.predict(X)</code>: Generate predictions on new data
+- <code>.predict_proba(X)</code>: Get probability predictions (classification)
+- <code>.evaluate(X, y)</code>: Calculate performance metrics
+- <code>.save(path)</code>: Serialize the entire pipeline
+- <code>.load(path)</code>: Load a saved pipeline</p>
+<p><strong>Purpose</strong>: Simplifies the entire workflow into a single, easy-to-use interface.</p>
+<h3 id="22-dataprocessor">2.2 DataProcessor<a class="headerlink" href="#22-dataprocessor" title="Permanent link">¶</a></h3>
+<p>A smart, model-aware data preparation engine that automatically handles preprocessing based on your chosen model.</p>
+<p><strong>Responsibilities:</strong>
+- <strong>Imputation</strong>: Handle missing values (mean, median, mode, etc.)
+- <strong>Scaling</strong>: Normalize numerical features (standard, min-max, robust)
+- <strong>Encoding</strong>: Transform categorical features (one-hot, ordinal, target encoding)
+- <strong>Model-Specific Processing</strong>: Apply specialized transformations for each model type
+- <strong>Feature Selection</strong>: Optional dimensionality reduction</p>
+<p><strong>Key Feature</strong>: Automatically selects the correct preprocessing strategy based on <code>model_name</code>, eliminating manual configuration.</p>
+<h3 id="23-tuningmanager">2.3 TuningManager<a class="headerlink" href="#23-tuningmanager" title="Permanent link">¶</a></h3>
+<p>The computational core that manages model adaptation and training strategies.</p>
+<p><strong>Strategies:</strong>
+- <strong><code>inference</code></strong>: Zero-shot predictions using pre-trained weights (no training)
+- <strong><code>base-ft</code></strong>: Full fine-tuning of all model parameters
+- <strong><code>peft</code></strong>: Parameter-efficient fine-tuning using LoRA adapters (memory-efficient)</p>
+<p><strong>Purpose</strong>: Abstracts away complex training loops, episodic fine-tuning, and optimization details.</p>
+<h3 id="24-tabularleaderboard">2.4 TabularLeaderboard<a class="headerlink" href="#24-tabularleaderboard" title="Permanent link">¶</a></h3>
+<p>A benchmarking tool for comparing multiple models and strategies on the same dataset splits.</p>
+<p><strong>Features:</strong>
+- Compare multiple models simultaneously
+- Test different tuning strategies
+- Rank results by any metric
+- Export results for analysis</p>
+<p><strong>Purpose</strong>: Streamline model selection and hyperparameter exploration.</p>
+<hr/>
+<h2 id="3-component-relationships">3. Component Relationships<a class="headerlink" href="#3-component-relationships" title="Permanent link">¶</a></h2>
+<div class="mermaid">flowchart TB
+    A[Raw Data: X, y] --&gt; B[TabularPipeline]
+    B --&gt; C[DataProcessor]
+    C --&gt; D{Model-Specific?}
+    D --&gt;|Yes| E[Custom Preprocessor]
+    D --&gt;|No| F[Standard Pipeline]
+    E --&gt; G[Transformed Data]
+    F --&gt; G
+    G --&gt; H[TuningManager]
+    H --&gt; I{Strategy?}
+    I --&gt;|inference| J[Load Pre-trained]
+    I --&gt;|base-ft| K[Full Fine-tuning]
+    I --&gt;|peft| L[LoRA Fine-tuning]
+    J --&gt; M[Trained Model]
+    K --&gt; M
+    L --&gt; M
+    M --&gt; N[Predictions / Metrics]
+
+    style B fill:#e1f5ff
+    style C fill:#fff4e1
+    style H fill:#f0e1ff
+    style M fill:#e1ffe1
+</div>
+<p><strong>Flow Explanation:</strong>
+1. Raw data enters <code>TabularPipeline</code>
+2. <code>DataProcessor</code> applies model-aware preprocessing
+3. <code>TuningManager</code> executes the chosen training strategy
+4. Final model generates predictions and metrics</p>
+<hr/>
+<h2 id="4-workflow">4. Workflow<a class="headerlink" href="#4-workflow" title="Permanent link">¶</a></h2>
+<p>Here's the typical workflow for using TabTune:</p>
+<h3 id="step-1-prepare-your-data">Step 1: Prepare Your Data<a class="headerlink" href="#step-1-prepare-your-data" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Load your data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'your_data.csv'</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'target'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Features</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span>  <span class="c1"># Labels</span>
+
+<span class="c1"># Split into train/test</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="step-2-initialize-the-pipeline">Step 2: Initialize the Pipeline<a class="headerlink" href="#step-2-initialize-the-pipeline" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>              <span class="c1"># Choose your model</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>        <span class="c1"># Task type</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span><span class="p">,</span>         <span class="c1"># Training strategy</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
+        <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="step-3-train-the-model">Step 3: Train the Model<a class="headerlink" href="#step-3-train-the-model" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># This automatically:</span>
+<span class="c1"># 1. Fits the DataProcessor (learns preprocessing transformations)</span>
+<span class="c1"># 2. Applies preprocessing to training data</span>
+<span class="c1"># 3. Trains the model using TuningManager</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="step-4-make-predictions">Step 4: Make Predictions<a class="headerlink" href="#step-4-make-predictions" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate predictions</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Get probability scores</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Evaluate performance</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"F1 Score: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'f1_score'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="step-5-save-and-reload">Step 5: Save and Reload<a class="headerlink" href="#step-5-save-and-reload" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save the entire pipeline (including preprocessing and model state)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"my_pipeline.joblib"</span><span class="p">)</span>
+
+<span class="c1"># Later, reload for inference</span>
+<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_pipeline.joblib"</span><span class="p">)</span>
+<span class="n">new_predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="5-models">5. Models<a class="headerlink" href="#5-models" title="Permanent link">¶</a></h2>
+<p>TabTune supports multiple state-of-the-art tabular foundation models:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Family</th>
+<th>Best Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TabPFN</strong></td>
+<td>PFN/ICL</td>
+<td>Small datasets (&lt;10K rows), quick baselines</td>
+</tr>
+<tr>
+<td><strong>TabICL</strong></td>
+<td>Scalable ICL</td>
+<td>General-purpose, balanced performance</td>
+</tr>
+<tr>
+<td><strong>OrionMSP</strong></td>
+<td>Scalable ICL</td>
+<td>Large datasets, strong generalization</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
+<td>Scalable ICL</td>
+<td>High-accuracy requirements</td>
+</tr>
+<tr>
+<td><strong>TabDPT</strong></td>
+<td>Denoising Transformer</td>
+<td>Very large datasets (&gt;100K rows)</td>
+</tr>
+<tr>
+<td><strong>Mitra</strong></td>
+<td>2D Attention</td>
+<td>Complex patterns, mixed data types</td>
+</tr>
+<tr>
+<td><strong>ContextTab</strong></td>
+<td>Semantic ICL</td>
+<td>Text-heavy tabular features</td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="../../models/overview/">Models Overview</a> for detailed comparisons and selection guidance.</p>
+<hr/>
+<h2 id="6-tuning-strategies-explained">6. Tuning Strategies Explained<a class="headerlink" href="#6-tuning-strategies-explained" title="Permanent link">¶</a></h2>
+<h3 id="inference-inference">Inference (<code>inference</code>)<a class="headerlink" href="#inference-inference" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>What</strong>: Uses pre-trained model weights without any training</li>
+<li><strong>When</strong>: Quick baselines, zero-shot evaluation</li>
+<li><strong>Training Time</strong>: 0 seconds</li>
+<li><strong>Memory</strong>: Minimal</li>
+</ul>
+<h3 id="base-fine-tuning-base-ft">Base Fine-Tuning (<code>base-ft</code>)<a class="headerlink" href="#base-fine-tuning-base-ft" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>What</strong>: Updates all model parameters during training</li>
+<li><strong>When</strong>: Maximum accuracy is priority, ample compute resources</li>
+<li><strong>Training Time</strong>: Moderate to long (depending on dataset size)</li>
+<li><strong>Memory</strong>: High (requires full model in memory)</li>
+</ul>
+<h3 id="peft-peft">PEFT (<code>peft</code>)<a class="headerlink" href="#peft-peft" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>What</strong>: Parameter-efficient fine-tuning using LoRA adapters</li>
+<li><strong>When</strong>: Memory-constrained environments, fast iteration</li>
+<li><strong>Training Time</strong>: Faster than base-ft</li>
+<li><strong>Memory</strong>: Low (only adapter weights updated)</li>
+</ul>
+<p>See <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> for detailed comparisons.</p>
+<hr/>
+<h2 id="7-key-principles">7. Key Principles<a class="headerlink" href="#7-key-principles" title="Permanent link">¶</a></h2>
+<ol>
+<li><strong>Model-Aware Processing</strong>: The <code>DataProcessor</code> automatically selects optimal preprocessing based on your chosen model</li>
+<li><strong>Unified API</strong>: Same interface (<code>.fit()</code>, <code>.predict()</code>) for all models and strategies</li>
+<li><strong>Automatic Optimization</strong>: <code>TuningManager</code> handles complex training loops, learning rate schedules, and optimization</li>
+<li><strong>Reproducibility</strong>: Save entire pipelines (including preprocessing) for consistent results</li>
+</ol>
+<hr/>
+<h2 id="8-next-steps">8. Next Steps<a class="headerlink" href="#8-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong><a href="../installation/">Installation Guide</a></strong>: Set up TabTune in your environment</li>
+<li><strong><a href="../quick-start/">Quick Start</a></strong>: Run your first end-to-end example</li>
+<li><strong><a href="../../user-guide/pipeline-overview/">Pipeline Overview</a></strong>: Deep dive into TabularPipeline</li>
+<li><strong><a href="../../user-guide/model-selection/">Model Selection</a></strong>: Choose the right model for your task</li>
+<li><strong><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a></strong>: Understand training options</li>
+</ul>
+<hr/>
+<h2 id="9-common-patterns">9. Common Patterns<a class="headerlink" href="#9-common-patterns" title="Permanent link">¶</a></h2>
+<h3 id="pattern-1-quick-baseline">Pattern 1: Quick Baseline<a class="headerlink" href="#pattern-1-quick-baseline" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="pattern-2-production-model">Pattern 2: Production Model<a class="headerlink" href="#pattern-2-production-model" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"OrionBix"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"production_model.joblib"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="pattern-3-memory-efficient-training">Pattern 3: Memory-Efficient Training<a class="headerlink" href="#pattern-3-memory-efficient-training" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"peft"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"peft_config"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">8</span><span class="p">}}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<p>Understanding these basic concepts will help you effectively leverage TabTune's capabilities for your tabular machine learning projects.</p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

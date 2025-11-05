@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>FAQ - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../roadmap/">Roadmap</a>
+</li>
+<li class="active">
+<a href="./">FAQ</a>
+</li>
+<li>
+<a href="../license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../roadmap/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../license/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/about/faq.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#faq">FAQ</a></li>
+<li class="second-level"><a href="#installation-setup">Installation &amp; Setup</a></li>
+<li class="third-level"><a href="#which-python-versions-are-supported">Which Python versions are supported?</a></li>
+<li class="third-level"><a href="#do-i-need-a-gpu">Do I need a GPU?</a></li>
+<li class="third-level"><a href="#how-do-i-install-tabtune-with-gpu-support">How do I install TabTune with GPU support?</a></li>
+<li class="second-level"><a href="#tasks-models">Tasks &amp; Models</a></li>
+<li class="third-level"><a href="#does-tabtune-support-regression">Does TabTune support regression?</a></li>
+<li class="third-level"><a href="#which-models-support-peft-lora">Which models support PEFT (LoRA)?</a></li>
+<li class="third-level"><a href="#how-do-i-choose-the-right-model-for-my-dataset">How do I choose the right model for my dataset?</a></li>
+<li class="second-level"><a href="#usage-workflow">Usage &amp; Workflow</a></li>
+<li class="third-level"><a href="#whats-the-difference-between-inference-base-ft-and-peft-strategies">What's the difference between inference, base-ft, and peft strategies?</a></li>
+<li class="third-level"><a href="#how-do-i-save-and-load-models">How do I save and load models?</a></li>
+<li class="third-level"><a href="#what-file-formats-are-supported-for-input-data">What file formats are supported for input data?</a></li>
+<li class="third-level"><a href="#how-do-i-handle-missing-values">How do I handle missing values?</a></li>
+<li class="second-level"><a href="#data-preprocessing">Data &amp; Preprocessing</a></li>
+<li class="third-level"><a href="#can-i-use-my-own-custom-preprocessing">Can I use my own custom preprocessing?</a></li>
+<li class="third-level"><a href="#what-are-the-memory-requirements">What are the memory requirements?</a></li>
+<li class="second-level"><a href="#training-performance">Training &amp; Performance</a></li>
+<li class="third-level"><a href="#how-long-does-training-take">How long does training take?</a></li>
+<li class="third-level"><a href="#how-do-i-debug-training-issues">How do I debug training issues?</a></li>
+<li class="third-level"><a href="#why-is-my-model-overfitting">Why is my model overfitting?</a></li>
+<li class="second-level"><a href="#technical-issues">Technical Issues</a></li>
+<li class="third-level"><a href="#i-get-cuda-out-of-memory-errors-how-do-i-fix-this">I get "CUDA out of memory" errors. How do I fix this?</a></li>
+<li class="third-level"><a href="#modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'</a></li>
+<li class="third-level"><a href="#import-errors-or-version-conflicts">Import errors or version conflicts</a></li>
+<li class="third-level"><a href="#model-predictions-are-all-the-same-class">Model predictions are all the same class</a></li>
+<li class="second-level"><a href="#comparison-evaluation">Comparison &amp; Evaluation</a></li>
+<li class="third-level"><a href="#how-do-i-compare-multiple-models">How do I compare multiple models?</a></li>
+<li class="third-level"><a href="#what-evaluation-metrics-are-available">What evaluation metrics are available?</a></li>
+<li class="third-level"><a href="#how-do-i-interpret-the-evaluation-metrics">How do I interpret the evaluation metrics?</a></li>
+<li class="second-level"><a href="#advanced-topics">Advanced Topics</a></li>
+<li class="third-level"><a href="#can-i-use-tabtune-for-production-deployment">Can I use TabTune for production deployment?</a></li>
+<li class="third-level"><a href="#how-do-i-fine-tune-hyperparameters">How do I fine-tune hyperparameters?</a></li>
+<li class="third-level"><a href="#can-i-use-multiple-gpus">Can I use multiple GPUs?</a></li>
+<li class="second-level"><a href="#support-community">Support &amp; Community</a></li>
+<li class="third-level"><a href="#where-can-i-get-help">Where can I get help?</a></li>
+<li class="third-level"><a href="#how-do-i-report-a-bug">How do I report a bug?</a></li>
+<li class="third-level"><a href="#can-i-contribute-to-tabtune">Can I contribute to TabTune?</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">¶</a></h1>
+<p>Frequently asked questions about TabTune, covering installation, usage, model selection, and troubleshooting.</p>
+<hr/>
+<h2 id="installation-setup">Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permanent link">¶</a></h2>
+<h3 id="which-python-versions-are-supported">Which Python versions are supported?<a class="headerlink" href="#which-python-versions-are-supported" title="Permanent link">¶</a></h3>
+<p><strong>Python 3.10+</strong> is required. Python 3.11+ is recommended for best performance.</p>
+<h3 id="do-i-need-a-gpu">Do I need a GPU?<a class="headerlink" href="#do-i-need-a-gpu" title="Permanent link">¶</a></h3>
+<p>No, TabTune works on CPU for many models. However, a GPU is <strong>strongly recommended</strong> for:
+- Training/fine-tuning (base-ft and peft strategies)
+- Large datasets (&gt;100K rows)
+- Faster inference</p>
+<p>Models like TabPFN and TabICL can run on CPU for inference, but training will be significantly slower.</p>
+<h3 id="how-do-i-install-tabtune-with-gpu-support">How do I install TabTune with GPU support?<a class="headerlink" href="#how-do-i-install-tabtune-with-gpu-support" title="Permanent link">¶</a></h3>
+<p>Install PyTorch with CUDA support first, then install TabTune:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install PyTorch with CUDA (check your CUDA version first with nvidia-smi)</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+
+<span class="c1"># Then install TabTune</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<hr/>
+<h2 id="tasks-models">Tasks &amp; Models<a class="headerlink" href="#tasks-models" title="Permanent link">¶</a></h2>
+<h3 id="does-tabtune-support-regression">Does TabTune support regression?<a class="headerlink" href="#does-tabtune-support-regression" title="Permanent link">¶</a></h3>
+<p>Not yet; regression support is planned for future releases. Currently, TabTune focuses on classification tasks (binary and multi-class).</p>
+<h3 id="which-models-support-peft-lora">Which models support PEFT (LoRA)?<a class="headerlink" href="#which-models-support-peft-lora" title="Permanent link">¶</a></h3>
+<p><strong>Full PEFT Support:</strong>
+- TabICL
+- OrionMSP
+- OrionBix
+- TabDPT
+- Mitra</p>
+<p><strong>Experimental PEFT Support:</strong>
+- TabPFN (may have stability issues)
+- ContextTab (may have stability issues)</p>
+<p>If you encounter issues with experimental models, use <code>base-ft</code> strategy instead.</p>
+<h3 id="how-do-i-choose-the-right-model-for-my-dataset">How do I choose the right model for my dataset?<a class="headerlink" href="#how-do-i-choose-the-right-model-for-my-dataset" title="Permanent link">¶</a></h3>
+<p>See the <a href="../../user-guide/model-selection/">Model Selection Guide</a> for detailed guidance. Quick reference:</p>
+<ul>
+<li><strong>&lt;10K rows</strong>: TabPFN (inference) or TabICL</li>
+<li><strong>10K-100K rows</strong>: TabICL or Mitra</li>
+<li><strong>100K-1M rows</strong>: OrionBix, OrionMSP, or TabDPT</li>
+<li><strong>&gt;1M rows</strong>: TabDPT</li>
+<li><strong>Text-heavy features</strong>: ContextTab</li>
+<li><strong>High accuracy needed</strong>: OrionBix or TabDPT with base-ft</li>
+</ul>
+<hr/>
+<h2 id="usage-workflow">Usage &amp; Workflow<a class="headerlink" href="#usage-workflow" title="Permanent link">¶</a></h2>
+<h3 id="whats-the-difference-between-inference-base-ft-and-peft-strategies">What's the difference between inference, base-ft, and peft strategies?<a class="headerlink" href="#whats-the-difference-between-inference-base-ft-and-peft-strategies" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong><code>inference</code></strong>: Zero-shot predictions using pre-trained weights. No training occurs. Fastest, lowest accuracy.</li>
+<li><strong><code>base-ft</code></strong>: Full fine-tuning of all model parameters. Slowest, highest accuracy, requires most memory.</li>
+<li><strong><code>peft</code></strong>: Parameter-efficient fine-tuning using LoRA adapters. Faster than base-ft, uses less memory, high accuracy.</li>
+</ul>
+<p>See <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> for detailed comparisons.</p>
+<h3 id="how-do-i-save-and-load-models">How do I save and load models?<a class="headerlink" href="#how-do-i-save-and-load-models" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save pipeline (includes preprocessing and model state)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"my_pipeline.joblib"</span><span class="p">)</span>
+
+<span class="c1"># Load pipeline</span>
+<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_pipeline.joblib"</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Note</strong>: Saved pipelines include the DataProcessor state, so preprocessing is automatically applied.</p>
+<h3 id="what-file-formats-are-supported-for-input-data">What file formats are supported for input data?<a class="headerlink" href="#what-file-formats-are-supported-for-input-data" title="Permanent link">¶</a></h3>
+<p>TabTune accepts <strong>pandas DataFrames and Series</strong>. You can load data from:
+- CSV files: <code>pd.read_csv()</code>
+- Excel files: <code>pd.read_excel()</code>
+- Parquet files: <code>pd.read_parquet()</code>
+- Any format that pandas supports</p>
+<h3 id="how-do-i-handle-missing-values">How do I handle missing values?<a class="headerlink" href="#how-do-i-handle-missing-values" title="Permanent link">¶</a></h3>
+<p>The <code>DataProcessor</code> automatically handles missing values based on your configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"imputation_strategy"</span><span class="p">:</span> <span class="s2">"mean"</span>  <span class="c1"># Options: 'mean', 'median', 'mode', 'knn'</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Most models have sensible defaults, so you often don't need to specify this.</p>
+<hr/>
+<h2 id="data-preprocessing">Data &amp; Preprocessing<a class="headerlink" href="#data-preprocessing" title="Permanent link">¶</a></h2>
+<h3 id="can-i-use-my-own-custom-preprocessing">Can I use my own custom preprocessing?<a class="headerlink" href="#can-i-use-my-own-custom-preprocessing" title="Permanent link">¶</a></h3>
+<p>Yes! See <a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a> for details on:
+- Creating custom preprocessors
+- Extending the data pipeline
+- Integrating domain-specific transformations</p>
+<h3 id="what-are-the-memory-requirements">What are the memory requirements?<a class="headerlink" href="#what-are-the-memory-requirements" title="Permanent link">¶</a></h3>
+<p>Memory usage varies by model and dataset size:</p>
+<ul>
+<li><strong>TabPFN</strong>: ~2-4 GB (small datasets)</li>
+<li><strong>TabICL</strong>: ~4-8 GB (medium datasets)</li>
+<li><strong>OrionBix/OrionMSP</strong>: ~8-16 GB (large datasets)</li>
+<li><strong>TabDPT</strong>: ~12-24 GB (very large datasets)</li>
+<li><strong>Mitra</strong>: ~16-32 GB (complex datasets)</li>
+</ul>
+<p><strong>PEFT strategy</strong> reduces memory by 40-60% compared to base-ft.</p>
+<hr/>
+<h2 id="training-performance">Training &amp; Performance<a class="headerlink" href="#training-performance" title="Permanent link">¶</a></h2>
+<h3 id="how-long-does-training-take">How long does training take?<a class="headerlink" href="#how-long-does-training-take" title="Permanent link">¶</a></h3>
+<p>Training time depends on:
+- Dataset size (rows and features)
+- Model choice
+- Strategy (inference: 0s, peft: fast, base-ft: slower)
+- Hardware (GPU vs CPU)</p>
+<p>Rough estimates:
+- <strong>Inference</strong>: Instant (no training)
+- <strong>PEFT</strong>: 5-30 minutes for medium datasets
+- <strong>Base-ft</strong>: 30 minutes to several hours for large datasets</p>
+<h3 id="how-do-i-debug-training-issues">How do I debug training issues?<a class="headerlink" href="#how-do-i-debug-training-issues" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Check logs</strong>: TabTune uses structured logging - enable verbose mode</li>
+<li><strong>Reduce dataset size</strong>: Test with a smaller subset first</li>
+<li><strong>Use CPU</strong>: Test on CPU to rule out GPU-specific issues</li>
+<li><strong>Lower batch size</strong>: Reduce memory pressure</li>
+<li><strong>Check data quality</strong>: Ensure no invalid values or type mismatches</li>
+</ol>
+<p>See <a href="../../user-guide/troubleshooting/">Troubleshooting</a> for detailed solutions.</p>
+<h3 id="why-is-my-model-overfitting">Why is my model overfitting?<a class="headerlink" href="#why-is-my-model-overfitting" title="Permanent link">¶</a></h3>
+<p>Common causes and solutions:</p>
+<ul>
+<li><strong>Too many epochs</strong>: Reduce <code>epochs</code> in <code>tuning_params</code></li>
+<li><strong>Too high learning rate</strong>: Lower <code>learning_rate</code> (try 1e-5 to 2e-5)</li>
+<li><strong>Dataset too small</strong>: Use more data or a simpler model</li>
+<li><strong>Try PEFT</strong>: LoRA adapters often generalize better</li>
+</ul>
+<hr/>
+<h2 id="technical-issues">Technical Issues<a class="headerlink" href="#technical-issues" title="Permanent link">¶</a></h2>
+<h3 id="i-get-cuda-out-of-memory-errors-how-do-i-fix-this">I get "CUDA out of memory" errors. How do I fix this?<a class="headerlink" href="#i-get-cuda-out-of-memory-errors-how-do-i-fix-this" title="Permanent link">¶</a></h3>
+<p><strong>Solutions:</strong>
+1. Use <code>peft</code> strategy instead of <code>base-ft</code> (40-60% less memory)
+2. Reduce <code>batch_size</code> in <code>tuning_params</code>
+3. Use a smaller model (TabICL instead of TabDPT)
+4. Process data in chunks
+5. Use CPU instead of GPU (slower but no memory limits)</p>
+<h3 id="modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'<a class="headerlink" href="#modulenotfounderror-no-module-named-tabtune" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: Install TabTune in development mode:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>TabTune_Internal
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+<h3 id="import-errors-or-version-conflicts">Import errors or version conflicts<a class="headerlink" href="#import-errors-or-version-conflicts" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: Use a virtual environment:
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>tabtune-env
+<span class="nb">source</span><span class="w"> </span>tabtune-env/bin/activate<span class="w">  </span><span class="c1"># Linux/macOS</span>
+<span class="c1"># tabtune-env\Scripts\activate   # Windows</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+<h3 id="model-predictions-are-all-the-same-class">Model predictions are all the same class<a class="headerlink" href="#model-predictions-are-all-the-same-class" title="Permanent link">¶</a></h3>
+<p><strong>Possible causes:</strong>
+- Model not trained (using inference with poor pre-trained weights)
+- Data preprocessing issue (check DataProcessor summary)
+- Severe class imbalance (use resampling strategies)
+- Wrong model for dataset size</p>
+<p><strong>Solution</strong>: Try fine-tuning with <code>base-ft</code> or <code>peft</code> strategy.</p>
+<hr/>
+<h2 id="comparison-evaluation">Comparison &amp; Evaluation<a class="headerlink" href="#comparison-evaluation" title="Permanent link">¶</a></h2>
+<h3 id="how-do-i-compare-multiple-models">How do I compare multiple models?<a class="headerlink" href="#how-do-i-compare-multiple-models" title="Permanent link">¶</a></h3>
+<p>Use <code>TabularLeaderboard</code>:
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+
+<span class="n">leaderboard</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"TabICL"</span><span class="p">,</span> <span class="s2">"base-ft"</span><span class="p">)</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"OrionBix"</span><span class="p">,</span> <span class="s2">"peft"</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s2">"roc_auc_score"</span><span class="p">)</span>
+</code></pre></div></p>
+<p>See <a href="../../user-guide/leaderboard/">Model Comparison</a> for detailed examples.</p>
+<h3 id="what-evaluation-metrics-are-available">What evaluation metrics are available?<a class="headerlink" href="#what-evaluation-metrics-are-available" title="Permanent link">¶</a></h3>
+<p>Default metrics in <code>.evaluate()</code>:
+- <strong>Accuracy</strong>: Overall correctness
+- <strong>Weighted F1 Score</strong>: Class-balanced F1
+- <strong>ROC AUC Score</strong>: Binary and multi-class supported
+- <strong>Precision</strong>: Weighted average
+- <strong>Recall</strong>: Weighted average
+- <strong>MCC</strong>: Matthews Correlation Coefficient</p>
+<h3 id="how-do-i-interpret-the-evaluation-metrics">How do I interpret the evaluation metrics?<a class="headerlink" href="#how-do-i-interpret-the-evaluation-metrics" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Accuracy</strong>: Simple but can be misleading with imbalanced classes</li>
+<li><strong>F1 Score</strong>: Better for imbalanced datasets (weighted average)</li>
+<li><strong>ROC AUC</strong>: Best for ranking/model comparison, works with imbalanced data</li>
+<li><strong>MCC</strong>: Comprehensive metric that accounts for all confusion matrix values</li>
+</ul>
+<hr/>
+<h2 id="advanced-topics">Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permanent link">¶</a></h2>
+<h3 id="can-i-use-tabtune-for-production-deployment">Can I use TabTune for production deployment?<a class="headerlink" href="#can-i-use-tabtune-for-production-deployment" title="Permanent link">¶</a></h3>
+<p>Yes! TabTune pipelines are production-ready:
+- Save complete pipelines with <code>.save()</code>
+- Includes all preprocessing transformations
+- Reproducible results
+- Handles new data automatically</p>
+<p><strong>Best practices:</strong>
+- Use <code>base-ft</code> or <code>peft</code> for best accuracy
+- Save checkpoints during training
+- Log hyperparameters and preprocessing config
+- Test on validation sets before deployment</p>
+<h3 id="how-do-i-fine-tune-hyperparameters">How do I fine-tune hyperparameters?<a class="headerlink" href="#how-do-i-fine-tune-hyperparameters" title="Permanent link">¶</a></h3>
+<p>See <a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a> for:
+- Search strategies (grid, random, Bayesian)
+- Hyperparameter spaces for each model
+- Integration with Optuna and other tools
+- Best practices and validation strategies</p>
+<h3 id="can-i-use-multiple-gpus">Can I use multiple GPUs?<a class="headerlink" href="#can-i-use-multiple-gpus" title="Permanent link">¶</a></h3>
+<p>Yes, for supported models. See <a href="../../advanced/multi-gpu/">Multi-GPU Training</a> for configuration details.</p>
+<hr/>
+<h2 id="support-community">Support &amp; Community<a class="headerlink" href="#support-community" title="Permanent link">¶</a></h2>
+<h3 id="where-can-i-get-help">Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/Lexsi-Labs/TabTune_Internal/issues">TabTune_Internal Issues</a></li>
+<li><strong>Documentation</strong>: Browse the <a href="../../user-guide/pipeline-overview/">User Guide</a></li>
+<li><strong>FAQ</strong>: This page!</li>
+</ul>
+<h3 id="how-do-i-report-a-bug">How do I report a bug?<a class="headerlink" href="#how-do-i-report-a-bug" title="Permanent link">¶</a></h3>
+<p>Open an issue on GitHub with:
+- TabTune version
+- Python version
+- Error message and traceback
+- Minimal reproducible example
+- System information (OS, GPU if applicable)</p>
+<h3 id="can-i-contribute-to-tabtune">Can I contribute to TabTune?<a class="headerlink" href="#can-i-contribute-to-tabtune" title="Permanent link">¶</a></h3>
+<p>Yes! See the <a href="../../contributing/setup/">Contributing Guide</a> for:
+- Development setup
+- Code standards
+- How to add new models
+- Documentation guidelines</p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

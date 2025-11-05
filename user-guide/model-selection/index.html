@@ -1,430 +1,269 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>Model Selection - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Model Selection - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown active">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li class="active">
-    <a href="./">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../advanced/peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="prev" href="../tuning-strategies/">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="next" href="../saving-loading/">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/model-selection.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#model-selection">Model Selection</a></li>
-            <li class="second-level"><a href="#1-model-overview">1. Model Overview</a></li>
-                
-            <li class="second-level"><a href="#2-decision-framework">2. Decision Framework</a></li>
-                
-                <li class="third-level"><a href="#21-by-dataset-size">2.1 By Dataset Size</a></li>
-                <li class="third-level"><a href="#22-by-feature-types">2.2 By Feature Types</a></li>
-                <li class="third-level"><a href="#23-by-computational-budget">2.3 By Computational Budget</a></li>
-                <li class="third-level"><a href="#24-by-use-case">2.4 By Use Case</a></li>
-            <li class="second-level"><a href="#3-detailed-model-profiles">3. Detailed Model Profiles</a></li>
-                
-                <li class="third-level"><a href="#31-tabpfn">3.1 TabPFN</a></li>
-                <li class="third-level"><a href="#32-tabicl">3.2 TabICL</a></li>
-                <li class="third-level"><a href="#33-tabbiaxial">3.3 TabBiaxial</a></li>
-                <li class="third-level"><a href="#34-tabdpt">3.4 TabDPT</a></li>
-                <li class="third-level"><a href="#35-mitra">3.5 Mitra</a></li>
-                <li class="third-level"><a href="#36-contexttab">3.6 ContextTab</a></li>
-            <li class="second-level"><a href="#4-model-selection-checklist">4. Model Selection Checklist</a></li>
-                
-            <li class="second-level"><a href="#5-hybrid-approaches">5. Hybrid Approaches</a></li>
-                
-                <li class="third-level"><a href="#ensemble-multiple-models">Ensemble Multiple Models</a></li>
-            <li class="second-level"><a href="#6-advanced-selection-criteria">6. Advanced Selection Criteria</a></li>
-                
-                <li class="third-level"><a href="#61-explainability-requirements">6.1 Explainability Requirements</a></li>
-                <li class="third-level"><a href="#62-regulatory-compliance">6.2 Regulatory Compliance</a></li>
-                <li class="third-level"><a href="#63-transfer-learning">6.3 Transfer Learning</a></li>
-            <li class="second-level"><a href="#7-next-steps">7. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li class="active">
+<a href="./">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../tuning-strategies/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../saving-loading/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/model-selection.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#model-selection">Model Selection</a></li>
+<li class="second-level"><a href="#1-model-overview">1. Model Overview</a></li>
+<li class="second-level"><a href="#2-decision-framework">2. Decision Framework</a></li>
+<li class="third-level"><a href="#21-by-dataset-size">2.1 By Dataset Size</a></li>
+<li class="third-level"><a href="#22-by-feature-types">2.2 By Feature Types</a></li>
+<li class="third-level"><a href="#23-by-computational-budget">2.3 By Computational Budget</a></li>
+<li class="third-level"><a href="#24-by-use-case">2.4 By Use Case</a></li>
+<li class="second-level"><a href="#3-detailed-model-profiles">3. Detailed Model Profiles</a></li>
+<li class="third-level"><a href="#31-tabpfn">3.1 TabPFN</a></li>
+<li class="third-level"><a href="#32-tabicl">3.2 TabICL</a></li>
+<li class="third-level"><a href="#33-orionmsp">3.3 OrionMSP</a></li>
+<li class="third-level"><a href="#34-orionbix">3.4 OrionBix</a></li>
+<li class="third-level"><a href="#35-tabdpt">3.5 TabDPT</a></li>
+<li class="third-level"><a href="#36-mitra">3.6 Mitra</a></li>
+<li class="third-level"><a href="#37-contexttab">3.7 ContextTab</a></li>
+<li class="second-level"><a href="#4-model-selection-checklist">4. Model Selection Checklist</a></li>
+<li class="second-level"><a href="#5-hybrid-approaches">5. Hybrid Approaches</a></li>
+<li class="third-level"><a href="#ensemble-multiple-models">Ensemble Multiple Models</a></li>
+<li class="second-level"><a href="#6-advanced-selection-criteria">6. Advanced Selection Criteria</a></li>
+<li class="third-level"><a href="#61-explainability-requirements">6.1 Explainability Requirements</a></li>
+<li class="third-level"><a href="#62-regulatory-compliance">6.2 Regulatory Compliance</a></li>
+<li class="third-level"><a href="#63-transfer-learning">6.3 Transfer Learning</a></li>
+<li class="second-level"><a href="#7-next-steps">7. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="model-selection">Model Selection<a class="headerlink" href="#model-selection" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="model-selection">Model Selection<a class="headerlink" href="#model-selection" title="Permanent link">¶</a></h1>
 <p>Choosing the right model for your tabular task is crucial for achieving optimal performance. This guide helps you navigate TabTune's model ecosystem and select the best model for your specific use case.</p>
-<hr />
-<h2 id="1-model-overview">1. Model Overview<a class="headerlink" href="#1-model-overview" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-model-overview">1. Model Overview<a class="headerlink" href="#1-model-overview" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -454,7 +293,15 @@
 <td>⭐⭐⭐⭐</td>
 </tr>
 <tr>
-<td><strong>TabBiaxial</strong></td>
+<td><strong>OrionMSP</strong></td>
+<td>Scalable ICL</td>
+<td>Balanced generalization</td>
+<td>50K-2M+ rows</td>
+<td>✅ Full</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
 <td>Scalable ICL</td>
 <td>High-accuracy scenarios</td>
 <td>10K-1M rows</td>
@@ -487,10 +334,10 @@
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="2-decision-framework">2. Decision Framework<a class="headerlink" href="#2-decision-framework" title="Permanent link">&para;</a></h2>
-<h3 id="21-by-dataset-size">2.1 By Dataset Size<a class="headerlink" href="#21-by-dataset-size" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>flowchart TD
+<hr/>
+<h2 id="2-decision-framework">2. Decision Framework<a class="headerlink" href="#2-decision-framework" title="Permanent link">¶</a></h2>
+<h3 id="21-by-dataset-size">2.1 By Dataset Size<a class="headerlink" href="#21-by-dataset-size" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart TD
     A[Dataset Size?] --&gt; B{&lt; 10K rows}
     A --&gt; C{10K - 100K rows}
     A --&gt; D{100K - 1M rows}
@@ -498,23 +345,23 @@
 
     B --&gt; F[TabPFN]
     C --&gt; G[TabICL or Mitra]
-    D --&gt; H[TabBiaxial or TabDPT]
+    D --&gt; H[OrionBix or TabDPT]
     E --&gt; I[TabDPT]
-</code></pre></div>
+</div>
 <p><strong>Small (&lt;10K rows)</strong>
 - <strong>Recommended</strong>: TabPFN, Mitra
 - <strong>Alternative</strong>: TabICL with small <code>n_estimators</code></p>
 <p><strong>Medium (10K-100K rows)</strong>
 - <strong>Recommended</strong>: TabICL
-- <strong>Alternatives</strong>: Mitra, TabBiaxial</p>
+- <strong>Alternatives</strong>: Mitra, OrionMSP, OrionBix</p>
 <p><strong>Large (100K-1M rows)</strong>
-- <strong>Recommended</strong>: TabBiaxial, TabDPT
+- <strong>Recommended</strong>: OrionMSP, OrionBix, TabDPT
 - <strong>Alternative</strong>: TabICL with larger <code>n_estimators</code></p>
 <p><strong>Very Large (&gt;1M rows)</strong>
 - <strong>Recommended</strong>: TabDPT
-- <strong>Alternative</strong>: TabBiaxial with chunked training</p>
-<hr />
-<h3 id="22-by-feature-types">2.2 By Feature Types<a class="headerlink" href="#22-by-feature-types" title="Permanent link">&para;</a></h3>
+- <strong>Alternative</strong>: OrionBix with chunked training</p>
+<hr/>
+<h3 id="22-by-feature-types">2.2 By Feature Types<a class="headerlink" href="#22-by-feature-types" title="Permanent link">¶</a></h3>
 <p><strong>Primarily Numerical</strong>
 - <strong>Best</strong>: TabDPT, TabICL
 - <strong>Reason</strong>: Efficient scaling and normalization pipelines</p>
@@ -522,30 +369,30 @@
 - <strong>Best</strong>: TabPFN (if small), ContextTab
 - <strong>Reason</strong>: Specialized categorical encoding</p>
 <p><strong>Mixed (Numerical + Categorical)</strong>
-- <strong>Best</strong>: TabICL, TabBiaxial, Mitra
+- <strong>Best</strong>: TabICL, OrionMSP, OrionBix, Mitra
 - <strong>Reason</strong>: Balanced handling of both types</p>
 <p><strong>Text/Semantic Features</strong>
 - <strong>Best</strong>: ContextTab
 - <strong>Reason</strong>: Built-in text embedding support</p>
-<hr />
-<h3 id="23-by-computational-budget">2.3 By Computational Budget<a class="headerlink" href="#23-by-computational-budget" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="23-by-computational-budget">2.3 By Computational Budget<a class="headerlink" href="#23-by-computational-budget" title="Permanent link">¶</a></h3>
 <p><strong>Limited Resources (&lt;8GB GPU)</strong>
 - <strong>Recommended</strong>: TabPFN (inference), TabICL (PEFT)
 - <strong>Strategy</strong>: Use <code>peft</code> tuning strategy</p>
 <p><strong>Moderate Resources (8-16GB GPU)</strong>
-- <strong>Recommended</strong>: TabICL, TabBiaxial
+- <strong>Recommended</strong>: TabICL, OrionMSP, OrionBix
 - <strong>Strategy</strong>: <code>base-ft</code> or <code>peft</code></p>
 <p><strong>Ample Resources (&gt;16GB GPU)</strong>
-- <strong>Recommended</strong>: TabDPT, Mitra, TabBiaxial
+- <strong>Recommended</strong>: TabDPT, Mitra, OrionBix
 - <strong>Strategy</strong>: <code>base-ft</code> with mixed precision</p>
-<hr />
-<h3 id="24-by-use-case">2.4 By Use Case<a class="headerlink" href="#24-by-use-case" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="24-by-use-case">2.4 By Use Case<a class="headerlink" href="#24-by-use-case" title="Permanent link">¶</a></h3>
 <p><strong>Quick Prototyping</strong>
 - <strong>Model</strong>: TabPFN, TabICL
 - <strong>Strategy</strong>: <code>inference</code>
 - <strong>Reason</strong>: Zero-shot predictions, instant results</p>
 <p><strong>Production Deployment</strong>
-- <strong>Model</strong>: TabBiaxial, TabDPT
+- <strong>Model</strong>: OrionMSP, OrionBix, TabDPT
 - <strong>Strategy</strong>: <code>base-ft</code>
 - <strong>Reason</strong>: Highest accuracy, stable performance</p>
 <p><strong>Research/Experimentation</strong>
@@ -553,12 +400,12 @@
 - <strong>Strategy</strong>: <code>peft</code>
 - <strong>Reason</strong>: Fast iteration, low cost</p>
 <p><strong>High Accuracy Priority</strong>
-- <strong>Model</strong>: TabBiaxial, TabDPT
+- <strong>Model</strong>: OrionMSP, OrionBix, TabDPT
 - <strong>Strategy</strong>: <code>base-ft</code> with extensive tuning
 - <strong>Reason</strong>: State-of-the-art performance</p>
-<hr />
-<h2 id="3-detailed-model-profiles">3. Detailed Model Profiles<a class="headerlink" href="#3-detailed-model-profiles" title="Permanent link">&para;</a></h2>
-<h3 id="31-tabpfn">3.1 TabPFN<a class="headerlink" href="#31-tabpfn" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="3-detailed-model-profiles">3. Detailed Model Profiles<a class="headerlink" href="#3-detailed-model-profiles" title="Permanent link">¶</a></h2>
+<h3 id="31-tabpfn">3.1 TabPFN<a class="headerlink" href="#31-tabpfn" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Prior-Fitted Network with approximate Bayesian inference</p>
 <p><strong>Strengths</strong>:
 - ⭐ Extremely fast inference
@@ -579,12 +426,12 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;inference&#39;</span><span class="p">,</span>  <span class="c1"># or &#39;base-ft&#39; for adaptation</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">,</span>  <span class="c1"># or 'base-ft' for adaptation</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h3 id="32-tabicl">3.2 TabICL<a class="headerlink" href="#32-tabicl" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="32-tabicl">3.2 TabICL<a class="headerlink" href="#32-tabicl" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Two-stage in-context learning (column → row attention)</p>
 <p><strong>Strengths</strong>:
 - ⭐ Balanced speed and accuracy
@@ -602,36 +449,68 @@
 - Ensemble predictions for robustness</p>
 <p><strong>Example Configuration</strong>:
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;softmax_temperature&#39;</span><span class="p">:</span> <span class="mf">0.9</span>
+        <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'softmax_temperature'</span><span class="p">:</span> <span class="mf">0.9</span>
     <span class="p">},</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;n_episodes&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h3 id="33-tabbiaxial">3.3 TabBiaxial<a class="headerlink" href="#33-tabbiaxial" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="33-orionmsp">3.3 OrionMSP<a class="headerlink" href="#33-orionmsp" title="Permanent link">¶</a></h3>
+<p><strong>Architecture</strong>: Multi-scale sparse attention for scalable in-context learning</p>
+<p><strong>Strengths</strong>:
+- ⭐ Strong generalization with multi-scale priors
+- ⭐ Balanced performance across dataset sizes
+- ⭐ Full PEFT support
+- ⭐ Efficient column-then-row attention</p>
+<p><strong>Limitations</strong>:
+- ⚠️ Requires larger datasets for best performance (≥50K rows)
+- ⚠️ Moderate memory requirements
+- ⚠️ Slower than TabICL for small datasets</p>
+<p><strong>Ideal Use Cases</strong>:
+- Medium to large datasets (50K-2M+ rows)
+- Tasks requiring strong generalization
+- Balanced speed/accuracy requirements
+- Production systems with moderate compute</p>
+<p><strong>Example Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionMSP'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s1">'softmax_temperature'</span><span class="p">:</span> <span class="mf">0.9</span>
+    <span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<hr/>
+<h3 id="34-orionbix">3.4 OrionBix<a class="headerlink" href="#34-orionbix" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Custom variant of TabICL with biaxial attention mechanisms</p>
 <p><strong>Strengths</strong>:</p>
 <!-- - ⭐ Higher accuracy than TabICL
 - ⭐ Better feature interaction modeling
 - ⭐ Full PEFT support
 - ⭐ Handles complex patterns -->
-
 <p><strong>Limitations</strong>:</p>
 <!-- - ⚠️ Slower training than TabICL
 - ⚠️ Higher memory requirements
 - ⚠️ More hyperparameters to tune -->
-
 <p><strong>Ideal Use Cases</strong>:
 - High-stakes applications (finance, healthcare)
 - Complex feature interactions
@@ -639,22 +518,22 @@
 - Production models with tuning budget</p>
 <p><strong>Example Configuration</strong>:
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionBix'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">32</span>
+        <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="mi">32</span>
     <span class="p">},</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h3 id="34-tabdpt">3.4 TabDPT<a class="headerlink" href="#34-tabdpt" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="35-tabdpt">3.5 TabDPT<a class="headerlink" href="#35-tabdpt" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Denoising pre-trained transformer with k-NN context selection</p>
 <p><strong>Strengths</strong>:
 - ⭐ Scales to very large datasets (5M+ rows)
@@ -672,24 +551,24 @@
 - High-accuracy requirements</p>
 <p><strong>Example Configuration</strong>:
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabDPT&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabDPT'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;n_ensembles&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-        <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
-        <span class="s1">&#39;context_size&#39;</span><span class="p">:</span> <span class="mi">2048</span>
+        <span class="s1">'n_ensembles'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">'temperature'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="s1">'context_size'</span><span class="p">:</span> <span class="mi">2048</span>
     <span class="p">},</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
-        <span class="s1">&#39;steps_per_epoch&#39;</span><span class="p">:</span> <span class="mi">15</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+        <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">15</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h3 id="35-mitra">3.5 Mitra<a class="headerlink" href="#35-mitra" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="36-mitra">3.6 Mitra<a class="headerlink" href="#36-mitra" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: 2D cross-attention (Tab2D) with synthetic priors</p>
 <p><strong>Strengths</strong>:
 - ⭐ Excellent for mixed-type features
@@ -708,21 +587,21 @@
 - Complex multi-variate relationships</p>
 <p><strong>Example Configuration</strong>:
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;Mitra&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;peft&#39;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="s1">&#39;support_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
-        <span class="s1">&#39;query_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
-        <span class="s1">&#39;steps_per_epoch&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="s1">&#39;peft_config&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;lora_alpha&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h3 id="36-contexttab">3.6 ContextTab<a class="headerlink" href="#36-contexttab" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="37-contexttab">3.7 ContextTab<a class="headerlink" href="#37-contexttab" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Semantics-aware ICL with modality-specific embeddings</p>
 <p><strong>Strengths</strong>:
 - ⭐ Best for text-heavy features
@@ -742,18 +621,18 @@
 <p><strong>Example Configuration</strong>:
 <div class="highlight"><pre><span></span><code><span class="c1"># Requires HF_TOKEN environment variable</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;ContextTab&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>  <span class="c1"># Use base-ft, not peft</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>  <span class="c1"># Use base-ft, not peft</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
-        <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">8</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </code></pre></div></p>
-<hr />
-<h2 id="4-model-selection-checklist">4. Model Selection Checklist<a class="headerlink" href="#4-model-selection-checklist" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="4-model-selection-checklist">4. Model Selection Checklist<a class="headerlink" href="#4-model-selection-checklist" title="Permanent link">¶</a></h2>
 <p>Use this checklist to guide your decision:</p>
 <p><strong>Dataset Characteristics</strong>
 - [ ] How many rows? (&lt;10K, 10K-100K, 100K-1M, &gt;1M)
@@ -769,159 +648,187 @@
 <p><strong>Recommendations Based on Checklist</strong></p>
 <div class="highlight"><pre><span></span><code>If dataset &lt; 10K rows → TabPFN
 If dataset 10K-100K rows AND balanced types → TabICL
-If dataset 10K-100K rows AND high accuracy needed → TabBiaxial
+If dataset 50K-2M rows AND balanced → OrionMSP
+If dataset 10K-100K rows AND high accuracy needed → OrionBix
 If dataset &gt; 100K rows → TabDPT
 If text features present → ContextTab
 If complex patterns + mixed types → Mitra
 If GPU &lt; 8GB → TabPFN or TabICL with PEFT
 If speed critical → TabPFN (inference)
-If accuracy critical → TabBiaxial or TabDPT (base-ft)
+If accuracy critical → OrionBix or TabDPT (base-ft)
 </code></pre></div>
-<hr />
-<h2 id="5-hybrid-approaches">5. Hybrid Approaches<a class="headerlink" href="#5-hybrid-approaches" title="Permanent link">&para;</a></h2>
-<h3 id="ensemble-multiple-models">Ensemble Multiple Models<a class="headerlink" href="#ensemble-multiple-models" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="5-hybrid-approaches">5. Hybrid Approaches<a class="headerlink" href="#5-hybrid-approaches" title="Permanent link">¶</a></h2>
+<h3 id="ensemble-multiple-models">Ensemble Multiple Models<a class="headerlink" href="#ensemble-multiple-models" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
 
 <span class="n">leaderboard</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 
 <span class="c1"># Add multiple models</span>
-<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabPFN&#39;</span><span class="p">,</span> <span class="s1">&#39;inference&#39;</span><span class="p">)</span>
-<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span> <span class="s1">&#39;peft&#39;</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
-<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;TabBiaxial&#39;</span><span class="p">,</span> <span class="s1">&#39;base-ft&#39;</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="s1">'inference'</span><span class="p">)</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabICL'</span><span class="p">,</span> <span class="s1">'peft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionMSP'</span><span class="p">,</span> <span class="s1">'base-ft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionBix'</span><span class="p">,</span> <span class="s1">'base-ft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
 
 <span class="c1"># Run and compare</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">&#39;roc_auc_score&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">'roc_auc_score'</span><span class="p">)</span>
 
 <span class="c1"># Ensemble predictions (average probabilities)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">VotingClassifier</span>
 <span class="c1"># Use predictions from top 3 models for ensemble</span>
 </code></pre></div>
-<hr />
-<h2 id="6-advanced-selection-criteria">6. Advanced Selection Criteria<a class="headerlink" href="#6-advanced-selection-criteria" title="Permanent link">&para;</a></h2>
-<h3 id="61-explainability-requirements">6.1 Explainability Requirements<a class="headerlink" href="#61-explainability-requirements" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="6-advanced-selection-criteria">6. Advanced Selection Criteria<a class="headerlink" href="#6-advanced-selection-criteria" title="Permanent link">¶</a></h2>
+<h3 id="61-explainability-requirements">6.1 Explainability Requirements<a class="headerlink" href="#61-explainability-requirements" title="Permanent link">¶</a></h3>
 <ul>
 <li><strong>High Explainability</strong>: TabPFN (inherent uncertainty), TabICL (attention weights)</li>
 <li><strong>Moderate Explainability</strong>: TabDPT (feature importance)</li>
 <li><strong>Low Explainability</strong>: Mitra, ContextTab (complex architectures)</li>
 </ul>
-<h3 id="62-regulatory-compliance">6.2 Regulatory Compliance<a class="headerlink" href="#62-regulatory-compliance" title="Permanent link">&para;</a></h3>
+<h3 id="62-regulatory-compliance">6.2 Regulatory Compliance<a class="headerlink" href="#62-regulatory-compliance" title="Permanent link">¶</a></h3>
 <ul>
-<li><strong>Medical/Financial</strong>: TabBiaxial, TabDPT (reproducible, auditable)</li>
+<li><strong>Medical/Financial</strong>: OrionMSP, OrionBix, TabDPT (reproducible, auditable)</li>
 <li><strong>General</strong>: Any model with saved checkpoints and logged hyperparameters</li>
 </ul>
-<h3 id="63-transfer-learning">6.3 Transfer Learning<a class="headerlink" href="#63-transfer-learning" title="Permanent link">&para;</a></h3>
+<h3 id="63-transfer-learning">6.3 Transfer Learning<a class="headerlink" href="#63-transfer-learning" title="Permanent link">¶</a></h3>
 <ul>
 <li><strong>Best for Transfer</strong>: TabDPT (large pre-training corpus)</li>
 <li><strong>Moderate Transfer</strong>: TabICL, ContextTab</li>
 <li><strong>Limited Transfer</strong>: TabPFN (task-specific priors)</li>
 </ul>
-<hr />
-<h2 id="7-next-steps">7. Next Steps<a class="headerlink" href="#7-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="7-next-steps">7. Next Steps<a class="headerlink" href="#7-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../pipeline-overview/">Pipeline Overview</a> - Learn the TabularPipeline API</li>
 <li><a href="../../models/overview/">Model Documentation</a> - Detailed model specifications</li>
 <li><a href="../leaderboard/">TabularLeaderboard</a> - Compare models systematically</li>
 </ul>
-<hr />
+<hr/>
 <p>Select your model wisely, and iterate based on your specific requirements and constraints!</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
 </html>

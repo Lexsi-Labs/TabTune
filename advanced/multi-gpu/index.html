@@ -1,444 +1,284 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>Multi-GPU Training: Scaling TabTune Across Multiple GPUs - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Multi-GPU Training - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../user-guide/leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/advanced/multi-gpu.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#multi-gpu-training-scaling-tabtune-across-multiple-gpus">Multi-GPU Training: Scaling TabTune Across Multiple GPUs</a></li>
-            <li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
-                
-            <li class="second-level"><a href="#2-multi-gpu-fundamentals">2. Multi-GPU Fundamentals</a></li>
-                
-                <li class="third-level"><a href="#21-parallelism-strategies">2.1 Parallelism Strategies</a></li>
-                <li class="third-level"><a href="#22-data-parallelism-most-common">2.2 Data Parallelism (Most Common)</a></li>
-            <li class="second-level"><a href="#3-setup-requirements">3. Setup Requirements</a></li>
-                
-                <li class="third-level"><a href="#31-hardware-prerequisites">3.1 Hardware Prerequisites</a></li>
-                <li class="third-level"><a href="#32-software-stack">3.2 Software Stack</a></li>
-            <li class="second-level"><a href="#4-data-parallel-training">4. Data Parallel Training</a></li>
-                
-                <li class="third-level"><a href="#41-dataparallel-simpler-single-machine">4.1 DataParallel (Simpler, Single-Machine)</a></li>
-                <li class="third-level"><a href="#42-distributeddataparallel-recommended">4.2 DistributedDataParallel (Recommended)</a></li>
-            <li class="second-level"><a href="#5-launch-methods">5. Launch Methods</a></li>
-                
-                <li class="third-level"><a href="#51-torchrun-pytorch-110">5.1 torchrun (PyTorch 1.10+)</a></li>
-                <li class="third-level"><a href="#52-torchdistributedlaunch-legacy">5.2 torch.distributed.launch (Legacy)</a></li>
-                <li class="third-level"><a href="#53-manual-launch">5.3 Manual Launch</a></li>
-            <li class="second-level"><a href="#6-training-scripts">6. Training Scripts</a></li>
-                
-                <li class="third-level"><a href="#61-complete-distributed-training-script">6.1 Complete Distributed Training Script</a></li>
-                <li class="third-level"><a href="#62-synchronization-across-ranks">6.2 Synchronization Across Ranks</a></li>
-            <li class="second-level"><a href="#7-performance-optimization">7. Performance Optimization</a></li>
-                
-                <li class="third-level"><a href="#71-gradient-accumulation">7.1 Gradient Accumulation</a></li>
-                <li class="third-level"><a href="#72-overlapping-computation-communication">7.2 Overlapping Computation &amp; Communication</a></li>
-                <li class="third-level"><a href="#73-mixed-precision-with-distributed-training">7.3 Mixed Precision with Distributed Training</a></li>
-            <li class="second-level"><a href="#8-scaling-efficiency">8. Scaling Efficiency</a></li>
-                
-                <li class="third-level"><a href="#81-linear-scaling-rule">8.1 Linear Scaling Rule</a></li>
-                <li class="third-level"><a href="#82-speedup-analysis">8.2 Speedup Analysis</a></li>
-            <li class="second-level"><a href="#9-distributed-challenges-solutions">9. Distributed Challenges &amp; Solutions</a></li>
-                
-                <li class="third-level"><a href="#91-communication-overhead">9.1 Communication Overhead</a></li>
-                <li class="third-level"><a href="#92-load-imbalance">9.2 Load Imbalance</a></li>
-                <li class="third-level"><a href="#93-gradient-divergence">9.3 Gradient Divergence</a></li>
-            <li class="second-level"><a href="#10-complete-multi-gpu-example">10. Complete Multi-GPU Example</a></li>
-                
-            <li class="second-level"><a href="#11-debugging-multi-gpu-issues">11. Debugging Multi-GPU Issues</a></li>
-                
-                <li class="third-level"><a href="#111-common-problems">11.1 Common Problems</a></li>
-            <li class="second-level"><a href="#12-best-practices">12. Best Practices</a></li>
-                
-                <li class="third-level"><a href="#dos">✅ Do's</a></li>
-                <li class="third-level"><a href="#donts">❌ Don'ts</a></li>
-            <li class="second-level"><a href="#13-performance-benchmarks">13. Performance Benchmarks</a></li>
-                
-            <li class="second-level"><a href="#14-quick-reference">14. Quick Reference</a></li>
-                
-            <li class="second-level"><a href="#15-next-steps">15. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../memory-optimization/">Memory Optimization</a>
+</li>
+<li class="active">
+<a href="./">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../memory-optimization/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../api/pipeline/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/advanced/multi-gpu.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#multi-gpu-training-scaling-tabtune-across-multiple-gpus">Multi-GPU Training: Scaling TabTune Across Multiple GPUs</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-multi-gpu-fundamentals">2. Multi-GPU Fundamentals</a></li>
+<li class="third-level"><a href="#21-parallelism-strategies">2.1 Parallelism Strategies</a></li>
+<li class="third-level"><a href="#22-data-parallelism-most-common">2.2 Data Parallelism (Most Common)</a></li>
+<li class="second-level"><a href="#3-setup-requirements">3. Setup Requirements</a></li>
+<li class="third-level"><a href="#31-hardware-prerequisites">3.1 Hardware Prerequisites</a></li>
+<li class="third-level"><a href="#32-software-stack">3.2 Software Stack</a></li>
+<li class="second-level"><a href="#4-data-parallel-training">4. Data Parallel Training</a></li>
+<li class="third-level"><a href="#41-dataparallel-simpler-single-machine">4.1 DataParallel (Simpler, Single-Machine)</a></li>
+<li class="third-level"><a href="#42-distributeddataparallel-recommended">4.2 DistributedDataParallel (Recommended)</a></li>
+<li class="second-level"><a href="#5-launch-methods">5. Launch Methods</a></li>
+<li class="third-level"><a href="#51-torchrun-pytorch-110">5.1 torchrun (PyTorch 1.10+)</a></li>
+<li class="third-level"><a href="#52-torchdistributedlaunch-legacy">5.2 torch.distributed.launch (Legacy)</a></li>
+<li class="third-level"><a href="#53-manual-launch">5.3 Manual Launch</a></li>
+<li class="second-level"><a href="#6-training-scripts">6. Training Scripts</a></li>
+<li class="third-level"><a href="#61-complete-distributed-training-script">6.1 Complete Distributed Training Script</a></li>
+<li class="third-level"><a href="#62-synchronization-across-ranks">6.2 Synchronization Across Ranks</a></li>
+<li class="second-level"><a href="#7-performance-optimization">7. Performance Optimization</a></li>
+<li class="third-level"><a href="#71-gradient-accumulation">7.1 Gradient Accumulation</a></li>
+<li class="third-level"><a href="#72-overlapping-computation-communication">7.2 Overlapping Computation &amp; Communication</a></li>
+<li class="third-level"><a href="#73-mixed-precision-with-distributed-training">7.3 Mixed Precision with Distributed Training</a></li>
+<li class="second-level"><a href="#8-scaling-efficiency">8. Scaling Efficiency</a></li>
+<li class="third-level"><a href="#81-linear-scaling-rule">8.1 Linear Scaling Rule</a></li>
+<li class="third-level"><a href="#82-speedup-analysis">8.2 Speedup Analysis</a></li>
+<li class="second-level"><a href="#9-distributed-challenges-solutions">9. Distributed Challenges &amp; Solutions</a></li>
+<li class="third-level"><a href="#91-communication-overhead">9.1 Communication Overhead</a></li>
+<li class="third-level"><a href="#92-load-imbalance">9.2 Load Imbalance</a></li>
+<li class="third-level"><a href="#93-gradient-divergence">9.3 Gradient Divergence</a></li>
+<li class="second-level"><a href="#10-complete-multi-gpu-example">10. Complete Multi-GPU Example</a></li>
+<li class="second-level"><a href="#11-debugging-multi-gpu-issues">11. Debugging Multi-GPU Issues</a></li>
+<li class="third-level"><a href="#111-common-problems">11.1 Common Problems</a></li>
+<li class="second-level"><a href="#12-best-practices">12. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#13-performance-benchmarks">13. Performance Benchmarks</a></li>
+<li class="second-level"><a href="#14-quick-reference">14. Quick Reference</a></li>
+<li class="second-level"><a href="#15-next-steps">15. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="multi-gpu-training-scaling-tabtune-across-multiple-gpus">Multi-GPU Training: Scaling TabTune Across Multiple GPUs<a class="headerlink" href="#multi-gpu-training-scaling-tabtune-across-multiple-gpus" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="multi-gpu-training-scaling-tabtune-across-multiple-gpus">Multi-GPU Training: Scaling TabTune Across Multiple GPUs<a class="headerlink" href="#multi-gpu-training-scaling-tabtune-across-multiple-gpus" title="Permanent link">¶</a></h1>
 <p>This document provides comprehensive guidance on leveraging multiple GPUs for distributed training with TabTune, enabling faster training and handling of larger models and datasets.</p>
-<hr />
-<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
 <p>Multi-GPU training accelerates TabTune workflows through:</p>
 <ul>
 <li><strong>Data Parallelism</strong>: Distribute data across GPUs</li>
@@ -447,30 +287,30 @@
 <li><strong>Scaling</strong>: Near-linear speedup with multiple GPUs</li>
 </ul>
 <p>This guide covers setup, strategies, and best practices.</p>
-<hr />
-<h2 id="2-multi-gpu-fundamentals">2. Multi-GPU Fundamentals<a class="headerlink" href="#2-multi-gpu-fundamentals" title="Permanent link">&para;</a></h2>
-<h3 id="21-parallelism-strategies">2.1 Parallelism Strategies<a class="headerlink" href="#21-parallelism-strategies" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>flowchart TD
+<hr/>
+<h2 id="2-multi-gpu-fundamentals">2. Multi-GPU Fundamentals<a class="headerlink" href="#2-multi-gpu-fundamentals" title="Permanent link">¶</a></h2>
+<h3 id="21-parallelism-strategies">2.1 Parallelism Strategies<a class="headerlink" href="#21-parallelism-strategies" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart TD
     A[Multi-GPU Training] --&gt; B[Data Parallelism]
     A --&gt; C[Model Parallelism]
     A --&gt; D[Pipeline Parallelism]
 
-    B --&gt; B1[&quot;Each GPU gets data batch&quot;]
-    B --&gt; B2[&quot;Model replicated on each GPU&quot;]
-    B --&gt; B3[&quot;Gradients averaged across GPUs&quot;]
+    B --&gt; B1["Each GPU gets data batch"]
+    B --&gt; B2["Model replicated on each GPU"]
+    B --&gt; B3["Gradients averaged across GPUs"]
 
-    C --&gt; C1[&quot;Model layers split across GPUs&quot;]
-    C --&gt; C2[&quot;Each GPU processes different layers&quot;]
-    C --&gt; C3[&quot;Communication between GPUs&quot;]
+    C --&gt; C1["Model layers split across GPUs"]
+    C --&gt; C2["Each GPU processes different layers"]
+    C --&gt; C3["Communication between GPUs"]
 
-    D --&gt; D1[&quot;Stages of model pipeline&quot;]
-    D --&gt; D2[&quot;Different stages on different GPUs&quot;]
-    D --&gt; D3[&quot;Micro-batching for efficiency&quot;]
-</code></pre></div>
-<h3 id="22-data-parallelism-most-common">2.2 Data Parallelism (Most Common)<a class="headerlink" href="#22-data-parallelism-most-common" title="Permanent link">&para;</a></h3>
+    D --&gt; D1["Stages of model pipeline"]
+    D --&gt; D2["Different stages on different GPUs"]
+    D --&gt; D3["Micro-batching for efficiency"]
+</div>
+<h3 id="22-data-parallelism-most-common">2.2 Data Parallelism (Most Common)<a class="headerlink" href="#22-data-parallelism-most-common" title="Permanent link">¶</a></h3>
 <p><strong>Recommended for TabTune</strong> - simplest and most effective:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Single GPU training</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">)</span>
 <span class="c1"># Loss: 100% on GPU 0</span>
 
 <span class="c1"># Data parallel (2 GPUs)</span>
@@ -479,83 +319,83 @@
 <span class="c1"># GPU 1: sub-batch 2</span>
 <span class="c1"># Gradients averaged</span>
 </code></pre></div>
-<hr />
-<h2 id="3-setup-requirements">3. Setup Requirements<a class="headerlink" href="#3-setup-requirements" title="Permanent link">&para;</a></h2>
-<h3 id="31-hardware-prerequisites">3.1 Hardware Prerequisites<a class="headerlink" href="#31-hardware-prerequisites" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="3-setup-requirements">3. Setup Requirements<a class="headerlink" href="#3-setup-requirements" title="Permanent link">¶</a></h2>
+<h3 id="31-hardware-prerequisites">3.1 Hardware Prerequisites<a class="headerlink" href="#31-hardware-prerequisites" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="c1"># Check GPU availability</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPUs available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current GPU: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GPUs available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current GPU: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()):</span>
     <span class="n">gpu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_properties</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">gpu</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">gpu</span><span class="o">.</span><span class="n">total_memory</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">GB)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GPU </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">gpu</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">gpu</span><span class="o">.</span><span class="n">total_memory</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">GB)"</span><span class="p">)</span>
 
 <span class="c1"># Recommended</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Availability check:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NCCL available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_nccl_available</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Availability check:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NCCL available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_nccl_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="32-software-stack">3.2 Software Stack<a class="headerlink" href="#32-software-stack" title="Permanent link">&para;</a></h3>
+<h3 id="32-software-stack">3.2 Software Stack<a class="headerlink" href="#32-software-stack" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Install required packages</span>
 pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
 pip<span class="w"> </span>install<span class="w"> </span>torch-distributed-rpc
 pip<span class="w"> </span>install<span class="w"> </span>horovod<span class="w">  </span><span class="c1"># Optional: for advanced distributed training</span>
 pip<span class="w"> </span>install<span class="w"> </span>pytorch-lightning<span class="w">  </span><span class="c1"># Optional: simplified multi-GPU setup</span>
 </code></pre></div>
-<hr />
-<h2 id="4-data-parallel-training">4. Data Parallel Training<a class="headerlink" href="#4-data-parallel-training" title="Permanent link">&para;</a></h2>
-<h3 id="41-dataparallel-simpler-single-machine">4.1 DataParallel (Simpler, Single-Machine)<a class="headerlink" href="#41-dataparallel-simpler-single-machine" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="4-data-parallel-training">4. Data Parallel Training<a class="headerlink" href="#4-data-parallel-training" title="Permanent link">¶</a></h2>
+<h3 id="41-dataparallel-simpler-single-machine">4.1 DataParallel (Simpler, Single-Machine)<a class="headerlink" href="#41-dataparallel-simpler-single-machine" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DataParallelWrapper</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap TabTune pipeline with DataParallel.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Wrap TabTune pipeline with DataParallel."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">device_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_ids</span><span class="o">=</span><span class="n">device_ids</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device_ids</span> <span class="o">=</span> <span class="n">device_ids</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Training with DataParallel.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Training with DataParallel."""</span>
         <span class="c1"># Batch automatically split across GPUs</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_test</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inference on primary GPU.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Inference on primary GPU."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
 <span class="c1"># Usage</span>
 <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">DataParallelWrapper</span><span class="p">(</span>
-        <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">),</span>
+        <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">),</span>
         <span class="n">device_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>  <span class="c1"># Use GPUs 0-3</span>
     <span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">)</span>
 
 <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="42-distributeddataparallel-recommended">4.2 DistributedDataParallel (Recommended)<a class="headerlink" href="#42-distributeddataparallel-recommended" title="Permanent link">&para;</a></h3>
+<h3 id="42-distributeddataparallel-recommended">4.2 DistributedDataParallel (Recommended)<a class="headerlink" href="#42-distributeddataparallel-recommended" title="Permanent link">¶</a></h3>
 <p>More efficient than DataParallel:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistributedDataParallel</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">setup_distributed</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Setup distributed training environment.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Setup distributed training environment."""</span>
     <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
-        <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;nccl&#39;</span><span class="p">,</span>  <span class="c1"># NVIDIA Collective Communications Library</span>
-        <span class="n">init_method</span><span class="o">=</span><span class="s1">&#39;env://&#39;</span>
+        <span class="n">backend</span><span class="o">=</span><span class="s1">'nccl'</span><span class="p">,</span>  <span class="c1"># NVIDIA Collective Communications Library</span>
+        <span class="n">init_method</span><span class="o">=</span><span class="s1">'env://'</span>
     <span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cleanup distributed environment.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Cleanup distributed environment."""</span>
     <span class="n">dist</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">train_distributed</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Distributed training.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Distributed training."""</span>
     <span class="n">setup_distributed</span><span class="p">()</span>
 
     <span class="c1"># Get process rank and world size</span>
@@ -563,12 +403,12 @@ pip<span class="w"> </span>install<span class="w"> </span>pytorch-lightning<span
     <span class="n">world_size</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
 
     <span class="c1"># Create model on current device</span>
-    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
-        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span><span class="p">}</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'device'</span><span class="p">:</span> <span class="n">device</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="c1"># Wrap with DistributedDataParallel</span>
@@ -581,9 +421,9 @@ pip<span class="w"> </span>install<span class="w"> </span>pytorch-lightning<span
 
 <span class="c1"># Launch with: python -m torch.distributed.launch --nproc_per_node=4 script.py</span>
 </code></pre></div>
-<hr />
-<h2 id="5-launch-methods">5. Launch Methods<a class="headerlink" href="#5-launch-methods" title="Permanent link">&para;</a></h2>
-<h3 id="51-torchrun-pytorch-110">5.1 torchrun (PyTorch 1.10+)<a class="headerlink" href="#51-torchrun-pytorch-110" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="5-launch-methods">5. Launch Methods<a class="headerlink" href="#5-launch-methods" title="Permanent link">¶</a></h2>
+<h3 id="51-torchrun-pytorch-110">5.1 torchrun (PyTorch 1.10+)<a class="headerlink" href="#51-torchrun-pytorch-110" title="Permanent link">¶</a></h3>
 <p><strong>Recommended method</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Single-machine, 4 GPUs</span>
 torchrun<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">4</span><span class="w"> </span>train_script.py
@@ -597,7 +437,7 @@ torchrun<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--master_port<span class="o">=</span><span class="m">29500</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>train_script.py
 </code></pre></div>
-<h3 id="52-torchdistributedlaunch-legacy">5.2 torch.distributed.launch (Legacy)<a class="headerlink" href="#52-torchdistributedlaunch-legacy" title="Permanent link">&para;</a></h3>
+<h3 id="52-torchdistributedlaunch-legacy">5.2 torch.distributed.launch (Legacy)<a class="headerlink" href="#52-torchdistributedlaunch-legacy" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Single-machine, 4 GPUs</span>
 python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--nproc_per_node<span class="o">=</span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
@@ -610,7 +450,7 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="w">  </span>--learning_rate<span class="w"> </span>2e-5<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--epochs<span class="w"> </span><span class="m">5</span>
 </code></pre></div>
-<h3 id="53-manual-launch">5.3 Manual Launch<a class="headerlink" href="#53-manual-launch" title="Permanent link">&para;</a></h3>
+<h3 id="53-manual-launch">5.3 Manual Launch<a class="headerlink" href="#53-manual-launch" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Terminal 1: GPU 0</span>
 <span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>python<span class="w"> </span>train_script.py
 
@@ -623,9 +463,9 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="c1"># Terminal 4: GPU 3</span>
 <span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>python<span class="w"> </span>train_script.py
 </code></pre></div>
-<hr />
-<h2 id="6-training-scripts">6. Training Scripts<a class="headerlink" href="#6-training-scripts" title="Permanent link">&para;</a></h2>
-<h3 id="61-complete-distributed-training-script">6.1 Complete Distributed Training Script<a class="headerlink" href="#61-complete-distributed-training-script" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="6-training-scripts">6. Training Scripts<a class="headerlink" href="#6-training-scripts" title="Permanent link">¶</a></h2>
+<h3 id="61-complete-distributed-training-script">6.1 Complete Distributed Training Script<a class="headerlink" href="#61-complete-distributed-training-script" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
@@ -634,20 +474,20 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main training function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Main training function."""</span>
 
     <span class="c1"># Initialize distributed training</span>
-    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;nccl&#39;</span><span class="p">)</span>
+    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">'nccl'</span><span class="p">)</span>
     <span class="n">rank</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
     <span class="n">world_size</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
 
     <span class="c1"># Set device</span>
-    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
     <span class="c1"># Print rank info</span>
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training on </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> GPUs&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Training on </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> GPUs"</span><span class="p">)</span>
 
     <span class="c1"># Load data</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
@@ -669,12 +509,12 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
     <span class="c1"># Create model</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
         <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-            <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">2e-5</span>
+            <span class="s1">'device'</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+            <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -686,26 +526,26 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
     <span class="c1"># Training</span>
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting training...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Starting training..."</span><span class="p">)</span>
 
     <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">train_sampler</span><span class="o">.</span><span class="n">indices</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">train_sampler</span><span class="o">.</span><span class="n">indices</span><span class="p">])</span>
 
     <span class="c1"># Evaluation on rank 0 only</span>
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># Cleanup</span>
     <span class="n">dist</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="62-synchronization-across-ranks">6.2 Synchronization Across Ranks<a class="headerlink" href="#62-synchronization-across-ranks" title="Permanent link">&para;</a></h3>
+<h3 id="62-synchronization-across-ranks">6.2 Synchronization Across Ranks<a class="headerlink" href="#62-synchronization-across-ranks" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_with_sync</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Training with synchronization points.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Training with synchronization points."""</span>
 
-    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;nccl&#39;</span><span class="p">)</span>
+    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">'nccl'</span><span class="p">)</span>
     <span class="n">rank</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
 
     <span class="c1"># Training</span>
@@ -718,7 +558,7 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
         <span class="c1"># Evaluation (on rank 0 only)</span>
         <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">metrics</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Broadcast best checkpoint from rank 0</span>
         <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -734,12 +574,12 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
     <span class="n">dist</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span>
 </code></pre></div>
-<hr />
-<h2 id="7-performance-optimization">7. Performance Optimization<a class="headerlink" href="#7-performance-optimization" title="Permanent link">&para;</a></h2>
-<h3 id="71-gradient-accumulation">7.1 Gradient Accumulation<a class="headerlink" href="#71-gradient-accumulation" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="7-performance-optimization">7. Performance Optimization<a class="headerlink" href="#7-performance-optimization" title="Permanent link">¶</a></h2>
+<h3 id="71-gradient-accumulation">7.1 Gradient Accumulation<a class="headerlink" href="#71-gradient-accumulation" title="Permanent link">¶</a></h3>
 <p>Increase effective batch size without memory increase:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_with_accumulation</span><span class="p">(</span><span class="n">num_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Training with gradient accumulation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Training with gradient accumulation."""</span>
 
     <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
 
@@ -756,9 +596,9 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
                 <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
                 <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="72-overlapping-computation-communication">7.2 Overlapping Computation &amp; Communication<a class="headerlink" href="#72-overlapping-computation-communication" title="Permanent link">&para;</a></h3>
+<h3 id="72-overlapping-computation-communication">7.2 Overlapping Computation &amp; Communication<a class="headerlink" href="#72-overlapping-computation-communication" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_with_overlap</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Training with async communication.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Training with async communication."""</span>
 
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
@@ -781,11 +621,11 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
             <span class="c1"># Update weights</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="73-mixed-precision-with-distributed-training">7.3 Mixed Precision with Distributed Training<a class="headerlink" href="#73-mixed-precision-with-distributed-training" title="Permanent link">&para;</a></h3>
+<h3 id="73-mixed-precision-with-distributed-training">7.3 Mixed Precision with Distributed Training<a class="headerlink" href="#73-mixed-precision-with-distributed-training" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch.cuda.amp</span><span class="w"> </span><span class="kn">import</span> <span class="n">autocast</span><span class="p">,</span> <span class="n">GradScaler</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">train_mixed_precision</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multi-GPU training with mixed precision.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Multi-GPU training with mixed precision."""</span>
 
     <span class="n">scaler</span> <span class="o">=</span> <span class="n">GradScaler</span><span class="p">()</span>
 
@@ -807,9 +647,9 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
             <span class="n">scaler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
             <span class="n">scaler</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </code></pre></div>
-<hr />
-<h2 id="8-scaling-efficiency">8. Scaling Efficiency<a class="headerlink" href="#8-scaling-efficiency" title="Permanent link">&para;</a></h2>
-<h3 id="81-linear-scaling-rule">8.1 Linear Scaling Rule<a class="headerlink" href="#81-linear-scaling-rule" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="8-scaling-efficiency">8. Scaling Efficiency<a class="headerlink" href="#8-scaling-efficiency" title="Permanent link">¶</a></h2>
+<h3 id="81-linear-scaling-rule">8.1 Linear Scaling Rule<a class="headerlink" href="#81-linear-scaling-rule" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Optimal learning rate for N GPUs</span>
 <span class="n">base_learning_rate</span> <span class="o">=</span> <span class="mf">2e-5</span>
 <span class="n">num_gpus</span> <span class="o">=</span> <span class="mi">4</span>
@@ -820,19 +660,19 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="c1"># Or more conservatively:</span>
 <span class="n">optimal_learning_rate</span> <span class="o">=</span> <span class="n">base_learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_gpus</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="82-speedup-analysis">8.2 Speedup Analysis<a class="headerlink" href="#82-speedup-analysis" title="Permanent link">&para;</a></h3>
+<h3 id="82-speedup-analysis">8.2 Speedup Analysis<a class="headerlink" href="#82-speedup-analysis" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">analyze_scaling</span><span class="p">(</span><span class="n">times_single_gpu</span><span class="p">,</span> <span class="n">times_multi_gpu</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze multi-GPU speedup.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Analyze multi-GPU speedup."""</span>
 
     <span class="n">num_gpus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">times_multi_gpu</span><span class="p">)</span>
 
     <span class="n">speedup</span> <span class="o">=</span> <span class="n">times_single_gpu</span> <span class="o">/</span> <span class="n">times_multi_gpu</span>
     <span class="n">efficiency</span> <span class="o">=</span> <span class="n">speedup</span> <span class="o">/</span> <span class="n">num_gpus</span>  <span class="c1"># Ideally 1.0 (100%)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU Count: </span><span class="si">{</span><span class="n">num_gpus</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time (1 GPU): </span><span class="si">{</span><span class="n">times_single_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time (</span><span class="si">{</span><span class="n">num_gpus</span><span class="si">}</span><span class="s2"> GPUs): </span><span class="si">{</span><span class="n">times_multi_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Speedup: </span><span class="si">{</span><span class="n">speedup</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x (</span><span class="si">{</span><span class="n">efficiency</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% efficiency)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GPU Count: </span><span class="si">{</span><span class="n">num_gpus</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Time (1 GPU): </span><span class="si">{</span><span class="n">times_single_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Time (</span><span class="si">{</span><span class="n">num_gpus</span><span class="si">}</span><span class="s2"> GPUs): </span><span class="si">{</span><span class="n">times_multi_gpu</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Speedup: </span><span class="si">{</span><span class="n">speedup</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x (</span><span class="si">{</span><span class="n">efficiency</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% efficiency)"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">speedup</span><span class="p">,</span> <span class="n">efficiency</span>
 
@@ -841,30 +681,30 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="c1"># 4 GPUs: 3.5x speedup (87.5% efficiency)</span>
 <span class="c1"># 8 GPUs: 6.5x speedup (81% efficiency)</span>
 </code></pre></div>
-<hr />
-<h2 id="9-distributed-challenges-solutions">9. Distributed Challenges &amp; Solutions<a class="headerlink" href="#9-distributed-challenges-solutions" title="Permanent link">&para;</a></h2>
-<h3 id="91-communication-overhead">9.1 Communication Overhead<a class="headerlink" href="#91-communication-overhead" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="9-distributed-challenges-solutions">9. Distributed Challenges &amp; Solutions<a class="headerlink" href="#9-distributed-challenges-solutions" title="Permanent link">¶</a></h2>
+<h3 id="91-communication-overhead">9.1 Communication Overhead<a class="headerlink" href="#91-communication-overhead" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Problem: Communication becomes bottleneck</span>
 <span class="c1"># Solution 1: Larger batch size</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>  <span class="c1"># Instead of 32</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>  <span class="c1"># Instead of 32</span>
 <span class="p">}</span>
 
 <span class="c1"># Solution 2: Gradient accumulation</span>
 <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-    <span class="s1">&#39;gradient_accumulation_steps&#39;</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Effective: 128</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s1">'gradient_accumulation_steps'</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Effective: 128</span>
 <span class="p">}</span>
 
 <span class="c1"># Solution 3: Reduce communication frequency</span>
 <span class="c1"># Communicate every N steps instead of every step</span>
 </code></pre></div>
-<h3 id="92-load-imbalance">9.2 Load Imbalance<a class="headerlink" href="#92-load-imbalance" title="Permanent link">&para;</a></h3>
+<h3 id="92-load-imbalance">9.2 Load Imbalance<a class="headerlink" href="#92-load-imbalance" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Problem: Some GPUs finish before others</span>
 <span class="c1"># Solution: Dynamic load balancing</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">balanced_sampler</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">num_replicas</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create balanced sampler across ranks.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Create balanced sampler across ranks."""</span>
 
     <span class="c1"># Ensure each rank gets similar amount of work</span>
     <span class="n">samples_per_rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">//</span> <span class="n">num_replicas</span>
@@ -880,12 +720,12 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
         <span class="n">rank</span><span class="o">=</span><span class="n">rank</span>
     <span class="p">)</span>
 </code></pre></div>
-<h3 id="93-gradient-divergence">9.3 Gradient Divergence<a class="headerlink" href="#93-gradient-divergence" title="Permanent link">&para;</a></h3>
+<h3 id="93-gradient-divergence">9.3 Gradient Divergence<a class="headerlink" href="#93-gradient-divergence" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Problem: Different GPUs compute different gradients</span>
 <span class="c1"># Solution: Proper synchronization</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">synchronized_training</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure all ranks have synchronized gradients.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Ensure all ranks have synchronized gradients."""</span>
 
     <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
         <span class="c1"># Compute gradients</span>
@@ -900,10 +740,10 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
         <span class="c1"># Update</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </code></pre></div>
-<hr />
-<h2 id="10-complete-multi-gpu-example">10. Complete Multi-GPU Example<a class="headerlink" href="#10-complete-multi-gpu-example" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="10-complete-multi-gpu-example">10. Complete Multi-GPU Example<a class="headerlink" href="#10-complete-multi-gpu-example" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
-<span class="sd">&quot;&quot;&quot;Multi-GPU training example.&quot;&quot;&quot;</span>
+<span class="sd">"""Multi-GPU training example."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -914,19 +754,19 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--epochs&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--batch_size&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--learning_rate&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">2e-5</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">'--epochs'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">'--batch_size'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">'--learning_rate'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">2e-5</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
     <span class="c1"># Initialize distributed training</span>
-    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;nccl&#39;</span><span class="p">)</span>
+    <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">'nccl'</span><span class="p">)</span>
     <span class="n">rank</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
     <span class="n">world_size</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
-    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cuda:</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting training on </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> GPUs&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Starting training on </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> GPUs"</span><span class="p">)</span>
 
     <span class="c1"># Load data</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">()</span>
@@ -936,13 +776,13 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
     <span class="c1"># Create pipeline</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
         <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-            <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
-            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="n">scaled_lr</span><span class="p">,</span>
-            <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">batch_size</span>
+            <span class="s1">'device'</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+            <span class="s1">'epochs'</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="n">scaled_lr</span><span class="p">,</span>
+            <span class="s1">'batch_size'</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -954,7 +794,7 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 
     <span class="c1"># Training</span>
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training with LR=</span><span class="si">{</span><span class="n">scaled_lr</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, batch_size=</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Training with LR=</span><span class="si">{</span><span class="n">scaled_lr</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, batch_size=</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
@@ -964,26 +804,26 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
     <span class="c1"># Evaluation on primary GPU only</span>
     <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Final accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">dist</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 <p><strong>Launch:</strong>
 <div class="highlight"><pre><span></span><code>torchrun<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">4</span><span class="w"> </span>train_distributed.py<span class="w"> </span>--epochs<span class="w"> </span><span class="m">5</span><span class="w"> </span>--batch_size<span class="w"> </span><span class="m">32</span>
 </code></pre></div></p>
-<hr />
-<h2 id="11-debugging-multi-gpu-issues">11. Debugging Multi-GPU Issues<a class="headerlink" href="#11-debugging-multi-gpu-issues" title="Permanent link">&para;</a></h2>
-<h3 id="111-common-problems">11.1 Common Problems<a class="headerlink" href="#111-common-problems" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="11-debugging-multi-gpu-issues">11. Debugging Multi-GPU Issues<a class="headerlink" href="#11-debugging-multi-gpu-issues" title="Permanent link">¶</a></h2>
+<h3 id="111-common-problems">11.1 Common Problems<a class="headerlink" href="#111-common-problems" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Problem: Hanging/deadlock</span>
 <span class="c1"># Solution: Use timeout and debug flags</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;NCCL_DEBUG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;INFO&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TORCH_DISTRIBUTED_DEBUG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DETAIL&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'NCCL_DEBUG'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'INFO'</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'TORCH_DISTRIBUTED_DEBUG'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'DETAIL'</span>
 
 <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
-    <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;nccl&#39;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s1">'nccl'</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 <span class="p">)</span>
 
@@ -991,15 +831,15 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <span class="c1"># Solution: Check and balance</span>
 <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">world_size</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_properties</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">total_memory</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">GB&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GPU </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_properties</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">total_memory</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">GB"</span><span class="p">)</span>
 
 <span class="c1"># Problem: Rank synchronization issues</span>
 <span class="c1"># Solution: Add explicit barriers</span>
 <span class="n">dist</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>  <span class="c1"># Wait for all ranks</span>
 </code></pre></div>
-<hr />
-<h2 id="12-best-practices">12. Best Practices<a class="headerlink" href="#12-best-practices" title="Permanent link">&para;</a></h2>
-<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="12-best-practices">12. Best Practices<a class="headerlink" href="#12-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
 <ul>
 <li>✅ Use DistributedDataParallel over DataParallel</li>
 <li>✅ Scale learning rate with batch size</li>
@@ -1009,7 +849,7 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <li>✅ Monitor all GPU memory usage</li>
 <li>✅ Test on fewer GPUs first</li>
 </ul>
-<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
 <ul>
 <li>❌ Don't use DataParallel for multi-machine</li>
 <li>❌ Don't forget to set environment variables</li>
@@ -1018,8 +858,8 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 <li>❌ Don't over-subscribe GPU memory</li>
 <li>❌ Don't change data on different ranks</li>
 </ul>
-<hr />
-<h2 id="13-performance-benchmarks">13. Performance Benchmarks<a class="headerlink" href="#13-performance-benchmarks" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="13-performance-benchmarks">13. Performance Benchmarks<a class="headerlink" href="#13-performance-benchmarks" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code>Dataset: 500K samples, TabICL model
 
 1 GPU:
@@ -1041,8 +881,8 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
   Memory: 1.5 GB per GPU
   Efficiency: 75%
 </code></pre></div>
-<hr />
-<h2 id="14-quick-reference">14. Quick Reference<a class="headerlink" href="#14-quick-reference" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="14-quick-reference">14. Quick Reference<a class="headerlink" href="#14-quick-reference" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -1079,114 +919,140 @@ python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.launch
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="15-next-steps">15. Next Steps<a class="headerlink" href="#15-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="15-next-steps">15. Next Steps<a class="headerlink" href="#15-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../memory-optimization/">Memory Optimization</a> - Memory management with DDP</li>
 <li><a href="../hyperparameter-tuning/">Hyperparameter Tuning</a> - Scaling learning rates</li>
 <li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - PEFT with DDP</li>
-<li><a href="../examples/benchmarking.md">Examples</a> - Multi-GPU benchmarks</li>
+<li><a href="../../examples/benchmarking/">Examples</a> - Multi-GPU benchmarks</li>
 </ul>
-<hr />
+<hr/>
 <p>Scale TabTune efficiently across multiple GPUs for production-grade training!</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
 </html>

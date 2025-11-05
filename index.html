@@ -1,448 +1,281 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="img/favicon.ico">
-
-    
-    <title>Home - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="css/base.min.css" rel="stylesheet">
-    <link href="css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="img/favicon.ico" rel="shortcut icon"/>
+<title>Home - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="css/base.min.css" rel="stylesheet"/>
+<link href="css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
-<body class="homepage" >
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href=".">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li class="active">
-                        <a href=".">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="user-guide/pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="user-guide/data-processing/">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="user-guide/tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="user-guide/model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="user-guide/saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="user-guide/leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="advanced/peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li class="disabled">
-                        <a rel="prev" >
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="next" href="getting-started/installation/">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/index.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<body class="homepage">
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href=".">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#tabtune-an-advanced-library-for-tabular-model-training-and-adaptation">TabTune - An Advanced Library for Tabular Model Training and Adaptation</a></li>
-            <li class="second-level"><a href="#overview">Overview</a></li>
-                
-            <li class="second-level"><a href="#whats-new-in-tabtune">🆕 What's New in TabTune</a></li>
-                
-            <li class="second-level"><a href="#core-features">⭐ Core Features</a></li>
-                
-            <li class="second-level"><a href="#supported-models">📦 Supported Models</a></li>
-                
-            <li class="second-level"><a href="#quick-start">⚡ Quick Start</a></li>
-                
-            <li class="second-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
-                
-            <li class="second-level"><a href="#explore-the-documentation">📑 Explore the Documentation</a></li>
-                
-            <li class="second-level"><a href="#example-notebooks">🏆 Example Notebooks</a></li>
-                
-            <li class="second-level"><a href="#project-structure">📂 Project Structure</a></li>
-                
-            <li class="second-level"><a href="#license">🗃️ License</a></li>
-                
-            <li class="second-level"><a href="#join-community-contribute">📫 Join Community / Contribute</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="models/overview/">Overview</a>
+</li>
+<li>
+<a href="models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="about/faq/">FAQ</a>
+</li>
+<li>
+<a href="about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/index.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#tabtune-v10-first-release">🚀 TabTune v1.0 - First Release</a></li>
+<li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
+<li class="first-level"><a href="#supported-models">📦 Supported Models</a></li>
+<li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
+<li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
+<li class="first-level"><a href="#explore-the-documentation">📑 Explore the Documentation</a></li>
+<li class="first-level"><a href="#example-notebooks">🏆 Example Notebooks</a></li>
+<li class="first-level"><a href="#project-structure">📂 Project Structure</a></li>
+<li class="first-level"><a href="#developed-by-lexsi-labs">🏢 Developed by Lexsi Labs</a></li>
+<li class="first-level"><a href="#license">🗃️ License</a></li>
+<li class="first-level"><a href="#join-community-contribute">📫 Join Community / Contribute</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="tabtune-an-advanced-library-for-tabular-model-training-and-adaptation">TabTune - An Advanced Library for Tabular Model Training and Adaptation<a class="headerlink" href="#tabtune-an-advanced-library-for-tabular-model-training-and-adaptation" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
 <div style="text-align: center;">
-  <img src="assets/tabtune.svg" alt="TabTune Logo" style="width: 600px; height: auto;" />
+<img alt="TabTune Logo" src="assets/tabtune.svg" style="width: 600px; height: auto;"/>
 </div>
-
-<p><a href="https://www.python.org/downloads/"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11+-blue.svg" /></a>
-<a href="https://pytorch.org/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-2.0+-red.svg" /></a>
-<a href="https://github.com/AryaXAI/TabTune"><img alt="Documentation" src="https://img.shields.io/badge/docs-available-green.svg" /></a></p>
-<hr />
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p><strong>TabTune</strong> is a powerful and flexible Python library designed to simplify the training and fine-tuning of modern foundation models on tabular data.<br />
+<hr/>
+<p><strong>TabTune</strong> is a powerful and flexible Python library designed to simplify the training and fine-tuning of modern foundation models on tabular data.<br/>
 It provides a high-level, scikit-learn-compatible API that abstracts away the complexities of data preprocessing, model-specific training loops, and benchmarking, letting you focus on delivering results.</p>
 <p>Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced architectures, TabTune streamlines your workflow for tabular deep learning.</p>
-<hr />
-<h2 id="whats-new-in-tabtune">🆕 What's New in TabTune<a class="headerlink" href="#whats-new-in-tabtune" title="Permanent link">&para;</a></h2>
-<p><strong>Major Features and Updates:</strong></p>
+<hr/>
+<h2 id="tabtune-v10-first-release">🚀 TabTune v1.0 - First Release<a class="headerlink" href="#tabtune-v10-first-release" title="Permanent link">¶</a></h2>
+<p><strong>Welcome to TabTune! This initial release provides a complete, production-ready framework for tabular foundation models.</strong></p>
+<p><strong>Core Components:</strong></p>
 <ul>
-<li><strong>PEFT (LoRA) Support:</strong> Parameter-efficient fine-tuning using LoRA adapters for most models.</li>
-<li><strong>Enhanced Tuning Strategies:</strong> Easily switch between <code>inference</code>, <code>base-ft</code>, and <code>peft</code> strategies.</li>
-<li><strong>TabularLeaderboard:</strong> Effortless model comparison and benchmarking on your custom splits.</li>
-<li><strong>New Models Added:</strong> TabBiaxial and TabDPT with full PEFT support.</li>
-<li><strong>PEFT Limitations:</strong> Experimental LoRA support for TabPFN and ContextTab.</li>
-<li><strong>Comprehensive Testing:</strong> Robust test suite covering all models and strategies.</li>
-<li><strong>Rich Documentation:</strong> Extensive examples and how-to guides.</li>
-<li><strong>Performance Optimizations:</strong> Improved memory footprint and training throughput.</li>
+<li><strong>Unified API (<code>TabularPipeline</code>):</strong> Single, scikit-learn-compatible interface for all models with <code>.fit()</code>, <code>.predict()</code>, <code>.save()</code>, and <code>.load()</code> methods.</li>
+<li><strong>Smart Data Processing (<code>DataProcessor</code>):</strong> Model-aware preprocessing that automatically handles imputation, scaling, categorical encoding, and feature transformations for each model.</li>
+<li><strong>Flexible Tuning (<code>TuningManager</code>):</strong> Three tuning strategies—zero-shot <code>inference</code>, supervised fine-tuning (<code>base-ft</code>) with full parameter updates, and memory-efficient <code>peft</code> (LoRA) adapters. Supports episodic meta-learning for ICL models.</li>
+<li><strong>Model Comparison (<code>TabularLeaderboard</code>):</strong> Systematic benchmarking tool for comparing multiple models and strategies on your datasets.</li>
 </ul>
-<hr />
-<h2 id="core-features">⭐ Core Features<a class="headerlink" href="#core-features" title="Permanent link">&para;</a></h2>
+<p><strong>Supported Models (7 Models):</strong></p>
+<ul>
+<li><strong>TabPFN-v2:</strong> Fast Bayesian inference for small datasets (&lt;10K rows) with experimental PEFT support.</li>
+<li><strong>TabICL:</strong> Scalable ICL with two-stage attention, full PEFT support, ideal for 10K-1M row datasets.</li>
+<li><strong>OrionMSP:</strong> Multi-scale prior ICL for balanced generalization on 50K-2M+ row datasets, full PEFT support.</li>
+<li><strong>OrionBix:</strong> Biaxial interaction expert for high-accuracy scenarios (50K-2M+ rows), full PEFT support.</li>
+<li><strong>TabDPT:</strong> Denoising transformer for very large datasets (100K-5M rows), full PEFT support.</li>
+<li><strong>Mitra:</strong> 2D cross-attention model for complex patterns and mixed data types, full PEFT support.</li>
+<li><strong>ContextTab:</strong> Semantics-aware ICL with text embedding integration, experimental PEFT support.</li>
+</ul>
+<p><strong>Key Capabilities:</strong></p>
+<ul>
+<li>✅ <strong>Multiple Training Paradigms:</strong> Supports supervised fine-tuning (SFT) with full parameter updates, episodic meta-learning for in-context learning models, and parameter-efficient PEFT strategies.</li>
+<li>✅ <strong>PEFT (LoRA) Support:</strong> Parameter-efficient fine-tuning for 5 out of 7 models (TabICL, OrionMSP, OrionBix, TabDPT, Mitra) with full support.</li>
+<li>✅ <strong>Meta-Learning Integration:</strong> Episodic training with support/query sets for ICL models (TabICL, OrionMSP, OrionBix, Mitra) enabling fast task adaptation.</li>
+<li>✅ <strong>Comprehensive Documentation:</strong> Extensive guides, API references, troubleshooting, and model-specific documentation.</li>
+<li>✅ <strong>Production Ready:</strong> Model serialization, reproducible training, and deployment-ready pipelines.</li>
+<li>✅ <strong>Extensible Architecture:</strong> Modular design for easy integration of custom processors and models.</li>
+</ul>
+<hr/>
+<h2 id="core-features">⭐ Core Features<a class="headerlink" href="#core-features" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Unified API:</strong> Single interface for model training, inference, and evaluation across multiple tabular model families.</li>
 <li><strong>Automated Preprocessing:</strong> Model-aware data processing for feature scaling, encoding, imputation, and transformation.</li>
@@ -450,8 +283,8 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Model Comparison:</strong> Built-in leaderboard for systematic benchmarking and strategy evaluation.</li>
 <li><strong>Extensible Design:</strong> Modular codebase for easy integration of custom data processors and models.</li>
 </ul>
-<hr />
-<h2 id="supported-models">📦 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="supported-models">📦 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -475,9 +308,15 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <td>✅ Full Support</td>
 </tr>
 <tr>
-<td><strong>TabBiaxial</strong></td>
+<td><strong>OrionMSP</strong></td>
 <td>Scalable ICL</td>
-<td>Custom Biaxial Attention</td>
+<td>Multi-Scale Prior (MSP) ICL</td>
+<td>✅ Full Support</td>
+</tr>
+<tr>
+<td><strong>Orion BIX</strong></td>
+<td>Scalable ICL</td>
+<td>Biaxial Interaction eXpert</td>
 <td>✅ Full Support</td>
 </tr>
 <tr>
@@ -500,13 +339,13 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </tr>
 </tbody>
 </table>
-<p><sup>✅ Full Support: Reliable LoRA integration<br>⚠️ Experimental: Known issues may occur; use base-ft if unstable</sup></p>
-<hr />
-<h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<p><sup>✅ Full Support: Reliable LoRA integration<br/>⚠️ Experimental: Known issues may occur; use base-ft if unstable</sup></p>
+<hr/>
+<h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">openml</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">TabularPipeline.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Load dataset</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">openml</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="mi">42178</span><span class="p">)</span>
@@ -515,22 +354,22 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 
 <span class="c1"># Init and fit pipeline</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;TabPFN&quot;</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;classification&quot;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">&quot;base-ft&quot;</span><span class="p">,</span>
-    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">}</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Save and load pipeline for prediction</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;churn_pipeline.joblib&quot;</span><span class="p">)</span>
-<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;churn_pipeline.joblib&quot;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"churn_pipeline.joblib"</span><span class="p">)</span>
+<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"churn_pipeline.joblib"</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="why-tabtune">📝 Why TabTune?<a class="headerlink" href="#why-tabtune" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="why-tabtune">📝 Why TabTune?<a class="headerlink" href="#why-tabtune" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>No Boilerplate:</strong> Avoids repetitive code for model-specific data loading, training, and inference.</li>
 <li><strong>Consistent Results:</strong> Automates best practices for tabular DL research and model selection.</li>
@@ -538,19 +377,18 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Production Ready:</strong> Model and config serialization for robust deployment and reproducibility.</li>
 <li><strong>Community-Driven:</strong> Extensible design and open contribution policy.</li>
 </ul>
-<hr />
-<h2 id="explore-the-documentation">📑 Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="explore-the-documentation">📑 Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong><a href="getting-started/installation/">Getting Started</a>:</strong> Installation, setup, and basic usage.</li>
 <li><strong><a href="user-guide/pipeline-overview/">User Guide</a>:</strong> In-depth tutorials for each component.</li>
 <li><strong><a href="models/overview/">Supported Models</a>:</strong> Model details and design notes.</li>
 <li><strong><a href="advanced/peft-lora/">Advanced Topics</a>:</strong> PEFT/LoRA, custom preprocessing, and more.</li>
-<li><strong><a href="api/pipeline.md">API Reference</a>:</strong> Complete Python API and class/method details.</li>
-<li><strong><a href="testing/guidelines.md">Testing &amp; Validation</a>:</strong> Test guidelines and reliability promises.</li>
+<li><strong><a href="api/pipeline/">API Reference</a>:</strong> Complete Python API and class/method details.</li>
 <li><strong><a href="examples/classification/">Examples &amp; Benchmarks</a>:</strong> End-to-end code notebooks.</li>
 </ul>
-<hr />
-<h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -570,133 +408,198 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <td>Inference &amp; Fine-Tune</td>
 <td><a href="https://colab.research.google.com/drive/1Vnnfshuy1PZs5SpLSgKWdFg-4JVudxMY">Open In Colab</a></td>
 </tr>
+<tr>
+<td>OrionMSP/BIX Examples</td>
+<td>Inference &amp; Fine-Tune</td>
+<td><em>Coming soon</em></td>
+</tr>
+<tr>
+<td>TabDPT Large Dataset</td>
+<td>Large-Scale Training</td>
+<td><em>Coming soon</em></td>
+</tr>
+<tr>
+<td>PEFT Fine-Tuning Guide</td>
+<td>Parameter-Efficient FT</td>
+<td><em>Coming soon</em></td>
+</tr>
+<tr>
+<td>Leaderboard Benchmarking</td>
+<td>Model Comparison</td>
+<td><em>Coming soon</em></td>
+</tr>
 </tbody>
 </table>
-<hr />
-<h2 id="project-structure">📂 Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>TabTune/
+<hr/>
+<h2 id="project-structure">📂 Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>tabtune/
 ├── Dataprocess/
 ├── models/
 ├── TabularPipeline/
 ├── TuningManager/
 ├── TabularLeaderboard/
+├── benchmarking/
+├── data/
+├── logger.py
+└── run.py
 </code></pre></div>
 <p>See <a href="user-guide/pipeline-overview/">User Guide</a> for a full file/module breakdown.</p>
-<hr />
-<h2 id="license">🗃️ License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>This project is released under the MIT License.<br />
-Please cite appropriately if used in academic or production projects.</p>
-<hr />
-<h2 id="join-community-contribute">📫 Join Community / Contribute<a class="headerlink" href="#join-community-contribute" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="developed-by-lexsi-labs">🏢 Developed by Lexsi Labs<a class="headerlink" href="#developed-by-lexsi-labs" title="Permanent link">¶</a></h2>
+<div style="text-align: center; margin: 30px 0;">
+<img alt="Lexsi Labs Logo" src="assets/lexsi-labs-logo.svg" style="height: 390px; width: auto; margin-bottom: 20px; position: relative;"/>
+<p style="font-size: 1.1em; color: #666; margin-top: 10px;">
+    Created by the team at <strong>Lexsi Labs</strong>, TabTune extends frontier AI research into the tabular domain.
+  </p>
+</div>
+<hr/>
+<h2 id="license">🗃️ License<a class="headerlink" href="#license" title="Permanent link">¶</a></h2>
+<p>This project is released under the MIT License.<br>
+Please cite appropriately if used in academic or production projects.</br></p>
+<p><strong>BibTeX Citation:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">tanna2025tabtuneunifiedlibraryinference</span><span class="p">,</span>
+<span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="na">author</span><span class="p">=</span><span class="s">{Aditya Tanna and Pratinav Seth and Mohamed Bouadi and Utsav Avaiya and Vinay Kumar Sankarapu}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">year</span><span class="p">=</span><span class="s">{2025}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">eprint</span><span class="p">=</span><span class="s">{2511.02802}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">archivePrefix</span><span class="p">=</span><span class="s">{arXiv}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">primaryClass</span><span class="p">=</span><span class="s">{cs.LG}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">url</span><span class="p">=</span><span class="s">{https://arxiv.org/abs/2511.02802}</span><span class="p">,</span><span class="w"> </span>
+<span class="p">}</span>
+</code></pre></div>
+<hr/>
+<h2 id="join-community-contribute">📫 Join Community / Contribute<a class="headerlink" href="#join-community-contribute" title="Permanent link">¶</a></h2>
 <ul>
-<li>Issues and discussions are welcomed on the <a href="https://github.com/AryaXAI/TabTune/issues">GitHub issue tracker</a>.</li>
+<li>Issues and discussions are welcomed on the <a href="https://github.com/Lexsi-Labs/TabTune/issues">GitHub issue tracker</a>.</li>
 <li>Please see the <strong>Contributing</strong> section for contribution standards, code reviews, and documentation tips.</li>
 </ul>
-<hr />
+<hr/>
 <p><strong>Get started with TabTune and accelerate your tabular deep learning workflows today!</strong></p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "."</script>
-    
-    <script src="js/base.js"></script>
-    <script src="search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "."</script>
+<script src="js/base.js"></script>
+<script src="search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
 </html>
-
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-10-31 09:58:37.271430+00:00
+Build Date UTC : 2025-11-05 09:32:18.715457+00:00
 -->

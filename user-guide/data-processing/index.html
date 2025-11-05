@@ -1,448 +1,285 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced Library for Tabular Model Training and Adaptation">
-    <meta name="author" content="TabTune Development Team">
-    
-    <link rel="shortcut icon" href="../../img/favicon.ico">
-
-    
-    <title>Data Processing - TabTune Documentation</title>
-    
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../../css/base.min.css" rel="stylesheet">
-    <link href="../../css/cinder.min.css" rel="stylesheet">
-
-    
-        
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
-        
-    
-    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Data Processing - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
             <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
         <![endif]-->
-
-    
-
-     
 </head>
-
 <body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            
-
-            <!-- Main title -->
-
-            
-              <a class="navbar-brand" href="../..">TabTune Documentation</a>
-            
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                
-                
-                    <li >
-                        <a href="../..">Home</a>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../getting-started/installation/">Installation</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../getting-started/basic-concepts.md">Basic Concepts</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown active">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../pipeline-overview/">TabularPipeline Overview</a>
-</li>
-
-                        
-                            
-<li class="active">
-    <a href="./">Data Processing</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../tuning-strategies/">Tuning Strategies</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../model-selection/">Model Selection</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../saving-loading/">Saving and Loading</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../leaderboard/">Model Comparison</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../models/overview/">Overview</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabpfn/">TabPFN</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabicl/">TabICL</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabbiaxial.md">TabBiaxial</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/tabdpt/">TabDPT</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/mitra/">Mitra</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../models/contexttab/">ConTextTab</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../advanced/peft-lora/">PEFT & LoRA</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../api/pipeline.md">TabularPipeline</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/data-processor.md">DataProcessor</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/tuning-manager.md">TuningManager</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/leaderboard.md">TabularLeaderboard</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../api/peft-utils.md">PEFT Utils</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../examples/classification/">Classification Tasks</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/large-datasets/">Large Datasets</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../examples/benchmarking.md">Benchmarking</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../contributing/setup.md">Development Setup</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/standards.md">Code Standards</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/new-models.md">Adding New Models</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../contributing/documentation.md">Documentation Guide</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../about/release-notes.md">Release Notes</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/roadmap.md">Roadmap</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/faq.md">FAQ</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../about/license.md">License</a>
-</li>
-
-                        
-                        </ul>
-                    </li>
-                
-                
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                            <i class="fas fa-search"></i> Search
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="prev" href="../pipeline-overview/">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="next" href="../tuning-strategies/">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/Lexsi-Labs/TabTune_Internal/edit/master/docs/user-guide/data-processing.md">Edit on Lexsi-Labs/TabTune_Internal</a>
-                    </li>
-            </ul>
-        </div>
-    </div>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
 </div>
-
-    <div class="container">
-        
-        
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#data-processing">Data Processing</a></li>
-            <li class="second-level"><a href="#1-overview">1. Overview</a></li>
-                
-            <li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
-                
-            <li class="second-level"><a href="#3-initialization-parameters">3. Initialization Parameters</a></li>
-                
-                <li class="third-level"><a href="#parameter-reference">Parameter Reference</a></li>
-            <li class="second-level"><a href="#4-model-aware-defaults">4. Model-Aware Defaults</a></li>
-                
-            <li class="second-level"><a href="#5-standard-preprocessing-pipeline">5. Standard Preprocessing Pipeline</a></li>
-                
-                <li class="third-level"><a href="#51-missing-value-imputation">5.1 Missing Value Imputation</a></li>
-                <li class="third-level"><a href="#52-categorical-encoding">5.2 Categorical Encoding</a></li>
-                <li class="third-level"><a href="#53-numerical-scaling">5.3 Numerical Scaling</a></li>
-                <li class="third-level"><a href="#54-feature-selection">5.4 Feature Selection</a></li>
-                <li class="third-level"><a href="#55-class-resampling">5.5 Class Resampling</a></li>
-                <li class="third-level"><a href="#6-get_processing_summary-function">6. get_processing_summary() function</a></li>
-            <li class="second-level"><a href="#7-custom-model-preprocessing">7. Custom Model Preprocessing</a></li>
-                
-                <li class="third-level"><a href="#tabpfn-preprocessing">TabPFN Preprocessing</a></li>
-                <li class="third-level"><a href="#tabicltabbiaxial-preprocessing">TabICL/TabBiaxial Preprocessing</a></li>
-                <li class="third-level"><a href="#contexttab-preprocessing">ContextTab Preprocessing</a></li>
-                <li class="third-level"><a href="#tabdpt-preprocessing">TabDPT Preprocessing</a></li>
-                <li class="third-level"><a href="#mitra-preprocessing">Mitra Preprocessing</a></li>
-            <li class="second-level"><a href="#8-usage-examples">8. Usage Examples</a></li>
-                
-                <li class="third-level"><a href="#example-1-basic-standard-pipeline">Example 1: Basic Standard Pipeline</a></li>
-                <li class="third-level"><a href="#example-3-handling-imbalanced-data">Example 3: Handling Imbalanced Data</a></li>
-            <li class="second-level"><a href="#9-best-practices">9. Best Practices</a></li>
-                
-            <li class="second-level"><a href="#10-troubleshooting">10. Troubleshooting</a></li>
-                
-                <li class="third-level"><a href="#issue-must-call-fit-before-calling-transform">Issue: "Must call fit() before calling transform()"</a></li>
-                <li class="third-level"><a href="#issue-feature-count-mismatch-after-encoding">Issue: Feature count mismatch after encoding</a></li>
-                <li class="third-level"><a href="#issue-nan-values-after-transformation">Issue: NaN values after transformation</a></li>
-                <li class="third-level"><a href="#issue-memory-errors-with-large-datasets">Issue: Memory errors with large datasets</a></li>
-            <li class="second-level"><a href="#11-next-steps">11. Next Steps</a></li>
-                
-    </ul>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li class="active">
+<a href="./">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../pipeline-overview/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../tuning-strategies/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/data-processing.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#data-processing">Data Processing</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
+<li class="second-level"><a href="#3-initialization-parameters">3. Initialization Parameters</a></li>
+<li class="third-level"><a href="#parameter-reference">Parameter Reference</a></li>
+<li class="second-level"><a href="#4-model-aware-defaults">4. Model-Aware Defaults</a></li>
+<li class="second-level"><a href="#5-standard-preprocessing-pipeline">5. Standard Preprocessing Pipeline</a></li>
+<li class="third-level"><a href="#51-missing-value-imputation">5.1 Missing Value Imputation</a></li>
+<li class="third-level"><a href="#52-categorical-encoding">5.2 Categorical Encoding</a></li>
+<li class="third-level"><a href="#53-numerical-scaling">5.3 Numerical Scaling</a></li>
+<li class="third-level"><a href="#54-feature-selection">5.4 Feature Selection</a></li>
+<li class="third-level"><a href="#55-class-resampling">5.5 Class Resampling</a></li>
+<li class="third-level"><a href="#6-get_processing_summary-function">6. get_processing_summary() function</a></li>
+<li class="second-level"><a href="#7-custom-model-preprocessing">7. Custom Model Preprocessing</a></li>
+<li class="third-level"><a href="#tabpfn-preprocessing">TabPFN Preprocessing</a></li>
+<li class="third-level"><a href="#tabicl-preprocessing">TabICL Preprocessing</a></li>
+<li class="third-level"><a href="#orionmsp-preprocessing">OrionMSP Preprocessing</a></li>
+<li class="third-level"><a href="#orionbix-preprocessing">OrionBix Preprocessing</a></li>
+<li class="third-level"><a href="#contexttab-preprocessing">ContextTab Preprocessing</a></li>
+<li class="third-level"><a href="#tabdpt-preprocessing">TabDPT Preprocessing</a></li>
+<li class="third-level"><a href="#mitra-preprocessing">Mitra Preprocessing</a></li>
+<li class="second-level"><a href="#8-usage-examples">8. Usage Examples</a></li>
+<li class="third-level"><a href="#example-1-basic-standard-pipeline">Example 1: Basic Standard Pipeline</a></li>
+<li class="third-level"><a href="#example-3-handling-imbalanced-data">Example 3: Handling Imbalanced Data</a></li>
+<li class="second-level"><a href="#9-best-practices">9. Best Practices</a></li>
+<li class="second-level"><a href="#10-troubleshooting">10. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-must-call-fit-before-calling-transform">Issue: "Must call fit() before calling transform()"</a></li>
+<li class="third-level"><a href="#issue-feature-count-mismatch-after-encoding">Issue: Feature count mismatch after encoding</a></li>
+<li class="third-level"><a href="#issue-nan-values-after-transformation">Issue: NaN values after transformation</a></li>
+<li class="third-level"><a href="#issue-memory-errors-with-large-datasets">Issue: Memory errors with large datasets</a></li>
+<li class="second-level"><a href="#11-next-steps">11. Next Steps</a></li>
+</ul>
 </div></div>
-        <div class="col-md-9" role="main">
-
-<h1 id="data-processing">Data Processing<a class="headerlink" href="#data-processing" title="Permanent link">&para;</a></h1>
+<div class="col-md-9" role="main">
+<h1 id="data-processing">Data Processing<a class="headerlink" href="#data-processing" title="Permanent link">¶</a></h1>
 <p>The <code>DataProcessor</code> is TabTune's intelligent, model-aware data preparation engine. It automatically handles imputation, scaling, categorical encoding, feature selection, and resampling based on your chosen model's requirements.</p>
-<hr />
-<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
 <p>The <code>DataProcessor</code> integrates two preprocessing pathways:</p>
 <ol>
-<li><strong>Custom Model-Specific Preprocessing</strong>: For models requiring specialized transformations (TabPFN, TabICL, ContextTab, Mitra, TabDPT, TabBiaxial, APT).</li>
+<li><strong>Custom Model-Specific Preprocessing</strong>: For models requiring specialized transformations (TabPFN, TabICL, ContextTab, Mitra, TabDPT, OrionMSP, OrionBix).</li>
 <li><strong>Standard Preprocessing Pipeline</strong>: For general tabular models using scikit-learn-compatible transformations.</li>
 </ol>
-<hr />
-<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>flowchart TD
+<hr/>
+<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
+<div class="mermaid">flowchart TD
     A[Raw DataFrame] --&gt; B{Model-Specific?}
     B --&gt;|Yes| C[Custom Preprocessor]
     B --&gt;|No| D[Standard Pipeline]
@@ -453,22 +290,22 @@
     H --&gt; I[Feature Selection]
     I --&gt; J[Resampling]
     J --&gt; E
-</code></pre></div>
-<hr />
-<h2 id="3-initialization-parameters">3. Initialization Parameters<a class="headerlink" href="#3-initialization-parameters" title="Permanent link">&para;</a></h2>
+</div>
+<hr/>
+<h2 id="3-initialization-parameters">3. Initialization Parameters<a class="headerlink" href="#3-initialization-parameters" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">DataProcessor</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">override_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
-    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">&#39;onehot&#39;</span><span class="p">,</span>
-    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span>
+    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">,</span>
+    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">'onehot'</span><span class="p">,</span>
+    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">'standard'</span><span class="p">,</span>
     <span class="n">resampling_strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">feature_selection_strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">feature_selection_k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="parameter-reference">Parameter Reference<a class="headerlink" href="#parameter-reference" title="Permanent link">&para;</a></h3>
+<h3 id="parameter-reference">Parameter Reference<a class="headerlink" href="#parameter-reference" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -535,8 +372,8 @@
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="4-model-aware-defaults">4. Model-Aware Defaults<a class="headerlink" href="#4-model-aware-defaults" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="4-model-aware-defaults">4. Model-Aware Defaults<a class="headerlink" href="#4-model-aware-defaults" title="Permanent link">¶</a></h2>
 <p>When <code>model_name</code> is specified, the processor automatically configures optimal preprocessing:</p>
 <table>
 <thead>
@@ -558,7 +395,12 @@
 <td>Normalization + shuffling support</td>
 </tr>
 <tr>
-<td><strong>TabBiaxial</strong></td>
+<td><strong>OrionMSP</strong></td>
+<td><code>orionmsp_special</code></td>
+<td>Multi-scale prior preprocessing</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
 <td><code>tab_biaxial_special</code></td>
 <td>Custom biaxial attention preprocessing</td>
 </tr>
@@ -577,16 +419,11 @@
 <td><code>contexttab_special</code></td>
 <td>Text embedding integration</td>
 </tr>
-<tr>
-<td><strong>APT</strong></td>
-<td><code>apt_special</code></td>
-<td>Patch-based encoding (requires <code>d_patch</code>)</td>
-</tr>
 </tbody>
 </table>
-<hr />
-<h2 id="5-standard-preprocessing-pipeline">5. Standard Preprocessing Pipeline<a class="headerlink" href="#5-standard-preprocessing-pipeline" title="Permanent link">&para;</a></h2>
-<h3 id="51-missing-value-imputation">5.1 Missing Value Imputation<a class="headerlink" href="#51-missing-value-imputation" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="5-standard-preprocessing-pipeline">5. Standard Preprocessing Pipeline<a class="headerlink" href="#5-standard-preprocessing-pipeline" title="Permanent link">¶</a></h2>
+<h3 id="51-missing-value-imputation">5.1 Missing Value Imputation<a class="headerlink" href="#51-missing-value-imputation" title="Permanent link">¶</a></h3>
 <p>Available strategies:</p>
 <ul>
 <li><strong>mean</strong>: Replace with column mean (default)</li>
@@ -594,9 +431,9 @@
 <li><strong>iterative</strong>: Multivariate imputation using IterativeImputer</li>
 <li><strong>knn</strong>: K-Nearest Neighbors imputation</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">&#39;median&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">'median'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="52-categorical-encoding">5.2 Categorical Encoding<a class="headerlink" href="#52-categorical-encoding" title="Permanent link">&para;</a></h3>
+<h3 id="52-categorical-encoding">5.2 Categorical Encoding<a class="headerlink" href="#52-categorical-encoding" title="Permanent link">¶</a></h3>
 <p>Supported methods:</p>
 <ul>
 <li><strong>onehot</strong>: One-hot encoding (default, handles unknown categories)</li>
@@ -605,9 +442,9 @@
 <li><strong>hashing</strong>: Hashing encoder for high-cardinality features</li>
 <li><strong>binary</strong>: Binary encoding for memory efficiency</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">'target'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="53-numerical-scaling">5.3 Numerical Scaling<a class="headerlink" href="#53-numerical-scaling" title="Permanent link">&para;</a></h3>
+<h3 id="53-numerical-scaling">5.3 Numerical Scaling<a class="headerlink" href="#53-numerical-scaling" title="Permanent link">¶</a></h3>
 <p>Available scalers:</p>
 <ul>
 <li><strong>standard</strong>: Standardization (zero mean, unit variance)</li>
@@ -615,9 +452,9 @@
 <li><strong>robust</strong>: Robust scaling using median and IQR</li>
 <li><strong>power_transform</strong>: Power transformation for normality</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">&#39;robust&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">'robust'</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="54-feature-selection">5.4 Feature Selection<a class="headerlink" href="#54-feature-selection" title="Permanent link">&para;</a></h3>
+<h3 id="54-feature-selection">5.4 Feature Selection<a class="headerlink" href="#54-feature-selection" title="Permanent link">¶</a></h3>
 <p>Methods:</p>
 <ul>
 <li><strong>variance</strong>: Remove low-variance features</li>
@@ -626,11 +463,11 @@
 <li><strong>correlation</strong>: Remove highly correlated features (threshold=0.9)</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span>
-    <span class="n">feature_selection_strategy</span><span class="o">=</span><span class="s1">&#39;select_k_best_anova&#39;</span><span class="p">,</span>
+    <span class="n">feature_selection_strategy</span><span class="o">=</span><span class="s1">'select_k_best_anova'</span><span class="p">,</span>
     <span class="n">feature_selection_k</span><span class="o">=</span><span class="mi">20</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="55-class-resampling">5.5 Class Resampling<a class="headerlink" href="#55-class-resampling" title="Permanent link">&para;</a></h3>
+<h3 id="55-class-resampling">5.5 Class Resampling<a class="headerlink" href="#55-class-resampling" title="Permanent link">¶</a></h3>
 <p>Imbalanced data handling:</p>
 <ul>
 <li><strong>smote</strong>: Synthetic Minority Over-sampling Technique</li>
@@ -640,10 +477,10 @@
 <li><strong>kmeans</strong>: Cluster centroids undersampling</li>
 <li><strong>knn</strong>: Neighborhood cleaning rule</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;smote&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span><span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">'smote'</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h3 id="6-get_processing_summary-function">6. get_processing_summary() function<a class="headerlink" href="#6-get_processing_summary-function" title="Permanent link">&para;</a></h3>
+<hr/>
+<h3 id="6-get_processing_summary-function">6. get_processing_summary() function<a class="headerlink" href="#6-get_processing_summary-function" title="Permanent link">¶</a></h3>
 <p>Returns a detailed report of all applied transformations.</p>
 <div class="highlight"><pre><span></span><code><span class="n">summary</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_processing_summary</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
@@ -653,63 +490,75 @@
 
 [Standard Preprocessing Pipeline]
 
-1. Imputation (Strategy: &#39;median&#39;)
+1. Imputation (Strategy: 'median')
  - Applied to 12 numerical features: `age`, `salary`, ...
 
-2. Categorical Encoding (Strategy: &#39;onehot&#39;)
+2. Categorical Encoding (Strategy: 'onehot')
  - Applied to 5 categorical features: `city`, `occupation`, ...
 
-3. Scaling (Strategy: &#39;standard&#39;)
+3. Scaling (Strategy: 'standard')
  - Applied to 27 features (original numerical + encoded categorical).
 
-4. Feature Selection (Strategy: &#39;select_k_best_anova&#39;)
+4. Feature Selection (Strategy: 'select_k_best_anova')
  - Removed 7 features: `feature_3`, `feature_8`, ...
 
 [Resampling]
- - Strategy: &#39;smote&#39; applied to the training data.
+ - Strategy: 'smote' applied to the training data.
 </code></pre></div></p>
-<hr />
-<h2 id="7-custom-model-preprocessing">7. Custom Model Preprocessing<a class="headerlink" href="#7-custom-model-preprocessing" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="7-custom-model-preprocessing">7. Custom Model Preprocessing<a class="headerlink" href="#7-custom-model-preprocessing" title="Permanent link">¶</a></h2>
 <p>For models with special requirements, TabTune automatically loads the appropriate custom preprocessor:</p>
-<h3 id="tabpfn-preprocessing">TabPFN Preprocessing<a class="headerlink" href="#tabpfn-preprocessing" title="Permanent link">&para;</a></h3>
+<h3 id="tabpfn-preprocessing">TabPFN Preprocessing<a class="headerlink" href="#tabpfn-preprocessing" title="Permanent link">¶</a></h3>
 <ul>
 <li>Converts all features to integer codes</li>
 <li>Limits feature count (max 100)</li>
 <li>Handles categorical and numerical separately</li>
 </ul>
-<h3 id="tabicltabbiaxial-preprocessing">TabICL/TabBiaxial Preprocessing<a class="headerlink" href="#tabicltabbiaxial-preprocessing" title="Permanent link">&para;</a></h3>
+<h3 id="tabicl-preprocessing">TabICL Preprocessing<a class="headerlink" href="#tabicl-preprocessing" title="Permanent link">¶</a></h3>
 <ul>
 <li>Applies multiple normalization methods</li>
 <li>Supports feature shuffling strategies</li>
 <li>Prepares data for episodic training</li>
 </ul>
-<h3 id="contexttab-preprocessing">ContextTab Preprocessing<a class="headerlink" href="#contexttab-preprocessing" title="Permanent link">&para;</a></h3>
+<h3 id="orionmsp-preprocessing">OrionMSP Preprocessing<a class="headerlink" href="#orionmsp-preprocessing" title="Permanent link">¶</a></h3>
+<ul>
+<li>Multi-scale prior transformations</li>
+<li>Column-then-row attention preparation</li>
+<li>Ensemble view transformations</li>
+</ul>
+<h3 id="orionbix-preprocessing">OrionBix Preprocessing<a class="headerlink" href="#orionbix-preprocessing" title="Permanent link">¶</a></h3>
+<ul>
+<li>Biaxial attention preprocessing</li>
+<li>Custom feature interaction handling</li>
+<li>Similar to TabICL with enhanced interactions</li>
+</ul>
+<h3 id="contexttab-preprocessing">ContextTab Preprocessing<a class="headerlink" href="#contexttab-preprocessing" title="Permanent link">¶</a></h3>
 <ul>
 <li>Generates text embeddings for categorical features</li>
 <li>Integrates semantic information</li>
 <li>Handles mixed-type features</li>
 </ul>
-<h3 id="tabdpt-preprocessing">TabDPT Preprocessing<a class="headerlink" href="#tabdpt-preprocessing" title="Permanent link">&para;</a></h3>
+<h3 id="tabdpt-preprocessing">TabDPT Preprocessing<a class="headerlink" href="#tabdpt-preprocessing" title="Permanent link">¶</a></h3>
 <ul>
 <li>Context-based transformations</li>
 <li>Supports k-NN context selection</li>
 <li>Prepares permuted features</li>
 </ul>
-<h3 id="mitra-preprocessing">Mitra Preprocessing<a class="headerlink" href="#mitra-preprocessing" title="Permanent link">&para;</a></h3>
+<h3 id="mitra-preprocessing">Mitra Preprocessing<a class="headerlink" href="#mitra-preprocessing" title="Permanent link">¶</a></h3>
 <ul>
 <li>2D attention-compatible format</li>
 <li>Row and column embeddings</li>
 <li>Synthetic prior integration</li>
 </ul>
-<hr />
-<h2 id="8-usage-examples">8. Usage Examples<a class="headerlink" href="#8-usage-examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1-basic-standard-pipeline">Example 1: Basic Standard Pipeline<a class="headerlink" href="#example-1-basic-standard-pipeline" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="8-usage-examples">8. Usage Examples<a class="headerlink" href="#8-usage-examples" title="Permanent link">¶</a></h2>
+<h3 id="example-1-basic-standard-pipeline">Example 1: Basic Standard Pipeline<a class="headerlink" href="#example-1-basic-standard-pipeline" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProcessor</span>
 
 <span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span>
-    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">&#39;median&#39;</span><span class="p">,</span>
-    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">&#39;onehot&#39;</span><span class="p">,</span>
-    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span>
+    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">'median'</span><span class="p">,</span>
+    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">'onehot'</span><span class="p">,</span>
+    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">'standard'</span>
 <span class="p">)</span>
 
 <span class="c1"># Fit on training data</span>
@@ -719,19 +568,19 @@
 <span class="n">X_train_processed</span><span class="p">,</span> <span class="n">y_train_processed</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">X_test_processed</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="example-3-handling-imbalanced-data">Example 3: Handling Imbalanced Data<a class="headerlink" href="#example-3-handling-imbalanced-data" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-handling-imbalanced-data">Example 3: Handling Imbalanced Data<a class="headerlink" href="#example-3-handling-imbalanced-data" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">(</span>
-    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
-    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">&#39;target&#39;</span><span class="p">,</span>
-    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">&#39;robust&#39;</span><span class="p">,</span>
-    <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;smote&#39;</span>
+    <span class="n">imputation_strategy</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">,</span>
+    <span class="n">categorical_encoding</span><span class="o">=</span><span class="s1">'target'</span><span class="p">,</span>
+    <span class="n">scaling_strategy</span><span class="o">=</span><span class="s1">'robust'</span><span class="p">,</span>
+    <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">'smote'</span>
 <span class="p">)</span>
 
 <span class="c1"># Resampling is applied during fit_transform</span>
 <span class="n">X_resampled</span><span class="p">,</span> <span class="n">y_resampled</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
-<hr />
-<h2 id="9-best-practices">9. Best Practices<a class="headerlink" href="#9-best-practices" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="9-best-practices">9. Best Practices<a class="headerlink" href="#9-best-practices" title="Permanent link">¶</a></h2>
 <ol>
 <li><strong>Always fit on training data only</strong>: Never fit on test data to avoid data leakage.</li>
 <li><strong>Use model-specific preprocessing</strong>: Let <code>model_name</code> trigger optimal defaults.</li>
@@ -740,123 +589,149 @@
 <li><strong>Scale after encoding</strong>: Standard pipeline handles this automatically.</li>
 <li><strong>Test resampling impact</strong>: Compare with and without resampling for imbalanced tasks.</li>
 </ol>
-<hr />
-<h2 id="10-troubleshooting">10. Troubleshooting<a class="headerlink" href="#10-troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="issue-must-call-fit-before-calling-transform">Issue: "Must call fit() before calling transform()"<a class="headerlink" href="#issue-must-call-fit-before-calling-transform" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="10-troubleshooting">10. Troubleshooting<a class="headerlink" href="#10-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-must-call-fit-before-calling-transform">Issue: "Must call fit() before calling transform()"<a class="headerlink" href="#issue-must-call-fit-before-calling-transform" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Ensure <code>.fit()</code> is called on training data before <code>.transform()</code>.</p>
-<h3 id="issue-feature-count-mismatch-after-encoding">Issue: Feature count mismatch after encoding<a class="headerlink" href="#issue-feature-count-mismatch-after-encoding" title="Permanent link">&para;</a></h3>
+<h3 id="issue-feature-count-mismatch-after-encoding">Issue: Feature count mismatch after encoding<a class="headerlink" href="#issue-feature-count-mismatch-after-encoding" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Use <code>handle_unknown='ignore'</code> in encoder or ensure test data has same categories.</p>
-<h3 id="issue-nan-values-after-transformation">Issue: NaN values after transformation<a class="headerlink" href="#issue-nan-values-after-transformation" title="Permanent link">&para;</a></h3>
+<h3 id="issue-nan-values-after-transformation">Issue: NaN values after transformation<a class="headerlink" href="#issue-nan-values-after-transformation" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Check imputation strategy; use <code>'iterative'</code> for complex missing patterns.</p>
-<h3 id="issue-memory-errors-with-large-datasets">Issue: Memory errors with large datasets<a class="headerlink" href="#issue-memory-errors-with-large-datasets" title="Permanent link">&para;</a></h3>
+<h3 id="issue-memory-errors-with-large-datasets">Issue: Memory errors with large datasets<a class="headerlink" href="#issue-memory-errors-with-large-datasets" title="Permanent link">¶</a></h3>
 <p><strong>Solution</strong>: Use <code>'hashing'</code> or <code>'binary'</code> encoding; avoid one-hot for high cardinality.</p>
-<hr />
-<h2 id="11-next-steps">11. Next Steps<a class="headerlink" href="#11-next-steps" title="Permanent link">&para;</a></h2>
+<hr/>
+<h2 id="11-next-steps">11. Next Steps<a class="headerlink" href="#11-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../tuning-strategies/">Tuning Strategies</a> - Learn about training workflows</li>
 <li><a href="../model-selection/">Model Selection</a> - Choose the right model</li>
-<li><a href="../api/data-processor.md">API Reference</a> - Complete DataProcessor API</li>
+<li><a href="../../api/data-processor/">API Reference</a> - Complete DataProcessor API</li>
 </ul>
-<hr />
+<hr/>
 <p>The <code>DataProcessor</code> ensures your data is optimally prepared for any TabTune model with minimal configuration.</p></div>
-        
-        
-    </div>
-
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
-
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../../js/bootstrap-3.0.3.min.js"></script>
-
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
-
-    <script>var base_url = "../.."</script>
-    
-    <script src="../../js/base.js"></script>
-    <script src="../../search/main.js"></script>
-
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-            </div>
-            <div class="modal-body">
-                <p>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
 </div>
-    </body>
-
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
 </html>
