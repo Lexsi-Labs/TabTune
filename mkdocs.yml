@@ -1,0 +1,108 @@
+site_name: TabTune Documentation
+site_description: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models
+site_author: Lexsi Labs
+repo_url: https://github.com/Lexsi-Labs/TabTune
+repo_name: Lexsi-Labs/TabTune
+
+# Disable "Edit on ..." link; keep repo link in header
+edit_uri: null
+
+theme:
+  name: cinder
+  custom_dir: docs/_overrides
+  logo: assets/tabtune.svg
+  favicon: assets/lexsilabs.ico
+  highlightjs: true
+  hljs_languages:
+    - python
+    - yaml
+  navigation_depth: 3
+  
+nav:
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+      - Basic Concepts: getting-started/basic-concepts.md
+  
+  - User Guide:
+      - TabularPipeline Overview: user-guide/pipeline-overview.md
+      - Data Processing: user-guide/data-processing.md
+      - Tuning Strategies: user-guide/tuning-strategies.md
+      - Model Selection: user-guide/model-selection.md
+      - Saving and Loading: user-guide/saving-loading.md
+      - Model Comparison: user-guide/leaderboard.md
+      - Troubleshooting: user-guide/troubleshooting.md
+  
+  - Models:
+      - Overview: models/overview.md
+      - TabPFN: models/tabpfn.md
+      - TabICL: models/tabicl.md
+      - Orion MSP: models/orion-msp.md
+      - Orion BIX: models/orion-bix.md
+      - TabDPT: models/tabdpt.md
+      - Mitra: models/mitra.md
+      - ConTextTab: models/contexttab.md
+  
+  - Advanced Topics:
+      - PEFT & LoRA: advanced/peft-lora.md
+      - Custom Preprocessing: advanced/custom-preprocessing.md
+      - Hyperparameter Tuning: advanced/hyperparameter-tuning.md
+      - Memory Optimization: advanced/memory-optimization.md
+      - Multi-GPU Training: advanced/multi-gpu.md
+  
+  - API Reference:
+      - TabularPipeline: api/pipeline.md
+      - DataProcessor: api/data-processor.md
+      - TuningManager: api/tuning-manager.md
+      - TabularLeaderboard: api/leaderboard.md
+      - PEFT Utils: api/peft-utils.md
+  
+  - Examples:
+      - Classification Tasks: examples/classification.md
+      - PEFT Fine-Tuning: examples/peft-examples.md
+      - Benchmarking: examples/benchmarking.md
+  
+  - Project:
+      - Contributing:
+          - Development Setup: contributing/setup.md
+          - Code Standards: contributing/standards.md
+          - Adding New Models: contributing/new-models.md
+          - Documentation Guide: contributing/documentation.md
+      - About:
+          - Release Notes: about/release-notes.md
+          - Roadmap: about/roadmap.md
+          - FAQ: about/faq.md
+          - License: about/license.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.emoji
+  - toc:
+      permalink: true
+  - tables
+
+extra_css:
+  - assets/overrides.css
+
+plugins:
+  - search
+  - mermaid2:
+      javascript: https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js
+      arguments:
+        securityLevel: 'loose'
+        startOnLoad: false
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+
+

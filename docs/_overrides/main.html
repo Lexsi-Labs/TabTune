@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {{ super() }}
+    <link rel="icon" href="{{ base_url }}/assets/lexsilabs.ico">
+    <link rel="shortcut icon" href="{{ base_url }}/assets/lexsilabs.ico">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+{% endblock %}
+

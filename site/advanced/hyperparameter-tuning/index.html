@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Hyperparameter Tuning - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li class="active">
+<a href="./">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../custom-preprocessing/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../memory-optimization/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/advanced/hyperparameter-tuning.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#hyperparameter-tuning-optimizing-tabtune-model-performance">Hyperparameter Tuning: Optimizing TabTune Model Performance</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-hyperparameter-landscape">2. Hyperparameter Landscape</a></li>
+<li class="third-level"><a href="#21-tunable-hyperparameters-by-model">2.1 Tunable Hyperparameters by Model</a></li>
+<li class="third-level"><a href="#22-shared-hyperparameters">2.2 Shared Hyperparameters</a></li>
+<li class="second-level"><a href="#3-search-strategies">3. Search Strategies</a></li>
+<li class="third-level"><a href="#31-grid-search">3.1 Grid Search</a></li>
+<li class="third-level"><a href="#32-random-search">3.2 Random Search</a></li>
+<li class="third-level"><a href="#33-bayesian-optimization-with-optuna">3.3 Bayesian Optimization with Optuna</a></li>
+<li class="second-level"><a href="#4-model-specific-tuning">4. Model-Specific Tuning</a></li>
+<li class="third-level"><a href="#41-tabpfn-tuning">4.1 TabPFN Tuning</a></li>
+<li class="third-level"><a href="#42-tabiclorionmsporionbix-tuning">4.2 TabICL/OrionMSP/OrionBix Tuning</a></li>
+<li class="third-level"><a href="#43-tabdpt-tuning">4.3 TabDPT Tuning</a></li>
+<li class="third-level"><a href="#44-mitra-tuning">4.4 Mitra Tuning</a></li>
+<li class="third-level"><a href="#45-peft-tuning">4.5 PEFT Tuning</a></li>
+<li class="second-level"><a href="#5-cross-validation-strategy">5. Cross-Validation Strategy</a></li>
+<li class="third-level"><a href="#51-k-fold-cross-validation">5.1 k-Fold Cross-Validation</a></li>
+<li class="third-level"><a href="#52-stratified-k-fold">5.2 Stratified k-Fold</a></li>
+<li class="second-level"><a href="#6-efficient-tuning-workflows">6. Efficient Tuning Workflows</a></li>
+<li class="third-level"><a href="#61-cascading-search">6.1 Cascading Search</a></li>
+<li class="third-level"><a href="#62-early-stopping-during-tuning">6.2 Early Stopping During Tuning</a></li>
+<li class="second-level"><a href="#7-complete-tuning-examples">7. Complete Tuning Examples</a></li>
+<li class="third-level"><a href="#71-simple-grid-search-with-leaderboard">7.1 Simple Grid Search with Leaderboard</a></li>
+<li class="third-level"><a href="#72-bayesian-optimization-with-pruning">7.2 Bayesian Optimization with Pruning</a></li>
+<li class="third-level"><a href="#73-parallel-tuning-with-ray">7.3 Parallel Tuning with Ray</a></li>
+<li class="second-level"><a href="#8-tuning-summary-defaults">8. Tuning Summary &amp; Defaults</a></li>
+<li class="third-level"><a href="#81-quick-reference-table">8.1 Quick Reference Table</a></li>
+<li class="third-level"><a href="#82-tuning-priority">8.2 Tuning Priority</a></li>
+<li class="second-level"><a href="#9-best-practices">9. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#10-common-pitfalls-solutions">10. Common Pitfalls &amp; Solutions</a></li>
+<li class="third-level"><a href="#issue-tuning-is-too-slow">Issue: "Tuning is too slow"</a></li>
+<li class="third-level"><a href="#issue-best-tuned-model-still-overfits">Issue: "Best tuned model still overfits"</a></li>
+<li class="third-level"><a href="#issue-tuning-results-dont-transfer-to-test-set">Issue: "Tuning results don't transfer to test set"</a></li>
+<li class="second-level"><a href="#11-next-steps">11. Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="hyperparameter-tuning-optimizing-tabtune-model-performance">Hyperparameter Tuning: Optimizing TabTune Model Performance<a class="headerlink" href="#hyperparameter-tuning-optimizing-tabtune-model-performance" title="Permanent link">¶</a></h1>
+<p>This document provides comprehensive guidance on hyperparameter tuning for TabTune models, including strategies, tools, and best practices for finding optimal configurations.</p>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
+<p>Hyperparameter tuning is the process of systematically searching for the best model configuration to maximize performance on your specific task. This guide covers:</p>
+<ul>
+<li><strong>Search Strategies</strong>: Grid search, random search, Bayesian optimization</li>
+<li><strong>Hyperparameter Spaces</strong>: Ranges and distributions for each model</li>
+<li><strong>Tuning Tools</strong>: Integration with Optuna, scikit-optimize, and hyperopt</li>
+<li><strong>Best Practices</strong>: Efficient tuning workflows and validation strategies</li>
+</ul>
+<hr/>
+<h2 id="2-hyperparameter-landscape">2. Hyperparameter Landscape<a class="headerlink" href="#2-hyperparameter-landscape" title="Permanent link">¶</a></h2>
+<h3 id="21-tunable-hyperparameters-by-model">2.1 Tunable Hyperparameters by Model<a class="headerlink" href="#21-tunable-hyperparameters-by-model" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Critical</th>
+<th>Important</th>
+<th>Minor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TabPFN</strong></td>
+<td>epochs, lr</td>
+<td>temperature</td>
+<td>batch_size</td>
+</tr>
+<tr>
+<td><strong>TabICL</strong></td>
+<td>n_episodes, lr</td>
+<td>support_size, query_size, n_estimators</td>
+<td>norm_methods</td>
+</tr>
+<tr>
+<td><strong>OrionMSP</strong></td>
+<td>n_episodes, lr</td>
+<td>support_size, query_size</td>
+<td>n_estimators</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
+<td>n_episodes, lr</td>
+<td>support_size, query_size</td>
+<td>n_estimators</td>
+</tr>
+<tr>
+<td><strong>TabDPT</strong></td>
+<td>support_size, lr</td>
+<td>k_neighbors, num_layers</td>
+<td>temperature</td>
+</tr>
+<tr>
+<td><strong>Mitra</strong></td>
+<td>support_size, lr</td>
+<td>batch_size, num_layers</td>
+<td>d_model</td>
+</tr>
+<tr>
+<td><strong>ContextTab</strong></td>
+<td>epochs, lr</td>
+<td>warmup_steps</td>
+<td>text_encoder</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-shared-hyperparameters">2.2 Shared Hyperparameters<a class="headerlink" href="#22-shared-hyperparameters" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">shared_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">5e-4</span><span class="p">],</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># PEFT-specific</span>
+<span class="n">peft_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr/>
+<h2 id="3-search-strategies">3. Search Strategies<a class="headerlink" href="#3-search-strategies" title="Permanent link">¶</a></h2>
+<h3 id="31-grid-search">3.1 Grid Search<a class="headerlink" href="#31-grid-search" title="Permanent link">¶</a></h3>
+<p>Systematic evaluation of all parameter combinations.</p>
+<p><strong>Advantages</strong>:
+- ✅ Exhaustive coverage
+- ✅ Parallelize easily
+- ✅ Reproducible</p>
+<p><strong>Disadvantages</strong>:
+- ❌ Exponential complexity
+- ❌ Wasteful on large spaces
+- ❌ Poor scaling</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterGrid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="c1"># Define grid</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">],</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Grid search</span>
+<span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">best_params</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">ParameterGrid</span><span class="p">(</span><span class="n">param_grid</span><span class="p">):</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
+    <span class="p">)</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+        <span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"New best: </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Best parameters: </span><span class="si">{</span><span class="n">best_params</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best score: </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="32-random-search">3.2 Random Search<a class="headerlink" href="#32-random-search" title="Permanent link">¶</a></h3>
+<p>Random sampling from parameter distributions.</p>
+<p><strong>Advantages</strong>:
+- ✅ Covers parameter space more uniformly
+- ✅ Scales well to large spaces
+- ✅ Simple parallelization</p>
+<p><strong>Disadvantages</strong>:
+- ❌ May miss optimal region
+- ❌ Less reproducible</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">uniform</span><span class="p">,</span> <span class="n">randint</span>
+
+<span class="c1"># Define distributions</span>
+<span class="n">param_distributions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="n">randint</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span>
+    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Random search</span>
+<span class="n">n_iter</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">best_params</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
+    <span class="c1"># Sample random parameters</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">dist</span><span class="o">.</span><span class="n">rvs</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="n">param_distributions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Convert to integers</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">])</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">'batch_size'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">'batch_size'</span><span class="p">])</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
+    <span class="p">)</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+        <span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Iteration </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">n_iter</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Best parameters: </span><span class="si">{</span><span class="n">best_params</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="33-bayesian-optimization-with-optuna">3.3 Bayesian Optimization with Optuna<a class="headerlink" href="#33-bayesian-optimization-with-optuna" title="Permanent link">¶</a></h3>
+<p>Intelligent search using Gaussian processes.</p>
+<p><strong>Advantages</strong>:
+- ✅ Intelligent sampling
+- ✅ Few evaluations needed
+- ✅ Adaptively explores promising regions</p>
+<p><strong>Disadvantages</strong>:
+- ❌ More complex
+- ❌ Slower per iteration
+- ❌ Requires more setup</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.pruners</span><span class="w"> </span><span class="kn">import</span> <span class="n">MedianPruner</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Optuna objective function."""</span>
+
+    <span class="c1"># Suggest hyperparameters</span>
+    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">'learning_rate'</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">epochs</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'epochs'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'batch_size'</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="n">weight_decay</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">'weight_decay'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="n">learning_rate</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="n">epochs</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+        <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="n">weight_decay</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Train and evaluate</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="n">tuning_params</span>
+    <span class="p">)</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">score</span>
+
+<span class="c1"># Create study</span>
+<span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s1">'maximize'</span><span class="p">,</span>
+    <span class="n">pruner</span><span class="o">=</span><span class="n">MedianPruner</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="c1"># Optimize</span>
+<span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Get results</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best score: </span><span class="si">{</span><span class="n">study</span><span class="o">.</span><span class="n">best_value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best parameters: </span><span class="si">{</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="4-model-specific-tuning">4. Model-Specific Tuning<a class="headerlink" href="#4-model-specific-tuning" title="Permanent link">¶</a></h2>
+<h3 id="41-tabpfn-tuning">4.1 TabPFN Tuning<a class="headerlink" href="#41-tabpfn-tuning" title="Permanent link">¶</a></h3>
+<p>Focus on inference parameters since base-ft is not primary use case:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Key hyperparameters</span>
+<span class="n">tabpfn_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>           <span class="c1"># Ensemble size</span>
+    <span class="s1">'softmax_temperature'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>  <span class="c1"># Confidence</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>                   <span class="c1"># If fine-tuning</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">]</span>   <span class="c1"># If fine-tuning</span>
+<span class="p">}</span>
+
+<span class="c1"># Fine-tune only if needed</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="42-tabiclorionmsporionbix-tuning">4.2 TabICL/OrionMSP/OrionBix Tuning<a class="headerlink" href="#42-tabiclorionmsporionbix-tuning" title="Permanent link">¶</a></h3>
+<p>Optimize episodic training parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Key hyperparameters</span>
+<span class="n">tabicl_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">96</span><span class="p">],</span>          <span class="c1"># Context size</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>            <span class="c1"># Query size</span>
+    <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span>       <span class="c1"># Training episodes</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">],</span>
+    <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span>           <span class="c1"># Ensemble</span>
+<span class="p">}</span>
+
+<span class="c1"># Recommended defaults</span>
+<span class="n">best_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="43-tabdpt-tuning">4.3 TabDPT Tuning<a class="headerlink" href="#43-tabdpt-tuning" title="Permanent link">¶</a></h3>
+<p>Leverage pre-training and large context:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Key hyperparameters</span>
+<span class="n">tabdpt_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2048</span><span class="p">],</span>     <span class="c1"># Large context</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
+    <span class="s1">'k_neighbors'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>             <span class="c1"># k-NN context</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>               <span class="c1"># Architecture</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Recommended for large datasets</span>
+<span class="n">best_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="s1">'k_neighbors'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span>  <span class="c1"># Few due to pre-training</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="44-mitra-tuning">4.4 Mitra Tuning<a class="headerlink" href="#44-mitra-tuning" title="Permanent link">¶</a></h3>
+<p>Optimize 2D attention parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Key hyperparameters</span>
+<span class="n">mitra_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span>              <span class="c1"># Embedding dim</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>               <span class="c1"># Must be small</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Recommended</span>
+<span class="n">best_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># Critical: keep small</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="45-peft-tuning">4.5 PEFT Tuning<a class="headerlink" href="#45-peft-tuning" title="Permanent link">¶</a></h3>
+<p>Optimize LoRA parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># LoRA hyperparameters</span>
+<span class="n">peft_hparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>  <span class="c1"># Usually 2x rank</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">2e-4</span><span class="p">,</span> <span class="mf">5e-4</span><span class="p">]</span>  <span class="c1"># Higher than base-ft</span>
+<span class="p">}</span>
+
+<span class="c1"># Recommended</span>
+<span class="n">best_peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-4</span>  <span class="c1"># 10x base-ft</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr/>
+<h2 id="5-cross-validation-strategy">5. Cross-Validation Strategy<a class="headerlink" href="#5-cross-validation-strategy" title="Permanent link">¶</a></h2>
+<h3 id="51-k-fold-cross-validation">5.1 k-Fold Cross-Validation<a class="headerlink" href="#51-k-fold-cross-validation" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cross_validate_hyperparams</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Evaluate hyperparameters via k-fold CV."""</span>
+
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">val_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+        <span class="n">X_train_fold</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
+        <span class="n">X_val_fold</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+        <span class="n">y_train_fold</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
+        <span class="n">y_val_fold</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+
+        <span class="c1"># Train and evaluate</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+            <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+            <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
+        <span class="p">)</span>
+
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_fold</span><span class="p">,</span> <span class="n">y_train_fold</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val_fold</span><span class="p">,</span> <span class="n">y_val_fold</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
+        <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fold </span><span class="si">{</span><span class="n">fold_idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="n">mean_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    <span class="n">std_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Mean: </span><span class="si">{</span><span class="n">mean_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">std_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mean_score</span><span class="p">,</span> <span class="n">std_score</span>
+
+<span class="c1"># Usage</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">cross_validate_hyperparams</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">},</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="52-stratified-k-fold">5.2 Stratified k-Fold<a class="headerlink" href="#52-stratified-k-fold" title="Permanent link">¶</a></h3>
+<p>For imbalanced classification:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">StratifiedKFold</span>
+
+<span class="c1"># Ensures class distribution preserved</span>
+<span class="n">skf</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">val_idx</span> <span class="ow">in</span> <span class="n">skf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">X_train_fold</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
+    <span class="n">X_val_fold</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+    <span class="c1"># ... training code</span>
+</code></pre></div>
+<hr/>
+<h2 id="6-efficient-tuning-workflows">6. Efficient Tuning Workflows<a class="headerlink" href="#6-efficient-tuning-workflows" title="Permanent link">¶</a></h2>
+<h3 id="61-cascading-search">6.1 Cascading Search<a class="headerlink" href="#61-cascading-search" title="Permanent link">¶</a></h3>
+<p>Start coarse, then fine-grained:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Stage 1: Coarse grid search</span>
+<span class="n">stage1_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">],</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Find best in stage 1</span>
+<span class="n">best_params_stage1</span> <span class="o">=</span> <span class="n">grid_search</span><span class="p">(</span><span class="n">stage1_params</span><span class="p">)</span>
+
+<span class="c1"># Stage 2: Fine-grained around best</span>
+<span class="n">stage2_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'learning_rate'</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'learning_rate'</span><span class="p">],</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'learning_rate'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="p">],</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">],</span>
+        <span class="n">best_params_stage1</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Find best in stage 2</span>
+<span class="n">best_params_stage2</span> <span class="o">=</span> <span class="n">grid_search</span><span class="p">(</span><span class="n">stage2_params</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="62-early-stopping-during-tuning">6.2 Early Stopping During Tuning<a class="headerlink" href="#62-early-stopping-during-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">EarlyStoppingTuner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tuner with early stopping."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_improve_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if tuning should stop."""</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">no_improve_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">no_improve_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_improve_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span>
+
+<span class="c1"># Usage</span>
+<span class="n">tuner</span> <span class="o">=</span> <span class="n">EarlyStoppingTuner</span><span class="p">(</span><span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">param_grid</span><span class="p">:</span>
+    <span class="c1"># ... train and evaluate ...</span>
+
+    <span class="k">if</span> <span class="n">tuner</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Early stopping after </span><span class="si">{</span><span class="n">tuner</span><span class="o">.</span><span class="n">no_improve_count</span><span class="si">}</span><span class="s2"> iterations"</span><span class="p">)</span>
+        <span class="k">break</span>
+</code></pre></div>
+<hr/>
+<h2 id="7-complete-tuning-examples">7. Complete Tuning Examples<a class="headerlink" href="#7-complete-tuning-examples" title="Permanent link">¶</a></h2>
+<h3 id="71-simple-grid-search-with-leaderboard">7.1 Simple Grid Search with Leaderboard<a class="headerlink" href="#71-simple-grid-search-with-leaderboard" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+
+<span class="c1"># Define parameter grid</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span><span class="p">,</span> <span class="mf">5e-5</span><span class="p">],</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Generate all combinations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="n">param_combinations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_grid</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">values</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">param_grid</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="p">]</span>
+
+<span class="c1"># Use leaderboard for comparison</span>
+<span class="n">leaderboard</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">param_combinations</span><span class="p">):</span>
+    <span class="n">config_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Config_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">'learning_rate'</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">'epochs'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+        <span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">config_name</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
+    <span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">get_ranking</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="72-bayesian-optimization-with-pruning">7.2 Bayesian Optimization with Pruning<a class="headerlink" href="#72-bayesian-optimization-with-pruning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">objective_with_pruning</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Objective with early pruning."""</span>
+
+    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">'lr'</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">epochs</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'epochs'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="n">learning_rate</span><span class="p">,</span>
+            <span class="s1">'epochs'</span><span class="p">:</span> <span class="n">epochs</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Train with intermediate reporting</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="c1"># ... train for one epoch ...</span>
+
+        <span class="c1"># Evaluate</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)[</span><span class="s1">'accuracy'</span><span class="p">]</span>
+
+        <span class="c1"># Report intermediate value</span>
+        <span class="n">trial</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+
+        <span class="c1"># Prune if not promising</span>
+        <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">should_prune</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">score</span>
+
+<span class="c1"># Create study with pruning</span>
+<span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s1">'maximize'</span><span class="p">,</span>
+    <span class="n">pruner</span><span class="o">=</span><span class="n">optuna</span><span class="o">.</span><span class="n">pruners</span><span class="o">.</span><span class="n">MedianPruner</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective_with_pruning</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="73-parallel-tuning-with-ray">7.3 Parallel Tuning with Ray<a class="headerlink" href="#73-parallel-tuning-with-ray" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">tune</span>
+
+<span class="c1"># Initialize Ray</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">train_model</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Trainable function for Ray."""</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+        <span class="n">tuning_params</span><span class="o">=</span><span class="n">config</span>
+    <span class="p">)</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">metrics</span>
+
+<span class="c1"># Parallel tuning</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">train_model</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="n">tune</span><span class="o">.</span><span class="n">loguniform</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="n">tune</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="n">tune</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+    <span class="p">},</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</code></pre></div>
+<hr/>
+<h2 id="8-tuning-summary-defaults">8. Tuning Summary &amp; Defaults<a class="headerlink" href="#8-tuning-summary-defaults" title="Permanent link">¶</a></h2>
+<h3 id="81-quick-reference-table">8.1 Quick Reference Table<a class="headerlink" href="#81-quick-reference-table" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Learning Rate</th>
+<th>Epochs</th>
+<th>Support Size</th>
+<th>Key Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TabPFN</td>
+<td>2e-5</td>
+<td>3-5</td>
+<td>N/A</td>
+<td>n_estimators</td>
+</tr>
+<tr>
+<td>TabICL</td>
+<td>2e-5</td>
+<td>5</td>
+<td>48</td>
+<td>n_episodes</td>
+</tr>
+<tr>
+<td>OrionMSP</td>
+<td>2e-5</td>
+<td>5</td>
+<td>1024</td>
+<td>n_episodes</td>
+</tr>
+<tr>
+<td>OrionBix</td>
+<td>2e-5</td>
+<td>5</td>
+<td>48</td>
+<td>n_episodes</td>
+</tr>
+<tr>
+<td>TabDPT</td>
+<td>2e-5</td>
+<td>3</td>
+<td>1024</td>
+<td>k_neighbors</td>
+</tr>
+<tr>
+<td>Mitra</td>
+<td>1e-5</td>
+<td>3</td>
+<td>128</td>
+<td>batch_size</td>
+</tr>
+<tr>
+<td>ContextTab</td>
+<td>1e-4</td>
+<td>10</td>
+<td>N/A</td>
+<td>warmup_steps</td>
+</tr>
+<tr>
+<td>PEFT</td>
+<td>2e-4</td>
+<td>5</td>
+<td>48</td>
+<td>rank (r)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-tuning-priority">8.2 Tuning Priority<a class="headerlink" href="#82-tuning-priority" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Learning Rate</strong>: 80% of impact</li>
+<li><strong>Epochs</strong>: 10% of impact</li>
+<li><strong>Batch/Support Size</strong>: 5% of impact</li>
+<li><strong>Other</strong>: 5% of impact</li>
+</ol>
+<hr/>
+<h2 id="9-best-practices">9. Best Practices<a class="headerlink" href="#9-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ Start with default hyperparameters</li>
+<li>✅ Use cross-validation for robustness</li>
+<li>✅ Tune on validation set, evaluate on test set</li>
+<li>✅ Focus on high-impact hyperparameters first</li>
+<li>✅ Use multiple seeds for stability</li>
+<li>✅ Log all experiments</li>
+<li>✅ Parallelize when possible</li>
+</ul>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
+<ul>
+<li>❌ Don't tune on test set</li>
+<li>❌ Don't use learning rate as only tunable parameter</li>
+<li>❌ Don't ignore data size when choosing ranges</li>
+<li>❌ Don't forget to freeze random seed</li>
+<li>❌ Don't tune without validation set</li>
+<li>❌ Don't skip early stopping</li>
+</ul>
+<hr/>
+<h2 id="10-common-pitfalls-solutions">10. Common Pitfalls &amp; Solutions<a class="headerlink" href="#10-common-pitfalls-solutions" title="Permanent link">¶</a></h2>
+<h3 id="issue-tuning-is-too-slow">Issue: "Tuning is too slow"<a class="headerlink" href="#issue-tuning-is-too-slow" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: 
+- Use Bayesian optimization instead of grid search
+- Parallelize across cores
+- Use early stopping</p>
+<h3 id="issue-best-tuned-model-still-overfits">Issue: "Best tuned model still overfits"<a class="headerlink" href="#issue-best-tuned-model-still-overfits" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>:
+- Increase regularization (weight decay)
+- Use PEFT instead of base-ft
+- Reduce learning rate
+- Add dropout</p>
+<h3 id="issue-tuning-results-dont-transfer-to-test-set">Issue: "Tuning results don't transfer to test set"<a class="headerlink" href="#issue-tuning-results-dont-transfer-to-test-set" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>:
+- Use larger validation set
+- Use cross-validation
+- Don't overfit to validation set
+- Use proper hyperparameter ranges</p>
+<hr/>
+<h2 id="11-next-steps">11. Next Steps<a class="headerlink" href="#11-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - Strategy details</li>
+<li><a href="../../user-guide/model-selection/">Model Selection</a> - Choosing models</li>
+<li><a href="../../user-guide/leaderboard/">TabularLeaderboard</a> - Systematic comparison</li>
+<li><a href="../peft-lora/">PEFT &amp; LoRA</a> - PEFT-specific tuning</li>
+</ul>
+<hr/>
+<p>Systematic hyperparameter tuning unlocks the full potential of TabTune models!</p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

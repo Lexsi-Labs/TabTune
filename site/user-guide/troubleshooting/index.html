@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Troubleshooting - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li class="active">
+<a href="./">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../leaderboard/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../models/overview/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/troubleshooting.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#troubleshooting-guide">Troubleshooting Guide</a></li>
+<li class="second-level"><a href="#common-import-errors">Common Import Errors</a></li>
+<li class="third-level"><a href="#modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'</a></li>
+<li class="third-level"><a href="#importerror-cannot-import-tabularpipeline">ImportError: Cannot import TabularPipeline</a></li>
+<li class="third-level"><a href="#importerror-no-module-named-torch">ImportError: No module named 'torch'</a></li>
+<li class="second-level"><a href="#cudagpu-issues">CUDA/GPU Issues</a></li>
+<li class="third-level"><a href="#cuda-out-of-memory">CUDA out of memory</a></li>
+<li class="third-level"><a href="#cuda-device-not-found">CUDA device not found</a></li>
+<li class="third-level"><a href="#gpu-not-being-used">GPU not being used</a></li>
+<li class="second-level"><a href="#memory-errors">Memory Errors</a></li>
+<li class="third-level"><a href="#out-of-memory-during-training">Out of memory during training</a></li>
+<li class="third-level"><a href="#memory-leak-during-training">Memory leak during training</a></li>
+<li class="second-level"><a href="#model-loading-failures">Model Loading Failures</a></li>
+<li class="third-level"><a href="#model-checkpoint-not-found">Model checkpoint not found</a></li>
+<li class="third-level"><a href="#model-state-dict-mismatch">Model state dict mismatch</a></li>
+<li class="second-level"><a href="#preprocessing-errors">Preprocessing Errors</a></li>
+<li class="third-level"><a href="#valueerror-found-array-with-0-samples">ValueError: Found array with 0 sample(s)</a></li>
+<li class="third-level"><a href="#categorical-encoding-mismatch">Categorical encoding mismatch</a></li>
+<li class="third-level"><a href="#data-type-mismatches">Data type mismatches</a></li>
+<li class="second-level"><a href="#training-convergence-issues">Training Convergence Issues</a></li>
+<li class="third-level"><a href="#model-not-converging-loss-not-decreasing">Model not converging / Loss not decreasing</a></li>
+<li class="third-level"><a href="#overfitting">Overfitting</a></li>
+<li class="third-level"><a href="#underfitting">Underfitting</a></li>
+<li class="second-level"><a href="#peft-specific-problems">PEFT-Specific Problems</a></li>
+<li class="third-level"><a href="#peft-not-working-falling-back-to-base-ft">PEFT not working / Falling back to base-ft</a></li>
+<li class="third-level"><a href="#peft-model-size-larger-than-expected">PEFT model size larger than expected</a></li>
+<li class="second-level"><a href="#data-format-errors">Data Format Errors</a></li>
+<li class="third-level"><a href="#valueerror-input-must-be-pandas-dataframe">ValueError: Input must be pandas DataFrame</a></li>
+<li class="third-level"><a href="#shape-mismatch-errors">Shape mismatch errors</a></li>
+<li class="third-level"><a href="#missing-target-column">Missing target column</a></li>
+<li class="second-level"><a href="#version-compatibility-issues">Version Compatibility Issues</a></li>
+<li class="third-level"><a href="#pytorch-version-conflicts">PyTorch version conflicts</a></li>
+<li class="third-level"><a href="#scikit-learn-version-issues">scikit-learn version issues</a></li>
+<li class="third-level"><a href="#python-version-too-old">Python version too old</a></li>
+<li class="second-level"><a href="#evaluation-prediction-errors">Evaluation &amp; Prediction Errors</a></li>
+<li class="third-level"><a href="#predict_proba-returns-incorrect-shape">predict_proba returns incorrect shape</a></li>
+<li class="third-level"><a href="#all-predictions-are-the-same-class">All predictions are the same class</a></li>
+<li class="second-level"><a href="#performance-issues">Performance Issues</a></li>
+<li class="third-level"><a href="#training-is-very-slow">Training is very slow</a></li>
+<li class="third-level"><a href="#inference-is-slow">Inference is slow</a></li>
+<li class="second-level"><a href="#getting-help">Getting Help</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">¶</a></h1>
+<p>This guide addresses common errors, issues, and solutions when using TabTune.</p>
+<hr/>
+<h2 id="common-import-errors">Common Import Errors<a class="headerlink" href="#common-import-errors" title="Permanent link">¶</a></h2>
+<h3 id="modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'<a class="headerlink" href="#modulenotfounderror-no-module-named-tabtune" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: TabTune is not installed or not in your Python path.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>TabTune
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+<p><strong>Verify installation</strong>:
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tabtune</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tabtune</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="importerror-cannot-import-tabularpipeline">ImportError: Cannot import TabularPipeline<a class="headerlink" href="#importerror-cannot-import-tabularpipeline" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: Incorrect import path or installation issue.</p>
+<p><strong>Solution</strong>: Use the correct import:
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>  <span class="c1"># ✅ Correct</span>
+<span class="c1"># NOT: from TabularPipeline.pipeline import TabularPipeline  # ❌ Old path</span>
+</code></pre></div></p>
+<h3 id="importerror-no-module-named-torch">ImportError: No module named 'torch'<a class="headerlink" href="#importerror-no-module-named-torch" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: PyTorch is not installed.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># For CPU only</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch
+
+<span class="c1"># For GPU support (CUDA 11.8)</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+</code></pre></div></p>
+<hr/>
+<h2 id="cudagpu-issues">CUDA/GPU Issues<a class="headerlink" href="#cudagpu-issues" title="Permanent link">¶</a></h2>
+<h3 id="cuda-out-of-memory">CUDA out of memory<a class="headerlink" href="#cuda-out-of-memory" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: <code>RuntimeError: CUDA out of memory</code></p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Use PEFT strategy</strong> (recommended):
+   <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"peft"</span><span class="p">,</span>  <span class="c1"># Uses 40-60% less memory</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"peft_config"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}}</span>  <span class="c1"># Lower rank = less memory</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reduce batch size</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Default is often 8 or 16</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use a smaller model</strong>:</p>
+</li>
+<li>Switch from TabDPT to TabICL</li>
+<li>
+<p>Switch from OrionBix to TabICL</p>
+</li>
+<li>
+<p><strong>Process in chunks</strong>:
+   <div class="highlight"><pre><span></span><code><span class="c1"># Split dataset into smaller batches</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
+    <span class="n">X_chunk</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
+    <span class="n">y_chunk</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
+    <span class="c1"># Process chunk</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Clear GPU cache</strong>:
+   <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use CPU instead</strong> (slower but no memory limits):
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="cuda-device-not-found">CUDA device not found<a class="headerlink" href="#cuda-device-not-found" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: <code>RuntimeError: CUDA error: no kernel image is available</code></p>
+<p><strong>Cause</strong>: PyTorch version doesn't match your GPU's CUDA version.</p>
+<p><strong>Solution</strong>:
+1. Check your CUDA version: <code>nvidia-smi</code>
+2. Install matching PyTorch:
+   <div class="highlight"><pre><span></span><code><span class="c1"># For CUDA 11.8</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+
+<span class="c1"># For CUDA 12.1</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
+</code></pre></div></p>
+<h3 id="gpu-not-being-used">GPU not being used<a class="headerlink" href="#gpu-not-being-used" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Training runs on CPU despite having GPU.</p>
+<p><strong>Check</strong>:
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current device: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'CPU'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Solution</strong>: Explicitly set device in <code>tuning_params</code>:
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">}</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="memory-errors">Memory Errors<a class="headerlink" href="#memory-errors" title="Permanent link">¶</a></h2>
+<h3 id="out-of-memory-during-training">Out of memory during training<a class="headerlink" href="#out-of-memory-during-training" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: Dataset too large or batch size too high.</p>
+<p><strong>Solutions</strong>:
+1. Reduce batch size: <code>tuning_params={"batch_size": 2}</code>
+2. Use gradient accumulation:
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"gradient_accumulation_steps"</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Effective batch size = 16</span>
+<span class="p">}</span>
+</code></pre></div>
+3. Use PEFT instead of base-ft
+4. Reduce dataset size for testing</p>
+<h3 id="memory-leak-during-training">Memory leak during training<a class="headerlink" href="#memory-leak-during-training" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Memory usage increases over epochs.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Add periodic cleanup</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="c1"># Training code</span>
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="model-loading-failures">Model Loading Failures<a class="headerlink" href="#model-loading-failures" title="Permanent link">¶</a></h2>
+<h3 id="model-checkpoint-not-found">Model checkpoint not found<a class="headerlink" href="#model-checkpoint-not-found" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: <code>FileNotFoundError</code> when loading checkpoint.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if checkpoint exists</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Checkpoint not found: </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="c1"># Use inference mode instead</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="model-state-dict-mismatch">Model state dict mismatch<a class="headerlink" href="#model-state-dict-mismatch" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: <code>RuntimeError: Error(s) in loading state_dict</code></p>
+<p><strong>Cause</strong>: Checkpoint from different model version or architecture.</p>
+<p><strong>Solution</strong>:
+- Use checkpoints saved from the same TabTune version
+- Or start fresh training without loading checkpoint</p>
+<hr/>
+<h2 id="preprocessing-errors">Preprocessing Errors<a class="headerlink" href="#preprocessing-errors" title="Permanent link">¶</a></h2>
+<h3 id="valueerror-found-array-with-0-samples">ValueError: Found array with 0 sample(s)<a class="headerlink" href="#valueerror-found-array-with-0-samples" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: Empty dataset after preprocessing/filtering.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Check data before preprocessing</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Data shape: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Null values: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Ensure sufficient samples after train/test split</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Train samples: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="categorical-encoding-mismatch">Categorical encoding mismatch<a class="headerlink" href="#categorical-encoding-mismatch" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Errors during prediction about unseen categories.</p>
+<p><strong>Cause</strong>: Test set contains categories not seen during training.</p>
+<p><strong>Solution</strong>:
+- Ensure train/test split preserves all categories
+- Use <code>stratify=y</code> in train_test_split for classification
+- Check for new categories in test set:
+  <div class="highlight"><pre><span></span><code><span class="n">train_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<span class="n">test_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<span class="n">unseen</span> <span class="o">=</span> <span class="n">test_cats</span> <span class="o">-</span> <span class="n">train_cats</span>
+<span class="k">if</span> <span class="n">unseen</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unseen categories: </span><span class="si">{</span><span class="n">unseen</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="data-type-mismatches">Data type mismatches<a class="headerlink" href="#data-type-mismatches" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Type errors during preprocessing.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Ensure correct types</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">'col1'</span><span class="p">:</span> <span class="s1">'float64'</span><span class="p">,</span> <span class="s1">'col2'</span><span class="p">:</span> <span class="s1">'category'</span><span class="p">})</span>
+
+<span class="c1"># Or let DataProcessor handle it</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"override_types"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>  <span class="c1"># Auto-detect</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="training-convergence-issues">Training Convergence Issues<a class="headerlink" href="#training-convergence-issues" title="Permanent link">¶</a></h2>
+<h3 id="model-not-converging-loss-not-decreasing">Model not converging / Loss not decreasing<a class="headerlink" href="#model-not-converging-loss-not-decreasing" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Loss plateaus or increases.</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Lower learning rate</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">}</span>  <span class="c1"># Default might be too high</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reduce epochs</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>  <span class="c1"># Start small</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check data quality</strong>:</p>
+</li>
+<li>Ensure labels are correct</li>
+<li>Check for data leakage</li>
+<li>
+<p>Verify train/test split</p>
+</li>
+<li>
+<p><strong>Try different model</strong>:</p>
+</li>
+<li>Some models work better for certain datasets</li>
+<li>
+<p>Use TabularLeaderboard to compare</p>
+</li>
+<li>
+<p><strong>Warmup learning rate</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s2">"warmup_steps"</span><span class="p">:</span> <span class="mi">100</span>
+<span class="p">}</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="overfitting">Overfitting<a class="headerlink" href="#overfitting" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: High training accuracy, low validation accuracy.</p>
+<p><strong>Solutions</strong>:
+1. <strong>Reduce epochs</strong>: <code>tuning_params={"epochs": 3}</code>
+2. <strong>Lower learning rate</strong>: <code>tuning_params={"learning_rate": 1e-5}</code>
+3. <strong>Use PEFT</strong>: Often generalizes better than base-ft
+4. <strong>More training data</strong>: Collect or use data augmentation
+5. <strong>Early stopping</strong>: Implement callback to stop when validation loss increases</p>
+<h3 id="underfitting">Underfitting<a class="headerlink" href="#underfitting" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Both training and validation accuracy are low.</p>
+<p><strong>Solutions</strong>:
+1. <strong>Train longer</strong>: Increase <code>epochs</code>
+2. <strong>Higher learning rate</strong>: <code>tuning_params={"learning_rate": 5e-4}</code>
+3. <strong>Use base-ft</strong>: Full fine-tuning may be needed
+4. <strong>Larger model</strong>: Try TabDPT or OrionBix instead of TabICL
+5. <strong>Feature engineering</strong>: Add relevant features</p>
+<hr/>
+<h2 id="peft-specific-problems">PEFT-Specific Problems<a class="headerlink" href="#peft-specific-problems" title="Permanent link">¶</a></h2>
+<h3 id="peft-not-working-falling-back-to-base-ft">PEFT not working / Falling back to base-ft<a class="headerlink" href="#peft-not-working-falling-back-to-base-ft" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Warning messages about PEFT compatibility.</p>
+<p><strong>Cause</strong>: Some models have experimental PEFT support.</p>
+<p><strong>Solution</strong>:
+- TabPFN and ContextTab have experimental PEFT
+- Use <code>base-ft</code> strategy for these models
+- Or check PEFT configuration:
+  <div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"r"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># Rank (lower = less memory, but may affect performance)</span>
+    <span class="s2">"lora_alpha"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s2">"lora_dropout"</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s2">"target_modules"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"query"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">]</span>  <span class="c1"># Model-specific</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="peft-model-size-larger-than-expected">PEFT model size larger than expected<a class="headerlink" href="#peft-model-size-larger-than-expected" title="Permanent link">¶</a></h3>
+<p><strong>Cause</strong>: Incorrect target modules or high rank.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Use lower rank</span>
+<span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Instead of default 8</span>
+
+<span class="c1"># Check actual model size</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="n">total_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+<span class="n">trainable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total_params</span><span class="si">}</span><span class="s2">, Trainable: </span><span class="si">{</span><span class="n">trainable</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="data-format-errors">Data Format Errors<a class="headerlink" href="#data-format-errors" title="Permanent link">¶</a></h2>
+<h3 id="valueerror-input-must-be-pandas-dataframe">ValueError: Input must be pandas DataFrame<a class="headerlink" href="#valueerror-input-must-be-pandas-dataframe" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Error when passing numpy arrays.</p>
+<p><strong>Solution</strong>: Convert to DataFrame:
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="n">y_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="shape-mismatch-errors">Shape mismatch errors<a class="headerlink" href="#shape-mismatch-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Dimension errors during prediction.</p>
+<p><strong>Cause</strong>: Feature count differs between train and test.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Ensure same features</span>
+<span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># Or use pipeline's built-in handling</span>
+<span class="c1"># TabTune automatically handles this</span>
+</code></pre></div></p>
+<h3 id="missing-target-column">Missing target column<a class="headerlink" href="#missing-target-column" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: KeyError when accessing target.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Ensure target is separate Series</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span>  <span class="c1"># ✅ Correct</span>
+<span class="c1"># NOT: y = df[['target']]  # ❌ DataFrame instead of Series</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="version-compatibility-issues">Version Compatibility Issues<a class="headerlink" href="#version-compatibility-issues" title="Permanent link">¶</a></h2>
+<h3 id="pytorch-version-conflicts">PyTorch version conflicts<a class="headerlink" href="#pytorch-version-conflicts" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Errors about tensor operations or CUDA compatibility.</p>
+<p><strong>Solution</strong>: Check and match versions:
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PyTorch: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">cuda</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Update if needed:
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>torch
+</code></pre></div></p>
+<h3 id="scikit-learn-version-issues">scikit-learn version issues<a class="headerlink" href="#scikit-learn-version-issues" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Deprecation warnings or API errors.</p>
+<p><strong>Solution</strong>: Use compatible version:
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>scikit-learn<span class="o">==</span><span class="m">1</span>.7
+</code></pre></div></p>
+<h3 id="python-version-too-old">Python version too old<a class="headerlink" href="#python-version-too-old" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Syntax errors or unsupported features.</p>
+<p><strong>Solution</strong>: TabTune requires Python 3.10+. Upgrade Python:
+<div class="highlight"><pre><span></span><code><span class="c1"># Using conda</span>
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>tabtune<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
+conda<span class="w"> </span>activate<span class="w"> </span>tabtune
+</code></pre></div></p>
+<hr/>
+<h2 id="evaluation-prediction-errors">Evaluation &amp; Prediction Errors<a class="headerlink" href="#evaluation-prediction-errors" title="Permanent link">¶</a></h2>
+<h3 id="predict_proba-returns-incorrect-shape">predict_proba returns incorrect shape<a class="headerlink" href="#predict_proba-returns-incorrect-shape" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Shape mismatch or wrong number of classes.</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Check class count</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">custom_preprocessor_</span><span class="o">.</span><span class="n">label_encoder_</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected </span><span class="si">{</span><span class="n">n_classes</span><span class="si">}</span><span class="s2"> classes"</span><span class="p">)</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got shape: </span><span class="si">{</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># Should be (n_samples, n_classes)</span>
+</code></pre></div></p>
+<h3 id="all-predictions-are-the-same-class">All predictions are the same class<a class="headerlink" href="#all-predictions-are-the-same-class" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Model predicts only one class for all samples.</p>
+<p><strong>Possible causes</strong>:
+1. Model not trained (using inference with poor weights)
+2. Severe class imbalance
+3. Data preprocessing issue</p>
+<p><strong>Solutions</strong>:
+1. <strong>Fine-tune the model</strong>: Use <code>base-ft</code> or <code>peft</code>
+2. <strong>Check class distribution</strong>:
+   <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+</code></pre></div>
+3. <strong>Use resampling</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"resampling_strategy"</span><span class="p">:</span> <span class="s2">"smote"</span><span class="p">}</span>
+</code></pre></div>
+4. <strong>Inspect predictions</strong>:
+   <div class="highlight"><pre><span></span><code><span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique predictions: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prediction distribution: </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="performance-issues">Performance Issues<a class="headerlink" href="#performance-issues" title="Permanent link">¶</a></h2>
+<h3 id="training-is-very-slow">Training is very slow<a class="headerlink" href="#training-is-very-slow" title="Permanent link">¶</a></h3>
+<p><strong>Solutions</strong>:
+1. <strong>Use GPU</strong>: <code>tuning_params={"device": "cuda"}</code>
+2. <strong>Reduce dataset size</strong>: Test with subset first
+3. <strong>Use inference mode</strong>: For quick baselines
+4. <strong>Optimize batch size</strong>: Larger batches (if memory allows)
+5. <strong>Use PEFT</strong>: Faster than base-ft</p>
+<h3 id="inference-is-slow">Inference is slow<a class="headerlink" href="#inference-is-slow" title="Permanent link">¶</a></h3>
+<p><strong>Solutions</strong>:
+1. <strong>Batch predictions</strong>: Process multiple samples at once
+2. <strong>Use GPU</strong>: <code>tuning_params={"device": "cuda"}</code>
+3. <strong>Reduce n_estimators</strong> (for ensemble models):
+   <div class="highlight"><pre><span></span><code><span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_estimators"</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>  <span class="c1"># Instead of default 16 or 32</span>
+</code></pre></div>
+4. <strong>Cache preprocessing</strong>: Save and load preprocessed data</p>
+<hr/>
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">¶</a></h2>
+<p>If you encounter an issue not covered here:</p>
+<ol>
+<li>
+<p><strong>Check the logs</strong>: TabTune provides detailed logging
+   <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reproduce with minimal example</strong>: Create smallest code that reproduces the issue</p>
+</li>
+<li>
+<p><strong>Check GitHub Issues</strong>: Search <a href="https://github.com/Lexsi-Labs/TabTune_Internal/issues">TabTune_Internal Issues</a></p>
+</li>
+<li>
+<p><strong>Open new issue</strong>: Include:</p>
+</li>
+<li>TabTune version</li>
+<li>Python version</li>
+<li>Full error traceback</li>
+<li>Minimal reproducible code</li>
+<li>
+<p>System information</p>
+</li>
+<li>
+<p><strong>Review documentation</strong>: Check relevant guides:</p>
+</li>
+<li><a href="../../getting-started/installation/">Installation</a></li>
+<li><a href="../pipeline-overview/">User Guide</a></li>
+<li><a href="../../about/faq/">FAQ</a></li>
+</ol></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

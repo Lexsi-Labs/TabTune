@@ -1,0 +1,8 @@
+# Requirements for building the MkDocs documentation site
+mkdocs>=1.5
+mkdocstrings[python]>=0.26
+pymdown-extensions>=10.0
+mkdocs-autorefs>=1.0.0
+mkdocs-cinder>=1.2.0
+mkdocs-mermaid2-plugin>=1.0.0
+

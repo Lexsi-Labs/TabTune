@@ -454,9 +454,10 @@ TabTune is built upon the excellent work of the following projects and research 
 
 ## Contact
 
-<p align="center">
+<p align="center" style="background-color:white; display:inline-block; padding:5px;">
   <img src="assets/lexsi-labs-logo.svg" alt="Lexsi Labs Logo" width="200px"/>
 </p>
+
 
 For questions and support: **contact@lexsi.ai**  
 Website: **https://lexsi.ai**

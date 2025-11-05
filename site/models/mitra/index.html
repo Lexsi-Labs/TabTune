@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Mitra - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../overview/">Overview</a>
+</li>
+<li>
+<a href="../tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../tabdpt/">TabDPT</a>
+</li>
+<li class="active">
+<a href="./">Mitra</a>
+</li>
+<li>
+<a href="../contexttab/">ConTextTab</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../tabdpt/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../contexttab/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/models/mitra.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#mitra-2d-cross-attention-for-tabular-data">Mitra: 2D Cross-Attention for Tabular Data</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
+<li class="third-level"><a href="#21-high-level-design">2.1 High-Level Design</a></li>
+<li class="third-level"><a href="#23-2d-attention-mechanism">2.3 2D Attention Mechanism</a></li>
+<li class="third-level"><a href="#24-synthetic-priors">2.4 Synthetic Priors</a></li>
+<li class="second-level"><a href="#3-inference-parameters">3. Inference Parameters</a></li>
+<li class="third-level"><a href="#31-complete-parameter-reference">3.1 Complete Parameter Reference</a></li>
+<li class="third-level"><a href="#32-parameter-descriptions">3.2 Parameter Descriptions</a></li>
+<li class="third-level"><a href="#33-architecture-tuning">3.3 Architecture Tuning</a></li>
+<li class="second-level"><a href="#4-fine-tuning-with-mitra">4. Fine-Tuning with Mitra</a></li>
+<li class="third-level"><a href="#41-fine-tuning-parameters">4.1 Fine-Tuning Parameters</a></li>
+<li class="third-level"><a href="#42-key-parameters">4.2 Key Parameters</a></li>
+<li class="third-level"><a href="#43-why-small-batch-size">4.3 Why Small Batch Size?</a></li>
+<li class="third-level"><a href="#44-fine-tuning-guidelines">4.4 Fine-Tuning Guidelines</a></li>
+<li class="second-level"><a href="#5-lora-target-modules">5. LoRA Target Modules</a></li>
+<li class="third-level"><a href="#51-default-peft-configuration">5.1 Default PEFT Configuration</a></li>
+<li class="third-level"><a href="#52-peft-rank-guidelines">5.2 PEFT Rank Guidelines</a></li>
+<li class="second-level"><a href="#6-usage-patterns">6. Usage Patterns</a></li>
+<li class="third-level"><a href="#61-inference-only">6.1 Inference Only</a></li>
+<li class="third-level"><a href="#62-base-fine-tuning">6.2 Base Fine-Tuning</a></li>
+<li class="third-level"><a href="#63-peft-fine-tuning">6.3 PEFT Fine-Tuning</a></li>
+<li class="third-level"><a href="#64-architecture-customization">6.4 Architecture Customization</a></li>
+<li class="second-level"><a href="#7-complete-examples">7. Complete Examples</a></li>
+<li class="third-level"><a href="#71-basic-workflow">7.1 Basic Workflow</a></li>
+<li class="third-level"><a href="#72-peft-for-memory-constraints">7.2 PEFT for Memory Constraints</a></li>
+<li class="third-level"><a href="#73-architecture-search">7.3 Architecture Search</a></li>
+<li class="third-level"><a href="#74-production-deployment-saving-using-joblib">7.4 Production Deployment - Saving using joblib</a></li>
+<li class="second-level"><a href="#8-performance-characteristics">8. Performance Characteristics</a></li>
+<li class="third-level"><a href="#81-speed-benchmarks">8.1 Speed Benchmarks</a></li>
+<li class="third-level"><a href="#82-memory-usage">8.2 Memory Usage</a></li>
+<li class="second-level"><a href="#9-best-practices">9. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do's</a></li>
+<li class="third-level"><a href="#donts">❌ Don'ts</a></li>
+<li class="second-level"><a href="#10-troubleshooting">10. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-cuda-out-of-memory">Issue: "CUDA out of memory"</a></li>
+<li class="third-level"><a href="#issue-training-very-slow">Issue: "Training very slow"</a></li>
+<li class="third-level"><a href="#issue-low-accuracy">Issue: "Low accuracy"</a></li>
+<li class="third-level"><a href="#issue-overfitting-on-small-datasets">Issue: "Overfitting on small datasets"</a></li>
+<li class="second-level"><a href="#11-comparison-with-other-models">11. Comparison with Other Models</a></li>
+<li class="second-level"><a href="#12-quick-reference">12. Quick Reference</a></li>
+<li class="second-level"><a href="#13-next-steps">13. Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="mitra-2d-cross-attention-for-tabular-data">Mitra: 2D Cross-Attention for Tabular Data<a class="headerlink" href="#mitra-2d-cross-attention-for-tabular-data" title="Permanent link">¶</a></h1>
+<p>Mitra (also known as Tab2D) is a sophisticated tabular model featuring 2D cross-attention mechanisms for modeling both row-wise and column-wise dependencies. This document provides comprehensive guidance for using Mitra with TabTune.</p>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
+<p><strong>What is Mitra?</strong></p>
+<p>Mitra is an advanced in-context learning model that captures complex interactions through:</p>
+<ul>
+<li><strong>2D Cross-Attention</strong>: Simultaneous row (sample) and column (feature) modeling</li>
+<li><strong>Synthetic Priors</strong>: Pre-trained representations for tabular data</li>
+<li><strong>Mixed-Type Feature Handling</strong>: Natural support for numerical and categorical data</li>
+<li><strong>Episodic Training</strong>: Task-specific adaptation via meta-learning</li>
+</ul>
+<p><strong>Key Innovation</strong>: 2D attention mechanism simultaneously models relationships both across rows (samples) and columns (features), enabling superior pattern discovery.</p>
+<hr/>
+<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
+<h3 id="21-high-level-design">2.1 High-Level Design<a class="headerlink" href="#21-high-level-design" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
+    A[Input Features] --&gt; B[Feature Embeddings]
+    B --&gt; C[Row Embeddings]
+    C --&gt; D[2D Cross-Attention]
+    D --&gt; E[Feature-Sample Interactions]
+    E --&gt; F[Prediction Head]
+    F --&gt; G[Logits]
+    G --&gt; H[Final Predictions]
+</div>
+<!-- ### 2.2 Core Components
+
+1. **Feature Embedder** (`x_embedding`)
+   - Encodes each feature independently
+   - Learns feature-specific representations
+   - Handles mixed data types
+
+2. **Row Embedder** (implicit)
+   - Sample-level representations
+   - Position and context encoding
+   - Sample-specific patterns
+
+3. **2D Cross-Attention** (`layers`)
+   - Feature-to-sample attention
+   - Sample-to-feature attention
+   - Bidirectional interaction modeling
+
+4. **Prediction Head** (`final_layer`)
+   - Aggregates 2D representations
+   - Outputs class logits
+   - Task-specific predictions -->
+<h3 id="23-2d-attention-mechanism">2.3 2D Attention Mechanism<a class="headerlink" href="#23-2d-attention-mechanism" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>Row Embeddings         Feature Embeddings
+      ↓                       ↓
+      └─────────2D Cross-Attention─────────┘
+             ↓
+    Joint Row-Feature Representation
+             ↓
+         Prediction Head
+             ↓
+          Output
+</code></pre></div>
+<h3 id="24-synthetic-priors">2.4 Synthetic Priors<a class="headerlink" href="#24-synthetic-priors" title="Permanent link">¶</a></h3>
+<p>Mitra incorporates synthetic prior knowledge:
+- Pre-trained on diverse tabular data
+- Captures common patterns
+- Accelerates learning on new tasks
+- Improves generalization</p>
+<hr/>
+<h2 id="3-inference-parameters">3. Inference Parameters<a class="headerlink" href="#3-inference-parameters" title="Permanent link">¶</a></h2>
+<h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Architecture parameters</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>                         <span class="c1"># Feature embedding dimension</span>
+    <span class="s1">'d_ff'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                           <span class="c1"># Feedforward hidden dimension</span>
+    <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>                        <span class="c1"># Attention heads</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                       <span class="c1"># Stacked layers</span>
+
+    <span class="c1"># Training behavior</span>
+    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout rate</span>
+    <span class="s1">'use_synthetic_prior'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>           <span class="c1"># Use pre-trained prior</span>
+    <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="32-parameter-descriptions">3.2 Parameter Descriptions<a class="headerlink" href="#32-parameter-descriptions" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d_model</code></td>
+<td>int</td>
+<td>64</td>
+<td>32-256</td>
+<td>Feature embedding dimension</td>
+</tr>
+<tr>
+<td><code>d_ff</code></td>
+<td>int</td>
+<td>128</td>
+<td>64-512</td>
+<td>Feedforward network hidden size</td>
+</tr>
+<tr>
+<td><code>num_heads</code></td>
+<td>int</td>
+<td>4</td>
+<td>2-8</td>
+<td>Number of attention heads</td>
+</tr>
+<tr>
+<td><code>num_layers</code></td>
+<td>int</td>
+<td>2</td>
+<td>1-4</td>
+<td>Number of transformer layers</td>
+</tr>
+<tr>
+<td><code>dropout</code></td>
+<td>float</td>
+<td>0.1</td>
+<td>0.0-0.3</td>
+<td>Dropout probability</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>int</td>
+<td>42</td>
+<td>0+</td>
+<td>Random seed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-architecture-tuning">3.3 Architecture Tuning<a class="headerlink" href="#33-architecture-tuning" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Config</th>
+<th>Speed</th>
+<th>Accuracy</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small: d_model=32, num_layers=1</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐</td>
+</tr>
+<tr>
+<td>Medium: d_model=64, num_layers=2</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>Large: d_model=128, num_layers=4</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="4-fine-tuning-with-mitra">4. Fine-Tuning with Mitra<a class="headerlink" href="#4-fine-tuning-with-mitra" title="Permanent link">¶</a></h2>
+<p>Mitra uses episodic fine-tuning for task-specific adaptation.</p>
+<h3 id="41-fine-tuning-parameters">4.1 Fine-Tuning Parameters<a class="headerlink" href="#41-fine-tuning-parameters" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+    <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                          <span class="c1"># Training epochs</span>
+    <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>                <span class="c1"># Optimizer learning rate</span>
+    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
+
+    <span class="c1"># Episodic parameters</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                  <span class="c1"># Support set size</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                    <span class="c1"># Query set size</span>
+    <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>                    <span class="c1"># Episodes per epoch</span>
+    <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>                <span class="c1"># Gradient steps per epoch</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>                      <span class="c1"># Episodes per batch (small!)</span>
+
+    <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="42-key-parameters">4.2 Key Parameters<a class="headerlink" href="#42-key-parameters" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>support_size</code></td>
+<td>int</td>
+<td>128</td>
+<td>Context samples per episode</td>
+</tr>
+<tr>
+<td><code>query_size</code></td>
+<td>int</td>
+<td>128</td>
+<td>Query samples per episode</td>
+</tr>
+<tr>
+<td><code>n_episodes</code></td>
+<td>int</td>
+<td>500</td>
+<td>Total episodes for training</td>
+</tr>
+<tr>
+<td><code>steps_per_epoch</code></td>
+<td>int</td>
+<td>50</td>
+<td>Gradient updates per epoch</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>int</td>
+<td>4</td>
+<td>Episodes per batch (keep small)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-why-small-batch-size">4.3 Why Small Batch Size?<a class="headerlink" href="#43-why-small-batch-size" title="Permanent link">¶</a></h3>
+<p>Mitra's 2D attention is computationally expensive:
+- Attention complexity: (O(n^2)) for both rows and columns
+- Memory grows rapidly with batch size
+- Empirically: batch_size=4-8 is optimal
+- Larger: Use gradient accumulation instead</p>
+<h3 id="44-fine-tuning-guidelines">4.4 Fine-Tuning Guidelines<a class="headerlink" href="#44-fine-tuning-guidelines" title="Permanent link">¶</a></h3>
+<p><strong>Support/Query Balance</strong>:
+<div class="highlight"><pre><span></span><code>support_size = 128  # Larger context for pattern discovery
+query_size = 128    # Balance for gradient signal
+</code></pre></div></p>
+<p><strong>Learning Rate Strategy</strong>:
+- Start: 1e-5
+- If converging slowly: increase to 2e-5
+- If diverging: decrease to 5e-6</p>
+<p><strong>Episode Count</strong>:
+- Small dataset (10K): 500 episodes
+- Medium dataset (100K): 1000 episodes
+- Large dataset (500K): 2000 episodes</p>
+<hr/>
+<h2 id="5-lora-target-modules">5. LoRA Target Modules<a class="headerlink" href="#5-lora-target-modules" title="Permanent link">¶</a></h2>
+<p>When using PEFT, Mitra targets these modules:</p>
+<div class="highlight"><pre><span></span><code><span class="n">target_modules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'x_embedding'</span><span class="p">,</span>           <span class="c1"># Feature embedder</span>
+    <span class="s1">'layers'</span><span class="p">,</span>                <span class="c1"># Attention layers</span>
+    <span class="s1">'final_layer'</span>            <span class="c1"># Prediction head</span>
+<span class="p">]</span>
+</code></pre></div>
+<h3 id="51-default-peft-configuration">5.1 Default PEFT Configuration<a class="headerlink" href="#51-default-peft-configuration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s1">'target_modules'</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># Uses defaults above</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="52-peft-rank-guidelines">5.2 PEFT Rank Guidelines<a class="headerlink" href="#52-peft-rank-guidelines" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Memory</th>
+<th>Speed</th>
+<th>Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r=4</td>
+<td>Minimal</td>
+<td>Fast</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>r=8</td>
+<td>Low</td>
+<td>Moderate</td>
+<td>Better</td>
+</tr>
+<tr>
+<td>r=16</td>
+<td>Moderate</td>
+<td>Slower</td>
+<td>Best</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="6-usage-patterns">6. Usage Patterns<a class="headerlink" href="#6-usage-patterns" title="Permanent link">¶</a></h2>
+<h3 id="61-inference-only">6.1 Inference Only<a class="headerlink" href="#61-inference-only" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">'use_synthetic_prior'</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>  <span class="c1"># Preprocessing only</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="62-base-fine-tuning">6.2 Base Fine-Tuning<a class="headerlink" href="#62-base-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># Small!</span>
+        <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="63-peft-fine-tuning">6.3 PEFT Fine-Tuning<a class="headerlink" href="#63-peft-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>  <span class="c1"># Higher for PEFT</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>     <span class="c1"># Reduced for memory</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>        <span class="c1"># Very small</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.05</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="64-architecture-customization">6.4 Architecture Customization<a class="headerlink" href="#64-architecture-customization" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>      <span class="c1"># Larger embeddings</span>
+        <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>     <span class="c1"># More layers</span>
+        <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>      <span class="c1"># More heads</span>
+        <span class="s1">'d_ff'</span><span class="p">:</span> <span class="mi">256</span>
+    <span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="7-complete-examples">7. Complete Examples<a class="headerlink" href="#7-complete-examples" title="Permanent link">¶</a></h2>
+<h3 id="71-basic-workflow">7.1 Basic Workflow<a class="headerlink" href="#71-basic-workflow" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># Load data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'structured_data.csv'</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'target'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span>
+
+<span class="c1"># Split</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Train with Mitra</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"F1 Score: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'f1_score'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="72-peft-for-memory-constraints">7.2 PEFT for Memory Constraints<a class="headerlink" href="#72-peft-for-memory-constraints" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use PEFT when memory is limited</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>    <span class="c1"># Reduced</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>      <span class="c1"># Reduced</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>       <span class="c1"># Very small</span>
+        <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="c1"># Fewer steps</span>
+        <span class="s1">'peft_config'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'r'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>            <span class="c1"># Lower rank</span>
+            <span class="s1">'lora_alpha'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'lora_dropout'</span><span class="p">:</span> <span class="mf">0.1</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="73-architecture-search">7.3 Architecture Search<a class="headerlink" href="#73-architecture-search" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
+
+<span class="c1"># Compare architectures</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="c1"># Small model</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">'Mitra-Small'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Medium model</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">'Mitra-Medium'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Large model</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span>
+    <span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">'Mitra-Large'</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">lb</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="74-production-deployment-saving-using-joblib">7.4 Production Deployment - Saving using joblib<a class="headerlink" href="#74-production-deployment-saving-using-joblib" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+
+<span class="c1"># Train optimal model</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'Mitra'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="c1"># Save for deployment</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">'mitra_production.joblib'</span><span class="p">)</span>
+
+<span class="c1"># In production</span>
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'mitra_production.joblib'</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="8-performance-characteristics">8. Performance Characteristics<a class="headerlink" href="#8-performance-characteristics" title="Permanent link">¶</a></h2>
+<h3 id="81-speed-benchmarks">8.1 Speed Benchmarks<a class="headerlink" href="#81-speed-benchmarks" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Time</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inference (batch=1000)</td>
+<td>3-5s</td>
+<td>2D attention overhead</td>
+</tr>
+<tr>
+<td>Base FT (3 epochs, 100K)</td>
+<td>45-60m</td>
+<td>Slow but powerful</td>
+</tr>
+<tr>
+<td>PEFT (3 epochs, 100K)</td>
+<td>20-30m</td>
+<td>Better speed</td>
+</tr>
+<tr>
+<td>Prediction latency</td>
+<td>20-100ms</td>
+<td>Per sample</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-memory-usage">8.2 Memory Usage<a class="headerlink" href="#82-memory-usage" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Memory</th>
+<th>GPU VRAM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inference</td>
+<td>8-10 GB</td>
+<td>6GB minimum</td>
+</tr>
+<tr>
+<td>Base FT</td>
+<td>16-20 GB</td>
+<td>12GB recommended</td>
+</tr>
+<tr>
+<td>PEFT</td>
+<td>10-12 GB</td>
+<td>6-8GB sufficient</td>
+</tr>
+<tr>
+<td>Large model</td>
+<td>Up to 24 GB</td>
+<td>16GB+ needed</td>
+</tr>
+</tbody>
+</table>
+<!-- ### 8.3 Accuracy Profile
+
+| Dataset | Size | Accuracy |
+|---------|------|----------|
+| Small | 10K | 84% |
+| Medium | 100K | 89% |
+| Large | 500K | 91% |
+ -->
+<hr/>
+<h2 id="9-best-practices">9. Best Practices<a class="headerlink" href="#9-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ Use small batch sizes (2-4)</li>
+<li>✅ Start with medium architecture (d_model=64)</li>
+<li>✅ Monitor memory usage actively</li>
+<li>✅ Use PEFT on constrained systems</li>
+<li>✅ Increase support/query sizes for pattern discovery</li>
+<li>✅ Use synthetic priors (faster convergence)</li>
+</ul>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
+<ul>
+<li>❌ Don't use large batch sizes (causes OOM)</li>
+<li>❌ Don't use very large models on small GPUs</li>
+<li>❌ Don't skip warmup steps</li>
+<li>❌ Don't disable gradient clipping</li>
+<li>❌ Don't train for too many epochs (overfit risk)</li>
+</ul>
+<hr/>
+<h2 id="10-troubleshooting">10. Troubleshooting<a class="headerlink" href="#10-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-cuda-out-of-memory">Issue: "CUDA out of memory"<a class="headerlink" href="#issue-cuda-out-of-memory" title="Permanent link">¶</a></h3>
+<p><strong>Solution 1</strong>: Reduce batch size
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># Instead of 4</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>  <span class="c1"># Instead of 128</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">64</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Solution 2</strong>: Use PEFT
+<div class="highlight"><pre><span></span><code><span class="n">tuning_strategy</span> <span class="o">=</span> <span class="s1">'peft'</span>
+</code></pre></div></p>
+<h3 id="issue-training-very-slow">Issue: "Training very slow"<a class="headerlink" href="#issue-training-very-slow" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: Reduce model size
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>  <span class="c1"># Instead of 64</span>
+    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">1</span>  <span class="c1"># Instead of 2</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="issue-low-accuracy">Issue: "Low accuracy"<a class="headerlink" href="#issue-low-accuracy" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: Increase support set size
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>  <span class="c1"># More context</span>
+    <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="mi">1000</span>    <span class="c1"># More training</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="issue-overfitting-on-small-datasets">Issue: "Overfitting on small datasets"<a class="headerlink" href="#issue-overfitting-on-small-datasets" title="Permanent link">¶</a></h3>
+<p><strong>Solution</strong>: Use regularization
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Increase regularization</span>
+    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.2</span>        <span class="c1"># In model_params</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="11-comparison-with-other-models">11. Comparison with Other Models<a class="headerlink" href="#11-comparison-with-other-models" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Mitra</th>
+<th>TabICL</th>
+<th>TabDPT</th>
+<th>OrionMSP</th>
+<th>OrionBix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Speed</td>
+<td>Slow</td>
+<td>Fast</td>
+<td>Slow</td>
+<td>Moderate</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Very High</td>
+<td>Moderate</td>
+<td>High</td>
+<td>Moderate-High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Accuracy</td>
+<td>Excellent</td>
+<td>Good</td>
+<td>Excellent</td>
+<td>Very Good</td>
+<td>Very Good</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Complex</td>
+<td>Simple</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Small Data</td>
+<td>Good</td>
+<td>Good</td>
+<td>Okay</td>
+<td>⚠️</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>Large Data</td>
+<td>Good</td>
+<td>Good</td>
+<td>Excellent</td>
+<td>Excellent</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>PEFT</td>
+<td>✅ Full</td>
+<td>✅ Full</td>
+<td>✅ Full</td>
+<td>✅ Full</td>
+<td>✅ Full</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="12-quick-reference">12. Quick Reference<a class="headerlink" href="#12-quick-reference" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Config</th>
+<th>Batch Size</th>
+<th>Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small data (10K)</td>
+<td>d_model=64, layers=2</td>
+<td>4</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Medium data (100K)</td>
+<td>d_model=64, layers=2</td>
+<td>4</td>
+<td>256</td>
+</tr>
+<tr>
+<td>Large data (500K)</td>
+<td>d_model=128, layers=4</td>
+<td>2</td>
+<td>512</td>
+</tr>
+<tr>
+<td>Memory limited</td>
+<td>PEFT, r=4</td>
+<td>2</td>
+<td>64</td>
+</tr>
+<tr>
+<td>Max accuracy</td>
+<td>d_model=128, layers=4</td>
+<td>4</td>
+<td>512</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<!-- ## 13. Advanced Topics
+
+### 13.1 Attention Visualization
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Inspect attention patterns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># Get attention weights</span>
+<span class="n">attention_weights</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_attention_weights</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:</span><span class="mi">100</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attention shape: </span><span class="si">{</span><span class="n">attention_weights</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Min: </span><span class="si">{</span><span class="n">attention_weights</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Max: </span><span class="si">{</span><span class="n">attention_weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+### 13.2 Feature Importance via Attention
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Use attention weights for feature importance</span>
+<span class="n">attention</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_attention_weights</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">feature_importance</span> <span class="o">=</span> <span class="n">attention</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">top_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">feature_importance</span><span class="p">)[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Top 10 features: </span><span class="si">{</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">top_features</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+ -->
+<hr/>
+<h2 id="13-next-steps">13. Next Steps<a class="headerlink" href="#13-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../../user-guide/model-selection/">Model Selection</a> - Compare with other models</li>
+<li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - Fine-tuning details</li>
+<li><a href="../../advanced/peft-lora/">Advanced PEFT</a> - LoRA optimization</li>
+<li><a href="../../user-guide/leaderboard/">TabularLeaderboard</a> - Benchmark Mitra</li>
+</ul>
+<hr/>
+<p>Mitra excels at capturing complex 2D patterns in structured tabular data. Use it when maximum accuracy and pattern discovery are priorities!</p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>
