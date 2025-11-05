@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+    {{ super() }}
+    <link rel="icon" href="{{ base_url }}/assets/lexsilabs.ico">
+    <link rel="shortcut icon" href="{{ base_url }}/assets/lexsilabs.ico">
+{% endblock %}
+
 {% block scripts %}
     {{ super() }}
     <script>
