@@ -1,0 +1,103 @@
+[build-system]
+# ADDED 'wheel' for building wheel distributions
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabtune"
+version = "0.1.0"
+authors = [
+  { name="Aditya Tanna", email="contact@lexsi.ai" },
+  { name="Pratinav Seth", email="contact@lexsi.ai" },
+  { name="Mohamed Bouadi", email="contact@lexsi.ai" },
+  { name="Utsav Avaiya", email="contact@lexsi.ai" },
+  { name="Vinay Kumar Sankarapu", email="contact@lexsi.ai" },
+]
+maintainers = [
+  { name="Aditya Tanna", email="contact@lexsi.ai" },
+]
+description = "TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["tabular-data", "machine-learning", "model-adaptation", "pytorch", "scikit-learn"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "transformers==4.56.0",
+    "scikit-learn==1.7",
+    "pandas>=2.2.3",
+    "pyzmq==27.0.1",
+    "numpy>=1.21.0,<2.0.0",
+    "joblib>=1.0.0",
+    "openml>=0.12.0",
+    "tqdm>=4.60.0",
+    "category_encoders>=2.0.0",
+    "imbalanced-learn>=0.8.0",
+    "sentence-transformers>=2.0.0,<3.0.0",
+    "huggingface_hub>=0.10.0",
+    "einops>=0.6.0",
+    "pydantic>=1.8.0,<3.0.0",
+    "pydantic_settings>=2.0.0",
+    "safetensors>=0.3.0",
+    "omegaconf>=2.1.0",
+    "psutil>=5.8.0",
+    "torcheval>=0.0.6",
+    "faiss-cpu>=1.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "pre-commit>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Lexsi-Labs/TabTune"
+Repository = "https://github.com/Lexsi-Labs/TabTune"
+Issues = "https://github.com/Lexsi-Labs/TabTune/issues"
+
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88 
+known_first_party = ["tabtune"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"] 
+python_files = ["test_*.py"]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tabtune*"]
+
+[tool.setuptools.package-data]
+tabtune = ["*.py", "**/*.py"]

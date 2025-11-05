@@ -1,0 +1,42 @@
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch==2.7.0+cu126
+torchvision==0.22.0+cu126
+torchaudio==2.7.0+cu126
+transformers==4.56.0
+scikit-learn==1.7
+pyzmq==27.0.1
+pandas>=2.2.3
+
+# Core ML dependencies (rest)
+numpy>=1.21.0,<2.0.0
+joblib>=1.0.0
+openml>=0.12.0
+tqdm>=4.60.0
+
+# Data processing
+category_encoders>=2.0.0
+imbalanced-learn>=0.8.0
+
+# NLP and embeddings
+sentence-transformers>=2.0.0,<3.0.0
+huggingface_hub>=0.10.0
+
+# Utilities
+einops>=0.6.0
+pydantic>=1.8.0,<3.0.0
+pydantic_settings>=2.0.0
+safetensors>=0.3.0
+omegaconf>=2.1.0
+psutil>=5.8.0
+torcheval>=0.0.6
+faiss-cpu>=1.7.0
+
+# Optional: Jupyter support
+pyzmq>=27.0.1
+
+colorlog
+einx
+fairlearn
+gdown
+python-json-logger
+rich

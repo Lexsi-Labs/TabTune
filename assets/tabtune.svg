@@ -1,0 +1,39 @@
+<svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="100" fill="white"/>
+  
+  <!-- Main text "tabtune" -->
+  <g transform="translate(160, 45)">
+    <!-- "tab" in bold -->
+    <text x="" y="8" 
+          font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" 
+          font-size="42" 
+          font-weight="700" 
+          fill="#1a1a1a"
+          text-anchor="middle">
+      <tspan>tab</tspan>
+      <tspan font-weight="400">tune</tspan>
+    </text>
+    
+    <!-- Subtle accent line -->
+    <rect x="-81" y="15" width="160" height="3" fill="#4F46E5" opacity="0.8"/>
+    
+    <!-- Small tagline -->
+    <text x="0" y="40" 
+          font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" 
+          font-size="11" 
+          font-weight="400" 
+          fill="#666666"
+          text-anchor="middle"
+          letter-spacing="0.5">
+      TABULAR ML TOOLKIT
+    </text>
+  </g>
+  
+  <!-- Optional: Small decorative element -->
+  <g transform="translate(35, 42)">
+    <rect x="115" y="-5" width="3" height="3" fill="#4F46E5" opacity="0.6"/>
+    <rect x="115" y="0" width="3" height="3" fill="#4F46E5" opacity="0.5"/>
+    <rect x="115" y="5" width="3" height="3" fill="#4F46E5" opacity="0.4"/>
+  </g>
+</svg>
