@@ -36,6 +36,7 @@ classifiers = [
 dependencies = [
     "torch==2.7.0",
     "torchvision==0.22.0",
+    "torchaudio==2.7.0",
     "transformers==4.56.0",
     "scikit-learn==1.7",
     "pandas>=2.2.3",
@@ -56,6 +57,13 @@ dependencies = [
     "psutil>=5.8.0",
     "torcheval>=0.0.6",
     "faiss-cpu>=1.7.0",
+    # Additional dependencies from requirements.txt
+    "colorlog",
+    "einx",
+    "fairlearn",
+    "gdown",
+    "python-json-logger",
+    "rich",
 ]
 
 [project.optional-dependencies]
