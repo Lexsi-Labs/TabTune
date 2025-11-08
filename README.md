@@ -8,6 +8,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.6+-red.svg)](https://pytorch.org/)
 [![Documentation](https://img.shields.io/badge/docs-available-green.svg)](https://github.com/Lexsi-Labs/TabTune)
 [![arXiv](https://img.shields.io/badge/arXiv-2511.02802-b31b1b.svg)](https://arxiv.org/abs/2511.02802)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?&logo=discord&logoColor=white)](https://discord.gg/dSB62Q7A)
 
 A powerful and flexible Python library designed to simplify the **training and fine-tuning** of modern foundation models on tabular data.
 
@@ -453,6 +454,33 @@ TabTune is built upon the excellent work of the following projects and research 
 
 ---
 
+## 🗃️ License
+
+This project is released under the MIT License.  
+Please cite appropriately if used in academic or production projects.
+
+**Citation:**
+
+```bibtex
+@misc{tanna2025tabtuneunifiedlibraryinference,
+      title={TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}, 
+      author={Aditya Tanna and Pratinav Seth and Mohamed Bouadi and Utsav Avaiya and Vinay Kumar Sankarapu},
+      year={2025},
+      eprint={2511.02802},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2511.02802}, 
+}
+```
+
+---
+
+## 📫 Join Community / Contribute
+
+- Issues and discussions are welcomed on the [GitHub issue tracker](https://github.com/Lexsi-Labs/TabTune/issues) and [Discord](https://discord.gg/dSB62Q7A) .
+- Please see the **Contributing** section for contribution standards, code reviews, and documentation tips.
+
+---
 ## Contact
 
 <p align="center">
