@@ -125,14 +125,19 @@ print(metrics)
 
 ## 🏆 Example Notebooks
 
-| Name                    | Task Type               | Colab Link                                                                 |
-|-------------------------|-------------------------|----------------------------------------------------------------------------|
-| TabPFN Inference        | Inference & Fine-Tune   | [Open In Colab](https://colab.research.google.com/drive/1aLwPgWZFtf20nEBnjkPxTbcjsW9hwANW)             |
-| Mitra Inference/FineTune | Inference & Fine-Tune   | [Open In Colab](https://colab.research.google.com/drive/1Vnnfshuy1PZs5SpLSgKWdFg-4JVudxMY)             |
-| OrionMSP/BIX Examples  | Inference & Fine-Tune   | *Coming soon*                                                              |
-| TabDPT Large Dataset    | Large-Scale Training    | *Coming soon*                                                              |
-| PEFT Fine-Tuning Guide  | Parameter-Efficient FT  | *Coming soon*                                                              |
-| Leaderboard Benchmarking| Model Comparison        | *Coming soon*                                                              |
+|Below are 9 Example Notebooks showcasing all the features of the Library in-depth!
+
+| Serial No. | Name | Task Performed | Link To Notebook |
+|---|------|------|------|
+| 1 | Unified API | Showcasing A Unified API Across Multiple Models |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KcaSdYRjZnMlb0MLmQ5IlnbPDiuEr1Ld?usp=sharing) |
+| 2 |  Automated Model-Aware Preprocessing | The Automated preprocessing system explained |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/12BQ12VJrxtTDslgjnjm26yi3a0PYXqZT?usp=sharing) |
+| 3 | Fine-Tuning Strategies | TabTune's four fine-tuning strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1QixfiNCjF1IQV9NooMipPpnH4ETcEQwg?usp=sharing) |
+| 4 | Model Comparison | Model Comparison with TabularLeaderboard |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1PZW3iPQOvwh0kroGytMzYTGc6ZVUzuvg?usp=sharing) |
+| 5 | Checkpoint Management | Checkpoint Management - Save/Load Pipelines |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1DBTGEPpYLJjU9Aj7lzHoX3JtwaNOC0jn?usp=sharing) |
+| 6 | Advanced Usage | PEFT Configuration and Hybrid Strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1V3XGLeKrXSJwavaULMncZiM7uVE8sz0h?usp=sharing) |
+| 7 | Data Sampling |  Data Sampling and Resampling Strategies for Inference |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1TUwxsfk6E0LDepc3bONeDZLslYAMesbZ?usp=sharing) |
+| 8 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
+| 9 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
 
 ---
 
