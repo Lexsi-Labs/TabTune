@@ -64,6 +64,7 @@ dependencies = [
     "gdown",
     "python-json-logger",
     "rich",
+    "IPython>=8.0.0"
 ]
 
 [project.optional-dependencies]

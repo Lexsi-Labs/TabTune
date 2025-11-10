@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
 import logging
-from IPython.display import display, Markdown
+try:
+    from IPython.display import display, Markdown
+except ImportError:
+    display = None
+    Markdown = None
 
 from ..TabularPipeline.pipeline import TabularPipeline
 from ..logger import setup_logger
