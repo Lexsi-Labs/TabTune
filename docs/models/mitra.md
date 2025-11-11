@@ -87,15 +87,11 @@ Mitra incorporates synthetic prior knowledge:
 ```python
 model_params = {
     # Architecture parameters
-    'd_model': 64,                         # Feature embedding dimension
-    'd_ff': 128,                           # Feedforward hidden dimension
-    'num_heads': 4,                        # Attention heads
-    'num_layers': 2,                       # Stacked layers
+    'dim': 256,                         # Feature embedding dimension
+    'n_heads': 8,                        # Attention heads
+    'n_layers': 2,                       # Stacked layers
+    'device':'cuda'                     #device used
     
-    # Training behavior
-    'dropout': 0.1,                        # Dropout rate
-    'use_synthetic_prior': True,           # Use pre-trained prior
-    'seed': 42                             # Reproducibility
 }
 ```
 
@@ -103,12 +99,10 @@ model_params = {
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| `d_model` | int | 64 | 32-256 | Feature embedding dimension |
-| `d_ff` | int | 128 | 64-512 | Feedforward network hidden size |
-| `num_heads` | int | 4 | 2-8 | Number of attention heads |
-| `num_layers` | int | 2 | 1-4 | Number of transformer layers |
-| `dropout` | float | 0.1 | 0.0-0.3 | Dropout probability |
-| `seed` | int | 42 | 0+ | Random seed |
+| `diml` | int | 64 | 32-256 | Feature embedding dimension |
+| `n_heads` | int | 4 | 2-8 | Number of attention heads |
+| `n_layers` | int | 2 | 1-4 | Number of transformer layers |
+| `device` | str | cuda | cuda,cpu | Device being used for computation |
 
 ### 3.3 Architecture Tuning
 
@@ -131,15 +125,12 @@ tuning_params = {
     'device': 'cuda',
     'epochs': 3,                          # Training epochs
     'learning_rate': 1e-5,                # Optimizer learning rate
-    'optimizer': 'adamw',                 # Optimizer type
     
     # Episodic parameters
     'support_size': 128,                  # Support set size
     'query_size': 128,                    # Query set size
-    'n_episodes': 500,                    # Episodes per epoch
     'steps_per_epoch': 50,                # Gradient steps per epoch
     'batch_size': 4,                      # Episodes per batch (small!)
-    
     'show_progress': True                 # Progress bar
 }
 ```
@@ -150,7 +141,6 @@ tuning_params = {
 |-----------|------|---------|-------------|
 | `support_size` | int | 128 | Context samples per episode |
 | `query_size` | int | 128 | Query samples per episode |
-| `n_episodes` | int | 500 | Total episodes for training |
 | `steps_per_epoch` | int | 50 | Gradient updates per epoch |
 | `batch_size` | int | 4 | Episodes per batch (keep small) |
 

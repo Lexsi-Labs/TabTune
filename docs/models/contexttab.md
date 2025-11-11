@@ -90,19 +90,11 @@ Semantic Vectors     Value Vectors
 ```python
 model_params = {
     # Text encoding
-    'text_encoder': 'sentence-transformers/all-MiniLM-L6-v2',  # BERT model
-    'text_dim': 384,                       # Text embedding dimension
-    
+    'text_encoder': 'sentence-transformers/all-MiniLM-L6-v2',  # BERT model -> already set to default no need to channge
+    'bagging': 8,                       # bagging
     # Value encoding
-    'value_dim': 64,                       # Value embedding dimension
-    'categorical_encoding': 'embedding',   # 'embedding' or 'onehot'
-    
+    'max_context_size' = 8192,             # Maximum Context size
     # Fusion and processing
-    'fusion_dim': 128,                     # Fused embedding dimension
-    'dropout': 0.1,                        # Dropout rate
-    
-    # Training behavior
-    'use_cache': True,                     # Cache embeddings
     'seed': 42                             # Reproducibility
 }
 ```
@@ -112,36 +104,10 @@ model_params = {
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `text_encoder` | str | 'all-MiniLM-L6-v2' | Hugging Face model ID |
-| `text_dim` | int | 384 | Output dimension of text encoder |
-| `value_dim` | int | 64 | Dimension for value embeddings |
-| `categorical_encoding` | str | 'embedding' | How to encode categoricals |
-| `fusion_dim` | int | 128 | Fused representation dimension |
-| `dropout` | float | 0.1 | Dropout probability |
-| `use_cache` | bool | True | Cache computed embeddings |
+| `bagging` | int | 8 | Output dimension of text encoder |
+| `max_context_size ` | int | 8192 | The maximum context being passed through the model |
 | `seed` | int | 42 | Random seed |
 
-### 3.3 Text Encoder Options
-
-```python
-# Different pre-trained models (trade-off: speed vs quality)
-text_encoders = {
-    'all-MiniLM-L6-v2': {
-        'dim': 384,
-        'speed': 'Fast',
-        'quality': 'Good'
-    },
-    'all-MiniLM-L12-v2': {
-        'dim': 384,
-        'speed': 'Medium',
-        'quality': 'Better'
-    },
-    'all-mpnet-base-v2': {
-        'dim': 768,
-        'speed': 'Slow',
-        'quality': 'Best'
-    }
-}
-```
 
 ---
 
@@ -156,7 +122,6 @@ tuning_params = {
     'device': 'cuda',
     'epochs': 10,                         # More epochs typically needed
     'learning_rate': 1e-4,                # Higher than other models
-    'optimizer': 'adamw',                 # Optimizer type
     
     'batch_size': 8,                      # Standard batch size
     'show_progress': True                 # Progress bar
@@ -167,9 +132,6 @@ tuning_params = {
 
 - **Epochs**: 5-15 (longer than most models)
 - **Learning Rate**: 1e-4 to 5e-4 (higher than TabICL)
-- **Warmup**: Include warmup for stability
-- **Scheduler**: Use cosine decay for better convergence
-- **Early Stopping**: Important due to text embedding complexity
 
 ### 4.3 Fine-Tuning Stability
 
@@ -248,8 +210,7 @@ pipeline = TabularPipeline(
     model_name='ContextTab',
     tuning_strategy='inference',
     model_params={
-        'text_encoder': 'sentence-transformers/all-MiniLM-L6-v2',
-        'fusion_dim': 128
+        'text_encoder': 'sentence-transformers/all-MiniLM-L6-v2',=
     }
 )
 

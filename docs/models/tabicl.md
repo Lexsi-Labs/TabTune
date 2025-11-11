@@ -144,7 +144,6 @@ tuning_params = {
     'device': 'cuda',
     'epochs': 5,                          # Training epochs
     'learning_rate': 2e-5,                # Optimizer learning rate
-    'optimizer': 'adamw',                 # Optimizer type
     # Episodic parameters
     'support_size': 48,                   # Support set samples
     'query_size': 32,                     # Query set samples
