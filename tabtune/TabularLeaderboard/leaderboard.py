@@ -1,11 +1,9 @@
-import pandas as pd
-import numpy as np
 import logging
-try:
-    from IPython.display import display, Markdown
-except ImportError:
-    display = None
-    Markdown = None
+
+import numpy as np
+import pandas as pd
+
+from ..utils import is_colab
 
 from ..TabularPipeline.pipeline import TabularPipeline
 from ..logger import setup_logger
@@ -97,9 +95,9 @@ class TabularLeaderboard:
 
         logger.info("\n" + "="*60)
         logger.info("[Leaderboard] Leaderboard Complete")
-        
+
         leaderboard_df = pd.DataFrame(self.results)
-        
+
         sort_map = {'accuracy': 'Accuracy', 'f1_score': 'F1 Score', 'roc_auc_score': 'ROC AUC'}
         sort_column = sort_map.get(rank_by, 'ROC AUC')
         
@@ -109,7 +107,22 @@ class TabularLeaderboard:
             leaderboard_df.index = leaderboard_df.index + 1
             leaderboard_df.index.name = 'Rank'
 
-        display(Markdown("Leaderboard Results"))
-        display(leaderboard_df)
+        if not is_colab():
+            try:
+                from IPython.display import Markdown, display
+            except ImportError:
+                display = None
+                Markdown = None
+        else:
+            display = None
+            Markdown = None
+
+        if display and Markdown:
+            display(Markdown("Leaderboard Results"))
+            display(leaderboard_df)
+        else:
+            logger.info("[Leaderboard] Display not available; returning DataFrame")
+            logger.info("\n%s", leaderboard_df)
+
         return leaderboard_df
 

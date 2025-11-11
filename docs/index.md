@@ -112,6 +112,14 @@ print(metrics)
 
 ---
 
+### Google Colab Support
+
+- TabTune auto-detects Colab sessions, skipping optional IPython-heavy integrations (e.g., rich leaderboard display) so installs succeed with Colab’s preinstalled packages.
+- In Colab, install with `pip install "tabtune[colab]"` to keep core runtime packages (NumPy, pandas, scikit-learn, IPython) on the versions Colab expects.
+- For richer notebook display helpers outside Colab, opt into `pip install "tabtune[interactive]"`.
+
+---
+
 ## 📑 Explore the Documentation
 
 - **[Getting Started](getting-started/installation.md):** Installation, setup, and basic usage.

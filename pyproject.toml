@@ -34,14 +34,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "torch==2.7.0",
-    "torchvision==0.22.0",
-    "torchaudio==2.7.0",
-    "transformers==4.56.0",
-    "scikit-learn==1.7",
-    "pandas>=2.2.3",
-    "pyzmq==27.0.1",
-    "numpy>=1.21.0,<2.0.0",
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "torchaudio>=2.7.0",
+    "transformers>=4.56.0,<5.0.0",
+    "scikit-learn>=1.6.0",
+    "pandas>=2.2.0,<2.4.0",
+    "pyzmq>=25.0.0,<28.0.0",
+    "numpy>=1.26.0,<3.0.0",
     "joblib>=1.0.0",
     "openml>=0.12.0",
     "tqdm>=4.60.0",
@@ -58,13 +58,12 @@ dependencies = [
     "torcheval>=0.0.6",
     "faiss-cpu>=1.7.0",
     # Additional dependencies from requirements.txt
-    "colorlog",
-    "einx",
-    "fairlearn",
-    "gdown",
-    "python-json-logger",
-    "rich",
-    "IPython>=8.0.0"
+    "colorlog>=6.0.0",
+    "einx>=0.3.0",
+    "fairlearn>=0.13.0",
+    "gdown>=5.0.0",
+    "python-json-logger>=2.0.0",
+    "rich>=13.0.0"
 ]
 
 [project.optional-dependencies]
@@ -77,6 +76,24 @@ dev = [
     "isort>=5.12.0",
     "flake8>=6.0.0",
     "pre-commit>=3.0.0",
+]
+interactive = [
+    "IPython>=8.0.0",
+]
+colab = [
+    # Mirror Colab runtime pins to avoid reinstalling core packages.
+    "ipython==7.34.0",
+    "numpy>=2.0.0",
+    "pandas==2.2.2",
+    "scikit-learn==1.6.1",
+]
+strict = [
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "torchaudio==2.7.0",
+    "transformers==4.56.0",
+    "scikit-learn==1.7.0",
+    "pyzmq==27.0.1",
 ]
 
 [project.urls]
