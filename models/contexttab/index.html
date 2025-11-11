@@ -244,7 +244,6 @@
 <li class="second-level"><a href="#3-inference-parameters">3. Inference Parameters</a></li>
 <li class="third-level"><a href="#31-complete-parameter-reference">3.1 Complete Parameter Reference</a></li>
 <li class="third-level"><a href="#32-parameter-descriptions">3.2 Parameter Descriptions</a></li>
-<li class="third-level"><a href="#33-text-encoder-options">3.3 Text Encoder Options</a></li>
 <li class="second-level"><a href="#4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab</a></li>
 <li class="third-level"><a href="#41-fine-tuning-parameters">4.1 Fine-Tuning Parameters</a></li>
 <li class="third-level"><a href="#42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices</a></li>
@@ -356,19 +355,11 @@ Semantic Vectors     Value Vectors
 <h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># Text encoding</span>
-    <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>  <span class="c1"># BERT model</span>
-    <span class="s1">'text_dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>                       <span class="c1"># Text embedding dimension</span>
-
+    <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>  <span class="c1"># BERT model -&gt; already set to default no need to channge</span>
+    <span class="s1">'bagging'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                       <span class="c1"># bagging</span>
     <span class="c1"># Value encoding</span>
-    <span class="s1">'value_dim'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>                       <span class="c1"># Value embedding dimension</span>
-    <span class="s1">'categorical_encoding'</span><span class="p">:</span> <span class="s1">'embedding'</span><span class="p">,</span>   <span class="c1"># 'embedding' or 'onehot'</span>
-
+    <span class="s1">'max_context_size'</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">,</span>             <span class="c1"># Maximum Context size</span>
     <span class="c1"># Fusion and processing</span>
-    <span class="s1">'fusion_dim'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                     <span class="c1"># Fused embedding dimension</span>
-    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout rate</span>
-
-    <span class="c1"># Training behavior</span>
-    <span class="s1">'use_cache'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                     <span class="c1"># Cache embeddings</span>
     <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -390,40 +381,16 @@ Semantic Vectors     Value Vectors
 <td>Hugging Face model ID</td>
 </tr>
 <tr>
-<td><code>text_dim</code></td>
+<td><code>bagging</code></td>
 <td>int</td>
-<td>384</td>
+<td>8</td>
 <td>Output dimension of text encoder</td>
 </tr>
 <tr>
-<td><code>value_dim</code></td>
+<td><code>max_context_size</code></td>
 <td>int</td>
-<td>64</td>
-<td>Dimension for value embeddings</td>
-</tr>
-<tr>
-<td><code>categorical_encoding</code></td>
-<td>str</td>
-<td>'embedding'</td>
-<td>How to encode categoricals</td>
-</tr>
-<tr>
-<td><code>fusion_dim</code></td>
-<td>int</td>
-<td>128</td>
-<td>Fused representation dimension</td>
-</tr>
-<tr>
-<td><code>dropout</code></td>
-<td>float</td>
-<td>0.1</td>
-<td>Dropout probability</td>
-</tr>
-<tr>
-<td><code>use_cache</code></td>
-<td>bool</td>
-<td>True</td>
-<td>Cache computed embeddings</td>
+<td>8192</td>
+<td>The maximum context being passed through the model</td>
 </tr>
 <tr>
 <td><code>seed</code></td>
@@ -433,26 +400,6 @@ Semantic Vectors     Value Vectors
 </tr>
 </tbody>
 </table>
-<h3 id="33-text-encoder-options">3.3 Text Encoder Options<a class="headerlink" href="#33-text-encoder-options" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Different pre-trained models (trade-off: speed vs quality)</span>
-<span class="n">text_encoders</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'all-MiniLM-L6-v2'</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
-        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Fast'</span><span class="p">,</span>
-        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Good'</span>
-    <span class="p">},</span>
-    <span class="s1">'all-MiniLM-L12-v2'</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">384</span><span class="p">,</span>
-        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Medium'</span><span class="p">,</span>
-        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Better'</span>
-    <span class="p">},</span>
-    <span class="s1">'all-mpnet-base-v2'</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">768</span><span class="p">,</span>
-        <span class="s1">'speed'</span><span class="p">:</span> <span class="s1">'Slow'</span><span class="p">,</span>
-        <span class="s1">'quality'</span><span class="p">:</span> <span class="s1">'Best'</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
 <hr/>
 <h2 id="4-fine-tuning-with-contexttab">4. Fine-Tuning with ContextTab<a class="headerlink" href="#4-fine-tuning-with-contexttab" title="Permanent link">¶</a></h2>
 <p>ContextTab supports <strong>base fine-tuning</strong> via episodic training.</p>
@@ -461,7 +408,6 @@ Semantic Vectors     Value Vectors
     <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
     <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>                         <span class="c1"># More epochs typically needed</span>
     <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>                <span class="c1"># Higher than other models</span>
-    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
 
     <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Standard batch size</span>
     <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>
@@ -471,9 +417,6 @@ Semantic Vectors     Value Vectors
 <ul>
 <li><strong>Epochs</strong>: 5-15 (longer than most models)</li>
 <li><strong>Learning Rate</strong>: 1e-4 to 5e-4 (higher than TabICL)</li>
-<li><strong>Warmup</strong>: Include warmup for stability</li>
-<li><strong>Scheduler</strong>: Use cosine decay for better convergence</li>
-<li><strong>Early Stopping</strong>: Important due to text embedding complexity</li>
 </ul>
 <h3 id="43-fine-tuning-stability">4.3 Fine-Tuning Stability<a class="headerlink" href="#43-fine-tuning-stability" title="Permanent link">¶</a></h3>
 <p>ContextTab training can be unstable due to:
@@ -532,8 +475,7 @@ huggingface-cli<span class="w"> </span>login
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'ContextTab'</span><span class="p">,</span>
     <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">,</span>
     <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span>
-        <span class="s1">'fusion_dim'</span><span class="p">:</span> <span class="mi">128</span>
+        <span class="s1">'text_encoder'</span><span class="p">:</span> <span class="s1">'sentence-transformers/all-MiniLM-L6-v2'</span><span class="p">,</span><span class="o">=</span>
     <span class="p">}</span>
 <span class="p">)</span>
 

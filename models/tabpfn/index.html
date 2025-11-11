@@ -252,7 +252,6 @@
 <li class="third-level"><a href="#43-fine-tuning-example">4.3 Fine-Tuning Example</a></li>
 <li class="second-level"><a href="#5-inference-only-usage">5. Inference-Only Usage</a></li>
 <li class="third-level"><a href="#51-zero-shot-predictions">5.1 Zero-Shot Predictions</a></li>
-<li class="third-level"><a href="#52-uncertainty-estimation">5.2 Uncertainty Estimation</a></li>
 <li class="second-level"><a href="#6-usage-scenarios">6. Usage Scenarios</a></li>
 <li class="third-level"><a href="#61-quick-baseline">6.1 Quick Baseline</a></li>
 <li class="third-level"><a href="#62-small-dataset-learning">6.2 Small Dataset Learning</a></li>
@@ -316,10 +315,8 @@
 <h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">'n_estimators'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>                    <span class="c1"># Ensemble size</span>
-    <span class="s1">'softmax_temperature'</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>            <span class="c1"># Prediction confidence</span>
-    <span class="s1">'average_logits'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Aggregation method</span>
-    <span class="s1">'prior_strength'</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>                 <span class="c1"># Bayesian prior weight</span>
-    <span class="s1">'normalize_input'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Feature normalization</span>
+    <span class="s1">'softmax_temperature'</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>            <span class="c1"># Prediction confidence               </span>
+    <span class="s1">'fit_mode'</span> <span class="p">:</span> <span class="s1">'batched'</span><span class="p">,</span>               <span class="c1"># Feature normalization</span>
     <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -350,25 +347,11 @@
 <td>Scaling of logits before softmax; lower = sharper predictions</td>
 </tr>
 <tr>
-<td><code>average_logits</code></td>
-<td>bool</td>
-<td>True</td>
-<td>True/False</td>
-<td>Average logits vs probabilities across ensemble</td>
-</tr>
-<tr>
-<td><code>prior_strength</code></td>
-<td>float</td>
-<td>1.0</td>
-<td>0.5-2.0</td>
-<td>Weight of Bayesian prior relative to data</td>
-</tr>
-<tr>
-<td><code>normalize_input</code></td>
-<td>bool</td>
-<td>True</td>
-<td>True/False</td>
-<td>Apply input normalization</td>
+<td><code>fit_mode</code></td>
+<td>str</td>
+<td>batched</td>
+<td>batched,low_memory, fit_preprocessors, fit_with_cache</td>
+<td>Determine how the TabPFN model is "fitted"</td>
 </tr>
 <tr>
 <td><code>seed</code></td>
@@ -387,9 +370,6 @@
 - <code>&lt; 0.5</code>: Very confident predictions (may overfit)
 - <code>0.5 - 1.0</code>: Default, balanced confidence
 - <code>&gt; 1.0</code>: Softer predictions, lower confidence</p>
-<p><strong>Average Method (<code>average_logits</code>)</strong>:
-- <code>True</code>: Better for class imbalance
-- <code>False</code>: Better for probability calibration</p>
 <hr/>
 <h2 id="4-fine-tuning-with-tabpfn">4. Fine-Tuning with TabPFN<a class="headerlink" href="#4-fine-tuning-with-tabpfn" title="Permanent link">¶</a></h2>
 <p>TabPFN supports <strong>full fine-tuning</strong> (base-ft strategy) for task adaptation.</p>
@@ -399,10 +379,6 @@
     <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
     <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
     <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>
-    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>
-    <span class="s1">'scheduler'</span><span class="p">:</span> <span class="s1">'linear'</span><span class="p">,</span>
-    <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
     <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -411,8 +387,6 @@
 <li><strong>Learning Rate</strong>: Start with 1e-5, increase if needed</li>
 <li><strong>Epochs</strong>: 3-5 epochs typically sufficient</li>
 <li><strong>Batch Size</strong>: 256-512 works well</li>
-<li><strong>Warmup</strong>: Use 5-10% of total steps</li>
-<li><strong>Early Stopping</strong>: Monitor validation metric</li>
 </ul>
 <h3 id="43-fine-tuning-example">4.3 Fine-Tuning Example<a class="headerlink" href="#43-fine-tuning-example" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
@@ -425,7 +399,6 @@
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
         <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
         <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
-        <span class="s1">'scheduler'</span><span class="p">:</span> <span class="s1">'cosine'</span><span class="p">,</span>
         <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
     <span class="p">}</span>
 <span class="p">)</span>
@@ -457,14 +430,6 @@
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>  <span class="c1"># Only does preprocessing</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="n">uncertainty</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="52-uncertainty-estimation">5.2 Uncertainty Estimation<a class="headerlink" href="#52-uncertainty-estimation" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Get predictions with uncertainty</span>
-<span class="n">predictions</span><span class="p">,</span> <span class="n">std_dev</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_with_uncertainty</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-
-<span class="c1"># Filter predictions by confidence</span>
-<span class="n">high_conf_idx</span> <span class="o">=</span> <span class="n">std_dev</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">std_dev</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"High confidence predictions: </span><span class="si">{</span><span class="n">high_conf_idx</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <hr/>
 <h2 id="6-usage-scenarios">6. Usage Scenarios<a class="headerlink" href="#6-usage-scenarios" title="Permanent link">¶</a></h2>
