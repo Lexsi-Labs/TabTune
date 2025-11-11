@@ -350,21 +350,12 @@ Fine-tuning Phase (on your task):
 <h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># Architecture</span>
-    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>                        <span class="c1"># Embedding dimension</span>
     <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                        <span class="c1"># Attention heads</span>
-    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>                       <span class="c1"># Transformer layers</span>
-    <span class="s1">'hidden_size'</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>                    <span class="c1"># Feedforward hidden size</span>
-    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout probability</span>
-
-    <span class="c1"># Context retrieval</span>
-    <span class="s1">'k_neighbors'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>                      <span class="c1"># Number of neighbors for context</span>
-    <span class="s1">'context_mode'</span><span class="p">:</span> <span class="s1">'mixed'</span><span class="p">,</span>               <span class="c1"># 'mixed' or 'features_only'</span>
-
+    <span class="s1">'normalizer'</span><span class="p">:</span> <span class="s1">'standard'</span><span class="p">,</span>              <span class="c1"># Normalizer</span>
     <span class="c1"># Inference behavior</span>
     <span class="s1">'n_ensembles'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># Multiple runs</span>
-    <span class="s1">'temperature'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>                    <span class="c1"># Output scaling</span>
-    <span class="s1">'mask_ratio'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>                     <span class="c1"># Feature masking during inference</span>
-
+    <span class="s1">'temperature'</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>                    <span class="c1"># Output scaling</span>
+    <span class="s1">'context_size'</span><span class="p">:</span> <span class="mi">512</span> 
     <span class="c1"># Training</span>
     <span class="s1">'use_pretrain'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                  <span class="c1"># Use pre-trained weights</span>
     <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
@@ -383,13 +374,6 @@ Fine-tuning Phase (on your task):
 </thead>
 <tbody>
 <tr>
-<td><code>d_model</code></td>
-<td>int</td>
-<td>256</td>
-<td>128-512</td>
-<td>Transformer embedding dimension</td>
-</tr>
-<tr>
 <td><code>num_heads</code></td>
 <td>int</td>
 <td>8</td>
@@ -397,39 +381,11 @@ Fine-tuning Phase (on your task):
 <td>Number of attention heads</td>
 </tr>
 <tr>
-<td><code>num_layers</code></td>
-<td>int</td>
-<td>4</td>
-<td>2-8</td>
-<td>Number of transformer layers</td>
-</tr>
-<tr>
-<td><code>hidden_size</code></td>
-<td>int</td>
-<td>512</td>
-<td>256-1024</td>
-<td>Feedforward hidden dimension</td>
-</tr>
-<tr>
-<td><code>dropout</code></td>
-<td>float</td>
-<td>0.1</td>
-<td>0.0-0.3</td>
-<td>Dropout probability</td>
-</tr>
-<tr>
-<td><code>k_neighbors</code></td>
-<td>int</td>
-<td>5</td>
-<td>1-50</td>
-<td>k-NN context neighbors</td>
-</tr>
-<tr>
-<td><code>context_mode</code></td>
+<td><code>normalizer</code></td>
 <td>str</td>
-<td>'mixed'</td>
-<td>'mixed', 'features_only'</td>
-<td>How to use context</td>
+<td>standard</td>
+<td>standard, minmax, robust, power, quantile-uniform, quantile-normal, log1p</td>
+<td>Dropout probability</td>
 </tr>
 <tr>
 <td><code>n_ensembles</code></td>
@@ -446,11 +402,11 @@ Fine-tuning Phase (on your task):
 <td>Output temperature</td>
 </tr>
 <tr>
-<td><code>use_pretrain</code></td>
-<td>bool</td>
-<td>True</td>
-<td>True/False</td>
-<td>Use pre-trained weights</td>
+<td><code>context_size</code></td>
+<td>int</td>
+<td>512</td>
+<td>256-1024</td>
+<td>Setting the context size accepted</td>
 </tr>
 </tbody>
 </table>
@@ -506,16 +462,10 @@ Fine-tuning Phase (on your task):
     <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
     <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                          <span class="c1"># Few epochs needed (pre-trained)</span>
     <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>                <span class="c1"># Conservative learning rate</span>
-    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
-    <span class="s1">'scheduler'</span><span class="p">:</span> <span class="s1">'linear'</span><span class="p">,</span>                <span class="c1"># Learning rate scheduler</span>
-    <span class="s1">'warmup_steps'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>                  <span class="c1"># Extended warmup</span>
-    <span class="s1">'weight_decay'</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                 <span class="c1"># L2 regularization</span>
-    <span class="s1">'gradient_clip_value'</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>           <span class="c1"># Gradient clipping</span>
-
     <span class="c1"># Large context for TabDPT</span>
     <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>                 <span class="c1"># Large context</span>
     <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>                    <span class="c1"># Prediction samples</span>
-    <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>                <span class="c1"># Gradient steps</span>
+    <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>                <span class="c1"># Gradient steps</span>
     <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>                     <span class="c1"># Standard batch</span>
 
     <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>

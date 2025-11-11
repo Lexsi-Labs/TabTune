@@ -349,15 +349,11 @@
 <h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># Architecture parameters</span>
-    <span class="s1">'d_model'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>                         <span class="c1"># Feature embedding dimension</span>
-    <span class="s1">'d_ff'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                           <span class="c1"># Feedforward hidden dimension</span>
-    <span class="s1">'num_heads'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>                        <span class="c1"># Attention heads</span>
-    <span class="s1">'num_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                       <span class="c1"># Stacked layers</span>
+    <span class="s1">'dim'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>                         <span class="c1"># Feature embedding dimension</span>
+    <span class="s1">'n_heads'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                        <span class="c1"># Attention heads</span>
+    <span class="s1">'n_layers'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                       <span class="c1"># Stacked layers</span>
+    <span class="s1">'device'</span><span class="p">:</span><span class="s1">'cuda'</span>                     <span class="c1">#device used</span>
 
-    <span class="c1"># Training behavior</span>
-    <span class="s1">'dropout'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                        <span class="c1"># Dropout rate</span>
-    <span class="s1">'use_synthetic_prior'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>           <span class="c1"># Use pre-trained prior</span>
-    <span class="s1">'seed'</span><span class="p">:</span> <span class="mi">42</span>                             <span class="c1"># Reproducibility</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="32-parameter-descriptions">3.2 Parameter Descriptions<a class="headerlink" href="#32-parameter-descriptions" title="Permanent link">¶</a></h3>
@@ -373,46 +369,32 @@
 </thead>
 <tbody>
 <tr>
-<td><code>d_model</code></td>
+<td><code>diml</code></td>
 <td>int</td>
 <td>64</td>
 <td>32-256</td>
 <td>Feature embedding dimension</td>
 </tr>
 <tr>
-<td><code>d_ff</code></td>
-<td>int</td>
-<td>128</td>
-<td>64-512</td>
-<td>Feedforward network hidden size</td>
-</tr>
-<tr>
-<td><code>num_heads</code></td>
+<td><code>n_heads</code></td>
 <td>int</td>
 <td>4</td>
 <td>2-8</td>
 <td>Number of attention heads</td>
 </tr>
 <tr>
-<td><code>num_layers</code></td>
+<td><code>n_layers</code></td>
 <td>int</td>
 <td>2</td>
 <td>1-4</td>
 <td>Number of transformer layers</td>
 </tr>
 <tr>
-<td><code>dropout</code></td>
-<td>float</td>
-<td>0.1</td>
-<td>0.0-0.3</td>
-<td>Dropout probability</td>
-</tr>
-<tr>
-<td><code>seed</code></td>
-<td>int</td>
-<td>42</td>
-<td>0+</td>
-<td>Random seed</td>
+<td><code>device</code></td>
+<td>str</td>
+<td>cuda</td>
+<td>cuda,cpu</td>
+<td>Device being used for computation</td>
 </tr>
 </tbody>
 </table>
@@ -455,15 +437,12 @@
     <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
     <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                          <span class="c1"># Training epochs</span>
     <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>                <span class="c1"># Optimizer learning rate</span>
-    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
 
     <span class="c1"># Episodic parameters</span>
     <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                  <span class="c1"># Support set size</span>
     <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>                    <span class="c1"># Query set size</span>
-    <span class="s1">'n_episodes'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>                    <span class="c1"># Episodes per epoch</span>
     <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>                <span class="c1"># Gradient steps per epoch</span>
     <span class="s1">'batch_size'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>                      <span class="c1"># Episodes per batch (small!)</span>
-
     <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>                 <span class="c1"># Progress bar</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -489,12 +468,6 @@
 <td>int</td>
 <td>128</td>
 <td>Query samples per episode</td>
-</tr>
-<tr>
-<td><code>n_episodes</code></td>
-<td>int</td>
-<td>500</td>
-<td>Total episodes for training</td>
 </tr>
 <tr>
 <td><code>steps_per_epoch</code></td>

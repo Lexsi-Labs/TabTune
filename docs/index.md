@@ -1,7 +1,13 @@
 <div style="text-align: center;">
   <img src="assets/tabtune.svg" alt="TabTune Logo" style="width: 600px; height: auto;" />
 </div>
-
+<div style="text-align: center;">
+<a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg"/></a>
+<a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.6+-red.svg"/></a>
+<a href="https://github.com/Lexsi-Labs/TabTune"><img src="https://img.shields.io/badge/docs-available-green.svg"/></a>
+<a href="https://arxiv.org/abs/2511.02802"><img src="https://img.shields.io/badge/arXiv-2511.02802-b31b1b.svg"/></a>
+<a href="https://discord.gg/dSB62Q7A"><img src="https://img.shields.io/badge/Discord-%235865F2.svg?&amp;logo=discord&amp;logoColor=white"/></a>
+</div>
 
 ---
 
