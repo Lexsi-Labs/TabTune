@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tabtune"
-version = "0.1.0"
+version = "0.1.2"
 authors = [
   { name="Aditya Tanna", email="contact@lexsi.ai" },
   { name="Pratinav Seth", email="contact@lexsi.ai" },
