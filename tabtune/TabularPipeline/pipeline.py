@@ -95,7 +95,7 @@ class TabularPipeline:
         self.model_checkpoint_path = model_checkpoint_path
         self.finetune_mode = finetune_mode
 
-        if self.tuning_strategy in ('finetune', 'base-ft', 'peft'):
+        if self.tuning_strategy in ('finetune','peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
         
 
@@ -105,7 +105,7 @@ class TabularPipeline:
             config.update(self.model_params)
             logger.info(f"[Pipeline] Config: {config}")
             self.model = TabPFNClassifier(**config)
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                 self.model._initialize_model_variables()
 
 
@@ -251,7 +251,7 @@ class TabularPipeline:
                 self.model.device = device
 
 
-        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune', 'base-ft']:
+        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']:
             logger.info("[Pipeline] Preparing raw data for ConTextTab fine-tuning")
             if not isinstance(X, pd.DataFrame):
                 X_to_tune = pd.DataFrame(X)
@@ -292,7 +292,7 @@ class TabularPipeline:
             processor=self.processor
         )
 
-        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'peft']:
             logger.info("[Pipeline] Finalizing TabDPT setup after fine-tuning")
             self.model.num_classes = len(np.unique(y_to_tune))
             # Fit the model for inference after fine-tuning
@@ -320,7 +320,7 @@ class TabularPipeline:
             self.model.model_.eval()
 
         if isinstance(self.model, TabPFNClassifier):
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+            if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context (without refitting weights)...")
             
             # Store current model weights
@@ -384,7 +384,7 @@ class TabularPipeline:
                 predictions = self.model.predict(X_query)
             
             # Convert numerical predictions back to string format for evaluation
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
+            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
                 predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions)
 
         
@@ -454,7 +454,7 @@ class TabularPipeline:
 
         elif isinstance(self.model, TabPFNClassifier):
             # Special handling for fine-tuned TabPFN to set inference context
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+            if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context for proba...")
                 self.model.fit(self.X_train_processed_, self.y_train_processed_)
             
