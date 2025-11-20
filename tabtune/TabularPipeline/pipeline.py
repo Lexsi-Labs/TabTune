@@ -97,15 +97,15 @@ class TabularPipeline:
 
         if self.tuning_strategy in ('finetune','peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
-        
+
 
         if self.model_name in ['TabPFN']:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {'device': device, 'ignore_pretraining_limits': True}
             config.update(self.model_params)
             logger.info(f"[Pipeline] Config: {config}")
             self.model = TabPFNClassifier(**config)
-            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+            if self.tuning_strategy in ['finetune','peft'] and hasattr(self.model, '_initialize_model_variables'):
                 self.model._initialize_model_variables()
 
 
@@ -113,7 +113,7 @@ class TabularPipeline:
             self.model = ConTextTabClassifier(**self.model_params)
     
         elif self.model_name in ['TabICL', 'OrionBix','OrionMSP']:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {'n_jobs': 1, 'device': device}
             config.update(self.model_params)
             if self.model_name == 'TabICL':
@@ -131,7 +131,7 @@ class TabularPipeline:
 
         elif self.model_name == 'TabDPT':
             # Use GPU if available, otherwise fall back to CPU
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {
                 'device': device,
                 'compile': True,  # Disable compilation to avoid GPU issues
@@ -188,6 +188,8 @@ class TabularPipeline:
         # ContextTab ZMQ server cleanup is handled automatically by atexit.register()
         # in the start_embedding_server function, so no manual cleanup needed
         pass
+    
+    
 
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
@@ -224,7 +226,7 @@ class TabularPipeline:
             logger.info("[Pipeline] Performing late initialization of the model...")
             if self.model_name == 'Mitra':
                 n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
-                device = 'cuda' if torch.cuda.is_available() else 'cpu'
+                device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
                 config = {'dim': 256, 'n_layers': 6, 'n_heads': 8, 'task': 'CLASSIFICATION', 'dim_output': n_classes, 'use_pretrained_weights': False, 'path_to_weights': '', 'device': device}
                 config.update(self.model_params)
                 self.model = Tab2D(**config)
@@ -238,7 +240,7 @@ class TabularPipeline:
                         logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
 
         if hasattr(self.model, 'to'):
-            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
+            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             device = torch.device(device_str)
             self.model.to(device)
             if self.model_name == 'Mitra':
@@ -292,7 +294,7 @@ class TabularPipeline:
             processor=self.processor
         )
 
-        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'peft']:
+        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune','peft']:
             logger.info("[Pipeline] Finalizing TabDPT setup after fine-tuning")
             self.model.num_classes = len(np.unique(y_to_tune))
             # Fit the model for inference after fine-tuning
@@ -398,7 +400,7 @@ class TabularPipeline:
             
             X_support, y_support = self.X_train_processed_, self.y_train_processed_
             
-            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
+            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             device = device_str
             
             X_support_t = torch.tensor(X_support, dtype=torch.float32).unsqueeze(0).to(device)
