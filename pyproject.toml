@@ -5,16 +5,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tabtune"
-version = "0.1.2"
+version = "0.1.3"
 authors = [
-  { name="Aditya Tanna", email="contact@lexsi.ai" },
-  { name="Pratinav Seth", email="contact@lexsi.ai" },
-  { name="Mohamed Bouadi", email="contact@lexsi.ai" },
-  { name="Utsav Avaiya", email="contact@lexsi.ai" },
-  { name="Vinay Kumar Sankarapu", email="contact@lexsi.ai" },
+  { name="Aditya Tanna", email="aditya.tanna@lexsi.ai" },
+  { name="Pratinav Seth", email="pratinav.seth@lexsi.ai" },
+  { name="Mohamed Bouadi", email="mohamed.bouadi@lexsi.ai" },
+  { name="Utsav Avaiya", email="utsav.avaiya@lexsi.ai" },
+  { name="Vinay Kumar Sankarapu", email="v.k@lexsi.ai" },
 ]
 maintainers = [
-  { name="Aditya Tanna", email="contact@lexsi.ai" },
+  { name="Aditya Tanna", email="aditya.tanna@lexsi.ai" },
 ]
 description = "TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models"
 readme = "README.md"
