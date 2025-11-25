@@ -481,7 +481,7 @@ Please cite appropriately if used in academic or production projects.
 
 ## 📫 Join Community / Contribute
 
-- Issues and discussions are welcomed on the [GitHub issue tracker](https://github.com/Lexsi-Labs/TabTune/issues) and [Discord](https://discord.gg/dSB62Q7A) .
+- Issues and discussions are welcomed on the [GitHub issue tracker](https://github.com/Lexsi-Labs/TabTune/issues) and [Discord](https://discord.gg/ckVbEJGW) .
 - Please see the **Contributing** section for contribution standards, code reviews, and documentation tips.
 
 ---
