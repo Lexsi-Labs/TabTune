@@ -1,7 +1,11 @@
-<p align="center">
-  <img src="assets/vuugolelzvmgay7nhq.svg" alt="TabTune Logo" width="1000px"/>
-</p>
+<div align="center">
+  <a href="https://github.com/Lexsi-Labs/TabTune">
+    <img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/tabtunelogo.png" alt="TabTune Logo"  width="1000">
+  </a>
+  <br>
+</div>
 
+  
 # TabTune - A Unified Library for Inference and Fine-Tuning Tabular Foundation Models
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -483,8 +487,13 @@ Please cite appropriately if used in academic or production projects.
 ---
 ## Contact
 
-<p align="center">
-  <img src="assets/lexsi-labs-logo-white.svg" alt="Lexsi Labs Logo" width="200px"/>
-</p>
-
-Website: **https://lexsi.ai**
+<div align="center">
+  <a href="https://lexsi.ai/">
+    <img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/lexsilogowhite.png" width="300">
+  </a>
+  <br>
+  <a href="https://lexsi.ai/">https://www.lexsi.ai</a>
+  <br><br>
+  Paris 🇫🇷 · Mumbai 🇮🇳 · London 🇬🇧 
+  <br><br>
+</div>
