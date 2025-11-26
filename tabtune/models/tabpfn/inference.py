@@ -205,7 +205,7 @@ class InferenceEngineOnDemand(InferenceEngine):
             y_train=self.y_train,
             random_state=rng,
             cat_ix=self.cat_ix,
-            n_workers=self.n_workers,
+            n_preprocessing_jobs=self.n_workers,
             parallel_mode="as-ready",
         )
 
@@ -425,7 +425,7 @@ class InferenceEngineCachePreprocessing(InferenceEngine):
             y_train=y_train,
             random_state=rng,
             cat_ix=cat_ix,
-            n_workers=n_workers,
+            n_preprocessing_jobs=n_workers,
             parallel_mode="block",
         )
         configs, preprocessors, X_trains, y_trains, cat_ixs = list(zip(*itr))
@@ -576,7 +576,7 @@ class InferenceEngineCacheKV(InferenceEngine):
             y_train=y_train,
             random_state=rng,
             cat_ix=cat_ix,
-            n_workers=n_workers,
+            n_preprocessing_jobs=n_workers,
             parallel_mode="as-ready",
         )
         models: list[Architecture] = []

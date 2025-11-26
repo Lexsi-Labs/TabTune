@@ -95,17 +95,101 @@ class TabularPipeline:
         self.model_checkpoint_path = model_checkpoint_path
         self.finetune_mode = finetune_mode
 
-        if self.tuning_strategy in ('finetune','peft'):
+        if self.tuning_strategy in ('finetune', 'base-ft', 'peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
-
+        
 
         if self.model_name in ['TabPFN']:
-            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
             config = {'device': device, 'ignore_pretraining_limits': True}
-            config.update(self.model_params)
-            logger.info(f"[Pipeline] Config: {config}")
-            self.model = TabPFNClassifier(**config)
-            if self.tuning_strategy in ['finetune','peft'] and hasattr(self.model, '_initialize_model_variables'):
+            
+            # Check for version selection in model_params
+            model_params_copy = dict(self.model_params) if self.model_params else {}
+            version_str = model_params_copy.pop('model_version', None)
+            
+            # Helper function to get model path for a specific version
+            def _get_tabpfn_model_path(version_enum):
+                from ..models.tabpfn.model_loading import ModelSource, ModelType
+                import sys
+                from pathlib import Path
+                
+                model_source = ModelSource.get_classifier_v2_5() if version_enum.value == "v2.5" else ModelSource.get_classifier_v2()
+                
+                # Use the same cache directory logic as model_loading
+                if sys.platform == "win32":
+                    cache_dir = Path(os.environ.get("APPDATA", "")) / "tabpfn" if os.environ.get("APPDATA") else Path.cwd() / ".tabpfn_models"
+                elif sys.platform == "darwin":
+                    cache_dir = Path.home() / "Library" / "Caches" / "tabpfn"
+                else:
+                    xdg_cache = os.environ.get("XDG_CACHE_HOME", "")
+                    cache_dir = Path(xdg_cache) / "tabpfn" if xdg_cache.strip() else Path.home() / ".cache" / "tabpfn"
+                
+                return cache_dir / model_source.default_filename
+            
+            if version_str:
+                # Explicit version selection
+                try:
+                    from ..models.tabpfn.model_loading import ModelVersion
+                    # Normalize version string to match enum values: "v2.5" -> "v2.5", "v2" -> "v2"
+                    version_str_lower = version_str.lower().strip()
+                    if version_str_lower not in ["v2", "v2.5"]:
+                        raise ValueError(f"Invalid TabPFN version: {version_str}. Use 'v2' or 'v2.5'")
+                    
+                    # Create ModelVersion from the value string
+                    version = ModelVersion(version_str_lower)
+                    logger.info(f"[Pipeline] Using TabPFN {version.value} (explicit selection)")
+                    
+                    # Try to use create_default_for_version if available
+                    if hasattr(TabPFNClassifier, 'create_default_for_version'):
+                        config.update(model_params_copy)
+                        self.model = TabPFNClassifier.create_default_for_version(version, **config)
+                    else:
+                        # Fallback: construct model path manually
+                        model_path = _get_tabpfn_model_path(version)
+                        config['model_path'] = str(model_path)
+                        config.update(model_params_copy)
+                        self.model = TabPFNClassifier(**config)
+                except (ValueError, AttributeError, Exception) as e:
+                    logger.warning(f"[Pipeline] Invalid TabPFN version '{version_str}' or initialization failed, using default: {e}")
+                    # Remove model_version from config and model_params
+                    config.pop('model_version', None)
+                    fallback_params = dict(self.model_params) if self.model_params else {}
+                    fallback_params.pop('model_version', None)
+                    config.update(fallback_params)
+                    try:
+                        self.model = TabPFNClassifier(**config)
+                    except Exception as fallback_error:
+                        # Final fallback to v2
+                        logger.warning(f"[Pipeline] Default TabPFN initialization failed, trying v2: {fallback_error}")
+                        from ..models.tabpfn.model_loading import ModelVersion
+                        model_path = _get_tabpfn_model_path(ModelVersion.V2)
+                        config['model_path'] = str(model_path)
+                        config.pop('model_version', None)
+                        fallback_params_v2 = dict(self.model_params) if self.model_params else {}
+                        fallback_params_v2.pop('model_version', None)
+                        config.update(fallback_params_v2)
+                        self.model = TabPFNClassifier(**config)
+            else:
+                # Default behavior: use TabPFN's default (v2.5 if package >= 6.0.0, v2 otherwise)
+                default_params = dict(self.model_params) if self.model_params else {}
+                default_params.pop('model_version', None)
+                config.update(default_params)
+                logger.info(f"[Pipeline] Using TabPFN default version")
+                try:
+                    self.model = TabPFNClassifier(**config)
+                except Exception as e:
+                    # Fallback to v2 if default fails (e.g., v2.5 unavailable)
+                    logger.warning(f"[Pipeline] Default TabPFN initialization failed, trying v2: {e}")
+                    from ..models.tabpfn.model_loading import ModelVersion
+                    model_path = _get_tabpfn_model_path(ModelVersion.V2)
+                    config['model_path'] = str(model_path)
+                    config.pop('model_version', None)
+                    fallback_params = dict(self.model_params) if self.model_params else {}
+                    fallback_params.pop('model_version', None)
+                    config.update(fallback_params)
+                    self.model = TabPFNClassifier(**config)
+            
+            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                 self.model._initialize_model_variables()
 
 
@@ -113,7 +197,7 @@ class TabularPipeline:
             self.model = ConTextTabClassifier(**self.model_params)
     
         elif self.model_name in ['TabICL', 'OrionBix','OrionMSP']:
-            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
             config = {'n_jobs': 1, 'device': device}
             config.update(self.model_params)
             if self.model_name == 'TabICL':
@@ -131,7 +215,7 @@ class TabularPipeline:
 
         elif self.model_name == 'TabDPT':
             # Use GPU if available, otherwise fall back to CPU
-            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
             config = {
                 'device': device,
                 'compile': True,  # Disable compilation to avoid GPU issues
@@ -188,8 +272,6 @@ class TabularPipeline:
         # ContextTab ZMQ server cleanup is handled automatically by atexit.register()
         # in the start_embedding_server function, so no manual cleanup needed
         pass
-    
-    
 
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
@@ -226,7 +308,7 @@ class TabularPipeline:
             logger.info("[Pipeline] Performing late initialization of the model...")
             if self.model_name == 'Mitra':
                 n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
-                device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+                device = 'cuda' if torch.cuda.is_available() else 'cpu'
                 config = {'dim': 256, 'n_layers': 6, 'n_heads': 8, 'task': 'CLASSIFICATION', 'dim_output': n_classes, 'use_pretrained_weights': False, 'path_to_weights': '', 'device': device}
                 config.update(self.model_params)
                 self.model = Tab2D(**config)
@@ -240,7 +322,7 @@ class TabularPipeline:
                         logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
 
         if hasattr(self.model, 'to'):
-            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
             device = torch.device(device_str)
             self.model.to(device)
             if self.model_name == 'Mitra':
@@ -253,7 +335,7 @@ class TabularPipeline:
                 self.model.device = device
 
 
-        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']:
+        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune', 'base-ft']:
             logger.info("[Pipeline] Preparing raw data for ConTextTab fine-tuning")
             if not isinstance(X, pd.DataFrame):
                 X_to_tune = pd.DataFrame(X)
@@ -294,7 +376,7 @@ class TabularPipeline:
             processor=self.processor
         )
 
-        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune','peft']:
+        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
             logger.info("[Pipeline] Finalizing TabDPT setup after fine-tuning")
             self.model.num_classes = len(np.unique(y_to_tune))
             # Fit the model for inference after fine-tuning
@@ -322,7 +404,7 @@ class TabularPipeline:
             self.model.model_.eval()
 
         if isinstance(self.model, TabPFNClassifier):
-            if self.tuning_strategy in ['finetune', 'peft']:
+            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context (without refitting weights)...")
             
             # Store current model weights
@@ -386,7 +468,7 @@ class TabularPipeline:
                 predictions = self.model.predict(X_query)
             
             # Convert numerical predictions back to string format for evaluation
-            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
+            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
                 predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions)
 
         
@@ -400,7 +482,7 @@ class TabularPipeline:
             
             X_support, y_support = self.X_train_processed_, self.y_train_processed_
             
-            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
             device = device_str
             
             X_support_t = torch.tensor(X_support, dtype=torch.float32).unsqueeze(0).to(device)
@@ -456,7 +538,7 @@ class TabularPipeline:
 
         elif isinstance(self.model, TabPFNClassifier):
             # Special handling for fine-tuned TabPFN to set inference context
-            if self.tuning_strategy in ['finetune', 'peft']:
+            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context for proba...")
                 self.model.fit(self.X_train_processed_, self.y_train_processed_)
             

@@ -63,13 +63,13 @@ class TuningManager:
         if strategy == 'finetune' and finetune_method == 'peft':
             selected_strategy = 'peft'
         elif strategy == 'finetune':
-            selected_strategy = 'finetune'
+            selected_strategy = 'base-ft'
 
         is_finetuned = False
         original_is_tab2d = isinstance(model, Tab2D)
 
 
-        if (isinstance(model, Tab2D) or original_is_tab2d) and selected_strategy in ('finetune', 'peft'):
+        if (isinstance(model, Tab2D) or original_is_tab2d) and selected_strategy in ('finetune', 'base-ft', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for Mitra (task-optimized)")
                 self._finetune_mitra_pure_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -78,7 +78,7 @@ class TuningManager:
                 self._finetune_mitra(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, TabPFNClassifier) and selected_strategy in ('finetune', 'peft'):
+        elif isinstance(model, TabPFNClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for TabPFN (task-optimized)")
                 self._finetune_tabpfn_pure_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -87,7 +87,7 @@ class TuningManager:
                 self._finetune_tabpfn(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune','peft'):
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune', 'base-ft', 'peft'):
             if finetune_mode == 'meta-learning':
                 logger.info("[TuningManager] Meta Learning based FT")
                 self._finetune_tabicl(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -96,11 +96,11 @@ class TuningManager:
                 self._finetune_tabicl_simple_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, ConTextTabClassifier) and selected_strategy in ('finetune', 'peft'):
+        elif isinstance(model, ConTextTabClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
             self._full_finetune_model(model, X_train, y_train, params=params_copy, processor=processor, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, TabDPTClassifier) and selected_strategy in ('finetune','peft'):
+        elif isinstance(model, TabDPTClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for TabDPT (task-optimized)")
                 self._finetune_tabdpt_pure_sft(model, X_train, y_train, params=params_copy, processor=processor, peft_config=peft_config)

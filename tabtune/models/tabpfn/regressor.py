@@ -13,7 +13,6 @@
     ```
 """
 
-#  Copyright (c) Prior Labs GmbH 2025.
 
 from __future__ import annotations
 
@@ -199,6 +198,7 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
         memory_saving_mode: bool | Literal["auto"] | float | int = "auto",
         random_state: int | np.random.RandomState | np.random.Generator | None = 0,
         n_jobs: int = -1,
+        n_preprocessing_jobs: int = 1,
         inference_config: dict | ModelInterfaceConfig | None = None,
         differentiable_input: bool = False,
     ) -> None:
@@ -378,12 +378,21 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
                     passing `USE_SKLEARN_16_DECIMAL_PRECISION=True` as kwarg.
 
             n_jobs:
+                .. deprecated:: 2.5
+                    The `n_jobs` parameter is deprecated and has no effect.
+                    Use `n_preprocessing_jobs` instead.
+
                 The number of workers for tasks that can be parallelized across CPU
                 cores. Currently, this is used for preprocessing the data in parallel
                 (if `n_estimators > 1`).
 
                 - If `-1`, all available CPU cores are used.
                 - If `int`, the number of CPU cores to use is determined by `n_jobs`.
+
+            n_preprocessing_jobs:
+                The number of worker processes to use for preprocessing the data in
+                parallel. If `1`, preprocessing is performed in the current process,
+                avoiding multiprocessing overheads.
 
             inference_config:
                 For advanced users, additional advanced arguments that adjust the
@@ -417,6 +426,18 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
         )
         self.random_state = random_state
         self.n_jobs = n_jobs
+        
+        # Backward compatibility: if n_jobs is explicitly set (not -1), use it for n_preprocessing_jobs
+        if n_jobs != -1:
+            warnings.warn(
+                "The `n_jobs` parameter is deprecated and has no effect. "
+                "Use `n_preprocessing_jobs` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            n_preprocessing_jobs = n_jobs
+        
+        self.n_preprocessing_jobs = n_preprocessing_jobs
         self.inference_config = inference_config
         self.differentiable_input = differentiable_input
 
@@ -602,6 +623,7 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
             ),
             target_transforms=target_preprocessors,
             random_state=rng,
+            num_models=1,  # TabTune uses single model, but supports multi-model via _model_index
         )
 
         self.znorm_space_bardist_ = self.znorm_space_bardist_.to(self.device_)
@@ -661,7 +683,7 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
             fit_mode="batched",
             device_=self.device_,
             rng=rng,
-            n_jobs=self.n_jobs,
+            n_preprocessing_jobs=self.n_preprocessing_jobs,
             byte_size=byte_size,
             forced_inference_dtype_=self.forced_inference_dtype_,
             memory_saving_mode=self.memory_saving_mode,
@@ -736,7 +758,7 @@ class TabPFNRegressor(RegressorMixin, BaseEstimator):
             fit_mode=self.fit_mode,
             device_=self.device_,
             rng=rng,
-            n_jobs=self.n_jobs,
+            n_preprocessing_jobs=self.n_preprocessing_jobs,
             byte_size=byte_size,
             forced_inference_dtype_=self.forced_inference_dtype_,
             memory_saving_mode=self.memory_saving_mode,
