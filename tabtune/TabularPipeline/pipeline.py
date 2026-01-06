@@ -97,17 +97,17 @@ class TabularPipeline:
         self.model_checkpoint_path = model_checkpoint_path
         self.finetune_mode = finetune_mode
 
-        if self.tuning_strategy in ('finetune', 'base-ft', 'peft'):
+        if self.tuning_strategy in ('finetune', 'peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
         
 
         if self.model_name in ['TabPFN']:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {'device': device, 'ignore_pretraining_limits': True}
             config.update(self.model_params)
             logger.info(f"[Pipeline] Config: {config}")
             self.model = TabPFNClassifier(**config)
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                 self.model._initialize_model_variables()
 
 
@@ -115,7 +115,7 @@ class TabularPipeline:
             self.model = ConTextTabClassifier(**self.model_params)
     
         elif self.model_name in ['TabICL', 'OrionBix','OrionMSP']:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {'n_jobs': 1, 'device': device}
             config.update(self.model_params)
             if self.model_name == 'TabICL':
@@ -133,7 +133,7 @@ class TabularPipeline:
 
         elif self.model_name == 'TabDPT':
             # Use GPU if available, otherwise fall back to CPU
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {
                 'device': device,
                 'compile': True,  # Disable compilation to avoid GPU issues
@@ -154,7 +154,7 @@ class TabularPipeline:
             self.model = TabDPTClassifier(**config)
 
         elif self.model_name == 'Limix':
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             config = {'device': device}
             config.update(self.model_params)
             self.model = LimixClassifier(**config)
@@ -232,7 +232,7 @@ class TabularPipeline:
             logger.info("[Pipeline] Performing late initialization of the model...")
             if self.model_name == 'Mitra':
                 n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
-                device = 'cuda' if torch.cuda.is_available() else 'cpu'
+                device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
                 config = {'dim': 256, 'n_layers': 6, 'n_heads': 8, 'task': 'CLASSIFICATION', 'dim_output': n_classes, 'use_pretrained_weights': False, 'path_to_weights': '', 'device': device}
                 config.update(self.model_params)
                 self.model = Tab2D(**config)
@@ -246,7 +246,7 @@ class TabularPipeline:
                         logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
 
         if hasattr(self.model, 'to'):
-            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
+            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             device = torch.device(device_str)
             self.model.to(device)
             if self.model_name == 'Mitra':
@@ -259,7 +259,7 @@ class TabularPipeline:
                 self.model.device = device
 
 
-        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune', 'base-ft']:
+        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']:
             logger.info("[Pipeline] Preparing raw data for ConTextTab fine-tuning")
             if not isinstance(X, pd.DataFrame):
                 X_to_tune = pd.DataFrame(X)
@@ -300,7 +300,7 @@ class TabularPipeline:
             processor=self.processor
         )
 
-        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'peft']:
             logger.info("[Pipeline] Finalizing TabDPT setup after fine-tuning")
             self.model.num_classes = len(np.unique(y_to_tune))
             # Fit the model for inference after fine-tuning
@@ -312,7 +312,7 @@ class TabularPipeline:
             logger.info("[Pipeline] PEFT STATUS SUMMARY")
             logger.info("[Pipeline] LoRA adapters were applied to the model")
             logger.warning("[Pipeline] Note: PEFT compatibility with tabular models is experimental")
-            logger.info("[Pipeline] If you encounter issues, try 'base-ft' strategy for full compatibility")
+            logger.info("[Pipeline] If you encounter issues, try inference strategy for full compatibility")
             logger.info("[Pipeline] See documentation for more details on PEFT limitations")
         return self
 
@@ -328,7 +328,7 @@ class TabularPipeline:
             self.model.model_.eval()
 
         if isinstance(self.model, TabPFNClassifier):
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+            if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context (without refitting weights)...")
             
             # Store current model weights
@@ -392,7 +392,7 @@ class TabularPipeline:
                 predictions = self.model.predict(X_query)
             
             # Convert numerical predictions back to string format for evaluation
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
+            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
                 predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions)
 
         
@@ -406,7 +406,7 @@ class TabularPipeline:
             
             X_support, y_support = self.X_train_processed_, self.y_train_processed_
             
-            device_str = self.tuning_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')
+            device_str = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
             device = device_str
             
             X_support_t = torch.tensor(X_support, dtype=torch.float32).unsqueeze(0).to(device)
@@ -462,7 +462,7 @@ class TabularPipeline:
 
         elif isinstance(self.model, TabPFNClassifier):
             # Special handling for fine-tuned TabPFN to set inference context
-            if self.tuning_strategy in ['finetune', 'base-ft', 'peft']:
+            if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context for proba...")
                 self.model.fit(self.X_train_processed_, self.y_train_processed_)
             
