@@ -1179,7 +1179,7 @@ class TabularPipeline:
         if strategy == "finetune" and finetune_method == "peft":
             selected_strategy = "peft"
         elif strategy == "finetune":
-            selected_strategy = "base-ft"
+            selected_strategy = "finetune"
 
         # Defaults resolver that DOES NOT depend on isinstance()
         def _default_tuning_config(model_name: str, finetune_mode: str) -> dict:
