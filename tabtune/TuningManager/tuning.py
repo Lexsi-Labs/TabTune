@@ -63,13 +63,13 @@ class TuningManager:
         if strategy == 'finetune' and finetune_method == 'peft':
             selected_strategy = 'peft'
         elif strategy == 'finetune':
-            selected_strategy = 'base-ft'
+            selected_strategy = 'finetune'
 
         is_finetuned = False
         original_is_tab2d = isinstance(model, Tab2D)
 
 
-        if (isinstance(model, Tab2D) or original_is_tab2d) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        if (isinstance(model, Tab2D) or original_is_tab2d) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for Mitra (task-optimized)")
                 self._finetune_mitra_pure_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -78,7 +78,7 @@ class TuningManager:
                 self._finetune_mitra(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, TabPFNClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        elif isinstance(model, TabPFNClassifier) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for TabPFN (task-optimized)")
                 self._finetune_tabpfn_pure_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -87,7 +87,7 @@ class TuningManager:
                 self._finetune_tabpfn(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'meta-learning':
                 logger.info("[TuningManager] Meta Learning based FT")
                 self._finetune_tabicl(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -96,11 +96,11 @@ class TuningManager:
                 self._finetune_tabicl_simple_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, ConTextTabClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        elif isinstance(model, ConTextTabClassifier) and selected_strategy in ('finetune', 'peft'):
             self._full_finetune_model(model, X_train, y_train, params=params_copy, processor=processor, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, TabDPTClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        elif isinstance(model, TabDPTClassifier) and selected_strategy in ('finetune','peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for TabDPT (task-optimized)")
                 self._finetune_tabdpt_pure_sft(model, X_train, y_train, params=params_copy, processor=processor, peft_config=peft_config)
@@ -110,7 +110,7 @@ class TuningManager:
             is_finetuned = True
 
 
-        elif isinstance(model, LimixClassifier) and selected_strategy in ('finetune', 'base-ft', 'peft'):
+        elif isinstance(model, LimixClassifier) and selected_strategy in ('finetune', 'peft'):
             msg = "[TuningManager] Limix fine-tuning not supported; falling back to inference-mode fit (.fit) only."
             print(msg)
             logger.warning(msg)
@@ -245,7 +245,7 @@ class TuningManager:
         if peft_config:
             logger.warning("[TuningManager] WARNING: ConTextTab PEFT support is currently experimental and may cause prediction issues")
             logger.warning("[TuningManager] ConTextTab's complex embedding pipeline may conflict with LoRA adapters")
-            logger.info("[TuningManager] RECOMMENDATION: Use 'base-ft' strategy for ConTextTab instead of 'peft'")
+            logger.info("[TuningManager] RECOMMENDATION: Use standard finetune strategy for ConTextTab instead of 'peft'")
             logger.info("[TuningManager] FALLBACK: Proceeding with standard base fine-tuning")
             peft_config = None  # Disable PEFT for ConTextTab
         
@@ -327,7 +327,7 @@ class TuningManager:
         if peft_config:
             logger.warning("[TuningManager] WARNING: TabPFN PEFT support is currently experimental and unstable")
             logger.warning("[TuningManager] TabPFN's batched inference engine conflicts with LoRA adapter state")
-            logger.info("[TuningManager] RECOMMENDATION: Use 'base-ft' strategy for TabPFN instead of 'peft'")
+            logger.info("[TuningManager] RECOMMENDATION: Use standard finetune strategy for TabPFN instead of 'peft'")
             logger.info("[TuningManager] FALLBACK: Proceeding with standard base fine-tuning")
             peft_config = None  # Disable PEFT for TabPFN
 
