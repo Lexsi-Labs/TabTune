@@ -36,7 +36,7 @@ class TabularLeaderboard:
 
 
     def add_model(self, model_name: str, tuning_strategy: str = 'inference', 
-                  model_params: dict = None, tuning_params: dict = None, finetune_mode: str = None):
+                  model_params: dict = None, tuning_params: dict = None):
         """
         Adds a model configuration to the list of contestants for the leaderboard.
         """
@@ -44,8 +44,7 @@ class TabularLeaderboard:
             "model_name": model_name,
             "tuning_strategy": tuning_strategy,
             "model_params": model_params or {},
-            "tuning_params": tuning_params or {},
-            "finetune_mode": finetune_mode
+            "tuning_params": tuning_params or {}
         }
         self.models_to_run.append(config)
         logger.info(f"[Leaderboard] Added to leaderboard: {model_name} (Strategy: {tuning_strategy})")
@@ -67,8 +66,7 @@ class TabularLeaderboard:
                     model_name=config['model_name'],
                     tuning_strategy=config['tuning_strategy'],
                     model_params=config['model_params'],
-                    tuning_params=config['tuning_params'],
-                    finetune_mode=config['finetune_mode']
+                    tuning_params=config['tuning_params']
                 )
                 
                 pipeline.fit(self.X_train, self.y_train)
@@ -89,7 +87,6 @@ class TabularLeaderboard:
                 result_row = {
                     'Model': config['model_name'],
                     'Strategy': config['tuning_strategy'],
-                    'Finetune Mode': config['finetune_mode'],
                     'Accuracy': 'Failed', 'F1 Score': 'Failed', 'ROC AUC': 'Failed'
                 }
                 self.results.append(result_row)
@@ -103,13 +100,12 @@ class TabularLeaderboard:
         sort_column = sort_map.get(rank_by, 'ROC AUC')
         
         if sort_column in leaderboard_df.columns:
-            # Coerce errors to NaN to handle 'Failed' strings during sort, then sort
-            temp_col = pd.to_numeric(leaderboard_df[sort_column], errors='coerce')
-            leaderboard_df = leaderboard_df.iloc[temp_col.sort_values(ascending=False).index].reset_index(drop=True)
-            
+            leaderboard_df[sort_column] = pd.to_numeric(leaderboard_df[sort_column], errors='coerce')
+            leaderboard_df = leaderboard_df.sort_values(by=sort_column, ascending=False).reset_index(drop=True)
             leaderboard_df.index = leaderboard_df.index + 1
             leaderboard_df.index.name = 'Rank'
 
         display(Markdown("Leaderboard Results"))
         display(leaderboard_df)
         return leaderboard_df
+

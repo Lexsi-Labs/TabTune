@@ -12,6 +12,7 @@ from .result_handler import ResultsHandler
 from ..data.talent_full import TALENTFullDataset
 from ..data.openml import OpenMLCC18Dataset
 from ..data.tabzilla import TabZillaDataset
+from ..data.tabarena import TabArenaDataset
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ class BenchmarkPipeline:
             'talent': TALENTFullDataset,
             'openml-cc18': OpenMLCC18Dataset,
             'tabzilla': TabZillaDataset,
+            'tabarena': TabArenaDataset
         }
 
         if self.benchmark_name not in self.loader_map:

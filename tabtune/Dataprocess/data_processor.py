@@ -20,6 +20,7 @@ from .contexttab_preprocessor import ContextTabPreprocessor
 from .mitra_preprocessor import MitraPreprocessor 
 from .orion_bix_preprocessor import OrionBixPreprocessor
 from .tabdpt_preprocessor import TabDPTPreprocessor
+from .limix_preprocessor import LimixPreprocessor
 
 class DataProcessor(BaseEstimator, TransformerMixin):
     """
@@ -70,6 +71,8 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'Mitra': {'categorical_encoding': 'mitra_special'}, 
                 'OrionBix': {'categorical_encoding': 'orion_bix_special'},
                 'TabDPT': {'categorical_encoding': 'tabdpt_special'},
+                'Limix': {'categorical_encoding': 'limix_special'}
+                
             }
             config = model_defaults.get(self.model_name)
             if config:
@@ -87,6 +90,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'mitra_special': MitraPreprocessor,
             'orion_bix_special': OrionBixPreprocessor,
             'tabdpt_special': TabDPTPreprocessor,
+            'limix_special': LimixPreprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
