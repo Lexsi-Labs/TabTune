@@ -6,9 +6,31 @@ import torch
 from scipy.special import softmax
 from sklearn.base import ClassifierMixin
 from tqdm import tqdm
+import logging
 
 from .estimator import TabDPTEstimator
 from .utils import generate_random_permutation, pad_x
+
+logger = logging.getLogger(__name__)
+
+
+try:
+    import faiss  # type: ignore
+
+    def _faiss_noop_seed(self, seed):  # pragma: no cover - thin shim
+        """Provide a no-op seed method for FAISS flat indexes."""
+        return None
+
+    # Patch common flat indices if they lack the seed method
+    for _faiss_index_cls_name in ("IndexFlatL2", "IndexFlatIP"):
+        _faiss_index_cls = getattr(faiss, _faiss_index_cls_name, None)
+        if _faiss_index_cls is not None and not hasattr(_faiss_index_cls, "seed"):
+            setattr(_faiss_index_cls, "seed", _faiss_noop_seed)
+            logger.info("Patched faiss.%s.seed -> no-op", _faiss_index_cls_name)
+
+except ImportError:
+    faiss = None  # Optional dependency
+
 
 
 class TabDPTClassifier(TabDPTEstimator, ClassifierMixin):
