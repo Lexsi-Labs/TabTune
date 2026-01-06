@@ -18,6 +18,8 @@ BENCHMARK_DATASETS = {
         "electricity", "eye_movements", "road_safety",
     ],
 
+    "tabarena": None
+
 #     "talent": ['dry_bean_dataset', 'satellite_image', 'Bank_Customer_Churn_Dataset',  
 #                              'eeg-eye-state', 'compass_reg', 'healthcare_insurance_expenses', 'spambase', 'BNG(tic-tac-toe)', 'estimation_of_obesity_levels', 'Large-scale_Wave_Energy_Farm_Sydney_49', 'Insurance', 'BNG(mv)', 'ada_prior',       
 #                              'mfeat-fourier', 'analcatdata_authorship', 'customer_satisfaction_in_airline', 'KDD', 'Bias_correction_r',    'okcupid_stem', 'weather_izmir', 'sylvine', 'MIC', 'analcatdata_supreme', 'kdd_ipums_la_97-small',                   

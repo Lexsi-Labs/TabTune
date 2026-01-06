@@ -33,11 +33,11 @@ from ..models.orion_bix.sklearn.classifier import OrionBixClassifier
 from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.tabdpt.utils import pad_x
 from ..models.tabdpt.model import TabDPTModel
+from ..models.limix.classifier import LimixClassifier
 
 from .peft_utils import apply_tabular_lora
 
 logger = logging.getLogger(__name__)
-
 
 
 
@@ -87,7 +87,7 @@ class TuningManager:
                 self._finetune_tabpfn(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune','peft'):
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'meta-learning':
                 logger.info("[TuningManager] Meta Learning based FT")
                 self._finetune_tabicl(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -109,11 +109,24 @@ class TuningManager:
                 self._finetune_tabdpt(model, X_train, y_train, params=params_copy, processor=processor, peft_config=peft_config)
             is_finetuned = True
 
+
+        elif isinstance(model, LimixClassifier) and selected_strategy in ('finetune', 'peft'):
+            msg = "[TuningManager] Limix fine-tuning not supported; falling back to inference-mode fit (.fit) only."
+            print(msg)
+            logger.warning(msg)
+            logger.info("falling back to inference mode")
+            # Fall back to the inference behavior (your existing inference branch calls .fit)
+            model.fit(X_train, y_train)
+
+            # Not finetuned -> don't save/reload checkpoint
+            is_finetuned = False
+
+
         
         elif isinstance(model, (Tab2D)) and selected_strategy == 'inference':
             logger.info("[TuningManager] In-context learning model in inference mode. No training needed.")
             pass
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy == 'inference':
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier)) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabICL setup (inference mode)")
             model.fit(X_train, y_train)
         else:
@@ -232,7 +245,7 @@ class TuningManager:
         if peft_config:
             logger.warning("[TuningManager] WARNING: ConTextTab PEFT support is currently experimental and may cause prediction issues")
             logger.warning("[TuningManager] ConTextTab's complex embedding pipeline may conflict with LoRA adapters")
-            logger.info("[TuningManager] RECOMMENDATION: Use 'base-ft' strategy for ConTextTab instead of 'peft'")
+            logger.info("[TuningManager] RECOMMENDATION: Use standard finetune strategy for ConTextTab instead of 'peft'")
             logger.info("[TuningManager] FALLBACK: Proceeding with standard base fine-tuning")
             peft_config = None  # Disable PEFT for ConTextTab
         
@@ -314,7 +327,7 @@ class TuningManager:
         if peft_config:
             logger.warning("[TuningManager] WARNING: TabPFN PEFT support is currently experimental and unstable")
             logger.warning("[TuningManager] TabPFN's batched inference engine conflicts with LoRA adapter state")
-            logger.info("[TuningManager] RECOMMENDATION: Use 'base-ft' strategy for TabPFN instead of 'peft'")
+            logger.info("[TuningManager] RECOMMENDATION: Use standard finetune strategy for TabPFN instead of 'peft'")
             logger.info("[TuningManager] FALLBACK: Proceeding with standard base fine-tuning")
             peft_config = None  # Disable PEFT for TabPFN
 
@@ -1562,3 +1575,130 @@ class TuningManager:
     
         model.model_.eval()
         return model
+
+
+    def get_default_config(self, model, selected_strategy: str, finetune_mode: str, processor=None) -> dict:
+        """
+        Return the default config that would be used for this model/strategy/mode.
+        This must match the dicts defined inside the _finetune_* methods.
+        """
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # TabICL / Orion MSP / Orion Bix
+        if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)):
+            if finetune_mode == "meta-learning":
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 2e-6,
+                    "show_progress": True,
+                    "support_size": 48,
+                    "query_size": 32,
+                    "n_episodes": 1000,
+                    # keep these visible too if you support them
+                    # "finetune_method": None,
+                    # "peft_config": None,
+                }
+            else:
+                # simple SFT defaults (_finetune_tabicl_simple_sft)
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 1e-5,
+                    "batch_size": 16,
+                    "show_progress": True,
+                }
+
+        # TabPFN
+        if isinstance(model, TabPFNClassifier):
+            if finetune_mode == "sft":
+                return {
+                    "device": device,
+                    "epochs": 25,
+                    "learning_rate": 1e-5,
+                    "show_progress": True,
+                    "max_episode_size": None,   # you can set to len(X) only at fit-time
+                    "query_set_ratio": 0.3,
+                    "weight_decay": 1e-4,
+                }
+            else:
+                return {
+                    "device": device,
+                    "epochs": 3,
+                    "learning_rate": 1e-5,
+                    "batch_size": 256,
+                    "show_progress": True,
+                }
+
+        # ConTextTab full FT
+        if isinstance(model, ConTextTabClassifier):
+            return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 1e-4,
+                "batch_size": 128,
+                "show_progress": True,
+            }
+
+        # TabDPT
+        if isinstance(model, TabDPTClassifier):
+            if finetune_mode == "sft":
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 2e-5,
+                    "batch_size": 32,
+                    "show_progress": True,
+                    "weight_decay": 1e-4,
+                    "warmup_epochs": 1,
+                }
+            else:
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 1e-5,
+                    "batch_size": 8,
+                    "support_size": 512,
+                    "query_size": 256,
+                    "steps_per_epoch": 100,
+                    "show_progress": True,
+                }
+
+        # Mitra / Tab2D
+        if isinstance(model, Tab2D):
+            if finetune_mode == "sft":
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 1e-5,
+                    "batch_size": 128,
+                    "show_progress": True,
+                    "weight_decay": 1e-4,
+                    "warmup_epochs": 1,
+                }
+            else:
+                return {
+                    "device": device,
+                    "epochs": 3,
+                    "learning_rate": 1e-5,
+                    "batch_size": 4,
+                    "support_size": 128,
+                    "query_size": 128,
+                    "steps_per_epoch": 50,
+                    "show_progress": True,
+                }
+
+        # Limix
+        # if isinstance(model, LimixClassifier):
+        #     return {
+        #         "device": device,
+        #         "epochs": 5,
+        #         "learning_rate": 1e-5,
+        #         "show_progress": True,
+        #         "support_size": 48,
+        #         "query_size": 32,
+        #         "n_episodes": 1000,
+        #     }
+
+        # fallback: no tuning defaults known
+        return {"device": device}

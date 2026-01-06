@@ -15,6 +15,7 @@ from ..models.mitra.tab2d import Tab2D
 from ..models.orion_bix.sklearn.classifier import OrionBixClassifier
 from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
+from ..models.limix.classifier import LimixClassifier
 
 # imported for ContextTab cleanup
 try:
@@ -88,6 +89,7 @@ class TabularPipeline:
         self.tuning_strategy = tuning_strategy
         self.tuning_params = tuning_params or {}
         self.model_params = model_params or {}
+        self.processor_params = processor_params
         
         self.processor = DataProcessor(model_name=self.model_name, **(processor_params or {}))
         self.tuner = TuningManager()
@@ -95,9 +97,9 @@ class TabularPipeline:
         self.model_checkpoint_path = model_checkpoint_path
         self.finetune_mode = finetune_mode
 
-        if self.tuning_strategy in ('finetune','peft'):
+        if self.tuning_strategy in ('finetune', 'peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
-
+        
 
         if self.model_name in ['TabPFN']:
             device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
@@ -105,7 +107,7 @@ class TabularPipeline:
             config.update(self.model_params)
             logger.info(f"[Pipeline] Config: {config}")
             self.model = TabPFNClassifier(**config)
-            if self.tuning_strategy in ['finetune','peft'] and hasattr(self.model, '_initialize_model_variables'):
+            if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                 self.model._initialize_model_variables()
 
 
@@ -151,6 +153,12 @@ class TabularPipeline:
             config.update(self.model_params)  # All parameters now valid
             self.model = TabDPTClassifier(**config)
 
+        elif self.model_name == 'Limix':
+            device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+            config = {'device': device}
+            config.update(self.model_params)
+            self.model = LimixClassifier(**config)
+
         # Handle models that require late initialization (processor needs to be fit first)
         elif self.model_name not in ['Mitra', 'APT']:
             raise ValueError(f"Model '{self.model_name}' not supported.")
@@ -188,8 +196,6 @@ class TabularPipeline:
         # ContextTab ZMQ server cleanup is handled automatically by atexit.register()
         # in the start_embedding_server function, so no manual cleanup needed
         pass
-    
-    
 
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
@@ -200,7 +206,7 @@ class TabularPipeline:
         logger.info("[Pipeline] Starting fit process")
 
     # Special handling for models that are TRULY self-contained and do not need the pipeline's processor for inference
-        if self.tuning_strategy == 'inference' and isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)):
+        if self.tuning_strategy == 'inference' and isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier)):
             logger.info("[Pipeline] Handing off to TuningManager for inference setup.")
             self.processor.fit(X, y)
             self.model = self.tuner.tune(self.model, X, y, strategy=self.tuning_strategy)
@@ -294,7 +300,7 @@ class TabularPipeline:
             processor=self.processor
         )
 
-        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune','peft']:
+        if isinstance(self.model, TabDPTClassifier) and self.tuning_strategy in ['finetune', 'peft']:
             logger.info("[Pipeline] Finalizing TabDPT setup after fine-tuning")
             self.model.num_classes = len(np.unique(y_to_tune))
             # Fit the model for inference after fine-tuning
@@ -306,7 +312,7 @@ class TabularPipeline:
             logger.info("[Pipeline] PEFT STATUS SUMMARY")
             logger.info("[Pipeline] LoRA adapters were applied to the model")
             logger.warning("[Pipeline] Note: PEFT compatibility with tabular models is experimental")
-            logger.info("[Pipeline] If you encounter issues, try 'base-ft' strategy for full compatibility")
+            logger.info("[Pipeline] If you encounter issues, try inference strategy for full compatibility")
             logger.info("[Pipeline] See documentation for more details on PEFT limitations")
         return self
 
@@ -356,7 +362,7 @@ class TabularPipeline:
             logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
             predictions = self.model.predict(X)
             
-        elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)):
+        elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier)):
             logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")  
             X_processed = self.processor.transform(X)
             #predictions = self.model.predict(X)
@@ -464,14 +470,14 @@ class TabularPipeline:
             return self.model.predict_proba(X_processed)
             
         
-        if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, ConTextTabClassifier)):
+        if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, ConTextTabClassifier, LimixClassifier)):
             logger.debug("[Pipeline] Using model's native predict_proba method")
             
             X_processed = self.processor.transform(X)
             if isinstance(self.model, (ConTextTabClassifier)):
                  return self.model.predict_proba(X)
 
-            if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)):
+            if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier)):
                 if self.tuning_strategy == 'inference':
                     return self.model.predict_proba(X)
                 else:
@@ -999,6 +1005,8 @@ class TabularPipeline:
         elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, TabPFNClassifier)):
              # Fit a temporary encoder on the training labels seen during .fit()
             le = LabelEncoder().fit(self.y_train_processed_ if self.y_train_processed_ is not None else y_true)
+        elif isinstance(self.model, LimixClassifier) and hasattr(self.model, 'le_'):
+             le = self.model.le_
         else:
             raise RuntimeError("Could not find a fitted label encoder to evaluate metrics.")
 
@@ -1134,3 +1142,205 @@ class TabularPipeline:
             results[ep] = metrics
     
         return results
+
+
+
+    def get_params(self, deep: bool = True) -> dict:
+        """
+         Get parameters for this estimator.
+
+         Parameters
+         ----------
+         deep : bool, default=True
+        If True, will return the parameters for this estimator and
+        contained subobjects that are estimators (like the processor or the underlying model).
+
+        Returns
+        -------
+        params : dict
+        Parameter names mapped to their values.
+        """
+ 
+        user_tuning_params = self.tuning_params if isinstance(self.tuning_params, dict) else (self.tuning_params or {})
+        model_params = self.model_params if isinstance(self.model_params, dict) else (self.model_params or {})
+        processor_params = (
+            self.processor_params
+            if isinstance(self.processor_params, dict)
+            else (self.processor_params or {})
+        )
+
+        # --- NEW: compute "effective" tuning params = defaults + user overrides ---
+        finetune_mode = user_tuning_params.get("finetune_mode", getattr(self, "finetune_mode", "meta-learning"))
+        strategy = getattr(self, "tuning_strategy", "inference")
+
+        # Match your TuningManager logic
+        finetune_method = user_tuning_params.get("finetune_method", None)
+        selected_strategy = strategy
+        if strategy == "finetune" and finetune_method == "peft":
+            selected_strategy = "peft"
+        elif strategy == "finetune":
+            selected_strategy = "finetune"
+
+        # Defaults resolver that DOES NOT depend on isinstance()
+        def _default_tuning_config(model_name: str, finetune_mode: str) -> dict:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+            # TabICL / Orion defaults (meta-learning)
+            if model_name in {"TabICL", "OrionMSP", "OrionBix"}:
+                if finetune_mode == "meta-learning":
+                    return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 2e-6,
+                    "show_progress": True,
+                    "support_size": 48,
+                    "query_size": 32,
+                    "n_episodes": 1000,
+                    }
+                # TabICL simple SFT defaults
+                return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 1e-5,
+                "batch_size": 16,
+                "show_progress": True,
+                }
+
+            if model_name == "TabPFN":
+                if finetune_mode == "sft":
+                    return {
+                    "device": device,
+                    "epochs": 25,
+                    "learning_rate": 1e-5,
+                    "show_progress": True,
+                    "query_set_ratio": 0.3,
+                    "weight_decay": 1e-4,
+                    # max_episode_size is data-dependent; leave it out here
+                    }
+                return {
+                "device": device,
+                "epochs": 3,
+                "learning_rate": 1e-5,
+                "batch_size": 256,
+                "show_progress": True,
+                }
+
+            if model_name == "ConTextTab":
+                return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 1e-4,
+                "batch_size": 128,
+                "show_progress": True,
+                }
+
+            if model_name == "TabDPT":
+                if finetune_mode == "sft":
+                    return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 2e-5,
+                    "batch_size": 32,
+                    "show_progress": True,
+                    "weight_decay": 1e-4,
+                    "warmup_epochs": 1,
+                    }
+                return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 1e-5,
+                "batch_size": 8,
+                "support_size": 512,
+                "query_size": 256,
+                "steps_per_epoch": 100,
+                "show_progress": True,
+                }
+
+            if model_name in {"Mitra", "Tab2D"}:
+                if finetune_mode == "sft":
+                    return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 1e-5,
+                    "batch_size": 128,
+                    "show_progress": True,
+                    "weight_decay": 1e-4,
+                    "warmup_epochs": 1,
+                    }
+                return {
+                "device": device,
+                "epochs": 3,
+                "learning_rate": 1e-5,
+                "batch_size": 4,
+                "support_size": 128,
+                "query_size": 128,
+                "steps_per_epoch": 50,
+                "show_progress": True,
+                }
+
+            if model_name == "Limix":
+                return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 1e-5,
+                "show_progress": True,
+                "support_size": 48,
+                "query_size": 32,
+                "n_episodes": 1000,
+                }
+
+            return {"device": device}
+
+        defaults = _default_tuning_config(self.model_name, finetune_mode)
+
+        # Always include finetune_mode in tuning_params (even if defaults also include it)
+        effective_tuning_params = dict(defaults)
+        effective_tuning_params["finetune_mode"] = finetune_mode
+
+        # User overrides win (even if empty dict -> no changes)
+        effective_tuning_params.update(user_tuning_params or {})
+
+        # Base params (always include keys)
+        params = {
+        "model_name": self.model_name,
+        "task_type": self.task_type,
+        "tuning_strategy": self.tuning_strategy,
+        "tuning_params": effective_tuning_params,  # <-- this is what you want
+        "processor_params": processor_params,
+        "model_params": model_params,
+        "model_checkpoint_path": self.model_checkpoint_path,
+        "finetune_mode": self.finetune_mode,
+        }
+
+        if not deep:
+            return params
+
+        # Deep: Processor params
+        if hasattr(self.processor, "get_params"):
+            try:
+                proc_params = self.processor.get_params(deep=True)
+                for key, value in proc_params.items():
+                    params[f"processor__{key}"] = value
+            except Exception as e:
+                logger.debug(f"[Pipeline] Could not get params from processor: {e}")
+    
+        # Deep: Model params
+        if self.model is not None and hasattr(self.model, "get_params"):
+            try:
+                model_inner_params = self.model.get_params(deep=True)
+                for key, value in model_inner_params.items():
+                    params[f"model__{key}"] = value
+            except Exception as e:
+                logger.debug(f"[Pipeline] Could not get params from model: {e}")
+        elif self.model is not None:
+            if hasattr(self.model, "config"):
+                params["model__config"] = self.model.config
+            elif hasattr(self.model, "args"):
+                params["model__args"] = self.model.args
+    
+        # Optional: expose what strategy resolution decided
+        params["tuning__selected_strategy"] = selected_strategy
+
+        return params
+
+

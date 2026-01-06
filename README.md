@@ -62,15 +62,17 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 TabTune has built-in support for a growing list of powerful tabular models, each with its own specialized preprocessing and tuning pipeline handled automatically.
 
-| Model       | Family / Paradigm | Key Innovation | Supported Strategies |
-|-------------|------------------|----------------|----------------------|
-| **TabPFN-v2**  | PFN / ICL        | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT* |
-| **TabICL**  | Scalable ICL     | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionMSP** | Scalable ICL | Multi-Scale Sparse Attention for Tabular In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionBix** | Scalable ICL | Tabular BiAxial In-Context Learning with biaxial attention mechanism | Inference, Meta-Learning FT, SFT, PEFT |
-| **Mitra**   | Scalable ICL        | 2D attention (row & column); mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT |
-| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT* |
-| **TabDPT**     | Denoising Transformer      | Denoising pre-training for feature representation | Inference, Meta-Learning FT, SFT, PEFT |
+| Model        | Family / Paradigm        | Key Innovation                                                                 | Supported Strategies                          |
+|--------------|--------------------------|----------------------------------------------------------------------------------|-----------------------------------------------|
+| **TabPFN-v2** | PFN / ICL                | Approximates Bayesian inference on synthetic data                                 | Inference, Meta-Learning FT, SFT, PEFT*        |
+| **TabICL**   | Scalable ICL             | Two-stage column-then-row attention                                               | Inference, Meta-Learning FT, SFT, PEFT         |
+| **OrionMSP** | Scalable ICL             | Multi-Scale Sparse Attention for Tabular In-Context Learning                      | Inference, Meta-Learning FT, SFT, PEFT         |
+| **OrionBix** | Scalable ICL             | Tabular BiAxial In-Context Learning with biaxial attention mechanism              | Inference, Meta-Learning FT, SFT, PEFT         |
+| **Mitra**    | Scalable ICL             | 2D attention (row & column); mixed synthetic priors                                | Inference, Meta-Learning FT, SFT, PEFT         |
+| **ContextTab** | Semantics-Aware ICL    | Modality-specific semantic embeddings                                             | Inference, Full Fine-Tuning, PEFT*             |
+| **TabDPT**   | Denoising Transformer    | Denoising pre-training for feature representation                                 | Inference, Meta-Learning FT, SFT, PEFT         |
+| **Limix**    | Probabilistic / ICL      | Likelihood-based mixture modeling over in-context examples; uncertainty-aware     | Inference                                     |
+
 
 *Note: PEFT for ContextTab and TabPFN is experimental; 'base-ft' strategy is fully supported.*
 
