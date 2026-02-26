@@ -1,5 +1,5 @@
 """
-Example 11: Regression Model Comparison with TabularLeaderboard
+Example 10: Regression Model Comparison with TabularLeaderboard
 ===============================================================
 
 This example demonstrates TabTune's TabularLeaderboard utility applied to Regression,
