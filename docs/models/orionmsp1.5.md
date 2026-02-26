@@ -27,13 +27,13 @@ OrionMSP is a four-stage pipeline:
 
 ```mermaid
 flowchart LR
-    A[Raw tabular rows: numeric + categorical] --> B[Column-wise embedder]
-    B --> C[Cell/feature embeddings E]
-    C --> D[RowInteraction: sparse attention over feature axis]
-    D --> E[[CLS] summaries -> row embeddings H]
-    E --> F[Cross-component Perceiver memory]
-    F --> G[Enhanced row reps R]
-    G --> H[ICL predictor (split attention)]
+    A[Raw tabular rows] --> B[Column wise embedder]
+    B --> C[Feature embeddings]
+    C --> D[Row interaction sparse attention]
+    D --> E[CLS summaries to row embeddings]
+    E --> F[Perceiver memory]
+    F --> G[Enhanced row representations]
+    G --> H[ICL predictor split attention]
     H --> I[Logits for query rows]
 ```
 
