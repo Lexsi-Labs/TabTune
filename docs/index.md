@@ -50,6 +50,23 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 - **Extensible Design:** Modular codebase for easy integration of custom data processors and models.
 
 ---
+## 🆕 New in This Release
+
+### ✅ OrionMSP v1.5 and Limix Model Support
+
+### Regression Framework
+
+-   Unified regression training API
+-   Standardized metric handling
+-   Benchmark-ready evaluation utilities
+
+### Resampling Module
+
+-   Context-aware support/query sampling
+-   Configurable episodic batching
+-   Optimized for ICL models
+
+---
 
 ## 📊 Supported Models
 
@@ -66,24 +83,6 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
-
----
-
-## 🆕 New in This Release
-
-#### ✅ OrionMSP v1.5 and Limix Model Support
-
-### Regression Framework
-
--   Unified regression training API
--   Standardized metric handling
--   Benchmark-ready evaluation utilities
-
-### Resampling Module
-
--   Context-aware support/query sampling
--   Configurable episodic batching
--   Optimized for ICL models
 
 ---
 
