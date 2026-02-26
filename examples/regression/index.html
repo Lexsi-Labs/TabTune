@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -315,7 +315,7 @@ using TabTune across various scenarios and complexity levels.</p>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
     <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -350,7 +350,7 @@ using TabTune across various scenarios and complexity levels.</p>
         <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
             <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
             <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
-            <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+            <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
             <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
         <span class="p">)</span>
 
@@ -380,9 +380,9 @@ using TabTune across various scenarios and complexity levels.</p>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionMSP1.5'</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionMSPv1.5'</span><span class="p">,</span>
     <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>

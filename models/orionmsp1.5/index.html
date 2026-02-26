@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -298,13 +298,13 @@
 <h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
 <h3 id="21-high-level-design-as-implemented-in-tabtune">2.1 High-Level Design (as implemented in TabTune)<a class="headerlink" href="#21-high-level-design-as-implemented-in-tabtune" title="Permanent link">¶</a></h3>
 <div class="mermaid">flowchart LR
-    A[Raw tabular rows: numeric + categorical] --&gt; B[Column-wise embedder]
-    B --&gt; C[Cell/feature embeddings E]
-    C --&gt; D[RowInteraction: sparse attention over feature axis]
-    D --&gt; E[[CLS] summaries -&gt; row embeddings H]
-    E --&gt; F[Cross-component Perceiver memory]
-    F --&gt; G[Enhanced row reps R]
-    G --&gt; H[ICL predictor (split attention)]
+    A[Raw tabular rows] --&gt; B[Column wise embedder]
+    B --&gt; C[Feature embeddings]
+    C --&gt; D[Row interaction sparse attention]
+    D --&gt; E[CLS summaries to row embeddings]
+    E --&gt; F[Perceiver memory]
+    F --&gt; G[Enhanced row representations]
+    G --&gt; H[ICL predictor split attention]
     H --&gt; I[Logits for query rows]
 </div>
 <h3 id="22-core-components">2.2 Core Components<a class="headerlink" href="#22-core-components" title="Permanent link">¶</a></h3>

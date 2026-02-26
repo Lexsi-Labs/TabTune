@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -274,12 +274,11 @@
 <li class="second-level"><a href="#51-recommended-patterns">5.1 Recommended patterns</a></li>
 <li class="second-level"><a href="#52-example-sample-a-context-before-fitting">5.2 Example: sample a context before fitting</a></li>
 <li class="second-level"><a href="#53-example-regression-stratification-by-y-quantiles">5.3 Example: regression stratification by y-quantiles</a></li>
-<li class="first-level"><a href="#7-troubleshooting">7. Troubleshooting</a></li>
+<li class="first-level"><a href="#6-troubleshooting">6. Troubleshooting</a></li>
 <li class="second-level"><a href="#issue-kmeans-sampling-is-slow">Issue: “KMeans sampling is slow”</a></li>
 <li class="second-level"><a href="#issue-smote-fails-or-imblearn-not-installed">Issue: “SMOTE fails or imblearn not installed”</a></li>
 <li class="second-level"><a href="#issue-nans-break-sampling">Issue: “NaNs break sampling”</a></li>
-<li class="first-level"><a href="#8-quick-reference">8. Quick Reference</a></li>
-<li class="first-level"><a href="#9-next-steps">9. Next Steps</a></li>
+<li class="first-level"><a href="#7-quick-reference">7. Quick Reference</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
@@ -404,7 +403,7 @@ This module adds <code>_simple_impute_for_sampling(X)</code>:</p>
     <span class="n">seed</span><span class="o">=</span><span class="mi">7</span>
 <span class="p">)</span>
 </code></pre></div>
-<h2 id="7-troubleshooting">7. Troubleshooting<a class="headerlink" href="#7-troubleshooting" title="Permanent link">¶</a></h2>
+<h2 id="6-troubleshooting">6. Troubleshooting<a class="headerlink" href="#6-troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="issue-kmeans-sampling-is-slow">Issue: “KMeans sampling is slow”<a class="headerlink" href="#issue-kmeans-sampling-is-slow" title="Permanent link">¶</a></h3>
 <p><strong>What to do:</strong>
 - Lower <code>kmeans_centers</code> (e.g. from 2000 → 500)
@@ -424,7 +423,7 @@ This module adds <code>_simple_impute_for_sampling(X)</code>:</p>
 <p><strong>Expected:</strong>
 - SMOTE and KMeans paths already apply a lightweight imputation via <code>_simple_impute_for_sampling()</code>.</p>
 <hr/>
-<h2 id="8-quick-reference">8. Quick Reference<a class="headerlink" href="#8-quick-reference" title="Permanent link">¶</a></h2>
+<h2 id="7-quick-reference">7. Quick Reference<a class="headerlink" href="#7-quick-reference" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -471,13 +470,6 @@ This module adds <code>_simple_impute_for_sampling(X)</code>:</p>
 </tr>
 </tbody>
 </table>
-<hr/>
-<h2 id="9-next-steps">9. Next Steps<a class="headerlink" href="#9-next-steps" title="Permanent link">¶</a></h2>
-<ul>
-<li>Add context sampling as a configurable knob in your LimiX pipeline config (strategy + context_size).</li>
-<li>Benchmark <code>uniform</code> vs <code>hybrid_*</code> on your target datasets.</li>
-<li>For very large data, consider reducing <code>kmeans_centers</code> and using hybrid sampling for a strong speed/quality tradeoff.</li>
-</ul>
 <hr/></div>
 </div>
 <footer class="col-md-12 text-center">

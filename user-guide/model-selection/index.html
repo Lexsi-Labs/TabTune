@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -270,10 +270,12 @@
 <li class="third-level"><a href="#31-tabpfn">3.1 TabPFN</a></li>
 <li class="third-level"><a href="#32-tabicl">3.2 TabICL</a></li>
 <li class="third-level"><a href="#33-orionmsp">3.3 OrionMSP</a></li>
-<li class="third-level"><a href="#34-orionbix">3.4 OrionBix</a></li>
-<li class="third-level"><a href="#35-tabdpt">3.5 TabDPT</a></li>
-<li class="third-level"><a href="#36-mitra">3.6 Mitra</a></li>
-<li class="third-level"><a href="#37-contexttab">3.7 ContextTab</a></li>
+<li class="third-level"><a href="#34-orionmsp-v15">3.4 OrionMSP v1.5</a></li>
+<li class="third-level"><a href="#35-orionbix">3.5 OrionBix</a></li>
+<li class="third-level"><a href="#36-tabdpt">3.6 TabDPT</a></li>
+<li class="third-level"><a href="#37-mitra">3.7 Mitra</a></li>
+<li class="third-level"><a href="#38-contexttab">3.8 ContextTab</a></li>
+<li class="third-level"><a href="#39-limix">3.9 LimiX</a></li>
 <li class="second-level"><a href="#4-model-selection-checklist">4. Model Selection Checklist</a></li>
 <li class="second-level"><a href="#5-hybrid-approaches">5. Hybrid Approaches</a></li>
 <li class="third-level"><a href="#ensemble-multiple-models">Ensemble Multiple Models</a></li>
@@ -303,7 +305,7 @@
 <tbody>
 <tr>
 <td><strong>TabPFN</strong></td>
-<td>PFN/ICL</td>
+<td>PFN / ICL</td>
 <td>Small datasets, quick experiments</td>
 <td>&lt;10K rows</td>
 <td>⚠️ Experimental</td>
@@ -313,7 +315,7 @@
 <td><strong>TabICL</strong></td>
 <td>Scalable ICL</td>
 <td>General tabular, balanced performance</td>
-<td>10K-1M rows</td>
+<td>10K–1M rows</td>
 <td>✅ Full</td>
 <td>⭐⭐⭐⭐</td>
 </tr>
@@ -321,41 +323,57 @@
 <td><strong>OrionMSP</strong></td>
 <td>Scalable ICL</td>
 <td>Balanced generalization</td>
-<td>50K-2M+ rows</td>
+<td>50K–2M+ rows</td>
 <td>✅ Full</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>OrionMSP v1.5</strong></td>
+<td>Scalable ICL</td>
+<td>Improved stability and generalization</td>
+<td>50K–2M+ rows</td>
+<td>⚠️ Experimental</td>
 <td>⭐⭐⭐</td>
 </tr>
 <tr>
 <td><strong>OrionBix</strong></td>
 <td>Scalable ICL</td>
 <td>High-accuracy scenarios</td>
-<td>10K-1M rows</td>
+<td>10K–1M rows</td>
 <td>✅ Full</td>
 <td>⭐⭐⭐</td>
 </tr>
 <tr>
 <td><strong>TabDPT</strong></td>
-<td>Denoising</td>
+<td>Denoising Transformer</td>
 <td>Large datasets, robust features</td>
-<td>100K-5M rows</td>
+<td>100K–5M rows</td>
 <td>✅ Full</td>
 <td>⭐⭐⭐</td>
 </tr>
 <tr>
 <td><strong>Mitra</strong></td>
 <td>2D Attention</td>
-<td>Complex patterns, mixed types</td>
-<td>10K-500K rows</td>
+<td>Complex patterns, mixed data types</td>
+<td>10K–500K rows</td>
 <td>✅ Full</td>
 <td>⭐⭐</td>
 </tr>
 <tr>
 <td><strong>ContextTab</strong></td>
 <td>Semantic ICL</td>
-<td>Text-heavy features, semantics</td>
-<td>10K-500K rows</td>
+<td>Text-heavy features, semantic enrichment</td>
+<td>10K–500K rows</td>
 <td>⚠️ Experimental</td>
 <td>⭐⭐</td>
+</tr>
+<tr>
+<td><strong>LimiX</strong></td>
+<td>Probabilistic / Likelihood-based</td>
+<td>Uncertainty-aware inference, regression tasks</td>
+<td>10K–1M+ rows</td>
+<td>❌ Not Applicable</td>
+<td>⭐⭐⭐⭐</td>
 </tr>
 </tbody>
 </table>
@@ -525,7 +543,38 @@
 <span class="p">)</span>
 </code></pre></div></p>
 <hr/>
-<h3 id="34-orionbix">3.4 OrionBix<a class="headerlink" href="#34-orionbix" title="Permanent link">¶</a></h3>
+<h3 id="34-orionmsp-v15">3.4 OrionMSP v1.5<a class="headerlink" href="#34-orionmsp-v15" title="Permanent link">¶</a></h3>
+<p><strong>Architecture</strong>: Enhanced Multi-Scale Sparse Attention with stabilized prototype refinement</p>
+<p><strong>Strengths</strong>:
+- ⭐ Improved training stability over v1.0
+- ⭐ Better prototype refinement and gradient flow
+- ⭐ Strong generalization on medium-to-large datasets
+- ⭐ PEFT support (experimental)
+- ⭐ More robust episodic meta-learning</p>
+<p><strong>Limitations</strong>:
+- ⚠️ Requires ≥50K rows for best performance
+- ⚠️ Slightly higher compute than TabICL
+- ⚠️ PEFT support currently experimental</p>
+<p><strong>Ideal Use Cases</strong>:
+- Production systems needing stable training
+- Medium to large datasets (50K–2M+ rows)
+- Tasks requiring improved generalization
+- When OrionMSP v1.0 shows instability</p>
+<p><strong>Example Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionMSPv1.5'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<hr/>
+<h3 id="35-orionbix">3.5 OrionBix<a class="headerlink" href="#35-orionbix" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Custom variant of TabICL with biaxial attention mechanisms</p>
 <p><strong>Strengths</strong>:</p>
 <!-- - ⭐ Higher accuracy than TabICL
@@ -558,7 +607,7 @@
 <span class="p">)</span>
 </code></pre></div></p>
 <hr/>
-<h3 id="35-tabdpt">3.5 TabDPT<a class="headerlink" href="#35-tabdpt" title="Permanent link">¶</a></h3>
+<h3 id="36-tabdpt">3.6 TabDPT<a class="headerlink" href="#36-tabdpt" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Denoising pre-trained transformer with k-NN context selection</p>
 <p><strong>Strengths</strong>:
 - ⭐ Scales to very large datasets (5M+ rows)
@@ -593,7 +642,7 @@
 <span class="p">)</span>
 </code></pre></div></p>
 <hr/>
-<h3 id="36-mitra">3.6 Mitra<a class="headerlink" href="#36-mitra" title="Permanent link">¶</a></h3>
+<h3 id="37-mitra">3.7 Mitra<a class="headerlink" href="#37-mitra" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: 2D cross-attention (Tab2D) with synthetic priors</p>
 <p><strong>Strengths</strong>:
 - ⭐ Excellent for mixed-type features
@@ -626,7 +675,7 @@
 <span class="p">)</span>
 </code></pre></div></p>
 <hr/>
-<h3 id="37-contexttab">3.7 ContextTab<a class="headerlink" href="#37-contexttab" title="Permanent link">¶</a></h3>
+<h3 id="38-contexttab">3.8 ContextTab<a class="headerlink" href="#38-contexttab" title="Permanent link">¶</a></h3>
 <p><strong>Architecture</strong>: Semantics-aware ICL with modality-specific embeddings</p>
 <p><strong>Strengths</strong>:
 - ⭐ Best for text-heavy features
@@ -657,6 +706,36 @@
 <span class="p">)</span>
 </code></pre></div></p>
 <hr/>
+<h3 id="39-limix">3.9 LimiX<a class="headerlink" href="#39-limix" title="Permanent link">¶</a></h3>
+<p><strong>Architecture</strong>: Likelihood-based probabilistic mixture modeling with discriminative feature encoding and bi-level attention retrieval</p>
+<p><strong>Strengths</strong>:
+- ⭐ Native regression support
+- ⭐ Uncertainty-aware predictions
+- ⭐ Strong performance on structured tabular regression
+- ⭐ Two-pass attention with adaptive context refinement
+- ⭐ Stable optimization dynamics</p>
+<p><strong>Limitations</strong>:
+- ⚠️ No PEFT/LoRA (not transformer-adapter based)
+- ⚠️ Slightly slower than TabICL on small datasets
+- ⚠️ Best performance with moderate-to-large datasets</p>
+<p><strong>Ideal Use Cases</strong>:
+- Regression-heavy workflows
+- Tasks requiring calibrated uncertainty estimates
+- Structured tabular data with meaningful feature interactions
+- Mixed classification + regression pipelines</p>
+<p><strong>Example Configuration (Regression)</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'LimiX'</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<hr/>
 <h2 id="4-model-selection-checklist">4. Model Selection Checklist<a class="headerlink" href="#4-model-selection-checklist" title="Permanent link">¶</a></h2>
 <p>Use this checklist to guide your decision:</p>
 <p><strong>Dataset Characteristics</strong>
@@ -673,14 +752,14 @@
 <p><strong>Recommendations Based on Checklist</strong></p>
 <div class="highlight"><pre><span></span><code>If dataset &lt; 10K rows → TabPFN
 If dataset 10K-100K rows AND balanced types → TabICL
-If dataset 50K-2M rows AND balanced → OrionMSP
+If dataset 50K-2M rows AND balanced → OrionMSPv1.5
 If dataset 10K-100K rows AND high accuracy needed → OrionBix
 If dataset &gt; 100K rows → TabDPT
 If text features present → ContextTab
 If complex patterns + mixed types → Mitra
 If GPU &lt; 8GB → TabPFN or TabICL with PEFT
 If speed critical → TabPFN (inference)
-If accuracy critical → OrionBix or TabDPT (base-ft)
+If accuracy critical → OrionBix or TabDPT (inference)
 </code></pre></div>
 <hr/>
 <h2 id="5-hybrid-approaches">5. Hybrid Approaches<a class="headerlink" href="#5-hybrid-approaches" title="Permanent link">¶</a></h2>
@@ -692,8 +771,8 @@ If accuracy critical → OrionBix or TabDPT (base-ft)
 <span class="c1"># Add multiple models</span>
 <span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="s1">'inference'</span><span class="p">)</span>
 <span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabICL'</span><span class="p">,</span> <span class="s1">'peft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
-<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionMSP'</span><span class="p">,</span> <span class="s1">'base-ft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
-<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionBix'</span><span class="p">,</span> <span class="s1">'base-ft'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionMSP'</span><span class="p">,</span> <span class="s1">'finetune'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">leaderboard</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'OrionBix'</span><span class="p">,</span> <span class="s1">'finetune'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
 
 <span class="c1"># Run and compare</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">leaderboard</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">'roc_auc_score'</span><span class="p">)</span>
@@ -712,7 +791,7 @@ If accuracy critical → OrionBix or TabDPT (base-ft)
 </ul>
 <h3 id="62-regulatory-compliance">6.2 Regulatory Compliance<a class="headerlink" href="#62-regulatory-compliance" title="Permanent link">¶</a></h3>
 <ul>
-<li><strong>Medical/Financial</strong>: OrionMSP, OrionBix, TabDPT (reproducible, auditable)</li>
+<li><strong>Medical/Financial</strong>: OrionMSPv1.5, OrionBix, TabDPT (reproducible, auditable)</li>
 <li><strong>General</strong>: Any model with saved checkpoints and logged hyperparameters</li>
 </ul>
 <h3 id="63-transfer-learning">6.3 Transfer Learning<a class="headerlink" href="#63-transfer-learning" title="Permanent link">¶</a></h3>

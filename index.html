@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="framework/regression/regression.md">Regression Overview</a>
+<a href="regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -251,11 +251,11 @@
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#welcome-to-tabtune">🚀 Welcome to TabTune</a></li>
 <li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
-<li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
 <li class="first-level"><a href="#new-in-this-release">🆕 New in This Release</a></li>
 <li class="second-level"><a href="#orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support</a></li>
 <li class="second-level"><a href="#regression-framework">Regression Framework</a></li>
 <li class="second-level"><a href="#resampling-module">Resampling Module</a></li>
+<li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
 <li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
 <li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
 <li class="second-level"><a href="#google-colab-support">Google Colab Support</a></li>
@@ -309,6 +309,21 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Flexible Fine-Tuning:</strong> Choose between zero-shot inference, full fine-tuning, or memory-efficient PEFT strategies.</li>
 <li><strong>Model Comparison:</strong> Built-in leaderboard for systematic benchmarking and strategy evaluation.</li>
 <li><strong>Extensible Design:</strong> Modular codebase for easy integration of custom data processors and models.</li>
+</ul>
+<hr/>
+<h2 id="new-in-this-release">🆕 New in This Release<a class="headerlink" href="#new-in-this-release" title="Permanent link">¶</a></h2>
+<h3 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h3>
+<h3 id="regression-framework">Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h3>
+<ul>
+<li>Unified regression training API</li>
+<li>Standardized metric handling</li>
+<li>Benchmark-ready evaluation utilities</li>
+</ul>
+<h3 id="resampling-module">Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h3>
+<ul>
+<li>Context-aware support/query sampling</li>
+<li>Configurable episodic batching</li>
+<li>Optimized for ICL models</li>
 </ul>
 <hr/>
 <h2 id="supported-models">📊 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
@@ -379,21 +394,6 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </tbody>
 </table>
 <p><em>Note: PEFT for ContextTab and TabPFN is experimental; <code>inference</code> strategy is fully supported.</em></p>
-<hr/>
-<h2 id="new-in-this-release">🆕 New in This Release<a class="headerlink" href="#new-in-this-release" title="Permanent link">¶</a></h2>
-<h4 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h4>
-<h3 id="regression-framework">Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h3>
-<ul>
-<li>Unified regression training API</li>
-<li>Standardized metric handling</li>
-<li>Benchmark-ready evaluation utilities</li>
-</ul>
-<h3 id="resampling-module">Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h3>
-<ul>
-<li>Context-aware support/query sampling</li>
-<li>Configurable episodic batching</li>
-<li>Optimized for ICL models</li>
-</ul>
 <hr/>
 <h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -700,5 +700,5 @@ Please cite appropriately if used in academic or production projects.</p>
 </html>
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-02-26 09:15:14.015094+00:00
+Build Date UTC : 2026-02-26 10:08:20.585689+00:00
 -->

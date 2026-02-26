@@ -129,10 +129,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -245,7 +245,7 @@
                         </a>
 </li>
 <li>
-<a href="../../advanced/peft-lora/" rel="next">
+<a href="../../regression/regression/" rel="next">
                             Next <i class="fas fa-arrow-right"></i>
 </a>
 </li>
@@ -265,6 +265,7 @@
 <li class="third-level"><a href="#12-model-variants">1.2 Model Variants</a></li>
 <li class="second-level"><a href="#2-high-level-architecture">2. High-Level Architecture</a></li>
 <li class="third-level"><a href="#21-end-to-end-data-flow">2.1 End-to-End Data Flow</a></li>
+<li class="second-level"><a href="#flowchart-lr-araw-tabular-data-x-y-bcell-wise-embedding-mlp-ln-gelu-b-cdiscriminative-feature-encoding-c-dtransformer-blocks-axis-wise-attention-d-ebi-level-attention-retrieval-pass-1-e-fcustomized-context-top-k-samples-f-gsecond-forward-pass-pass-2-g-htask-head-classification-or-regression-h-ipredictions-and-optional-embeddings">flowchart LR A[Raw Tabular Data X y] --&gt; B[Cell wise Embedding MLP LN GELU] B --&gt; C[Discriminative Feature Encoding] C --&gt; D[Transformer Blocks Axis wise Attention] D --&gt; E[Bi level Attention Retrieval Pass 1] E --&gt; F[Customized Context Top K samples] F --&gt; G[Second Forward Pass Pass 2] G --&gt; H[Task Head Classification or Regression] H --&gt; I[Predictions and Optional Embeddings]</a></li>
 <li class="second-level"><a href="#4-inference-parameters">4. Inference Parameters</a></li>
 <li class="third-level"><a href="#41-complete-parameter-reference-regression">4.1 Complete Parameter Reference (Regression)</a></li>
 <li class="third-level"><a href="#42-parameter-descriptions">4.2 Parameter Descriptions</a></li>
@@ -308,18 +309,16 @@
 <li><strong>Sample axis</strong> (row-wise interactions)</li>
 </ul>
 <h3 id="21-end-to-end-data-flow">2.1 End-to-End Data Flow<a class="headerlink" href="#21-end-to-end-data-flow" title="Permanent link">¶</a></h3>
-<div class="mermaid">flowchart LR
-    A[Raw Tabular Data X, y] --&gt; B[Cell-wise Embedding (MLP + LN + GELU)]
-    B --&gt; C[Discriminative Feature Encoding (DFE)]
-    C --&gt; D[Transformer Blocks (Axis-wise Attention)]
-    D --&gt; E[Bi-level Attention Retrieval (Pass 1)]
-    E --&gt; F[Customized Context (Top-K samples)]
-    F --&gt; G[Second Forward Pass (Pass 2)]
-    G --&gt; H[Task Head: Classification / Regression]
-    H --&gt; I[Predictions + Optional Embeddings]
-</div>
-<hr/>
-<hr/>
+<h2 id="flowchart-lr-araw-tabular-data-x-y-bcell-wise-embedding-mlp-ln-gelu-b-cdiscriminative-feature-encoding-c-dtransformer-blocks-axis-wise-attention-d-ebi-level-attention-retrieval-pass-1-e-fcustomized-context-top-k-samples-f-gsecond-forward-pass-pass-2-g-htask-head-classification-or-regression-h-ipredictions-and-optional-embeddings"><div class="mermaid">flowchart LR
+    A[Raw Tabular Data X y] --&gt; B[Cell wise Embedding MLP LN GELU]
+    B --&gt; C[Discriminative Feature Encoding]
+    C --&gt; D[Transformer Blocks Axis wise Attention]
+    D --&gt; E[Bi level Attention Retrieval Pass 1]
+    E --&gt; F[Customized Context Top K samples]
+    F --&gt; G[Second Forward Pass Pass 2]
+    G --&gt; H[Task Head Classification or Regression]
+    H --&gt; I[Predictions and Optional Embeddings]
+</div><a class="headerlink" href="#flowchart-lr-araw-tabular-data-x-y-bcell-wise-embedding-mlp-ln-gelu-b-cdiscriminative-feature-encoding-c-dtransformer-blocks-axis-wise-attention-d-ebi-level-attention-retrieval-pass-1-e-fcustomized-context-top-k-samples-f-gsecond-forward-pass-pass-2-g-htask-head-classification-or-regression-h-ipredictions-and-optional-embeddings" title="Permanent link">¶</a></h2>
 <h2 id="4-inference-parameters">4. Inference Parameters<a class="headerlink" href="#4-inference-parameters" title="Permanent link">¶</a></h2>
 <h3 id="41-complete-parameter-reference-regression">4.1 Complete Parameter Reference (Regression)<a class="headerlink" href="#41-complete-parameter-reference-regression" title="Permanent link">¶</a></h3>
 <p>In TabTune, the pipeline builds a default config for regression LimiX like:</p>
