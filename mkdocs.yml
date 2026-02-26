@@ -28,6 +28,7 @@ nav:
       - TabularPipeline Overview: user-guide/pipeline-overview.md
       - Data Processing: user-guide/data-processing.md
       - Tuning Strategies: user-guide/tuning-strategies.md
+      - Resampling Strategies: user-guide/resampling.md
       - Model Selection: user-guide/model-selection.md
       - Saving and Loading: user-guide/saving-loading.md
       - Model Comparison: user-guide/leaderboard.md
@@ -38,11 +39,18 @@ nav:
       - TabPFN: models/tabpfn.md
       - TabICL: models/tabicl.md
       - Orion MSP: models/orion-msp.md
+      - Orion MSP V1.5: models/orionmsp1.5.md
       - Orion BIX: models/orion-bix.md
       - TabDPT: models/tabdpt.md
       - Mitra: models/mitra.md
       - ConTextTab: models/contexttab.md
-  
+      - Limix: models/limix.md
+
+  - Regression:
+      - Regression Overview: framework/regression/regression.md
+      - Regression Data Processing: framework/regression/regression_data_processing.md
+    
+
   - Advanced Topics:
       - PEFT & LoRA: advanced/peft-lora.md
       - Custom Preprocessing: advanced/custom-preprocessing.md
@@ -59,6 +67,7 @@ nav:
   
   - Examples:
       - Classification Tasks: examples/classification.md
+      - Regression Tasks: examples/regression.md
       - PEFT Fine-Tuning: examples/peft-examples.md
       - Benchmarking: examples/benchmarking.md
   

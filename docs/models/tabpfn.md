@@ -58,8 +58,10 @@ flowchart LR
 ```python
 model_params = {
     'n_estimators': 16,                    # Ensemble size
-    'softmax_temperature': 0.9,            # Prediction confidence               
-    'fit_mode' : 'batched',               # Feature normalization
+    'softmax_temperature': 0.9,            # Prediction confidence
+    'average_logits': True,                # Aggregation method
+    'prior_strength': 1.0,                 # Bayesian prior weight
+    'normalize_input': True,               # Feature normalization
     'seed': 42                             # Reproducibility
 }
 ```
@@ -70,7 +72,9 @@ model_params = {
 |-----------|------|---------|-------|-------------|
 | `n_estimators` | int | 16 | 1-32 | Number of ensemble members; higher = more robust |
 | `softmax_temperature` | float | 0.9 | 0.1-2.0 | Scaling of logits before softmax; lower = sharper predictions |
-| `fit_mode` | str | batched | batched,low_memory, fit_preprocessors, fit_with_cache | Determine how the TabPFN model is "fitted" |
+| `average_logits` | bool | True | True/False | Average logits vs probabilities across ensemble |
+| `prior_strength` | float | 1.0 | 0.5-2.0 | Weight of Bayesian prior relative to data |
+| `normalize_input` | bool | True | True/False | Apply input normalization |
 | `seed` | int | 42 | 0+ | Random seed for reproducibility |
 
 ### 3.3 Parameter Tuning Guidelines
@@ -83,6 +87,10 @@ model_params = {
 - `< 0.5`: Very confident predictions (may overfit)
 - `0.5 - 1.0`: Default, balanced confidence
 - `> 1.0`: Softer predictions, lower confidence
+
+**Average Method (`average_logits`)**:
+- `True`: Better for class imbalance
+- `False`: Better for probability calibration
 
 ---
 
@@ -98,6 +106,10 @@ tuning_params = {
     'epochs': 3,
     'learning_rate': 1e-5,
     'batch_size': 512,
+    'optimizer': 'adamw',
+    'scheduler': 'linear',
+    'warmup_steps': 100,
+    'weight_decay': 0.01,
     'show_progress': True
 }
 ```
@@ -107,7 +119,8 @@ tuning_params = {
 - **Learning Rate**: Start with 1e-5, increase if needed
 - **Epochs**: 3-5 epochs typically sufficient
 - **Batch Size**: 256-512 works well
-
+- **Warmup**: Use 5-10% of total steps
+- **Early Stopping**: Monitor validation metric
 
 ### 4.3 Fine-Tuning Example
 
@@ -122,6 +135,7 @@ pipeline = TabularPipeline(
         'epochs': 5,
         'learning_rate': 2e-5,
         'batch_size': 256,
+        'scheduler': 'cosine',
         'show_progress': True
     }
 )
@@ -161,6 +175,16 @@ predictions = pipeline.predict(X_test)
 uncertainty = pipeline.get_uncertainty(X_test)
 ```
 
+### 5.2 Uncertainty Estimation
+
+```python
+# Get predictions with uncertainty
+predictions, std_dev = pipeline.predict_with_uncertainty(X_test)
+
+# Filter predictions by confidence
+high_conf_idx = std_dev < np.percentile(std_dev, 25)
+print(f"High confidence predictions: {high_conf_idx.sum()}/{len(predictions)}")
+```
 
 ---
 

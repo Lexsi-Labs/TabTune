@@ -90,12 +90,21 @@ Fine-tuning Phase (on your task):
 ```python
 model_params = {
     # Architecture
+    'd_model': 256,                        # Embedding dimension
     'num_heads': 8,                        # Attention heads
-    'normalizer': 'standard',              # Normalizer
+    'num_layers': 4,                       # Transformer layers
+    'hidden_size': 512,                    # Feedforward hidden size
+    'dropout': 0.1,                        # Dropout probability
+    
+    # Context retrieval
+    'k_neighbors': 5,                      # Number of neighbors for context
+    'context_mode': 'mixed',               # 'mixed' or 'features_only'
+    
     # Inference behavior
     'n_ensembles': 8,                      # Multiple runs
-    'temperature': 0.8,                    # Output scaling
-    'context_size': 512 
+    'temperature': 0.3,                    # Output scaling
+    'mask_ratio': 0.3,                     # Feature masking during inference
+    
     # Training
     'use_pretrain': True,                  # Use pre-trained weights
     'seed': 42                             # Reproducibility
@@ -106,11 +115,16 @@ model_params = {
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
+| `d_model` | int | 256 | 128-512 | Transformer embedding dimension |
 | `num_heads` | int | 8 | 4-16 | Number of attention heads |
-| `normalizer` | str | standard | standard, minmax, robust, power, quantile-uniform, quantile-normal, log1p | Dropout probability |
+| `num_layers` | int | 4 | 2-8 | Number of transformer layers |
+| `hidden_size` | int | 512 | 256-1024 | Feedforward hidden dimension |
+| `dropout` | float | 0.1 | 0.0-0.3 | Dropout probability |
+| `k_neighbors` | int | 5 | 1-50 | k-NN context neighbors |
+| `context_mode` | str | 'mixed' | 'mixed', 'features_only' | How to use context |
 | `n_ensembles` | int | 8 | 1-16 | Number of ensemble runs |
 | `temperature` | float | 0.3 | 0.1-1.0 | Output temperature |
-| `context_size` | int | 512| 256-1024 | Setting the context size accepted |
+| `use_pretrain` | bool | True | True/False | Use pre-trained weights |
 
 ### 3.3 Architecture Tuning
 
@@ -145,10 +159,16 @@ tuning_params = {
     'device': 'cuda',
     'epochs': 3,                          # Few epochs needed (pre-trained)
     'learning_rate': 2e-5,                # Conservative learning rate
+    'optimizer': 'adamw',                 # Optimizer type
+    'scheduler': 'linear',                # Learning rate scheduler
+    'warmup_steps': 500,                  # Extended warmup
+    'weight_decay': 0.01,                 # L2 regularization
+    'gradient_clip_value': 1.0,           # Gradient clipping
+    
     # Large context for TabDPT
     'support_size': 1024,                 # Large context
     'query_size': 256,                    # Prediction samples
-    'steps_per_epoch': 100,                # Gradient steps
+    'steps_per_epoch': 15,                # Gradient steps
     'batch_size': 32,                     # Standard batch
     
     'show_progress': True                 # Progress bar
