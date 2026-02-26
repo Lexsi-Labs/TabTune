@@ -41,18 +41,15 @@ LimiX represents a dataset as a **2D table** (rows = samples, columns = features
 
 ```mermaid
 flowchart LR
-    A[Raw Tabular Data X, y] --> B[Cell-wise Embedding (MLP + LN + GELU)]
-    B --> C[Discriminative Feature Encoding (DFE)]
-    C --> D[Transformer Blocks (Axis-wise Attention)]
-    D --> E[Bi-level Attention Retrieval (Pass 1)]
-    E --> F[Customized Context (Top-K samples)]
-    F --> G[Second Forward Pass (Pass 2)]
-    G --> H[Task Head: Classification / Regression]
-    H --> I[Predictions + Optional Embeddings]
+    A[Raw Tabular Data X y] --> B[Cell wise Embedding MLP LN GELU]
+    B --> C[Discriminative Feature Encoding]
+    C --> D[Transformer Blocks Axis wise Attention]
+    D --> E[Bi level Attention Retrieval Pass 1]
+    E --> F[Customized Context Top K samples]
+    F --> G[Second Forward Pass Pass 2]
+    G --> H[Task Head Classification or Regression]
+    H --> I[Predictions and Optional Embeddings]
 ```
-
----
-
 ---
 
 ## 4. Inference Parameters
