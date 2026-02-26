@@ -8,13 +8,15 @@ Choosing the right model for your tabular task is crucial for achieving optimal 
 
 | Model | Family | Best For | Dataset Size | PEFT Support | Training Speed |
 |-------|--------|----------|--------------|--------------|----------------|
-| **TabPFN** | PFN/ICL | Small datasets, quick experiments | <10K rows | ⚠️ Experimental | ⭐⭐⭐⭐⭐ |
-| **TabICL** | Scalable ICL | General tabular, balanced performance | 10K-1M rows | ✅ Full | ⭐⭐⭐⭐ |
-| **OrionMSP** | Scalable ICL | Balanced generalization | 50K-2M+ rows | ✅ Full | ⭐⭐⭐ |
-| **OrionBix** | Scalable ICL | High-accuracy scenarios | 10K-1M rows | ✅ Full | ⭐⭐⭐ |
-| **TabDPT** | Denoising | Large datasets, robust features | 100K-5M rows | ✅ Full | ⭐⭐⭐ |
-| **Mitra** | 2D Attention | Complex patterns, mixed types | 10K-500K rows | ✅ Full | ⭐⭐ |
-| **ContextTab** | Semantic ICL | Text-heavy features, semantics | 10K-500K rows | ⚠️ Experimental | ⭐⭐ |
+| **TabPFN** | PFN / ICL | Small datasets, quick experiments | <10K rows | ⚠️ Experimental | ⭐⭐⭐⭐⭐ |
+| **TabICL** | Scalable ICL | General tabular, balanced performance | 10K–1M rows | ✅ Full | ⭐⭐⭐⭐ |
+| **OrionMSP** | Scalable ICL | Balanced generalization | 50K–2M+ rows | ✅ Full | ⭐⭐⭐ |
+| **OrionMSP v1.5** | Scalable ICL | Improved stability and generalization | 50K–2M+ rows | ⚠️ Experimental | ⭐⭐⭐ |
+| **OrionBix** | Scalable ICL | High-accuracy scenarios | 10K–1M rows | ✅ Full | ⭐⭐⭐ |
+| **TabDPT** | Denoising Transformer | Large datasets, robust features | 100K–5M rows | ✅ Full | ⭐⭐⭐ |
+| **Mitra** | 2D Attention | Complex patterns, mixed data types | 10K–500K rows | ✅ Full | ⭐⭐ |
+| **ContextTab** | Semantic ICL | Text-heavy features, semantic enrichment | 10K–500K rows | ⚠️ Experimental | ⭐⭐ |
+| **LimiX** | Probabilistic / Likelihood-based | Uncertainty-aware inference, regression tasks | 10K–1M+ rows | ❌ Not Applicable | ⭐⭐⭐⭐ |
 
 ---
 
@@ -234,7 +236,45 @@ pipeline = TabularPipeline(
 
 ---
 
-### 3.4 OrionBix
+### 3.4 OrionMSP v1.5
+
+**Architecture**: Enhanced Multi-Scale Sparse Attention with stabilized prototype refinement
+
+**Strengths**:
+- ⭐ Improved training stability over v1.0
+- ⭐ Better prototype refinement and gradient flow
+- ⭐ Strong generalization on medium-to-large datasets
+- ⭐ PEFT support (experimental)
+- ⭐ More robust episodic meta-learning
+
+**Limitations**:
+- ⚠️ Requires ≥50K rows for best performance
+- ⚠️ Slightly higher compute than TabICL
+- ⚠️ PEFT support currently experimental
+
+**Ideal Use Cases**:
+- Production systems needing stable training
+- Medium to large datasets (50K–2M+ rows)
+- Tasks requiring improved generalization
+- When OrionMSP v1.0 shows instability
+
+**Example Configuration**:
+```python
+pipeline = TabularPipeline(
+    model_name='OrionMSPv1.5',
+    tuning_strategy='base-ft',
+    tuning_params={
+        'device': 'cuda',
+        'epochs': 5,
+        'support_size': 1024,
+        'query_size': 256,
+        'learning_rate': 2e-5
+    }
+)
+```
+---
+
+### 3.5 OrionBix
 
 **Architecture**: Custom variant of TabICL with biaxial attention mechanisms
 
@@ -275,7 +315,7 @@ pipeline = TabularPipeline(
 
 ---
 
-### 3.5 TabDPT
+### 3.6 TabDPT
 
 **Architecture**: Denoising pre-trained transformer with k-NN context selection
 
@@ -318,7 +358,7 @@ pipeline = TabularPipeline(
 
 ---
 
-### 3.6 Mitra
+### 3.7 Mitra
 
 **Architecture**: 2D cross-attention (Tab2D) with synthetic priors
 
@@ -359,7 +399,7 @@ pipeline = TabularPipeline(
 
 ---
 
-### 3.7 ContextTab
+### 3.8 ContextTab
 
 **Architecture**: Semantics-aware ICL with modality-specific embeddings
 
@@ -399,6 +439,44 @@ pipeline = TabularPipeline(
 ---
 
 
+### 3.9 LimiX
+
+**Architecture**: Likelihood-based probabilistic mixture modeling with discriminative feature encoding and bi-level attention retrieval
+
+**Strengths**:
+- ⭐ Native regression support
+- ⭐ Uncertainty-aware predictions
+- ⭐ Strong performance on structured tabular regression
+- ⭐ Two-pass attention with adaptive context refinement
+- ⭐ Stable optimization dynamics
+
+**Limitations**:
+- ⚠️ No PEFT/LoRA (not transformer-adapter based)
+- ⚠️ Slightly slower than TabICL on small datasets
+- ⚠️ Best performance with moderate-to-large datasets
+
+**Ideal Use Cases**:
+- Regression-heavy workflows
+- Tasks requiring calibrated uncertainty estimates
+- Structured tabular data with meaningful feature interactions
+- Mixed classification + regression pipelines
+
+**Example Configuration (Regression)**:
+```python
+pipeline = TabularPipeline(
+    model_name='LimiX',
+    task_type='regression',
+    tuning_strategy='base-ft',
+    tuning_params={
+        'device': 'cuda',
+        'epochs': 5,
+        'learning_rate': 2e-5
+    }
+)
+```
+---
+
+
 ## 4. Model Selection Checklist
 
 Use this checklist to guide your decision:
@@ -421,14 +499,14 @@ Use this checklist to guide your decision:
 ```
 If dataset < 10K rows → TabPFN
 If dataset 10K-100K rows AND balanced types → TabICL
-If dataset 50K-2M rows AND balanced → OrionMSP
+If dataset 50K-2M rows AND balanced → OrionMSPv1.5
 If dataset 10K-100K rows AND high accuracy needed → OrionBix
 If dataset > 100K rows → TabDPT
 If text features present → ContextTab
 If complex patterns + mixed types → Mitra
 If GPU < 8GB → TabPFN or TabICL with PEFT
 If speed critical → TabPFN (inference)
-If accuracy critical → OrionBix or TabDPT (base-ft)
+If accuracy critical → OrionBix or TabDPT (inference)
 ```
 
 ---
@@ -445,8 +523,8 @@ leaderboard = TabularLeaderboard(X_train, X_test, y_train, y_test)
 # Add multiple models
 leaderboard.add_model('TabPFN', 'inference')
 leaderboard.add_model('TabICL', 'peft', tuning_params={'epochs': 5})
-leaderboard.add_model('OrionMSP', 'base-ft', tuning_params={'epochs': 5})
-leaderboard.add_model('OrionBix', 'base-ft', tuning_params={'epochs': 5})
+leaderboard.add_model('OrionMSP', 'finetune', tuning_params={'epochs': 5})
+leaderboard.add_model('OrionBix', 'finetune', tuning_params={'epochs': 5})
 
 # Run and compare
 results = leaderboard.run(rank_by='roc_auc_score')
@@ -468,7 +546,7 @@ from sklearn.ensemble import VotingClassifier
 
 ### 6.2 Regulatory Compliance
 
-- **Medical/Financial**: OrionMSP, OrionBix, TabDPT (reproducible, auditable)
+- **Medical/Financial**: OrionMSPv1.5, OrionBix, TabDPT (reproducible, auditable)
 - **General**: Any model with saved checkpoints and logged hyperparameters
 
 ### 6.3 Transfer Learning
