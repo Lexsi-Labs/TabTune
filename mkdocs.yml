@@ -47,8 +47,8 @@ nav:
       - Limix: models/limix.md
 
   - Regression:
-      - Regression Overview: framework/regression/regression.md
-      - Regression Data Processing: framework/regression/regression_data_processing.md
+      - Regression Overview: regression/regression.md
+      - Regression Data Processing: regression/regression_data_processing.md
     
 
   - Advanced Topics:
