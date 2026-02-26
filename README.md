@@ -58,23 +58,35 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ---
 
+
+## 🚀 What's New in this release
+
+-   ✅ **OrionMSP v1.5** -- Improved prototype normalization and
+    stabilized refinement.
+-   ✅ **LimiX Model Integration** -- Likelihood-based mixture modeling
+    for uncertainty-aware inference.
+-   ✅ **Regression Framework** -- End-to-end regression training,
+    evaluation, and benchmarking.
+-   ✅ **Resampling Module** -- Context-aware episodic sampling for ICL
+    models.
+
+---
+
 ## 📊 Supported Models
 
-TabTune has built-in support for a growing list of powerful tabular models, each with its own specialized preprocessing and tuning pipeline handled automatically.
+| Model | Family / Paradigm | Key Innovation | Supported Strategies |
+|-------|------------------|----------------|----------------------|
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionBix** | Scalable ICL | Tabular BiAxial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
+| **Mitra** | Scalable ICL | 2D attention (row & column) | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT |
+| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
+| **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
 
-| Model        | Family / Paradigm        | Key Innovation                                                                 | Supported Strategies                          |
-|--------------|--------------------------|----------------------------------------------------------------------------------|-----------------------------------------------|
-| **TabPFN-v2** | PFN / ICL                | Approximates Bayesian inference on synthetic data                                 | Inference, Meta-Learning FT, SFT, PEFT*        |
-| **TabICL**   | Scalable ICL             | Two-stage column-then-row attention                                               | Inference, Meta-Learning FT, SFT, PEFT         |
-| **OrionMSP** | Scalable ICL             | Multi-Scale Sparse Attention for Tabular In-Context Learning                      | Inference, Meta-Learning FT, SFT, PEFT         |
-| **OrionBix** | Scalable ICL             | Tabular BiAxial In-Context Learning with biaxial attention mechanism              | Inference, Meta-Learning FT, SFT, PEFT         |
-| **Mitra**    | Scalable ICL             | 2D attention (row & column); mixed synthetic priors                                | Inference, Meta-Learning FT, SFT, PEFT         |
-| **ContextTab** | Semantics-Aware ICL    | Modality-specific semantic embeddings                                             | Inference, Full Fine-Tuning, PEFT*             |
-| **TabDPT**   | Denoising Transformer    | Denoising pre-training for feature representation                                 | Inference, Meta-Learning FT, SFT, PEFT         |
-| **Limix**    | Probabilistic / ICL      | Likelihood-based mixture modeling over in-context examples; uncertainty-aware     | Inference                                     |
-
-
-*Note: PEFT for ContextTab and TabPFN is experimental; 'base-ft' strategy is fully supported.*
+*Note: PEFT for ContextTab and TabPFN is experimental; `base-ft` strategy is fully supported.*
 
 ---
 
@@ -208,6 +220,97 @@ print(metrics)
 ```
 
 ---
+
+# 📈 Using Regression in TabTune
+
+TabTune now fully supports regression tasks with standardized evaluation
+metrics.
+
+## Example: Housing Price Prediction
+
+``` python
+from tabtune import TabularPipeline
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+
+X, y = fetch_california_housing(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+pipeline = TabularPipeline(
+    model_name="OrionMSP1.5",
+    task_type="regression",
+    tuning_strategy="base-ft",
+    tuning_params={
+        "epochs": 5,
+        "learning_rate": 2e-5
+    }
+)
+
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+
+print(metrics)
+```
+
+### Supported Regression Metrics
+
+-   RMSE
+-   MAE
+-   R² Score
+
+
+---
+
+## 🔁 Resampling & Context Sampling (Fine-Tuning)
+
+TabTune provides **two complementary mechanisms** for handling data
+imbalance and episodic construction:
+
+1.  **Dataset-Level Resampling** (via `DataProcessor`)
+2.  **Context / Support-Query Sampling** (for meta-learning models)
+
+Both integrate seamlessly into `TabularPipeline`.
+
+---
+
+## ✅ Supported Resampling Strategies
+
+  Strategy         Description                       Task Support
+  ---------------- --------------------------------- ----------------
+  `smote`          Synthetic minority oversampling   Classification
+  `random_over`    Random oversampling               Classification
+  `random_under`   Random undersampling              Classification
+  `tomek`          Tomek links cleaning              Classification
+  `kmeans`         KMeans-SMOTE hybrid               Classification
+  `knn`            KNN-based synthetic sampling      Classification
+
+> Resampling is primarily designed for **imbalanced classification
+> tasks**.
+
+---
+
+# Resampling in Action
+
+Resampling is configured through `processor_params` and is applied before training. An example usage is as follows :-
+
+``` python
+from tabtune import TabularPipeline
+
+pipeline = TabularPipeline(
+    model_name="TabICL",
+    tuning_strategy="inference",
+    processor_params={
+        "resampling_strategy": "smote"
+    },
+    tuning_params={
+        "epochs": 5,
+        "learning_rate": 2e-5
+    }
+)
+
+pipeline.fit(X_train, y_train)
+```
+----
 
 ## 🏆 Model Comparison with TabularLeaderboard
 
