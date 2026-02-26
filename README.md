@@ -80,13 +80,13 @@ Using diverse tabular foundation models often requires writing model-specific bo
 | **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionBix** | Scalable ICL | Tabular BiAxial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
 | **Mitra** | Scalable ICL | 2D attention (row & column) | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT |
 | **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
 | **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
-
-*Note: PEFT for ContextTab and TabPFN is experimental; `base-ft` strategy is fully supported.*
+ 
+*Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
 ---
 
@@ -120,7 +120,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 pipeline = TabularPipeline(
     model_name="TabPFN",
     task_type="classification",
-    tuning_strategy="inference",  # or 'finetune', 'base-ft', 'peft'
+    tuning_strategy="inference",  # or 'finetune'
     tuning_params={"device": "cpu"}
 )
 
@@ -237,9 +237,9 @@ X, y = fetch_california_housing(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 pipeline = TabularPipeline(
-    model_name="OrionMSP1.5",
+    model_name="OrionMSP",
     task_type="regression",
-    tuning_strategy="base-ft",
+    tuning_strategy="inference",
     tuning_params={
         "epochs": 5,
         "learning_rate": 2e-5
@@ -529,12 +529,12 @@ For detailed documentation, API reference, model configurations, and usage examp
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 TabTune is built upon the excellent work of the following projects and research teams:
 
 
-- **[OrionMSP](https://github.com/Lexsi-Labs/OrionMSP)** - Multi-Scale Sparse Attention for Tabular In-Context Learning
+- **[OrionMSP1.0/1.5](https://github.com/Lexsi-Labs/OrionMSP)** - Multi-Scale Sparse Attention for Tabular In-Context Learning
 - **[OrionBix](https://github.com/Lexsi-Labs/OrionBix)** - Tabular BiAxial In-Context Learnin
 - **[TabPFN](https://github.com/PriorLabs/TabPFN)** - Prior-data Fitted Networks for tabular data
 - **[TabICL](https://github.com/soda-inria/tabicl)** - Tabular In-Context Learning with scalable attention
@@ -542,6 +542,7 @@ TabTune is built upon the excellent work of the following projects and research 
 - **[ContextTab](https://github.com/SAP-samples/contexttab)** - Semantics-Aware In-Context Learning for Tabular Data
 - **[TabDPT](https://github.com/layer6ai-labs/TabDPT-inference)** - Denoising Pre-training Transformer for Tabular Data
 - **[AutoGluon](https://github.com/autogluon/autogluon)** - AutoML framework that inspired our unified API design
+- **[LimiX](https://github.com/limix-ldm-ai/LimiX)** – Likelihood-based mixture modeling and probabilistic inference framework for structured tabular learning  
 
 ---
 
