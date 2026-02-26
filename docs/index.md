@@ -18,9 +18,9 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 
 ---
 
-## 🚀 TabTune v1.0 - First Release
+## 🚀 Welcome to TabTune
 
-**Welcome to TabTune! This initial release provides a complete, production-ready framework for tabular foundation models.**
+**This documentation provides a complete, production-ready framework for tabular foundation models.**
 
 **Core Components:**
 
@@ -29,15 +29,6 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 - **Flexible Tuning (`TuningManager`):** Three tuning strategies—zero-shot `inference`, supervised fine-tuning (`base-ft`) with full parameter updates, and memory-efficient `peft` (LoRA) adapters. Supports episodic meta-learning for ICL models.
 - **Model Comparison (`TabularLeaderboard`):** Systematic benchmarking tool for comparing multiple models and strategies on your datasets.
 
-**Supported Models (7 Models):**
-
-- **TabPFN-v2:** Fast Bayesian inference for small datasets (<10K rows) with experimental PEFT support.
-- **TabICL:** Scalable ICL with two-stage attention, full PEFT support, ideal for 10K-1M row datasets.
-- **OrionMSP:** Multi-scale prior ICL for balanced generalization on 50K-2M+ row datasets, full PEFT support.
-- **OrionBix:** Biaxial interaction expert for high-accuracy scenarios (50K-2M+ rows), full PEFT support.
-- **TabDPT:** Denoising transformer for very large datasets (100K-5M rows), full PEFT support.
-- **Mitra:** 2D cross-attention model for complex patterns and mixed data types, full PEFT support.
-- **ContextTab:** Semantics-aware ICL with text embedding integration, experimental PEFT support.
 
 **Key Capabilities:**
 
@@ -60,36 +51,21 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 
 ---
 
-## 📦 Supported Models (Updated)
+## 📊 Supported Models
 
-  ---------------------------------------------------------------------------------
-  Model            Family              Key Innovation                PEFT
-  ---------------- ------------------- ----------------------------- --------------
-  **TabPFN-v2**    PFN / ICL           Bayesian synthetic prior      ⚠️
-                                                                     Experimental
-
-  **TabICL**       Scalable ICL        Two-stage column-row          ✅
-                                       attention                     
-
-  **OrionMSP       MSP-ICL             Multi-Scale Prior             ✅
-  v1.0**                                                             
-
-  **OrionMSP       MSP-ICL (Enhanced)  Stabilized prototype          ⚠️
-  v1.5**                               refinement                    
-
-  **Orion BIX**    Scalable ICL        Biaxial Interaction eXpert    ✅
-
-  **TabDPT**       Denoising           Masked feature pretraining    ✅
-                   Transformer                                       
-
-  **Mitra**        2D Cross Attention  Cross-axis interaction        ✅
-                                       modeling                      
-
-  **ContextTab**   Semantics-Aware ICL Text-augmented embeddings     ⚠️
-
-  **LimiX**        Linear-Structured   Efficient low-rank structure  Not Supported
-                   Model               learning                      
-  ---------------------------------------------------------------------------------
+| Model | Family / Paradigm | Key Innovation | Supported Strategies |
+|-------|------------------|----------------|----------------------|
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
+| **Mitra** | Scalable ICL | 2D attention (row & column) | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT |
+| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
+| **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
+ 
+*Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
 ---
 
