@@ -154,7 +154,7 @@ X_ctx, y_ctx = sample_context(
 )
 ```
 
-## 7. Troubleshooting
+## 6. Troubleshooting
 
 ### Issue: “KMeans sampling is slow”
 **What to do:**
@@ -181,7 +181,7 @@ X_ctx, y_ctx = sample_context(
 
 ---
 
-## 8. Quick Reference
+## 7. Quick Reference
 
 | Goal | Task | Suggested Strategy |
 |------|------|--------------------|
@@ -195,10 +195,3 @@ X_ctx, y_ctx = sample_context(
 
 ---
 
-## 9. Next Steps
-
-- Add context sampling as a configurable knob in your LimiX pipeline config (strategy + context_size).
-- Benchmark `uniform` vs `hybrid_*` on your target datasets.
-- For very large data, consider reducing `kmeans_centers` and using hybrid sampling for a strong speed/quality tradeoff.
-
----
