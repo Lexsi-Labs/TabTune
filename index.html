@@ -74,6 +74,9 @@
 <a href="user-guide/tuning-strategies/">Tuning Strategies</a>
 </li>
 <li>
+<a href="user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
 <a href="user-guide/model-selection/">Model Selection</a>
 </li>
 <li>
@@ -103,6 +106,9 @@
 <a href="models/orion-msp/">Orion MSP</a>
 </li>
 <li>
+<a href="models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
 <a href="models/orion-bix/">Orion BIX</a>
 </li>
 <li>
@@ -113,6 +119,20 @@
 </li>
 <li>
 <a href="models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="framework/regression/regression_data_processing.md">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -161,6 +181,9 @@
 <ul class="dropdown-menu">
 <li>
 <a href="examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="examples/regression/">Regression Tasks</a>
 </li>
 <li>
 <a href="examples/peft-examples/">PEFT Fine-Tuning</a>
@@ -226,11 +249,16 @@
 <div class="container">
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#tabtune-v10-first-release">🚀 TabTune v1.0 - First Release</a></li>
+<li class="first-level active"><a href="#welcome-to-tabtune">🚀 Welcome to TabTune</a></li>
 <li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
-<li class="first-level"><a href="#supported-models">📦 Supported Models</a></li>
+<li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
+<li class="first-level"><a href="#new-in-this-release">🆕 New in This Release</a></li>
+<li class="second-level"><a href="#orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support</a></li>
+<li class="second-level"><a href="#regression-framework">Regression Framework</a></li>
+<li class="second-level"><a href="#resampling-module">Resampling Module</a></li>
 <li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
 <li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
+<li class="second-level"><a href="#google-colab-support">Google Colab Support</a></li>
 <li class="first-level"><a href="#explore-the-documentation">📑 Explore the Documentation</a></li>
 <li class="first-level"><a href="#example-notebooks">🏆 Example Notebooks</a></li>
 <li class="first-level"><a href="#project-structure">📂 Project Structure</a></li>
@@ -255,24 +283,14 @@
 It provides a high-level, scikit-learn-compatible API that abstracts away the complexities of data preprocessing, model-specific training loops, and benchmarking, letting you focus on delivering results.</p>
 <p>Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced architectures, TabTune streamlines your workflow for tabular deep learning.</p>
 <hr/>
-<h2 id="tabtune-v10-first-release">🚀 TabTune v1.0 - First Release<a class="headerlink" href="#tabtune-v10-first-release" title="Permanent link">¶</a></h2>
-<p><strong>Welcome to TabTune! This initial release provides a complete, production-ready framework for tabular foundation models.</strong></p>
+<h2 id="welcome-to-tabtune">🚀 Welcome to TabTune<a class="headerlink" href="#welcome-to-tabtune" title="Permanent link">¶</a></h2>
+<p><strong>This documentation provides a complete, production-ready framework for tabular foundation models.</strong></p>
 <p><strong>Core Components:</strong></p>
 <ul>
 <li><strong>Unified API (<code>TabularPipeline</code>):</strong> Single, scikit-learn-compatible interface for all models with <code>.fit()</code>, <code>.predict()</code>, <code>.save()</code>, and <code>.load()</code> methods.</li>
 <li><strong>Smart Data Processing (<code>DataProcessor</code>):</strong> Model-aware preprocessing that automatically handles imputation, scaling, categorical encoding, and feature transformations for each model.</li>
 <li><strong>Flexible Tuning (<code>TuningManager</code>):</strong> Three tuning strategies—zero-shot <code>inference</code>, supervised fine-tuning (<code>base-ft</code>) with full parameter updates, and memory-efficient <code>peft</code> (LoRA) adapters. Supports episodic meta-learning for ICL models.</li>
 <li><strong>Model Comparison (<code>TabularLeaderboard</code>):</strong> Systematic benchmarking tool for comparing multiple models and strategies on your datasets.</li>
-</ul>
-<p><strong>Supported Models (7 Models):</strong></p>
-<ul>
-<li><strong>TabPFN-v2:</strong> Fast Bayesian inference for small datasets (&lt;10K rows) with experimental PEFT support.</li>
-<li><strong>TabICL:</strong> Scalable ICL with two-stage attention, full PEFT support, ideal for 10K-1M row datasets.</li>
-<li><strong>OrionMSP:</strong> Multi-scale prior ICL for balanced generalization on 50K-2M+ row datasets, full PEFT support.</li>
-<li><strong>OrionBix:</strong> Biaxial interaction expert for high-accuracy scenarios (50K-2M+ rows), full PEFT support.</li>
-<li><strong>TabDPT:</strong> Denoising transformer for very large datasets (100K-5M rows), full PEFT support.</li>
-<li><strong>Mitra:</strong> 2D cross-attention model for complex patterns and mixed data types, full PEFT support.</li>
-<li><strong>ContextTab:</strong> Semantics-aware ICL with text embedding integration, experimental PEFT support.</li>
 </ul>
 <p><strong>Key Capabilities:</strong></p>
 <ul>
@@ -293,62 +311,89 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Extensible Design:</strong> Modular codebase for easy integration of custom data processors and models.</li>
 </ul>
 <hr/>
-<h2 id="supported-models">📦 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
+<h2 id="supported-models">📊 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
 <th>Model</th>
 <th>Family / Paradigm</th>
 <th>Key Innovation</th>
-<th>PEFT Support</th>
+<th>Supported Strategies</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>TabPFN-v2</strong></td>
 <td>PFN / ICL</td>
-<td>Bayesian approximation on synthetic</td>
-<td>⚠️ Experimental</td>
+<td>Approximates Bayesian inference on synthetic data</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT*, Regression</td>
 </tr>
 <tr>
 <td><strong>TabICL</strong></td>
 <td>Scalable ICL</td>
-<td>Two-stage column-row attention</td>
-<td>✅ Full Support</td>
+<td>Two-stage column-then-row attention</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
 </tr>
 <tr>
-<td><strong>OrionMSP</strong></td>
+<td><strong>OrionMSP v1.0</strong></td>
 <td>Scalable ICL</td>
-<td>Multi-Scale Prior (MSP) ICL</td>
-<td>✅ Full Support</td>
+<td>Multi-Scale Sparse Attention</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
 </tr>
 <tr>
-<td><strong>Orion BIX</strong></td>
+<td><strong>OrionMSP v1.5</strong></td>
 <td>Scalable ICL</td>
-<td>Biaxial Interaction eXpert</td>
-<td>✅ Full Support</td>
+<td>Stabilized prototype refinement</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
+<td>Scalable ICL</td>
+<td>Tabular Bi-Axial In-Context Learning</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
 </tr>
 <tr>
 <td><strong>Mitra</strong></td>
 <td>Scalable ICL</td>
-<td>2D attention, synthetic priors</td>
-<td>✅ Full Support</td>
+<td>2D attention (row &amp; column)</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT</td>
 </tr>
 <tr>
 <td><strong>ContextTab</strong></td>
 <td>Semantics-Aware ICL</td>
-<td>Modality-specific embeddings</td>
-<td>⚠️ Experimental</td>
+<td>Modality-specific semantic embeddings</td>
+<td>Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT</td>
 </tr>
 <tr>
 <td><strong>TabDPT</strong></td>
 <td>Denoising Transformer</td>
-<td>Denoising pre-trained transformer</td>
-<td>✅ Full Support</td>
+<td>Denoising pre-training</td>
+<td>Inference, Meta-Learning FT, SFT, Regression, Regression-FT</td>
+</tr>
+<tr>
+<td><strong>LimiX</strong></td>
+<td>Probabilistic / ICL</td>
+<td>Likelihood-based mixture modeling; uncertainty-aware</td>
+<td>Inference, Regression, Regression-FT</td>
 </tr>
 </tbody>
 </table>
-<p><sup>✅ Full Support: Reliable LoRA integration<br/>⚠️ Experimental: Known issues may occur; use base-ft if unstable</sup></p>
+<p><em>Note: PEFT for ContextTab and TabPFN is experimental; <code>inference</code> strategy is fully supported.</em></p>
+<hr/>
+<h2 id="new-in-this-release">🆕 New in This Release<a class="headerlink" href="#new-in-this-release" title="Permanent link">¶</a></h2>
+<h4 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h4>
+<h3 id="regression-framework">Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h3>
+<ul>
+<li>Unified regression training API</li>
+<li>Standardized metric handling</li>
+<li>Benchmark-ready evaluation utilities</li>
+</ul>
+<h3 id="resampling-module">Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h3>
+<ul>
+<li>Context-aware support/query sampling</li>
+<li>Configurable episodic batching</li>
+<li>Optimized for ICL models</li>
+</ul>
 <hr/>
 <h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -387,6 +432,13 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Community-Driven:</strong> Extensible design and open contribution policy.</li>
 </ul>
 <hr/>
+<h3 id="google-colab-support">Google Colab Support<a class="headerlink" href="#google-colab-support" title="Permanent link">¶</a></h3>
+<ul>
+<li>TabTune auto-detects Colab sessions, skipping optional IPython-heavy integrations (e.g., rich leaderboard display) so installs succeed with Colab’s preinstalled packages.</li>
+<li>In Colab, install with <code>pip install "tabtune[colab]"</code> to keep core runtime packages (NumPy, pandas, scikit-learn, IPython) on the versions Colab expects.</li>
+<li>For richer notebook display helpers outside Colab, opt into <code>pip install "tabtune[interactive]"</code>.</li>
+</ul>
+<hr/>
 <h2 id="explore-the-documentation">📑 Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong><a href="getting-started/installation/">Getting Started</a>:</strong> Installation, setup, and basic usage.</li>
@@ -398,7 +450,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </ul>
 <hr/>
 <h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">¶</a></h2>
-<p>|Below are 9 Example Notebooks showcasing all the features of the Library in-depth!</p>
+<p>|Below are 11 Example Notebooks showcasing all the features of the Library in-depth!</p>
 <table>
 <thead>
 <tr>
@@ -447,18 +499,30 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </tr>
 <tr>
 <td>7</td>
-<td>Data Sampling</td>
-<td>Data Sampling and Resampling Strategies for Inference</td>
-<td><a href="https://colab.research.google.com/drive/1TUwxsfk6E0LDepc3bONeDZLslYAMesbZ?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+<td>Resampling</td>
+<td>Resampling Strategies</td>
+<td><a href="https://colab.research.google.com/drive/1EHGrrSm7EalVRvzkH1RUHsNSLzmn10lM?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
 </tr>
 <tr>
 <td>8</td>
+<td>Regression - 1</td>
+<td>Introduction to Regression - Inference</td>
+<td><a href="https://colab.research.google.com/drive/1lBt0QZWqlwhEg2ul_nVPAeC-w3Are0At"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Regression - 2</td>
+<td>Introduction to Regression - Finetune</td>
+<td><a href="https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+</tr>
+<tr>
+<td>10</td>
 <td>Evaluation Metrics</td>
 <td>Evaluation Metrics involved</td>
 <td><a href="https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
 </tr>
 <tr>
-<td>9</td>
+<td>11</td>
 <td>Benchmarking</td>
 <td>Standard Benchmarking Techniques</td>
 <td><a href="https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
@@ -489,8 +553,8 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </div>
 <hr/>
 <h2 id="license">🗃️ License<a class="headerlink" href="#license" title="Permanent link">¶</a></h2>
-<p>This project is released under the MIT License.<br>
-Please cite appropriately if used in academic or production projects.</br></p>
+<p>This project is released under the MIT License.<br/>
+Please cite appropriately if used in academic or production projects.</p>
 <p><strong>BibTeX Citation:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">tanna2025tabtuneunifiedlibraryinference</span><span class="p">,</span>
 <span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}</span><span class="p">,</span><span class="w"> </span>
@@ -636,5 +700,5 @@ Please cite appropriately if used in academic or production projects.</br></p>
 </html>
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-11-11 12:33:45.877659+00:00
+Build Date UTC : 2026-02-26 09:15:14.015094+00:00
 -->

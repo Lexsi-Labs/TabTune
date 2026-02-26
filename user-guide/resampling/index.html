@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Resampling Strategies - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li class="active">
+<a href="./">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../tuning-strategies/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../model-selection/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/resampling.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#4-resampling">4. Resampling</a></li>
+<li class="second-level"><a href="#41-why-this-module-exists">4.1 Why this module exists</a></li>
+<li class="second-level"><a href="#42-public-api">4.2 Public API</a></li>
+<li class="second-level"><a href="#43-strategy-names-and-behavior">4.3 Strategy Names and Behavior</a></li>
+<li class="third-level"><a href="#core-strategies-classification">Core strategies (classification)</a></li>
+<li class="third-level"><a href="#core-strategies-regression">Core strategies (regression)</a></li>
+<li class="second-level"><a href="#44-strategy-aliases">4.4 Strategy Aliases</a></li>
+<li class="second-level"><a href="#45-important-implementation-details">4.5 Important implementation details</a></li>
+<li class="third-level"><a href="#a-nan-handling-critical-fix">(A) NaN handling (critical fix)</a></li>
+<li class="third-level"><a href="#b-kmeans-diversity-sampling">(B) KMeans diversity sampling</a></li>
+<li class="third-level"><a href="#c-hybrid-strategies">(C) Hybrid strategies</a></li>
+<li class="first-level"><a href="#5-how-to-use-resampling-in-tabtune">5. How to use Resampling in TabTune</a></li>
+<li class="second-level"><a href="#51-recommended-patterns">5.1 Recommended patterns</a></li>
+<li class="second-level"><a href="#52-example-sample-a-context-before-fitting">5.2 Example: sample a context before fitting</a></li>
+<li class="second-level"><a href="#53-example-regression-stratification-by-y-quantiles">5.3 Example: regression stratification by y-quantiles</a></li>
+<li class="first-level"><a href="#7-troubleshooting">7. Troubleshooting</a></li>
+<li class="second-level"><a href="#issue-kmeans-sampling-is-slow">Issue: “KMeans sampling is slow”</a></li>
+<li class="second-level"><a href="#issue-smote-fails-or-imblearn-not-installed">Issue: “SMOTE fails or imblearn not installed”</a></li>
+<li class="second-level"><a href="#issue-nans-break-sampling">Issue: “NaNs break sampling”</a></li>
+<li class="first-level"><a href="#8-quick-reference">8. Quick Reference</a></li>
+<li class="first-level"><a href="#9-next-steps">9. Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h2 id="4-resampling">4. Resampling<a class="headerlink" href="#4-resampling" title="Permanent link">¶</a></h2>
+<p>TabTune includes a unified <strong>context sampling / resampling</strong> module:</p>
+<p><strong>File:</strong> <code>tabtune/resampling/context_sampling.py</code><br/>
+<strong>Purpose:</strong> choose a fixed-size <strong>training subset (context)</strong> for ICL-style / foundation models using strategies beyond simple random sampling.</p>
+<h3 id="41-why-this-module-exists">4.1 Why this module exists<a class="headerlink" href="#41-why-this-module-exists" title="Permanent link">¶</a></h3>
+<p>The module exists because:
+- TabTune already has a generic <code>resampling_strategy</code> in some data processors (often aimed at imbalance resampling),
+- but model-specific preprocessors and ICL-style pipelines may not consistently apply those,
+- and for LimiX-like models the right abstraction is <strong>context selection</strong>, not just “rebalance the whole dataset”.</p>
+<h3 id="42-public-api">4.2 Public API<a class="headerlink" href="#42-public-api" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">sample_context</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+    <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>                    <span class="c1"># "classification" or "regression"</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>    <span class="c1"># e.g. "uniform", "balanced", "diversity_kmeans", ...</span>
+    <span class="n">context_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">strat_set</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>               <span class="c1"># bins for regression stratification/balancing</span>
+    <span class="n">hybrid_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>         <span class="c1"># split between "core" and "diverse" parts</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">allow_replacement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>                           <span class="c1"># kmeans_centers, min_pos, oversample_weight, ...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span>
+</code></pre></div>
+<p><strong>Key behavior:</strong>
+- Returns <code>(X_ctx, y_ctx)</code> — a sampled context dataset.
+- If <code>context_size &gt; len(X)</code>:
+  - by default it <strong>pads with replacement</strong> (<code>allow_replacement=True</code>).
+- Normalizes strategy names (e.g. notebook-style suffixes like <code>_10k</code> are stripped).</p>
+<h3 id="43-strategy-names-and-behavior">4.3 Strategy Names and Behavior<a class="headerlink" href="#43-strategy-names-and-behavior" title="Permanent link">¶</a></h3>
+<h4 id="core-strategies-classification">Core strategies (classification)<a class="headerlink" href="#core-strategies-classification" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong><code>uniform</code></strong>: random subset of rows.</li>
+<li><strong><code>stratified</code></strong>: preserve class proportions.</li>
+<li><strong><code>balanced</code></strong>: equal rows per class (pads with replacement if needed).</li>
+<li><strong><code>oversample_minority</code></strong>: weighted sampling to oversample minority classes.</li>
+<li><strong><code>smote</code></strong>: uses SMOTE/SMOTENC (if <code>imblearn</code> installed), then subsamples to <code>context_size</code>.</li>
+<li><strong><code>diversity_kmeans</code></strong>: diversity sampling by clustering in feature space (MiniBatchKMeans), then selecting representatives.</li>
+<li><strong><code>hybrid_balanced_diverse</code></strong>: balanced core + kmeans-diverse remainder.</li>
+</ul>
+<h4 id="core-strategies-regression">Core strategies (regression)<a class="headerlink" href="#core-strategies-regression" title="Permanent link">¶</a></h4>
+<p>Regression uses binning of <code>y</code> into quantile bins (via <code>qcut</code> with safe fallbacks):
+- <strong><code>uniform</code></strong>
+- <strong><code>stratified</code></strong>: stratify by quantile bins of <code>y</code>.
+- <strong><code>balanced</code></strong>: balance across quantile bins of <code>y</code>.
+- <strong><code>diversity_kmeans</code></strong>
+- <strong><code>hybrid_stratified_diverse</code></strong>: stratified core + kmeans-diverse remainder.</p>
+<h3 id="44-strategy-aliases">4.4 Strategy Aliases<a class="headerlink" href="#44-strategy-aliases" title="Permanent link">¶</a></h3>
+<p><code>normalize_sampling_strategy_name()</code> supports common aliases:
+- <code>random</code>, <code>rand</code> → <code>uniform</code>
+- <code>strat</code> → <code>stratified</code>
+- <code>diverse</code>, <code>kmeans</code> → <code>diversity_kmeans</code>
+- <code>hybrid</code>, <code>balanced_diverse</code> → <code>hybrid_balanced_diverse</code>
+- Notebook suffix stripping: <code>uniform_10k</code> → <code>uniform</code>, <code>hybrid_balanced_diverse_10k</code> → <code>hybrid_balanced_diverse</code></p>
+<h3 id="45-important-implementation-details">4.5 Important implementation details<a class="headerlink" href="#45-important-implementation-details" title="Permanent link">¶</a></h3>
+<h4 id="a-nan-handling-critical-fix">(A) NaN handling (critical fix)<a class="headerlink" href="#a-nan-handling-critical-fix" title="Permanent link">¶</a></h4>
+<p>Some strategies (SMOTE, KMeans clustering) do not handle NaNs.<br/>
+This module adds <code>_simple_impute_for_sampling(X)</code>:</p>
+<ul>
+<li>Numerical columns → fill with <strong>median</strong> (or 0 if all-NaN)</li>
+<li>Categorical columns → fill with <strong>mode</strong> (or <code>"MISSING"</code>)</li>
+</ul>
+<p>This imputation is <strong>only</strong> for sampling/clustering. The real preprocessing still happens later in the TabTune pipeline.</p>
+<h4 id="b-kmeans-diversity-sampling">(B) KMeans diversity sampling<a class="headerlink" href="#b-kmeans-diversity-sampling" title="Permanent link">¶</a></h4>
+<p><code>diversity_kmeans</code>:
+- imputes NaNs (see above),
+- one-hot encodes categoricals (<code>pd.get_dummies</code>),
+- runs <code>MiniBatchKMeans</code> with <code>n_clusters = min(kmeans_centers, n, k)</code>,
+- selects one representative per cluster,
+- pads/trims to exact <code>k</code>.</p>
+<p>Useful when:
+- you want <strong>coverage</strong> of different regions of feature space,
+- especially on large datasets where random sampling can miss minority modes.</p>
+<h4 id="c-hybrid-strategies">(C) Hybrid strategies<a class="headerlink" href="#c-hybrid-strategies" title="Permanent link">¶</a></h4>
+<p>Hybrid strategies split the context into:
+- <strong>core sampler</strong>: balanced (classification) or stratified (regression)
+- <strong>diversity sampler</strong>: kmeans-based diversity</p>
+<p>Allocation:
+- <code>k_core = round(context_size * hybrid_ratio)</code>
+- <code>k_div  = context_size - k_core</code></p>
+<p>Overlaps are removed where possible; remaining slots are padded if needed.</p>
+<hr/>
+<h2 id="5-how-to-use-resampling-in-tabtune">5. How to use Resampling in TabTune<a class="headerlink" href="#5-how-to-use-resampling-in-tabtune" title="Permanent link">¶</a></h2>
+<h3 id="51-recommended-patterns">5.1 Recommended patterns<a class="headerlink" href="#51-recommended-patterns" title="Permanent link">¶</a></h3>
+<p><strong>If you just want a fast baseline:</strong>
+- <code>uniform</code> with a moderate <code>context_size</code></p>
+<p><strong>If you have class imbalance:</strong>
+- <code>balanced</code> or <code>oversample_minority</code></p>
+<p><strong>If you want broader coverage / robustness:</strong>
+- <code>diversity_kmeans</code> (or hybrid)</p>
+<p><strong>If you want both calibration + coverage:</strong>
+- <code>hybrid_balanced_diverse</code> (classification)
+- <code>hybrid_stratified_diverse</code> (regression)</p>
+<h3 id="52-example-sample-a-context-before-fitting">5.2 Example: sample a context before fitting<a class="headerlink" href="#52-example-sample-a-context-before-fitting" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.resampling.context_sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_context</span>
+
+<span class="c1"># X_train: pd.DataFrame, y_train: pd.Series</span>
+<span class="n">X_ctx</span><span class="p">,</span> <span class="n">y_ctx</span> <span class="o">=</span> <span class="n">sample_context</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="o">=</span><span class="s2">"hybrid_balanced_diverse"</span><span class="p">,</span>
+    <span class="n">context_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">hybrid_ratio</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">kmeans_centers</span><span class="o">=</span><span class="mi">2000</span>
+<span class="p">)</span>
+
+<span class="c1"># Then feed (X_ctx, y_ctx) to your TabTune pipeline/model</span>
+</code></pre></div>
+<h3 id="53-example-regression-stratification-by-y-quantiles">5.3 Example: regression stratification by y-quantiles<a class="headerlink" href="#53-example-regression-stratification-by-y-quantiles" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">X_ctx</span><span class="p">,</span> <span class="n">y_ctx</span> <span class="o">=</span> <span class="n">sample_context</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="o">=</span><span class="s2">"stratified"</span><span class="p">,</span>
+    <span class="n">context_size</span><span class="o">=</span><span class="mi">8_000</span><span class="p">,</span>
+    <span class="n">strat_set</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>   <span class="c1"># 10 quantile bins</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">7</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="7-troubleshooting">7. Troubleshooting<a class="headerlink" href="#7-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-kmeans-sampling-is-slow">Issue: “KMeans sampling is slow”<a class="headerlink" href="#issue-kmeans-sampling-is-slow" title="Permanent link">¶</a></h3>
+<p><strong>What to do:</strong>
+- Lower <code>kmeans_centers</code> (e.g. from 2000 → 500)
+- Use <code>uniform</code> or <code>stratified</code> if diversity is not crucial</p>
+<div class="highlight"><pre><span></span><code><span class="n">X_ctx</span><span class="p">,</span> <span class="n">y_ctx</span> <span class="o">=</span> <span class="n">sample_context</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="o">=</span><span class="s2">"diversity_kmeans"</span><span class="p">,</span>
+    <span class="n">context_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">kmeans_centers</span><span class="o">=</span><span class="mi">500</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="issue-smote-fails-or-imblearn-not-installed">Issue: “SMOTE fails or imblearn not installed”<a class="headerlink" href="#issue-smote-fails-or-imblearn-not-installed" title="Permanent link">¶</a></h3>
+<p><strong>Behavior:</strong>
+- The module automatically falls back to <strong>balanced</strong> sampling if <code>imblearn</code> isn’t available.</p>
+<h3 id="issue-nans-break-sampling">Issue: “NaNs break sampling”<a class="headerlink" href="#issue-nans-break-sampling" title="Permanent link">¶</a></h3>
+<p><strong>Expected:</strong>
+- SMOTE and KMeans paths already apply a lightweight imputation via <code>_simple_impute_for_sampling()</code>.</p>
+<hr/>
+<h2 id="8-quick-reference">8. Quick Reference<a class="headerlink" href="#8-quick-reference" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Task</th>
+<th>Suggested Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fast baseline</td>
+<td>cls/reg</td>
+<td><code>uniform</code></td>
+</tr>
+<tr>
+<td>Preserve label shape</td>
+<td>classification</td>
+<td><code>stratified</code></td>
+</tr>
+<tr>
+<td>Fix imbalance</td>
+<td>classification</td>
+<td><code>balanced</code> / <code>oversample_minority</code></td>
+</tr>
+<tr>
+<td>Boost minority realism</td>
+<td>classification</td>
+<td><code>smote</code> (if available)</td>
+</tr>
+<tr>
+<td>Cover diverse modes</td>
+<td>cls/reg</td>
+<td><code>diversity_kmeans</code></td>
+</tr>
+<tr>
+<td>Robust default</td>
+<td>classification</td>
+<td><code>hybrid_balanced_diverse</code></td>
+</tr>
+<tr>
+<td>Robust default</td>
+<td>regression</td>
+<td><code>hybrid_stratified_diverse</code></td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="9-next-steps">9. Next Steps<a class="headerlink" href="#9-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li>Add context sampling as a configurable knob in your LimiX pipeline config (strategy + context_size).</li>
+<li>Benchmark <code>uniform</code> vs <code>hybrid_*</code> on your target datasets.</li>
+<li>For very large data, consider reducing <code>kmeans_centers</code> and using hybrid sampling for a strong speed/quality tradeoff.</li>
+</ul>
+<hr/></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

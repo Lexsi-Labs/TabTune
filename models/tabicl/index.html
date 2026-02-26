@@ -74,6 +74,9 @@
 <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
 </li>
 <li>
+<a href="../../user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
 <a href="../../user-guide/model-selection/">Model Selection</a>
 </li>
 <li>
@@ -103,6 +106,9 @@
 <a href="../orion-msp/">Orion MSP</a>
 </li>
 <li>
+<a href="../orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
 <a href="../orion-bix/">Orion BIX</a>
 </li>
 <li>
@@ -113,6 +119,20 @@
 </li>
 <li>
 <a href="../contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -161,6 +181,9 @@
 <ul class="dropdown-menu">
 <li>
 <a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
 </li>
 <li>
 <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
@@ -464,6 +487,7 @@ Stage 2: Row Attention (Sample-wise)
     <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
     <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>                          <span class="c1"># Training epochs</span>
     <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>                <span class="c1"># Optimizer learning rate</span>
+    <span class="s1">'optimizer'</span><span class="p">:</span> <span class="s1">'adamw'</span><span class="p">,</span>                 <span class="c1"># Optimizer type</span>
     <span class="c1"># Episodic parameters</span>
     <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>                   <span class="c1"># Support set samples</span>
     <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>                     <span class="c1"># Query set samples</span>

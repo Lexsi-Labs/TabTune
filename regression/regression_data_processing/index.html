@@ -8,7 +8,7 @@
 <meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
 <meta content="Lexsi Labs" name="author"/>
 <link href="../../img/favicon.ico" rel="shortcut icon"/>
-<title>Code Standards - TabTune Documentation</title>
+<title>TabTune Regression Data Processing - TabTune Documentation</title>
 <link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
 <link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
 <link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
@@ -193,23 +193,23 @@
 </li>
 </ul>
 </li>
-<li class="dropdown active">
+<li class="dropdown">
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li class="dropdown-submenu">
 <a href="" tabindex="-1">Contributing</a>
 <ul class="dropdown-menu">
 <li>
-<a href="../setup/">Development Setup</a>
-</li>
-<li class="active">
-<a href="./">Code Standards</a>
+<a href="../../contributing/setup/">Development Setup</a>
 </li>
 <li>
-<a href="../new-models/">Adding New Models</a>
+<a href="../../contributing/standards/">Code Standards</a>
 </li>
 <li>
-<a href="../documentation/">Documentation Guide</a>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
 </li>
 </ul>
 </li>
@@ -240,17 +240,7 @@
                         </a>
 </li>
 <li>
-<a href="../setup/" rel="prev">
-<i class="fas fa-arrow-left"></i> Previous
-                        </a>
-</li>
-<li>
-<a href="../new-models/" rel="next">
-                            Next <i class="fas fa-arrow-right"></i>
-</a>
-</li>
-<li>
-<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/contributing/standards.md">Edit on Lexsi-Labs/TabTune</a>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/regression/regression_data_processing.md">Edit on Lexsi-Labs/TabTune</a>
 </li>
 </ul>
 </div>
@@ -259,18 +249,196 @@
 <div class="container">
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#contributing-code-standards">Contributing: Code Standards</a></li>
+<li class="first-level active"><a href="#tabtune-regression-data-processing">TabTune Regression Data Processing</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="second-level"><a href="#2-regression-target-scaling">2. Regression Target Scaling</a></li>
+<li class="third-level"><a href="#21-regressiondataprocessor">2.1 RegressionDataProcessor</a></li>
+<li class="third-level"><a href="#22-inverse-transform-predictions">2.2 Inverse Transform (Predictions)</a></li>
+<li class="second-level"><a href="#3-model-specific-regression-processors">3. Model-Specific Regression Processors</a></li>
+<li class="third-level"><a href="#31-available-processor-implementations">3.1 Available Processor Implementations</a></li>
+<li class="third-level"><a href="#32-contexttab-regression-binning-regression-type">3.2 ContextTab Regression: Binning &amp; Regression Type</a></li>
+<li class="second-level"><a href="#4-feature-processing-in-regression-mode">4. Feature Processing in Regression Mode</a></li>
+<li class="second-level"><a href="#5-practical-recommendations">5. Practical Recommendations</a></li>
+<li class="third-level"><a href="#51-choose-a-target-scaling-strategy">5.1 Choose a Target Scaling Strategy</a></li>
+<li class="third-level"><a href="#52-keep-y-as-1d">5.2 Keep y as 1D</a></li>
+<li class="second-level"><a href="#6-troubleshooting">6. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-y-has-wrong-shape">Issue: “y has wrong shape”</a></li>
+<li class="third-level"><a href="#issue-inverse-transform-fails">Issue: “Inverse transform fails”</a></li>
+<li class="second-level"><a href="#7-next-steps">7. Next Steps</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="contributing-code-standards">Contributing: Code Standards<a class="headerlink" href="#contributing-code-standards" title="Permanent link">¶</a></h1>
+<h1 id="tabtune-regression-data-processing">TabTune Regression Data Processing<a class="headerlink" href="#tabtune-regression-data-processing" title="Permanent link">¶</a></h1>
+<p>This document explains <strong>how TabTune processes regression data</strong> end-to-end: feature preprocessing, target scaling, and model-specific regression processors.</p>
+<p>It focuses on the code paths used when <code>task_type="regression"</code>.</p>
+<hr/>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
+<p>In regression mode, TabTune uses a two-layer processing stack:</p>
+<ol>
+<li><strong><code>DataProcessor</code></strong> (<code>tabtune/Dataprocess/data_processor.py</code>)</li>
+<li>orchestrates feature transforms</li>
+<li>selects and fits a <strong>regression processor</strong> for <code>y</code></li>
+<li>
+<p>routes to model-specific preprocessors when needed</p>
+</li>
+<li>
+<p><strong>Regression processors</strong> (<code>tabtune/Dataprocess/regression/*</code>)</p>
+</li>
+<li>implement target scaling / transforms</li>
+<li>implement model-specific regression target encoding where needed</li>
+</ol>
+<hr/>
+<h2 id="2-regression-target-scaling">2. Regression Target Scaling<a class="headerlink" href="#2-regression-target-scaling" title="Permanent link">¶</a></h2>
+<h3 id="21-regressiondataprocessor">2.1 <code>RegressionDataProcessor</code><a class="headerlink" href="#21-regressiondataprocessor" title="Permanent link">¶</a></h3>
+<p>Base target scaling is implemented in:</p>
 <ul>
-<li>Follow PEP8; use <code>black</code> and <code>isort</code></li>
-<li>Type hints for public APIs</li>
-<li>Small, focused PRs with clear descriptions</li>
-<li>Add/adjust docs when changing APIs</li>
-<li>Prefer pure functions; avoid deep nesting</li>
-<li>Write minimal tests for new features</li>
+<li><code>tabtune/Dataprocess/regression/base_processor.py</code></li>
+</ul>
+<p>Supported <code>target_scaling_strategy</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Description</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>standard</code></td>
+<td>z-score scaling</td>
+<td>strong default</td>
+</tr>
+<tr>
+<td><code>minmax</code></td>
+<td>maps y into [0, 1]</td>
+<td>bounded targets</td>
+</tr>
+<tr>
+<td><code>robust</code></td>
+<td>robust scaling vs outliers</td>
+<td>heavy-tailed y</td>
+</tr>
+<tr>
+<td><code>power_transform</code></td>
+<td>stabilize variance / normalize</td>
+<td>skewed y</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>no scaling</td>
+<td>already-normalized targets</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Mitra"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"target_scaling_strategy"</span><span class="p">:</span> <span class="s2">"robust"</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="22-inverse-transform-predictions">2.2 Inverse Transform (Predictions)<a class="headerlink" href="#22-inverse-transform-predictions" title="Permanent link">¶</a></h3>
+<p>Regression processors support <code>inverse_transform()</code> so that:
+- the model trains on scaled targets
+- predictions are returned in the <strong>original y space</strong></p>
+<p>If you bypass pipeline APIs, ensure you inverse-transform predictions before reporting.</p>
+<hr/>
+<h2 id="3-model-specific-regression-processors">3. Model-Specific Regression Processors<a class="headerlink" href="#3-model-specific-regression-processors" title="Permanent link">¶</a></h2>
+<p><code>DataProcessor</code> selects the correct regression processor via a small factory:</p>
+<ul>
+<li><code>tabtune/Dataprocess/data_processor.py</code> → <code>_get_regression_processor()</code></li>
+</ul>
+<h3 id="31-available-processor-implementations">3.1 Available Processor Implementations<a class="headerlink" href="#31-available-processor-implementations" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Processor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TabPFN</td>
+<td><code>TabPFNRegressionProcessor</code></td>
+</tr>
+<tr>
+<td>ContextTab</td>
+<td><code>ContextTabRegressionProcessor</code></td>
+</tr>
+<tr>
+<td>TabDPT</td>
+<td><code>TabDPTRegressionProcessor</code></td>
+</tr>
+<tr>
+<td>Mitra</td>
+<td><code>MitraRegressionProcessor</code></td>
+</tr>
+<tr>
+<td>Limix</td>
+<td><code>LimixRegressionProcessor</code></td>
+</tr>
+<tr>
+<td>fallback</td>
+<td><code>RegressionDataProcessor</code></td>
+</tr>
+</tbody>
+</table>
+<p>These live in <code>tabtune/Dataprocess/regression/</code>.</p>
+<h3 id="32-contexttab-regression-binning-regression-type">3.2 ContextTab Regression: Binning &amp; Regression Type<a class="headerlink" href="#32-contexttab-regression-binning-regression-type" title="Permanent link">¶</a></h3>
+<p>ContextTab regression processor supports additional config:</p>
+<ul>
+<li><code>regression_type</code> (default: <code>l2</code>)</li>
+<li><code>num_regression_bins</code> (default: <code>16</code>)</li>
+</ul>
+<p>These are forwarded from <code>model_params</code> and used in ContextTab preprocessor/processor construction.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"ContextTab"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"regression_type"</span><span class="p">:</span> <span class="s2">"l2"</span><span class="p">,</span>
+        <span class="s2">"num_regression_bins"</span><span class="p">:</span> <span class="mi">32</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="4-feature-processing-in-regression-mode">4. Feature Processing in Regression Mode<a class="headerlink" href="#4-feature-processing-in-regression-mode" title="Permanent link">¶</a></h2>
+<p>Regression mode reuses much of TabTune’s standard feature preprocessing stack:</p>
+<ul>
+<li>numeric scaling</li>
+<li>categorical encoding (ordinal/one-hot depending on model/preprocessor)</li>
+<li>missing value handling</li>
+</ul>
+<p>Key rule:
+- If a <strong>custom preprocessor</strong> is selected for a model, TabTune delegates the feature transform to it.
+- Otherwise, TabTune applies standard transforms inferred from column types.</p>
+<hr/>
+<h2 id="5-practical-recommendations">5. Practical Recommendations<a class="headerlink" href="#5-practical-recommendations" title="Permanent link">¶</a></h2>
+<h3 id="51-choose-a-target-scaling-strategy">5.1 Choose a Target Scaling Strategy<a class="headerlink" href="#51-choose-a-target-scaling-strategy" title="Permanent link">¶</a></h3>
+<ul>
+<li>Start with <code>standard</code></li>
+<li>Use <code>robust</code> for outlier-prone targets</li>
+<li>Use <code>power_transform</code> for strong skew / nonlinear target distributions</li>
+<li>Use <code>none</code> only if you know the model expects raw y</li>
+</ul>
+<h3 id="52-keep-y-as-1d">5.2 Keep y as 1D<a class="headerlink" href="#52-keep-y-as-1d" title="Permanent link">¶</a></h3>
+<p>Internally, TabTune reshapes y to fit sklearn scalers.<br/>
+If you pass a <code>DataFrame</code> with multiple regression targets, behavior may be undefined unless the model explicitly supports it.</p>
+<hr/>
+<h2 id="6-troubleshooting">6. Troubleshooting<a class="headerlink" href="#6-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-y-has-wrong-shape">Issue: “y has wrong shape”<a class="headerlink" href="#issue-y-has-wrong-shape" title="Permanent link">¶</a></h3>
+<p><strong>Fix:</strong> pass a 1D <code>pd.Series</code> or 1D numpy array for y.</p>
+<h3 id="issue-inverse-transform-fails">Issue: “Inverse transform fails”<a class="headerlink" href="#issue-inverse-transform-fails" title="Permanent link">¶</a></h3>
+<p><strong>Cause:</strong> regression processor not fitted.<br/>
+<strong>Fix:</strong> ensure <code>pipeline.fit(X_train, y_train)</code> ran successfully before calling <code>predict()</code>.</p>
+<hr/>
+<h2 id="7-next-steps">7. Next Steps<a class="headerlink" href="#7-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li>For regression metrics &amp; evaluation behavior: <code>regression.md</code></li>
+<li>For benchmarking regression suites: <code>regression_benchmarking.md</code></li>
 </ul></div>
 </div>
 <footer class="col-md-12 text-center">

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>TabTune Regression Framework - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/regression/regression.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#tabtune-regression-framework">TabTune Regression Framework</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-high-level-architecture">2. High-Level Architecture</a></li>
+<li class="third-level"><a href="#21-pipeline-flow">2.1 Pipeline Flow</a></li>
+<li class="second-level"><a href="#3-supported-regression-models">3. Supported Regression Models</a></li>
+<li class="second-level"><a href="#4-core-api-usage">4. Core API Usage</a></li>
+<li class="third-level"><a href="#41-inference-only-regression">4.1 Inference-Only Regression</a></li>
+<li class="third-level"><a href="#42-regression-fine-tuning">4.2 Regression Fine-Tuning</a></li>
+<li class="second-level"><a href="#5-regression-metrics-evaluation">5. Regression Metrics &amp; Evaluation</a></li>
+<li class="third-level"><a href="#51-standard-regression-metrics">5.1 Standard Regression Metrics</a></li>
+<li class="third-level"><a href="#52-residual-diagnostics">5.2 Residual Diagnostics</a></li>
+<li class="second-level"><a href="#6-important-parameters">6. Important Parameters</a></li>
+<li class="second-level"><a href="#7-saving-loading">7. Saving &amp; Loading</a></li>
+<li class="second-level"><a href="#8-troubleshooting">8. Troubleshooting</a></li>
+<li class="third-level"><a href="#issue-regressiondataprocessor-must-be-fitted-before-transform">Issue: “RegressionDataProcessor must be fitted before transform”</a></li>
+<li class="third-level"><a href="#issue-regression-finetuning-is-not-enabled-for-model">Issue: “Regression finetuning is not enabled for model …”</a></li>
+<li class="third-level"><a href="#issue-predictions-look-scaled">Issue: Predictions look “scaled”</a></li>
+<li class="second-level"><a href="#9-next-steps">9. Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="tabtune-regression-framework">TabTune Regression Framework<a class="headerlink" href="#tabtune-regression-framework" title="Permanent link">¶</a></h1>
+<p>TabTune supports <strong>end-to-end regression workflows</strong> (training, inference, evaluation, and benchmarking) through the same <code>TabularPipeline</code> API used for classification, enabled via <code>task_type="regression"</code>.</p>
+<p>This document explains how regression is implemented in the TabTune codebase and how to use it effectively.</p>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
+<p><strong>What is “Regression mode” in TabTune?</strong></p>
+<p>When <code>task_type="regression"</code>, TabTune switches:</p>
+<ul>
+<li><strong>Model wrappers</strong> to regression-specific adapters (e.g., <code>TabPFNRegressorWrapper</code>, <code>TabDPTRegressorWrapper</code>, <code>MitraRegressorWrapper</code>, <code>LimixRegressorWrapper</code>, <code>ConTextTabRegressorWrapper</code>)</li>
+<li><strong>Target processing</strong> to regression-specific scaling and (model-specific) target transforms</li>
+<li><strong>Evaluation</strong> to regression metrics such as RMSE / MAE / R²</li>
+</ul>
+<p>Regression mode is activated at pipeline construction time:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Limix"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="2-high-level-architecture">2. High-Level Architecture<a class="headerlink" href="#2-high-level-architecture" title="Permanent link">¶</a></h2>
+<h3 id="21-pipeline-flow">2.1 Pipeline Flow<a class="headerlink" href="#21-pipeline-flow" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
+    A[Raw X, y] --&gt; B[DataProcessor.fit]
+    B --&gt; C[Regression Target Processor fit/scale y]
+    B --&gt; D[Feature transforms / model preprocessor]
+    C --&gt; E[Scaled y_train]
+    D --&gt; F[Processed X_train]
+    F --&gt; G[TuningManager.tune]
+    E --&gt; G
+    G --&gt; H[Model inference / finetune]
+    H --&gt; I[Predictions]
+    I --&gt; J[Inverse target scaling]
+    J --&gt; K[Regression metrics + plots]
+</div>
+<hr/>
+<h2 id="3-supported-regression-models">3. Supported Regression Models<a class="headerlink" href="#3-supported-regression-models" title="Permanent link">¶</a></h2>
+<p>TabTune regression is implemented via <strong>regression wrappers</strong> that standardize:
+- preprocessing expectations
+- calling conventions (<code>fit</code>, <code>predict</code>)
+- optional finetune behavior</p>
+<table>
+<thead>
+<tr>
+<th>Model Name (<code>model_name</code>)</th>
+<th>Wrapper Class</th>
+<th>Default Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TabPFN</code></td>
+<td><code>TabPFNRegressorWrapper</code></td>
+<td>inference</td>
+</tr>
+<tr>
+<td><code>ContextTab</code></td>
+<td><code>ConTextTabRegressorWrapper</code></td>
+<td>inference / finetune</td>
+</tr>
+<tr>
+<td><code>TabDPT</code></td>
+<td><code>TabDPTRegressorWrapper</code></td>
+<td>inference/finetune</td>
+</tr>
+<tr>
+<td><code>Mitra</code></td>
+<td><code>MitraRegressorWrapper</code></td>
+<td>inference/finetune</td>
+</tr>
+<tr>
+<td><code>Limix</code></td>
+<td><code>LimixRegressorWrapper</code></td>
+<td>inference/finetune</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="4-core-api-usage">4. Core API Usage<a class="headerlink" href="#4-core-api-usage" title="Permanent link">¶</a></h2>
+<h3 id="41-inference-only-regression">4.1 Inference-Only Regression<a class="headerlink" href="#41-inference-only-regression" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"rmse"</span><span class="p">],</span> <span class="n">metrics</span><span class="p">[</span><span class="s2">"r2_score"</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="42-regression-fine-tuning">4.2 Regression Fine-Tuning<a class="headerlink" href="#42-regression-fine-tuning" title="Permanent link">¶</a></h3>
+<p>TabTune’s regression fine-tuning is implemented through <code>TuningManager</code> and is currently most explicit for <strong>ContextTab regression</strong> (episodic fine-tuning).</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"ContextTab"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
+        <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">"steps_per_epoch"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s2">"context_size"</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+        <span class="s2">"query_size"</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s2">"lr"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s2">"weight_decay"</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="s2">"clip_grad_norm"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">"seed"</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<p>If you attempt regression finetuning for a model that is not enabled by the pipeline’s regression finetune validation, TabTune raises a clear error.</p>
+<hr/>
+<h2 id="5-regression-metrics-evaluation">5. Regression Metrics &amp; Evaluation<a class="headerlink" href="#5-regression-metrics-evaluation" title="Permanent link">¶</a></h2>
+<p>TabTune computes <strong>comprehensive</strong> regression metrics during <code>evaluate()</code>.</p>
+<h3 id="51-standard-regression-metrics">5.1 Standard Regression Metrics<a class="headerlink" href="#51-standard-regression-metrics" title="Permanent link">¶</a></h3>
+<p>Returned metrics include:</p>
+<ul>
+<li><code>mse</code></li>
+<li><code>rmse</code></li>
+<li><code>mae</code></li>
+<li><code>r2_score</code></li>
+<li>additional metrics like median absolute error, explained variance, max error</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="52-residual-diagnostics">5.2 Residual Diagnostics<a class="headerlink" href="#52-residual-diagnostics" title="Permanent link">¶</a></h3>
+<p>The pipeline includes utilities for residual analysis and saving plots (where supported):</p>
+<ul>
+<li>residual plots</li>
+<li>error distributions</li>
+</ul>
+<p>Use these for debugging calibration and identifying heteroscedasticity.</p>
+<hr/>
+<h2 id="6-important-parameters">6. Important Parameters<a class="headerlink" href="#6-important-parameters" title="Permanent link">¶</a></h2>
+<p>Regression-specific parameters are mostly configured through:</p>
+<ul>
+<li><code>task_type="regression"</code> (required)</li>
+<li><code>model_params</code> (model-level behavior)</li>
+<li><code>tuning_params</code> (finetune behavior if enabled)</li>
+<li><code>proc_params</code> / <code>processor_params</code> (target scaling &amp; preprocessing)</li>
+</ul>
+<p>A few key knobs:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Where</th>
+<th>Typical Values</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task_type</code></td>
+<td>pipeline</td>
+<td><code>regression</code></td>
+<td>switches entire framework</td>
+</tr>
+<tr>
+<td><code>target_scaling_strategy</code></td>
+<td>processor</td>
+<td><code>standard</code>, <code>minmax</code>, <code>robust</code>, <code>power_transform</code>, <code>none</code></td>
+<td>scales y</td>
+</tr>
+<tr>
+<td><code>tuning_strategy</code></td>
+<td>pipeline</td>
+<td><code>inference</code>, <code>finetune</code></td>
+<td>regression adaptation mode</td>
+</tr>
+<tr>
+<td><code>context_sampling_strategy</code></td>
+<td>processor</td>
+<td>(see resampling docs)</td>
+<td>controls context selection</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-saving-loading">7. Saving &amp; Loading<a class="headerlink" href="#7-saving-loading" title="Permanent link">¶</a></h2>
+<p>TabTune’s <code>TabularPipeline</code> supports persistence via <code>joblib</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"regressor.joblib"</span><span class="p">)</span>
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"regressor.joblib"</span><span class="p">)</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<p>This is the recommended way to package a regression workflow for reuse.</p>
+<hr/>
+<h2 id="8-troubleshooting">8. Troubleshooting<a class="headerlink" href="#8-troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="issue-regressiondataprocessor-must-be-fitted-before-transform">Issue: “RegressionDataProcessor must be fitted before transform”<a class="headerlink" href="#issue-regressiondataprocessor-must-be-fitted-before-transform" title="Permanent link">¶</a></h3>
+<p><strong>Cause:</strong> calling <code>transform(y)</code> before <code>fit(y)</code> in custom flows.<br/>
+<strong>Fix:</strong> always call <code>pipeline.fit(X, y)</code> before <code>predict/evaluate</code>.</p>
+<h3 id="issue-regression-finetuning-is-not-enabled-for-model">Issue: “Regression finetuning is not enabled for model …”<a class="headerlink" href="#issue-regression-finetuning-is-not-enabled-for-model" title="Permanent link">¶</a></h3>
+<p><strong>Cause:</strong> finetune was requested but the model is not enabled by the pipeline’s guard.<br/>
+<strong>Fix:</strong> use <code>tuning_strategy="inference"</code> or switch to a supported model (e.g., ContextTab regression finetune).</p>
+<h3 id="issue-predictions-look-scaled">Issue: Predictions look “scaled”<a class="headerlink" href="#issue-predictions-look-scaled" title="Permanent link">¶</a></h3>
+<p><strong>Cause:</strong> target scaling is enabled, but inverse scaling wasn’t applied in a custom path.<br/>
+<strong>Fix:</strong> use pipeline APIs (they handle inverse scaling), or manually call <code>processor.regression_processor_.inverse_transform()</code> when needed.</p>
+<hr/>
+<h2 id="9-next-steps">9. Next Steps<a class="headerlink" href="#9-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Target scaling &amp; processors:</strong> <code>regression_data_processing.md</code></li>
+<li><strong>Benchmark suites:</strong> <code>regression_benchmarking.md</code></li>
+<li><strong>Model-specific docs:</strong> see model pages (e.g., <code>limix.md</code>) for model internals and parameters.</li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

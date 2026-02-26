@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Orion MSP V1.5 - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../overview/">Overview</a>
+</li>
+<li>
+<a href="../tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../orion-msp/">Orion MSP</a>
+</li>
+<li class="active">
+<a href="./">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../mitra/">Mitra</a>
+</li>
+<li>
+<a href="../contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../orion-msp/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../orion-bix/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/models/orionmsp1.5.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#orionmsp-v15-hierarchical-multi-scale-sparse-attention-for-tabular-in-context-learning">OrionMSP v1.5: Hierarchical Multi-Scale Sparse Attention for Tabular In-Context Learning</a></li>
+<li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
+<li class="third-level"><a href="#21-high-level-design-as-implemented-in-tabtune">2.1 High-Level Design (as implemented in TabTune)</a></li>
+<li class="third-level"><a href="#22-core-components">2.2 Core Components</a></li>
+<li class="second-level"><a href="#3-inference-parameters">3. Inference Parameters</a></li>
+<li class="third-level"><a href="#31-complete-parameter-reference">3.1 Complete Parameter Reference</a></li>
+<li class="third-level"><a href="#32-inference-manager-reference-v15">3.2 Inference Manager Reference (v1.5)</a></li>
+<li class="third-level"><a href="#33-parameter-descriptions-key-deltas">3.3 Parameter Descriptions (key deltas)</a></li>
+<li class="second-level"><a href="#4-fine-tuning-with-orionmsp-v15">4. Fine-Tuning with OrionMSP v1.5</a></li>
+<li class="second-level"><a href="#5-lora-peft-target-modules-practical-guidance">5. LoRA / PEFT Target Modules (practical guidance)</a></li>
+<li class="second-level"><a href="#6-usage-patterns">6. Usage Patterns</a></li>
+<li class="third-level"><a href="#61-inference-only-usage-typical-orionmsp-flow">6.1 Inference-only usage (typical OrionMSP flow)</a></li>
+<li class="third-level"><a href="#62-faster-repeated-prediction-kv-cache">6.2 Faster repeated prediction (KV cache)</a></li>
+<li class="second-level"><a href="#7-best-practices">7. Best Practices</a></li>
+<li class="third-level"><a href="#dos">✅ Do’s</a></li>
+<li class="third-level"><a href="#donts">❌ Don’ts</a></li>
+<li class="second-level"><a href="#8-orionmsp-v15-vs-v10-quick-comparison">8. OrionMSP v1.5 vs v1.0 (quick comparison)</a></li>
+<li class="second-level"><a href="#9-next-steps">9. Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="orionmsp-v15-hierarchical-multi-scale-sparse-attention-for-tabular-in-context-learning">OrionMSP v1.5: Hierarchical Multi-Scale Sparse Attention for Tabular In-Context Learning<a class="headerlink" href="#orionmsp-v15-hierarchical-multi-scale-sparse-attention-for-tabular-in-context-learning" title="Permanent link">¶</a></h1>
+<p>OrionMSP v1.5 (a.k.a. <code>orionmsp_v15</code> in TabTune) is an in-context learning (ICL) foundation model for <strong>tabular classification</strong> that combines:
+- <strong>Column-wise distribution-aware embedding</strong>
+- <strong>Hierarchical sparse row interaction</strong>
+- <strong>Perceiver-style cross-component memory</strong>
+- <strong>ICL predictor with optional thinking tokens</strong>
+- <strong>Inference-time acceleration via KV caching</strong></p>
+<hr/>
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
+<p><strong>What is OrionMSP v1.5?</strong></p>
+<p>OrionMSP is designed for tabular tasks in the <em>in-context</em> setting: given a <strong>support/context set</strong> of labeled rows and a <strong>query set</strong> of unlabeled rows, the model predicts query labels in a single forward pass by learning dataset-specific decision rules from the context.</p>
+<p>OrionMSP is a four-stage pipeline:<br/>
+1) Column-wise embedder → 2) Multi-scale sparse row interaction → 3) Cross-component memory → 4) ICL predictor.  </p>
+<hr/>
+<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
+<h3 id="21-high-level-design-as-implemented-in-tabtune">2.1 High-Level Design (as implemented in TabTune)<a class="headerlink" href="#21-high-level-design-as-implemented-in-tabtune" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
+    A[Raw tabular rows: numeric + categorical] --&gt; B[Column-wise embedder]
+    B --&gt; C[Cell/feature embeddings E]
+    C --&gt; D[RowInteraction: sparse attention over feature axis]
+    D --&gt; E[[CLS] summaries -&gt; row embeddings H]
+    E --&gt; F[Cross-component Perceiver memory]
+    F --&gt; G[Enhanced row reps R]
+    G --&gt; H[ICL predictor (split attention)]
+    H --&gt; I[Logits for query rows]
+</div>
+<h3 id="22-core-components">2.2 Core Components<a class="headerlink" href="#22-core-components" title="Permanent link">¶</a></h3>
+<p>1) <strong>Column-wise embedder</strong>
+   - Encodes each cell value while conditioning on the column distribution (paper §3.2).
+   - Uses a shared set-based column encoder across all columns (paper notes the shared Set Transformer approach).</p>
+<p>2) <strong>RowInteraction: hierarchical sparse attention</strong>
+   - Prepends <strong>[CLS]</strong> and <strong>[GLOBAL]</strong> tokens, then performs sparse attention over the feature axis at one or more resolutions (paper Figure 1 description).
+   - Sparse attention uses a small local window plus global routing tokens to keep compute close to linear in the number of features (paper Appendix B.2 complexity discussion).</p>
+<p>3) <strong>Perceiver-style memory (optional, but enabled by default in v1.5 settings)</strong>
+   - Compresses the <em>training/context</em> rows into a fixed number of latent vectors, then lets all rows read from these latents (paper Algorithm 2).
+   - Preserves ICL causality because <em>writes</em> use context rows only (paper Appendix B.2).</p>
+<p>4) <strong>ICL predictor (split-attention transformer)</strong>
+   - Injects labels only into context rows (paper Eq. 31–32).
+   - Uses a split self-attention mask: context (+ thinking tokens) attend freely; query rows attend only to the context region (paper Eq. 33–35).
+   - Produces logits for query rows only.</p>
+<h2 id="3-inference-parameters">3. Inference Parameters<a class="headerlink" href="#3-inference-parameters" title="Permanent link">¶</a></h2>
+<h3 id="31-complete-parameter-reference">3.1 Complete Parameter Reference<a class="headerlink" href="#31-complete-parameter-reference" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Embedding / column encoder</span>
+    <span class="s2">"embed_dim"</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="s2">"dropout"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">"activation"</span><span class="p">:</span> <span class="s2">"gelu"</span><span class="p">,</span>
+    <span class="s2">"norm_first"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+
+    <span class="c1"># Column interaction (set-based / inducing points)</span>
+    <span class="s2">"col_num_blocks"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"col_nhead"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"col_num_inds"</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+
+    <span class="c1"># NEW in v1.5: feature positional embeddings</span>
+    <span class="s2">"feature_pos_emb"</span><span class="p">:</span> <span class="s2">"subspace"</span><span class="p">,</span>   <span class="c1"># "subspace", "learned", or None</span>
+
+    <span class="c1"># Row interaction (sparse TFrow)</span>
+    <span class="s2">"row_num_blocks"</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>             <span class="c1"># v1.5 default (deeper)</span>
+    <span class="s2">"row_nhead"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s2">"row_num_cls"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"row_rope_base"</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+    <span class="s2">"row_num_global"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"row_scales"</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span>              <span class="c1"># v1.5 default (single scale)</span>
+    <span class="s2">"row_window"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"row_num_random"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"row_group_mode"</span><span class="p">:</span> <span class="s2">"pma"</span><span class="p">,</span>
+
+    <span class="c1"># NEW in v1.5: grouping + scale aggregation</span>
+    <span class="s2">"features_per_group"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"scale_combine_method"</span><span class="p">:</span> <span class="s2">"enhanced_attention"</span><span class="p">,</span>
+
+    <span class="c1"># Perceiver memory (cross-component memory)</span>
+    <span class="s2">"perc_num_latents"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>          <span class="c1"># v1.5 default (increased)</span>
+    <span class="s2">"perc_layers"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+
+    <span class="c1"># NEW in v1.5: enhanced memory + thinking interface</span>
+    <span class="s2">"num_memory_heads"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"use_memory_gating"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"num_thinking_tokens"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+
+    <span class="c1"># ICL predictor</span>
+    <span class="s2">"icl_num_blocks"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="s2">"icl_nhead"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+
+    <span class="c1"># Task shaping</span>
+    <span class="s2">"max_classes"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>               <span class="c1"># typical cap in TabTune usage</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="32-inference-manager-reference-v15">3.2 Inference Manager Reference (v1.5)<a class="headerlink" href="#32-inference-manager-reference-v15" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">inference_manager_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"min_batch_size"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"safety_factor"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="s2">"offload"</span><span class="p">:</span> <span class="s2">"auto"</span><span class="p">,</span>               <span class="c1"># or True/False</span>
+    <span class="s2">"auto_offload_pct"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
+    <span class="s2">"use_amp"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"verbose"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+
+    <span class="c1"># NEW in v1.5</span>
+    <span class="s2">"enable_kv_cache"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"cache_trainset_representation"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="33-parameter-descriptions-key-deltas">3.3 Parameter Descriptions (key deltas)<a class="headerlink" href="#33-parameter-descriptions-key-deltas" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Type</th>
+<th style="text-align: right;">v1.0 Default</th>
+<th style="text-align: right;">v1.5 Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>row_num_blocks</code></td>
+<td style="text-align: right;">int</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">9</td>
+<td>Depth of row sparse transformer blocks</td>
+</tr>
+<tr>
+<td><code>row_scales</code></td>
+<td style="text-align: right;">tuple[int]</td>
+<td style="text-align: right;">(1,4,8)</td>
+<td style="text-align: right;">(1,)</td>
+<td>Multi-scale feature resolutions</td>
+</tr>
+<tr>
+<td><code>row_group_mode</code></td>
+<td style="text-align: right;">str</td>
+<td style="text-align: right;">contiguous</td>
+<td style="text-align: right;">pma</td>
+<td>How features are grouped before sparse attention</td>
+</tr>
+<tr>
+<td><code>feature_pos_emb</code></td>
+<td style="text-align: right;">str/None</td>
+<td style="text-align: right;">None</td>
+<td style="text-align: right;">subspace</td>
+<td>Adds feature-position signal to embeddings</td>
+</tr>
+<tr>
+<td><code>features_per_group</code></td>
+<td style="text-align: right;">int</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">2</td>
+<td>Grouping granularity for features</td>
+</tr>
+<tr>
+<td><code>scale_combine_method</code></td>
+<td style="text-align: right;">str</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">enhanced_attention</td>
+<td>How outputs across scales are combined</td>
+</tr>
+<tr>
+<td><code>perc_num_latents</code></td>
+<td style="text-align: right;">int</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">32</td>
+<td>Memory latent capacity</td>
+</tr>
+<tr>
+<td><code>num_memory_heads</code></td>
+<td style="text-align: right;">int</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">4</td>
+<td>Multi-head memory reads</td>
+</tr>
+<tr>
+<td><code>use_memory_gating</code></td>
+<td style="text-align: right;">bool</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">True</td>
+<td>Dataset-conditioned memory gating</td>
+</tr>
+<tr>
+<td><code>num_thinking_tokens</code></td>
+<td style="text-align: right;">int</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">0</td>
+<td>Inserts learnable tokens between context and query</td>
+</tr>
+<tr>
+<td><code>enable_kv_cache</code></td>
+<td style="text-align: right;">bool</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">False</td>
+<td>Cache KV pairs for repeated predictions</td>
+</tr>
+<tr>
+<td><code>cache_trainset_representation</code></td>
+<td style="text-align: right;">bool</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">False</td>
+<td>Cache training-set representations</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="4-fine-tuning-with-orionmsp-v15">4. Fine-Tuning with OrionMSP v1.5<a class="headerlink" href="#4-fine-tuning-with-orionmsp-v15" title="Permanent link">¶</a></h2>
+<p>OrionMSP is primarily an <strong>ICL model</strong> (context + query). In TabTune usage, you typically:
+- <strong>fit</strong> the pipeline (stores training data as context pool / support),
+- then <strong>predict</strong> on query rows.</p>
+<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
+    <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+    <span class="s2">"optimizer"</span><span class="p">:</span> <span class="s2">"adamw"</span><span class="p">,</span>
+    <span class="s2">"weight_decay"</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="s2">"gradient_clip_value"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">"show_progress"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Tip:</strong> OrionMSP-style models are sensitive to context length. If you increase the number of support rows too aggressively, you can increase memory cost and latency significantly. Consider resampling/context sampling strategies already supported in TabTune.</p>
+<hr/>
+<h2 id="5-lora-peft-target-modules-practical-guidance">5. LoRA / PEFT Target Modules (practical guidance)<a class="headerlink" href="#5-lora-peft-target-modules-practical-guidance" title="Permanent link">¶</a></h2>
+<p>If you apply PEFT/LoRA in your TabTune setup, start by targeting:
+- attention projections in column encoder,
+- row interaction attention blocks,
+- ICL predictor blocks,
+- output head / label encoder.</p>
+<p>A common safe starting configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"r"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s2">"lora_alpha"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s2">"lora_dropout"</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s2">"target_modules"</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># use your project defaults or map to attention/MLP blocks</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr/>
+<h2 id="6-usage-patterns">6. Usage Patterns<a class="headerlink" href="#6-usage-patterns" title="Permanent link">¶</a></h2>
+<h3 id="61-inference-only-usage-typical-orionmsp-flow">6.1 Inference-only usage (typical OrionMSP flow)<a class="headerlink" href="#61-inference-only-usage-typical-orionmsp-flow" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"OrionMSPv1.5"</span><span class="p">,</span>   
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="62-faster-repeated-prediction-kv-cache">6.2 Faster repeated prediction (KV cache)<a class="headerlink" href="#62-faster-repeated-prediction-kv-cache" title="Permanent link">¶</a></h3>
+<p>Use KV caching when:
+- you call <code>predict()</code> multiple times on the same fitted dataset,
+- or you run large batch inference where reuse helps.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Pseudocode: depends on how your TabTune pipeline exposes the manager config</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"OrionMSPv1.5"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"inference_manager_params"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"enable_kv_cache"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"cache_trainset_representation"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="7-best-practices">7. Best Practices<a class="headerlink" href="#7-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="dos">✅ Do’s<a class="headerlink" href="#dos" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ Start with v1.5 defaults (deeper RowInteraction + memory improvements).</li>
+<li>✅ Use moderate context sizes; scale carefully with compute.</li>
+<li>✅ Turn on KV caching if you do repeated inference on the same fitted dataset.</li>
+<li>✅ Consider minimal thinking tokens (e.g., 2) if you need more intermediate reasoning capacity.</li>
+</ul>
+<h3 id="donts">❌ Don’ts<a class="headerlink" href="#donts" title="Permanent link">¶</a></h3>
+<ul>
+<li>❌ Don’t increase context length without checking latency/memory.</li>
+<li>❌ Don’t set large thinking-token buffers by default.</li>
+<li>❌ Don’t disable memory blindly—v1.5’s memory heads + gating are designed to help.</li>
+</ul>
+<hr/>
+<h2 id="8-orionmsp-v15-vs-v10-quick-comparison">8. OrionMSP v1.5 vs v1.0 (quick comparison)<a class="headerlink" href="#8-orionmsp-v15-vs-v10-quick-comparison" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>OrionMSP v1.0 (<code>orion_msp</code>)</th>
+<th>OrionMSP v1.5 (<code>orionmsp_v1.5</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RowInteraction depth</td>
+<td>3 blocks</td>
+<td>9 blocks (default)</td>
+</tr>
+<tr>
+<td>Multi-scale default</td>
+<td>(1,4,8)</td>
+<td>(1,)</td>
+</tr>
+<tr>
+<td>Feature positional embeddings</td>
+<td>—</td>
+<td><code>feature_pos_emb</code> (default: subspace)</td>
+</tr>
+<tr>
+<td>Feature grouping</td>
+<td>contiguous</td>
+<td><code>pma</code> + <code>features_per_group</code></td>
+</tr>
+<tr>
+<td>Scale aggregation</td>
+<td>baseline</td>
+<td><code>scale_combine_method="enhanced_attention"</code></td>
+</tr>
+<tr>
+<td>Perceiver memory latents</td>
+<td>16</td>
+<td>32</td>
+</tr>
+<tr>
+<td>Memory reads</td>
+<td>single-head</td>
+<td>multi-head (<code>num_memory_heads</code>)</td>
+</tr>
+<tr>
+<td>Memory gating</td>
+<td>—</td>
+<td>enabled (<code>use_memory_gating=True</code>)</td>
+</tr>
+<tr>
+<td>Thinking tokens</td>
+<td>—</td>
+<td>supported (<code>num_thinking_tokens</code>)</td>
+</tr>
+<tr>
+<td>Inference optimization</td>
+<td>baseline</td>
+<td>KV caching options</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-next-steps">9. Next Steps<a class="headerlink" href="#9-next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li>Add this file under your docs <strong>models</strong> section (same place as the existing <code>orion-msp.md</code>), e.g.:</li>
+<li><code>docs/models/orionmsp1.5.md</code> (or your chosen filename)</li>
+<li>Add it to your docs navigation / sidebar index if your docs build uses an explicit nav list.</li>
+</ul>
+<hr/>
+<p>OrionMSP v1.5 is a practical, scalable ICL foundation model for tabular data with improved memory, grouping, and inference acceleration. Use it when you want strong cross-dataset generalization without per-task retraining.</p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

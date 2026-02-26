@@ -74,6 +74,9 @@
 <a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
 </li>
 <li>
+<a href="../../user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
 <a href="../../user-guide/model-selection/">Model Selection</a>
 </li>
 <li>
@@ -103,6 +106,9 @@
 <a href="../../models/orion-msp/">Orion MSP</a>
 </li>
 <li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
 <a href="../../models/orion-bix/">Orion BIX</a>
 </li>
 <li>
@@ -113,6 +119,20 @@
 </li>
 <li>
 <a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../framework/regression/regression.md">Regression Overview</a>
+</li>
+<li>
+<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -161,6 +181,9 @@
 <ul class="dropdown-menu">
 <li>
 <a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
 </li>
 <li>
 <a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
@@ -237,17 +260,102 @@
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#release-notes">Release Notes</a></li>
-<li class="second-level"><a href="#010">0.1.0</a></li>
+<li class="second-level"><a href="#release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026</a></li>
+<li class="third-level"><a href="#major-highlights">🎯 Major Highlights</a></li>
+<li class="third-level"><a href="#supported-models-9-total">🧠 Supported Models (9 Total)</a></li>
+<li class="third-level"><a href="#new-additions">🆕 New Additions</a></li>
+<li class="third-level"><a href="#improvements">⚙️ Improvements</a></li>
+<li class="third-level"><a href="#developer-experience">🛠 Developer Experience</a></li>
+<li class="second-level"><a href="#010-alpha-release">0.1.0 --- Alpha Release</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">¶</a></h1>
-<h2 id="010">0.1.0<a class="headerlink" href="#010" title="Permanent link">¶</a></h2>
+<hr/>
+<h2 id="release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026<a class="headerlink" href="#release-notes-26th-feb-2026" title="Permanent link">¶</a></h2>
+<p><strong>TabTune</strong> marks the first production-ready release of the unified
+tabular foundation model framework.</p>
+<h3 id="major-highlights">🎯 Major Highlights<a class="headerlink" href="#major-highlights" title="Permanent link">¶</a></h3>
+<ul>
+<li>Fully unified <code>TabularPipeline</code> API (<code>fit</code>, <code>predict</code>, <code>evaluate</code>,
+    <code>save</code>, <code>load</code>)</li>
+<li>Model-aware <code>DataProcessor</code> for automated preprocessing</li>
+<li><code>TuningManager</code> with three strategies:<ul>
+<li><code>inference</code> (zero-shot)</li>
+<li><code>base-ft</code> (full fine-tuning)</li>
+<li><code>peft</code> (LoRA-based parameter-efficient fine-tuning)</li>
+</ul>
+</li>
+<li><code>TabularLeaderboard</code> for benchmarking and model comparison</li>
+</ul>
+<hr/>
+<h3 id="supported-models-9-total">🧠 Supported Models (9 Total)<a class="headerlink" href="#supported-models-9-total" title="Permanent link">¶</a></h3>
+<ul>
+<li>TabPFN-v2\</li>
+<li>TabICL\</li>
+<li>OrionMSP v1.0\</li>
+<li><strong>OrionMSP v1.5 (New)</strong>\</li>
+<li>OrionBix\</li>
+<li>TabDPT\</li>
+<li>Mitra\</li>
+<li>ContextTab\</li>
+<li><strong>LimiX (New)</strong></li>
+</ul>
+<hr/>
+<h3 id="new-additions">🆕 New Additions<a class="headerlink" href="#new-additions" title="Permanent link">¶</a></h3>
+<h4 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h4>
+<h4 id="regression-framework">✅ Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h4>
+<ul>
+<li>Unified regression training pipeline</li>
+<li>Standardized evaluation metrics</li>
+<li>Benchmark-ready structure</li>
+</ul>
+<h4 id="resampling-module">✅ Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h4>
+<ul>
+<li>Context-aware support/query sampling</li>
+<li>Episodic batching utilities</li>
+<li>ICL model optimization support</li>
+</ul>
+<hr/>
+<h3 id="improvements">⚙️ Improvements<a class="headerlink" href="#improvements" title="Permanent link">¶</a></h3>
+<ul>
+<li>Cleaner modular architecture</li>
+<li>Better memory management</li>
+<li>Improved gradient stability for MSP models</li>
+<li>Colab compatibility enhancements</li>
+<li>Expanded serialization support</li>
+</ul>
+<hr/>
+<h3 id="developer-experience">🛠 Developer Experience<a class="headerlink" href="#developer-experience" title="Permanent link">¶</a></h3>
+<ul>
+<li>Modular structure for adding new models</li>
+<li>Improved documentation for contributions</li>
+<li>Extended API reference coverage</li>
+<li>Updated project structure clarity</li>
+</ul>
+<hr/>
+<h2 id="010-alpha-release">0.1.0 --- Alpha Release<a class="headerlink" href="#010-alpha-release" title="Permanent link">¶</a></h2>
 <ul>
 <li>Initial alpha release</li>
-<li>TabularPipeline, DataProcessor, TuningManager, TabularLeaderboard</li>
-<li>Docs site with getting started, user guide, models, API</li>
-</ul></div>
+<li>Introduced:<ul>
+<li><code>TabularPipeline</code></li>
+<li><code>DataProcessor</code></li>
+<li><code>TuningManager</code></li>
+<li><code>TabularLeaderboard</code></li>
+</ul>
+</li>
+<li>Basic documentation:<ul>
+<li>Getting Started</li>
+<li>User Guide</li>
+<li>Models</li>
+<li>API Reference</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<p><strong>TabTune</strong> establishes a complete foundation for tabular model
+inference, fine-tuning, benchmarking, regression workflows, and
+resampling-aware meta-learning.</p></div>
 </div>
 <footer class="col-md-12 text-center">
 <hr/>
