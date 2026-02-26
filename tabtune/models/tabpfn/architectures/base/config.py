@@ -8,6 +8,7 @@ from typing import Any, Literal, Optional
 from typing_extensions import Self
 
 import pydantic
+from pydantic import PositiveInt
 from pydantic.dataclasses import dataclass
 
 from ..interface import ArchitectureConfig
@@ -26,9 +27,9 @@ class ModelConfig(ArchitectureConfig):
     # ------ Actual variation across configs
     emsize: int = 192
     """The embedding dimension."""
-    features_per_group: Literal[1, 2] = 2
+    features_per_group: PositiveInt = 3
     """If > 1, the features will be grouped into groups of this size and the attention
-    is across groups."""
+    is across groups. Supports v2 (1-2) and v2.5 (1-3+) models."""
     nhead: int = 6
     """Number of attention heads for both between-item and between-feature attention."""
     remove_duplicate_features: bool = False
@@ -38,6 +39,14 @@ class ModelConfig(ArchitectureConfig):
     # --- Constant across all configs and used
     dropout: float = 0.0
     encoder_use_bias: bool = False
+    encoder_type: Literal["linear", "mlp"] = "linear"
+    """Type of input encoder to use. Either "linear" for a simple linear layer or "mlp"
+    for a multi-layer perceptron."""
+    encoder_mlp_hidden_dim: int | None = 1024
+    """Hidden dimension for MLP encoder. If None, defaults to emsize. Only used when
+    encoder_type="mlp"."""
+    encoder_mlp_num_layers: int = 2
+    """Number of layers in the MLP encoder. Only used when encoder_type="mlp"."""
     feature_positional_embedding: FeaturePositionalEmbedding = "subspace"
     multiquery_item_attention: Literal[False] = False
     """When True, uses multiquery for attention between items."""
@@ -45,7 +54,7 @@ class ModelConfig(ArchitectureConfig):
     nan_handling_y_encoder: Literal[True] = True
     nhid_factor: int = 4
     """Hidden dimension in the MLP layers is ninp * nhid_factor."""
-    nlayers: int = 12
+    nlayers: int = 24
     """Number of layers in the encoder, each consisting of
     a multi-head attention and an MLP layer."""
     normalize_by_used_features: Literal[True] = True
@@ -65,8 +74,9 @@ class ModelConfig(ArchitectureConfig):
     use_separate_decoder: Literal[False] = False
     """If True, the decoder will be separate from the encoder."""
 
-    multiquery_item_attention_for_test_set: Literal[True] = True
-    """If true, uses multiquery attention on the test set."""
+    multiquery_item_attention_for_test_set: bool = True
+    """If True, uses multiquery attention on the test set.
+    For now, this must be False for bridge attention and True otherwise."""
 
     attention_init_gain: float = 1.0
     """The gain when initializing the attention parameters. If None, then 1.0 is
@@ -77,11 +87,16 @@ class ModelConfig(ArchitectureConfig):
 
     item_attention_type: Literal["full"] = "full"
     feature_attention_type: Literal["full"] = "full"
-    seed: int = 0
+    seed: int = 42
     """The seed to use for the model. The default 0 is chosen to match
     the default random_state of 0 in the TabPFN estimator,
     which was used to set this seed before
     (though I'm not sure it makes a difference for a trained model).
+    """
+
+    num_thinking_rows: int = 64
+    """If >0, then this number of "thinking rows" will be prepended to each dataset.
+    See tabpfn.architectures.base.AddThinkingTokens for an explanation.
     """
 
     @classmethod

@@ -58,23 +58,35 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ---
 
+
+## 🚀 What's New in this release
+
+-   ✅ **OrionMSP v1.5** -- Improved prototype normalization and
+    stabilized refinement.
+-   ✅ **LimiX Model Integration** -- Likelihood-based mixture modeling
+    for uncertainty-aware inference.
+-   ✅ **Regression Framework** -- End-to-end regression training,
+    evaluation, and benchmarking.
+-   ✅ **Resampling Module** -- Context-aware episodic sampling for ICL
+    models.
+
+---
+
 ## 📊 Supported Models
 
-TabTune has built-in support for a growing list of powerful tabular models, each with its own specialized preprocessing and tuning pipeline handled automatically.
-
-| Model        | Family / Paradigm        | Key Innovation                                                                 | Supported Strategies                          |
-|--------------|--------------------------|----------------------------------------------------------------------------------|-----------------------------------------------|
-| **TabPFN-v2** | PFN / ICL                | Approximates Bayesian inference on synthetic data                                 | Inference, Meta-Learning FT, SFT, PEFT*        |
-| **TabICL**   | Scalable ICL             | Two-stage column-then-row attention                                               | Inference, Meta-Learning FT, SFT, PEFT         |
-| **OrionMSP** | Scalable ICL             | Multi-Scale Sparse Attention for Tabular In-Context Learning                      | Inference, Meta-Learning FT, SFT, PEFT         |
-| **OrionBix** | Scalable ICL             | Tabular BiAxial In-Context Learning with biaxial attention mechanism              | Inference, Meta-Learning FT, SFT, PEFT         |
-| **Mitra**    | Scalable ICL             | 2D attention (row & column); mixed synthetic priors                                | Inference, Meta-Learning FT, SFT, PEFT         |
-| **ContextTab** | Semantics-Aware ICL    | Modality-specific semantic embeddings                                             | Inference, Full Fine-Tuning, PEFT*             |
-| **TabDPT**   | Denoising Transformer    | Denoising pre-training for feature representation                                 | Inference, Meta-Learning FT, SFT, PEFT         |
-| **Limix**    | Probabilistic / ICL      | Likelihood-based mixture modeling over in-context examples; uncertainty-aware     | Inference                                     |
-
-
-*Note: PEFT for ContextTab and TabPFN is experimental; 'base-ft' strategy is fully supported.*
+| Model | Family / Paradigm | Key Innovation | Supported Strategies |
+|-------|------------------|----------------|----------------------|
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
+| **Mitra** | Scalable ICL | 2D attention (row & column) | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT |
+| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
+| **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
+ 
+*Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
 ---
 
@@ -108,7 +120,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 pipeline = TabularPipeline(
     model_name="TabPFN",
     task_type="classification",
-    tuning_strategy="inference",  # or 'finetune', 'base-ft', 'peft'
+    tuning_strategy="inference",  # or 'finetune'
     tuning_params={"device": "cpu"}
 )
 
@@ -208,6 +220,97 @@ print(metrics)
 ```
 
 ---
+
+# 📈 Using Regression in TabTune
+
+TabTune now fully supports regression tasks with standardized evaluation
+metrics.
+
+## Example: Housing Price Prediction
+
+``` python
+from tabtune import TabularPipeline
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+
+X, y = fetch_california_housing(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+pipeline = TabularPipeline(
+    model_name="OrionMSP",
+    task_type="regression",
+    tuning_strategy="inference",
+    tuning_params={
+        "epochs": 5,
+        "learning_rate": 2e-5
+    }
+)
+
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+
+print(metrics)
+```
+
+### Supported Regression Metrics
+
+-   RMSE
+-   MAE
+-   R² Score
+
+
+---
+
+## 🔁 Resampling & Context Sampling (Fine-Tuning)
+
+TabTune provides **two complementary mechanisms** for handling data
+imbalance and episodic construction:
+
+1.  **Dataset-Level Resampling** (via `DataProcessor`)
+2.  **Context / Support-Query Sampling** (for meta-learning models)
+
+Both integrate seamlessly into `TabularPipeline`.
+
+---
+
+## ✅ Supported Resampling Strategies
+
+  Strategy         Description                       Task Support
+  ---------------- --------------------------------- ----------------
+  `smote`          Synthetic minority oversampling   Classification
+  `random_over`    Random oversampling               Classification
+  `random_under`   Random undersampling              Classification
+  `tomek`          Tomek links cleaning              Classification
+  `kmeans`         KMeans-SMOTE hybrid               Classification
+  `knn`            KNN-based synthetic sampling      Classification
+
+> Resampling is primarily designed for **imbalanced classification
+> tasks**.
+
+---
+
+# Resampling in Action
+
+Resampling is configured through `processor_params` and is applied before training. An example usage is as follows :-
+
+``` python
+from tabtune import TabularPipeline
+
+pipeline = TabularPipeline(
+    model_name="TabICL",
+    tuning_strategy="inference",
+    processor_params={
+        "resampling_strategy": "smote"
+    },
+    tuning_params={
+        "epochs": 5,
+        "learning_rate": 2e-5
+    }
+)
+
+pipeline.fit(X_train, y_train)
+```
+----
 
 ## 🏆 Model Comparison with TabularLeaderboard
 
@@ -358,9 +461,9 @@ pipeline = TabularPipeline(
 
 ---
 
-## 📚 Example Notebooks
+## 🏆 Example Notebooks
 
-Below are 9 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 11 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -370,12 +473,11 @@ Below are 9 Example Notebooks showcasing all the features of the Library in-dept
 | 4 | Model Comparison | Model Comparison with TabularLeaderboard |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1PZW3iPQOvwh0kroGytMzYTGc6ZVUzuvg?usp=sharing) |
 | 5 | Checkpoint Management | Checkpoint Management - Save/Load Pipelines |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1DBTGEPpYLJjU9Aj7lzHoX3JtwaNOC0jn?usp=sharing) |
 | 6 | Advanced Usage | PEFT Configuration and Hybrid Strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1V3XGLeKrXSJwavaULMncZiM7uVE8sz0h?usp=sharing) |
-| 7 | Data Sampling |  Data Sampling and Resampling Strategies for Inference |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1TUwxsfk6E0LDepc3bONeDZLslYAMesbZ?usp=sharing) |
-| 8 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
-| 9 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
-
-
-
+| 7 |  Resampling |  Resampling Strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1EHGrrSm7EalVRvzkH1RUHsNSLzmn10lM?usp=sharing) |
+| 8 | Regression - 1| Introduction to Regression - Inference |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lBt0QZWqlwhEg2ul_nVPAeC-w3Are0At) |
+| 9 | Regression - 2| Introduction to Regression - Finetune |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing) |
+| 10 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
+| 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
 ---
 
 ## 🚀 Advanced Usage
@@ -427,12 +529,12 @@ For detailed documentation, API reference, model configurations, and usage examp
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 TabTune is built upon the excellent work of the following projects and research teams:
 
 
-- **[OrionMSP](https://github.com/Lexsi-Labs/OrionMSP)** - Multi-Scale Sparse Attention for Tabular In-Context Learning
+- **[OrionMSP1.0/1.5](https://github.com/Lexsi-Labs/OrionMSP)** - Multi-Scale Sparse Attention for Tabular In-Context Learning
 - **[OrionBix](https://github.com/Lexsi-Labs/OrionBix)** - Tabular BiAxial In-Context Learnin
 - **[TabPFN](https://github.com/PriorLabs/TabPFN)** - Prior-data Fitted Networks for tabular data
 - **[TabICL](https://github.com/soda-inria/tabicl)** - Tabular In-Context Learning with scalable attention
@@ -440,6 +542,7 @@ TabTune is built upon the excellent work of the following projects and research 
 - **[ContextTab](https://github.com/SAP-samples/contexttab)** - Semantics-Aware In-Context Learning for Tabular Data
 - **[TabDPT](https://github.com/layer6ai-labs/TabDPT-inference)** - Denoising Pre-training Transformer for Tabular Data
 - **[AutoGluon](https://github.com/autogluon/autogluon)** - AutoML framework that inspired our unified API design
+- **[LimiX](https://github.com/limix-ldm-ai/LimiX)** – Likelihood-based mixture modeling and probabilistic inference framework for structured tabular learning  
 
 ---
 

@@ -1,5 +1,6 @@
 import torch
 from torch.optim import Adam
+from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
@@ -9,6 +10,8 @@ import numpy as np
 import pandas as pd
 import logging
 import os
+from sklearn.metrics import r2_score
+
 
 def ensure_device_consistency(model, device):
     """Ensure all model parameters and buffers are on the same device"""
@@ -25,6 +28,7 @@ from ..models.tabpfn.utils import meta_dataset_collator
 from ..models.tabicl.sklearn.classifier import TabICLClassifier
 from ..models.tabicl.sklearn.preprocessing import TabICLMetaDataset
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
+from ..models.orionmsp_v15.sklearn.classifier import OrionMSPv15Classifier
 from ..models.orion_msp.sklearn.preprocessing import OrionMSPMetaDataset
 from ..models.contexttab.contexttab import ConTextTabClassifier
 from ..models.mitra.tab2d import Tab2D
@@ -34,6 +38,14 @@ from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.tabdpt.utils import pad_x
 from ..models.tabdpt.model import TabDPTModel
 from ..models.limix.classifier import LimixClassifier
+from ..models.regression.tabpfn.regressor import TabPFNRegressorWrapper
+from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
+from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
+from ..models.regression.mitra.regressor import MitraRegressorWrapper
+from ..models.regression.limix.regressor_wrapper import LimixRegressorWrapper
+
+
+from ..models.contexttab.contexttab import to_device
 
 from .peft_utils import apply_tabular_lora
 
@@ -46,6 +58,55 @@ class TuningManager:
     Handles the model adaptation process
     """
     def tune(self, model, X_train, y_train, strategy='inference', params=None, processor=None):
+        
+        params_copy = dict(params) if isinstance(params, dict) else {}
+        finetune_mode = params_copy.get('finetune_mode', 'turn_by_turn')
+
+        # --- Regression wrappers: allow ContextTab finetune (turn-by-turn) ---
+        if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
+                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper)):
+            if strategy == 'inference':
+                logger.info("[TuningManager] Regression model - inference path")
+                model.fit(X_train, y_train)
+                return model
+
+            # ContextTab regression finetune (turn-by-turn)
+            if isinstance(model, ConTextTabRegressorWrapper) and strategy == 'finetune':
+                if finetune_mode not in ('turn_by_turn', 'tbt'):
+                    raise ValueError(
+                        f"ContextTab regression finetune currently supports finetune_mode "
+                        f"'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'."
+                    )
+                return self._finetune_contexttab_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
+            # Limix regression finetune
+            if isinstance(model, LimixRegressorWrapper) and strategy == "finetune":
+                return self._finetune_limix_regression(model, X_train, y_train, params_copy)
+
+            if isinstance(model, TabDPTRegressorWrapper) and strategy == "finetune":
+                params_copy = dict(params) if isinstance(params, dict) else {}
+                return self._finetune_tabdpt_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
+            # Mitra regression finetune (turn-by-turn)
+            if isinstance(model, MitraRegressorWrapper) and strategy == "finetune":
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    raise ValueError(f"Mitra regression finetune supports finetune_mode 'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'.")
+                return self._finetune_mitra_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
+            # TabPFN regression finetune (turn-by-turn)
+            if isinstance(model, TabPFNRegressorWrapper) and strategy == "finetune":
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    raise ValueError(
+                        f"TabPFN regression finetune supports finetune_mode 'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'."
+                    )
+                return self._finetune_tabpfn_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
+
+
+            raise NotImplementedError(
+                f"Regression fine-tuning not implemented yet for model={type(model).__name__}. "
+                f"Currently implemented: ContextTab + strategy='finetune' + finetune_mode='turn_by_turn'."
+            )
         
         params_copy = dict(params) if isinstance(params, dict) else {}
         finetune_mode = params_copy.pop('finetune_mode', 'meta-learning')
@@ -87,7 +148,7 @@ class TuningManager:
                 self._finetune_tabpfn(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)) and selected_strategy in ('finetune', 'peft'):
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier)) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'meta-learning':
                 logger.info("[TuningManager] Meta Learning based FT")
                 self._finetune_tabicl(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -126,7 +187,7 @@ class TuningManager:
         elif isinstance(model, (Tab2D)) and selected_strategy == 'inference':
             logger.info("[TuningManager] In-context learning model in inference mode. No training needed.")
             pass
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier)) and selected_strategy == 'inference':
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier)) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabICL setup (inference mode)")
             model.fit(X_train, y_train)
         else:
@@ -581,7 +642,7 @@ class TuningManager:
 
     
 
-    def _finetune_tabicl(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier), X_train_processed: np.ndarray, y_train_processed: np.ndarray, params: dict | None = None, peft_config=None):
+    def _finetune_tabicl(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier), X_train_processed: np.ndarray, y_train_processed: np.ndarray, params: dict | None = None, peft_config=None):
         logger.info("[TuningManager] Starting advanced TabICL/OrionMSP/OrionBix fine-tuning")
         
         config = {
@@ -605,6 +666,8 @@ class TuningManager:
                     model_key = "OrionBix" 
                 elif isinstance(model, OrionMSPClassifier):
                     model_key = "OrionMSP"
+                elif isinstance(model, OrionMSPv15Classifier):
+                    model_key = "OrionMSPv1.5"
                 else :
                     model_key = "TabICL"
                 model.model_ = apply_tabular_lora(model_key, model.model_, peft_config)
@@ -719,7 +782,7 @@ class TuningManager:
         logger.info("[TuningManager] Fine-tuning complete")
 
 
-    def _finetune_tabicl_pure_sft(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier) , X_train_processed, y_train_processed, params=None, peft_config=None):
+    def _finetune_tabicl_pure_sft(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier) , X_train_processed, y_train_processed, params=None, peft_config=None):
         """
         PURE SFT FINE-TUNING (Not Recommended for TabICL)
     
@@ -1585,7 +1648,7 @@ class TuningManager:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # TabICL / Orion MSP / Orion Bix
-        if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier)):
+        if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier)):
             if finetune_mode == "meta-learning":
                 return {
                     "device": device,
@@ -1702,3 +1765,1057 @@ class TuningManager:
 
         # fallback: no tuning defaults known
         return {"device": device}
+
+
+
+    def _contexttab_regression_make_episode(self, model, X_all, y_all, context_size, query_size, seed=None):
+        """
+        Build one regression episode for ContextTab:
+        - context rows = training context (targets known)
+        - query rows   = test/query (targets masked in train_target; true labels returned separately)
+        Returns: tokenized_data dict ready for model forward + loss.
+        """
+        if not isinstance(X_all, pd.DataFrame):
+            X_all = pd.DataFrame(X_all)
+        if isinstance(y_all, (pd.DataFrame, pd.Series)):
+            y_all = np.array(y_all).reshape(-1)
+        y_all = np.asarray(y_all).astype(float)
+
+        n = len(X_all)
+        if n < (context_size + 1):
+            # fall back: tiny datasets
+            context_size = max(1, n - 1)
+            query_size = 1
+
+        rng = np.random.default_rng(seed)
+        idx = np.arange(n)
+        rng.shuffle(idx)
+
+        ctx_idx = idx[:context_size]
+        remaining = idx[context_size:]
+        if len(remaining) == 0:
+            # if context consumes all rows, reuse some rows as query
+            qry_idx = rng.choice(ctx_idx, size=query_size, replace=True)
+        else:
+            qry_idx = rng.choice(remaining, size=min(query_size, len(remaining)), replace=False)
+            if len(qry_idx) < query_size:
+                # top up with replacement from remaining/context
+                pool = remaining if len(remaining) > 0 else ctx_idx
+                extra = rng.choice(pool, size=(query_size - len(qry_idx)), replace=True)
+                qry_idx = np.concatenate([qry_idx, extra])
+
+        X_ctx = X_all.iloc[ctx_idx].copy()
+        y_ctx = pd.DataFrame({'TARGET': y_all[ctx_idx]}, index=X_ctx.index)
+
+        X_qry = X_all.iloc[qry_idx].copy()
+        y_qry = pd.DataFrame({'TARGET': y_all[qry_idx]}, index=X_qry.index)
+
+        # tokenizer returns:
+        # - data: dict with 'target' where query rows are masked (<= -99 sentinel)
+        # - labels: true labels for query rows (normalized for l2 if tokenizer does it)
+        data, labels, label_classes = model.tokenizer(
+            X_ctx, y_ctx,
+            X_qry, y_qry,
+            model.classification_or_regression
+        )
+
+        target_mean, target_std = 0, 0
+        if model.classification_or_regression == 'regression' and getattr(model, 'regression_type', 'l2') == 'l2':
+            _, target_mean, target_std = model.tokenizer.standard_scale_column(y_ctx, y_qry)
+
+        tokenized = {
+            'data': data,
+            'num_rows': context_size + query_size,
+            'num_cols': X_all.shape[1] + 1,  # incl target col
+            'labels': labels,                # <-- IMPORTANT for training
+            'is_regression': torch.tensor(True),
+            'label_classes': np.asarray(label_classes),
+            'target_mean': target_mean,
+            'target_std': target_std
+        }
+        return tokenized
+
+
+    def _finetune_contexttab_regression_turn_by_turn(self, model, X_train, y_train, params):
+        """
+        Turn-by-turn regression fine-tuning for ContextTab.
+        Uses episodic (context, query) batches and optimizes regression loss on query rows.
+        """
+        logger = logging.getLogger(__name__)
+
+        device = params.get('device', getattr(model, 'device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+
+        # loop params
+        epochs = int(params.get('epochs', 1))
+        steps_per_epoch = int(params.get('steps_per_epoch', 200))
+        context_size = int(params.get('context_size', 256))
+        query_size = int(params.get('query_size', 64))
+        seed = int(params.get('seed', 42))
+
+        # optim params
+        lr = float(params.get('lr', 1e-5))
+        weight_decay = float(params.get('weight_decay', 0.01))
+        clip_grad_norm = float(params.get('clip_grad_norm', 1.0))
+
+        # checkpoint (optional)
+        save_checkpoint_path = params.get('save_checkpoint_path', None)
+
+        # ensure context is stored (ConTextTab API expectation)
+        model.fit(X_train, y_train)
+
+        # train mode
+        model.model.train()
+        model.model.to(device)
+
+        opt = AdamW(model.model.parameters(), lr=lr, weight_decay=weight_decay)
+
+        global_step = 0
+        for ep in range(epochs):
+            running_loss = 0.0
+
+            step_iter = range(steps_per_epoch)
+            if params.get("show_progress", False):
+                step_iter = tqdm(
+                    step_iter,
+                    desc=f"ContextTab-Reg TBT | Epoch {ep+1}/{epochs}",
+                    leave=True
+                )
+                
+            for s in step_iter:
+                tokenized = self._contexttab_regression_make_episode(
+                    model=model,
+                    X_all=X_train,
+                    y_all=y_train,
+                    context_size=context_size,
+                    query_size=query_size,
+                    seed=seed + global_step
+                )
+
+                # move to device
+                tokenized = to_device(tokenized, device, raise_on_unexpected=False)
+
+                out = model.model(**tokenized)
+
+                # ContextTab forward sometimes returns (logits, aux) or a dict-like output
+                if isinstance(out, tuple):
+                    logits = out[0]
+                elif isinstance(out, dict):
+                    logits = out.get("logits", out.get("preds", out.get("output", out)))
+                else:
+                    logits = out
+
+
+                # labels are required for regression loss (query rows)
+                labels = tokenized.get('labels', None)
+                if labels is None:
+                    raise RuntimeError(
+                        "ContextTab regression finetune requires tokenized['labels'] from tokenizer(). "
+                        "If you see this, your tokenization path dropped labels."
+                    )
+
+                # compute regression loss on query rows (where train_target <= -99)
+                train_target = tokenized ['data']['target']
+                ret = model.model.compute_regression_output_loss_and_metric(
+                    logits=logits,
+                    labels=labels,
+                    train_target=train_target
+                )
+
+                # ContextTab regression may return (loss, metric) OR (loss, metric, ...)
+                if isinstance(ret, tuple):
+                    loss = ret[1]
+                    metric = ret[2] if len(ret) > 1 else None
+                else:
+                    loss = ret
+                    metric = None
+
+                # loss must be a scalar for backward()
+                if isinstance(loss, torch.Tensor) and loss.ndim > 0:
+                    loss = loss.mean()
+
+                opt.zero_grad(set_to_none=True)
+                loss.backward()
+
+                if clip_grad_norm is not None and clip_grad_norm > 0:
+                    torch.nn.utils.clip_grad_norm_(model.model.parameters(), clip_grad_norm)
+
+                opt.step()
+
+                running_loss += float(loss.detach().cpu().item())
+                global_step += 1
+
+            avg_loss = running_loss / max(1, steps_per_epoch)
+            logger.info(
+                f"[ContextTab-Regression-TBT] epoch={ep+1}/{epochs} "
+                f"steps={steps_per_epoch} avg_loss={avg_loss:.5f}"
+            )
+
+            if save_checkpoint_path:
+                os.makedirs(os.path.dirname(save_checkpoint_path), exist_ok=True)
+                torch.save({'model_state_dict': model.model.state_dict()}, save_checkpoint_path)
+                logger.info(f"[ContextTab-Regression-TBT] saved checkpoint -> {save_checkpoint_path}")
+
+        model.model.eval()
+        return model
+
+
+
+
+    def safe_r2(y_true, y_pred):
+        y_true = np.asarray(y_true).reshape(-1)
+        y_pred = np.asarray(y_pred).reshape(-1)
+
+        # finite + same length
+        mask = np.isfinite(y_true) & np.isfinite(y_pred)
+        y_true, y_pred = y_true[mask], y_pred[mask]
+
+        # need at least 2 points
+        if y_true.size < 2:
+            return np.nan
+
+        # undefined if variance is 0
+        if np.allclose(y_true, y_true[0]):
+            return np.nan
+
+        return r2_score(y_true, y_pred)
+    
+    def _finetune_limix_regression(self, model, X_train, y_train, params):
+        """
+        Episodic fine-tuning for Limix regression.
+        Builds (support, query) episodes and trains MSE on query predictions.
+        """
+        import numpy as np
+        import torch
+        from torch.optim import AdamW
+        from tqdm import tqdm
+
+        logger.info("[TuningManager] Starting Limix regression fine-tuning")
+
+        config = {
+            "device": params.get("device", "cuda" if torch.cuda.is_available() else "cpu"),
+            "epochs": int(params.get("epochs", 3)),
+            "steps_per_epoch": int(params.get("steps_per_epoch", 100)),
+            "support_size": int(params.get("support_size", params.get("context_size", 256))),
+            "query_size": int(params.get("query_size", 64)),
+            "lr": float(params.get("lr", 1e-5)),
+            "weight_decay": float(params.get("weight_decay", 0.01)),
+            "clip_grad_norm": float(params.get("clip_grad_norm", 1.0)),
+            "seed": int(params.get("seed", 42)),
+            "show_progress": bool(params.get("show_progress", True)),
+        }
+
+        device = torch.device(config["device"])
+
+        # Ensure dataframe/series -> numpy
+        if hasattr(X_train, "to_numpy"):
+            X_np = X_train.to_numpy()
+        else:
+            X_np = np.asarray(X_train)
+
+        if hasattr(y_train, "to_numpy"):
+            y_np = y_train.to_numpy()
+        else:
+            y_np = np.asarray(y_train)
+
+        X_np = X_np.astype(np.float32)
+        y_np = y_np.astype(np.float32).reshape(-1)
+
+        n = X_np.shape[0]
+        if n < (config["support_size"] + 2):
+            raise ValueError(f"Not enough rows for episodic finetune: n={n}, support={config['support_size']}")
+
+        # Normalize target like LimixRegressor.fit does
+        y_mean = float(np.mean(y_np))
+        y_std = float(np.std(y_np)) if float(np.std(y_np)) > 1e-12 else 1.0
+        y_norm = (y_np - y_mean) / y_std
+
+        # Under the wrapper, you have an ensemble
+        # Each estimator has .model (torch module)
+        estimators = getattr(model, "estimators", None)
+
+        # Some older codepaths might call it "models"
+        if estimators is None:
+            estimators = getattr(model, "models", None)
+
+        # Single-estimator fallback
+        if estimators is None and hasattr(model, "model"):
+            estimators = [model]
+
+        if not estimators:
+         # Important: wrapper creates estimators only after fit()
+            if hasattr(model, "fit"):
+                model.fit(X_train, y_train)
+                estimators = getattr(model, "estimators", None) or getattr(model, "models", None)
+            if not estimators:
+                raise AttributeError(
+                    f"Could not find Limix estimators on {type(model).__name__}. "
+                    "Expected `.estimators` (wrapper/ensemble) or `.model` (single regressor)."
+            )
+
+        mse = torch.nn.MSELoss()
+
+        rng = np.random.default_rng(config["seed"])
+
+        for est_i, est in enumerate(estimators):
+            torch_model = getattr(est, "model", None)
+            if torch_model is None or not isinstance(torch_model, torch.nn.Module):
+                raise RuntimeError(f"Estimator {est_i} has no torch model to finetune.")
+
+            torch_model.to(device)
+            torch_model.train()
+
+            opt = AdamW(torch_model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"])
+
+            for epoch in range(config["epochs"]):
+                it = range(config["steps_per_epoch"])
+                if config["show_progress"]:
+                    it = tqdm(it, desc=f"Limix-Reg FT | est {est_i+1}/{len(estimators)} | epoch {epoch+1}/{config['epochs']}")
+
+                for step in it:
+                    # sample episode indices
+                    total = config["support_size"] + config["query_size"]
+                    idx = rng.choice(n, size=total, replace=False)
+
+                    s = config["support_size"]
+                    sup_idx = idx[:s]
+                    qry_idx = idx[s:]
+
+                    X_sup = X_np[sup_idx]
+                    y_sup = y_norm[sup_idx]
+                    X_qry = X_np[qry_idx]
+                    y_qry = y_norm[qry_idx]
+
+                    # Build [1, S+Q, F]
+                    X_episode = np.concatenate([X_sup, X_qry], axis=0)
+                    X_t = torch.from_numpy(X_episode).unsqueeze(0).to(device)
+
+                    # y input: true for support, dummy for query (prevents leakage)
+                    y_in = np.concatenate([y_sup, np.zeros_like(y_qry)], axis=0)
+                    y_t = torch.from_numpy(y_in).unsqueeze(0).to(device)
+
+                    opt.zero_grad(set_to_none=True)
+
+                    out = torch_model(X_t, y_t, eval_pos=s, task_type="reg")
+
+                    # Robustly extract reg output
+                    if isinstance(out, dict):
+                        pred = out.get("reg_output", None)
+                    elif isinstance(out, (tuple, list)) and len(out) > 0:
+                        pred = out[0]
+                    else:
+                        pred = out
+
+                    if pred is None:
+                        raise RuntimeError("Limix forward did not return reg_output.")
+
+                    # pred is typically [1, Q, 1]
+                    pred = pred.squeeze(0).squeeze(-1)  # -> [Q]
+                    target = torch.from_numpy(y_qry).to(device)
+
+                    loss = mse(pred, target)
+                    loss.backward()
+
+                    if config["clip_grad_norm"] and config["clip_grad_norm"] > 0:
+                        torch.nn.utils.clip_grad_norm_(torch_model.parameters(), config["clip_grad_norm"])
+
+                    opt.step()
+
+                    if config["show_progress"]:
+                        it.set_postfix(loss=f"{float(loss.detach().cpu()):.4f}")
+
+            #torch_model.eval()
+
+        # After finetune, set context for inference
+        # Refit context on the SAME estimators (no recreation)
+        for est in estimators:
+            if hasattr(est, "fit"):
+                est.fit(X_train, y_train)
+                if hasattr(est, "model") and isinstance(est.model, torch.nn.Module):
+                    est.model.eval()
+
+        logger.info("[TuningManager] Limix regression fine-tuning complete")
+        return model
+
+    def _finetune_tabdpt_regression_turn_by_turn(self, model, X_train, y_train, params: dict):
+        """
+        Key correctness points vs common broken implementations:
+        - Fits the wrapper FIRST to ensure TabDPT preprocessing/caches (imputer/scaler/PCA V/X_train/y_train) exist.
+          This avoids finetuning on raw/unprocessed data (distribution mismatch + dtype/categorical crashes).
+        - Robustly resolves the underlying torch module for wrapper/estimator conventions.
+        - Fixes pred/y shape mismatch to avoid mse broadcasting.
+        - Keeps weights safe: if `fit()` recreates the torch module, we restore the pre-fit weights if possible.
+        - Leaves the model in eval mode at the end.
+        """
+        import logging
+        import numpy as np
+        import torch
+        import torch.nn.functional as F
+        from torch.optim import AdamW
+    
+        logger = logging.getLogger(__name__)
+        logger.info("[TuningManager] Starting TabDPT regression fine-tuning (turn-by-turn)")
+    
+        params = params or {}
+    
+        # ---------------------------
+        # Device / reproducibility
+        # ---------------------------
+        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device(device_str)
+    
+        epochs = int(params.get("epochs", 5))
+        steps_per_epoch = int(params.get("steps_per_epoch", 100))
+        context_size = int(params.get("context_size", params.get("support_size", 512)))
+        query_size = int(params.get("query_size", 128))
+    
+        lr = float(params.get("lr", params.get("learning_rate", 1e-5)))
+        weight_decay = float(params.get("weight_decay", 0.0))
+        clip_grad_norm = params.get("clip_grad_norm", None)
+        show_progress = bool(params.get("show_progress", True))
+        seed = params.get("seed", None)
+    
+        if seed is not None:
+            np.random.seed(int(seed))
+            torch.manual_seed(int(seed))
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(int(seed))
+    
+        # -------------------------------------------------------------------------
+        # Resolve underlying torch module robustly for TabDPT wrappers
+        # -------------------------------------------------------------------------
+        def _resolve_torch_module_and_cfg_host(wrapper):
+            """
+            Returns (torch_model, cfg_host, inner_holder)
+            - torch_model: the actual torch.nn.Module
+            - cfg_host: object where config attrs live (max_features, feature_reduction, V, etc.)
+            - inner_holder: the object that directly contains the torch module (for eval() at end)
+            """
+            est = getattr(wrapper, "model", None)
+            est2 = getattr(wrapper, "model_", None)
+    
+            # Case 1: wrapper.model is a torch module
+            if isinstance(est, torch.nn.Module):
+                return est, wrapper, est
+    
+            # Case 2: wrapper.model is an estimator that has .model (torch module)
+            if est is not None and hasattr(est, "model") and isinstance(est.model, torch.nn.Module):
+                return est.model, est, est
+    
+            # Case 3: wrapper.model_ is a torch module
+            if isinstance(est2, torch.nn.Module):
+                return est2, wrapper, est2
+    
+            # Case 4: wrapper.model_ is an estimator that has .model (torch module)
+            if est2 is not None and hasattr(est2, "model") and isinstance(est2.model, torch.nn.Module):
+                return est2.model, est2, est2
+    
+            return None, None, None
+    
+        torch_model, cfg_host, inner_holder = _resolve_torch_module_and_cfg_host(model)
+        if torch_model is None:
+            raise AttributeError(
+                "TabDPTRegressorWrapper: could not locate underlying torch module. "
+                "Expected either (a) `wrapper.model` to be torch.nn.Module, or "
+                "(b) `wrapper.model`/`wrapper.model_` to be an estimator with `.model` torch.nn.Module."
+            )
+    
+        prefit_state = None
+        try:
+            prefit_state = {k: v.detach().cpu() for k, v in torch_model.state_dict().items()}
+        except Exception:
+            prefit_state = None
+    
+        # Keep model in eval while fitting preprocessing (fit should not train)
+        try:
+            torch_model.eval()
+        except Exception:
+            pass
+    
+        try:
+            model.fit(X_train, y_train)
+        except Exception as e:
+            logger.exception("[TuningManager] model.fit(X_train, y_train) failed before finetune.")
+            raise
+    
+        # Re-resolve after fit (in case wrapper swapped internals)
+        torch_model2, cfg_host2, inner_holder2 = _resolve_torch_module_and_cfg_host(model)
+        if torch_model2 is None:
+            raise AttributeError(
+                "After model.fit, TabDPTRegressorWrapper: could not locate underlying torch module."
+            )
+    
+        # If module object changed, attempt to restore previous weights
+        if torch_model2 is not torch_model and prefit_state is not None:
+            try:
+                missing, unexpected = torch_model2.load_state_dict(prefit_state, strict=False)
+                logger.info(
+                    f"[TuningManager] Torch module changed after fit(); restored weights "
+                    f"(missing={len(missing)}, unexpected={len(unexpected)})."
+                )
+            except Exception:
+                logger.warning(
+                    "[TuningManager] Torch module changed after fit(); could not restore weights. "
+                    "Continuing with post-fit weights."
+                )
+    
+        torch_model, cfg_host, inner_holder = torch_model2, cfg_host2, inner_holder2
+    
+        # Keep device consistent with estimator/wrapper
+        try:
+            setattr(model, "device", str(device))
+        except Exception:
+            pass
+    
+        torch_model.to(device)
+        torch_model.train()
+    
+        optimizer = AdamW(torch_model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+        # -------------------------------------------------------------------------
+        # Use PREPROCESSED cached training arrays from the fitted estimator/wrapper
+        # -------------------------------------------------------------------------
+        X_np = getattr(model, "X_train", None)
+        y_np = getattr(model, "y_train", None)
+    
+        # Some implementations store caches on cfg_host (estimator). Fall back if needed.
+        if X_np is None or y_np is None:
+            X_np = getattr(cfg_host, "X_train", None)
+            y_np = getattr(cfg_host, "y_train", None)
+    
+        if X_np is None or y_np is None:
+            raise RuntimeError(
+                "Could not find preprocessed caches `X_train` / `y_train` after fit(). "
+                "Expected wrapper/estimator to expose them."
+            )
+    
+        X_np = np.asarray(X_np, dtype=np.float32)
+        y_np = np.asarray(y_np, dtype=np.float32).reshape(-1)
+    
+        n = len(X_np)
+        if n < 2:
+            raise ValueError("Need at least 2 training rows for episodic finetuning.")
+    
+        if n < (context_size + query_size):
+            context_size = max(4, min(context_size, n // 2))
+            query_size = max(1, min(query_size, n - context_size))
+            logger.warning(f"[TuningManager] Shrunk episode sizes: context={context_size}, query={query_size}")
+    
+        # -------------------------------------------------------------------------
+        # Feature reduction / padding (reuse fitted config)
+        # pad_x must be importable in this module scope as in your codebase.
+        # -------------------------------------------------------------------------
+        max_features = getattr(cfg_host, "max_features", None)
+        feature_reduction = getattr(cfg_host, "feature_reduction", None)
+        V = getattr(cfg_host, "V", None)  # should be set by fit() when PCA enabled
+    
+        def _to_tensor(x: np.ndarray) -> torch.Tensor:
+            return torch.as_tensor(x, dtype=torch.float32, device=device)
+    
+        def _prep_x(x_chunk: np.ndarray) -> torch.Tensor:
+            x_t = _to_tensor(x_chunk)  # (T, F)
+    
+            # If PCA reduction enabled, use the *fitted* V (do not recompute here)
+            if feature_reduction == "pca" and max_features is not None and x_t.shape[1] > max_features:
+                if V is None:
+                    raise RuntimeError(
+                        "feature_reduction='pca' but V is None after fit(). "
+                        "Ensure estimator.fit computes/stores V."
+                    )
+                v_dev = V.to(device) if hasattr(V, "to") else torch.as_tensor(V, device=device)
+                x_t = x_t @ v_dev
+    
+            x_t = x_t.unsqueeze(0)  # (1, T, F_reduced)
+            if max_features is not None:
+                x_t = pad_x(x_t, max_features)
+            return x_t
+    
+        def _prep_y(y_chunk: np.ndarray) -> torch.Tensor:
+            y_t = torch.as_tensor(y_chunk, dtype=torch.float32, device=device)
+            return y_t.view(1, -1, 1)  # (1, S, 1)
+    
+        total_steps = max(1, epochs * steps_per_epoch)
+        step_counter = 0
+        log_every = max(1, total_steps // 20)
+    
+        # -------------------------------------------------------------------------
+        # Episodic fine-tune loop
+        # -------------------------------------------------------------------------
+        for _ep in range(epochs):
+            for _ in range(steps_per_epoch):
+                step_counter += 1
+    
+                idx = np.random.permutation(n)
+                s_idx = idx[:context_size]
+                q_idx = idx[context_size: context_size + query_size]
+    
+                X_support, y_support = X_np[s_idx], y_np[s_idx]
+                X_query, y_query = X_np[q_idx], y_np[q_idx]
+    
+                x_support_t = _prep_x(X_support)  # (1, S, F)
+                x_query_t = _prep_x(X_query)      # (1, Q, F)
+    
+                x_src = torch.cat([x_support_t, x_query_t], dim=1)  # (1, S+Q, F)
+                y_src = _prep_y(y_support)                           # (1, S, 1)
+    
+                optimizer.zero_grad(set_to_none=True)
+    
+                pred = torch_model(x_src, y_src, task="reg")
+    
+                # Force predictions to shape (Q,)
+                pred_q = pred
+                if pred_q.dim() == 3:
+                    pred_q = pred_q.squeeze(0)          # (S+Q,1) or (Q,1) depending on model; common is (Q,1)
+                if pred_q.dim() == 2 and pred_q.size(-1) == 1:
+                    pred_q = pred_q.squeeze(-1)         # (Q,)
+                pred_q = pred_q.reshape(-1)
+    
+                # Targets: (Q,)
+                y_q = torch.as_tensor(y_query, dtype=torch.float32, device=device).reshape(-1)
+    
+                # Defensive: if model returned S+Q preds, keep only last Q
+                if pred_q.numel() != y_q.numel():
+                    if pred_q.numel() >= y_q.numel():
+                        pred_q = pred_q[-y_q.numel():]
+                    else:
+                        raise RuntimeError(
+                            f"Prediction length mismatch: pred={pred_q.numel()}, target={y_q.numel()}"
+                        )
+    
+                loss = F.mse_loss(pred_q, y_q)
+                loss.backward()
+    
+                if clip_grad_norm is not None:
+                    torch.nn.utils.clip_grad_norm_(torch_model.parameters(), float(clip_grad_norm))
+    
+                optimizer.step()
+    
+                if show_progress and (step_counter % log_every == 0 or step_counter == total_steps):
+                    logger.info(
+                        f"[TuningManager] TabDPT reg FT: step {step_counter}/{total_steps} | loss={loss.item():.6f}"
+                    )
+    
+        logger.info("[TuningManager] TabDPT regression fine-tuning complete")
+        try:
+            torch_model.eval()
+        except Exception:
+            pass
+    
+        # In case wrapper holds estimator and estimator holds torch module
+        try:
+            if isinstance(inner_holder, torch.nn.Module):
+                inner_holder.eval()
+            elif hasattr(inner_holder, "model") and isinstance(inner_holder.model, torch.nn.Module):
+                inner_holder.model.eval()
+        except Exception:
+            pass
+    
+        return model
+
+
+
+    def _finetune_mitra_regression_turn_by_turn(self, model, X_train, y_train, params: dict):
+        """
+        - Calls model.fit(...) FIRST to reuse the wrapper's exact preprocessing behavior:
+          * converts categorical/object columns to numeric codes
+          * normalizes y to [0,1] via min-max and stores y_min/y_max
+          * stores X_train/y_train caches used by predict()
+        - Uses Tab2D forward signature (including padding_obs_query__ kwarg).
+        - Shape-safe MSE without broadcasting issues.
+        - Leaves model in eval mode.
+        """
+        import torch
+        import numpy as np
+        import logging
+        from torch.optim import AdamW
+        import torch.nn.functional as F
+    
+        logger = logging.getLogger(__name__)
+        logger.info("[TuningManager] Starting Mitra regression fine-tuning (turn-by-turn)")
+    
+        params = params or {}
+        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device(device_str)
+    
+        epochs = int(params.get("epochs", 5))
+        steps_per_epoch = int(params.get("steps_per_epoch", 100))
+        context_size = int(params.get("context_size", params.get("support_size", 512)))
+        query_size = int(params.get("query_size", 128))
+    
+        lr = float(params.get("lr", params.get("learning_rate", 1e-5)))
+        weight_decay = float(params.get("weight_decay", 0.0))
+        clip_grad_norm = params.get("clip_grad_norm", None)
+        show_progress = bool(params.get("show_progress", True))
+        seed = params.get("seed", None)
+    
+        if seed is not None:
+            np.random.seed(int(seed))
+            torch.manual_seed(int(seed))
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(int(seed))
+    
+        # -------------------------------------------------------------------------
+        # Resolve underlying torch module (wrapper.model may be torch module, or estimator.model)
+        # -------------------------------------------------------------------------
+        def _resolve_torch_module(wrapper):
+            est = getattr(wrapper, "model", None)
+            est2 = getattr(wrapper, "model_", None)
+    
+            if isinstance(est, torch.nn.Module):
+                return est
+            if est is not None and hasattr(est, "model") and isinstance(est.model, torch.nn.Module):
+                return est.model
+            if isinstance(est2, torch.nn.Module):
+                return est2
+            if est2 is not None and hasattr(est2, "model") and isinstance(est2.model, torch.nn.Module):
+                return est2.model
+            return None
+    
+        torch_model = _resolve_torch_module(model)
+        if torch_model is None:
+            raise AttributeError(
+                "MitraRegressorWrapper: could not locate underlying torch module. "
+                "Expected either (a) `wrapper.model` to be torch.nn.Module, or "
+                "(b) `wrapper.model`/`wrapper.model_` to be an estimator with `.model` torch.nn.Module."
+            )
+
+        try:
+            # Ensure fit doesn't accidentally run with dropout enabled
+            try:
+                torch_model.eval()
+            except Exception:
+                pass
+            model.fit(X_train, y_train)
+        except Exception as e:
+            logger.exception("[TuningManager] model.fit(...) failed before Mitra finetune.")
+            raise
+    
+        X_np = getattr(model, "X_train", None)
+        y_norm = getattr(model, "y_train", None)
+        if X_np is None or y_norm is None:
+            raise RuntimeError(
+                "Expected Mitra wrapper to expose caches `X_train` and `y_train` after fit()."
+            )
+    
+        X_np = np.asarray(X_np, dtype=np.float32)
+        y_norm = np.asarray(y_norm, dtype=np.float32).reshape(-1)
+    
+        n = len(X_np)
+        if n < 2:
+            raise ValueError("Need at least 2 training rows for episodic finetuning.")
+    
+        if n < (context_size + query_size):
+            context_size = max(4, min(context_size, n // 2))
+            query_size = max(1, min(query_size, n - context_size))
+            logger.warning(f"[TuningManager] Shrunk episode sizes: context={context_size}, query={query_size}")
+    
+        torch_model.to(device)
+        torch_model.train()
+    
+        optimizer = AdamW(torch_model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+        def _to_tensor(x: np.ndarray, dtype=torch.float32):
+            return torch.as_tensor(x, dtype=dtype, device=device)
+    
+        total_steps = max(1, epochs * steps_per_epoch)
+        step_counter = 0
+        log_every = max(1, total_steps // 20)
+    
+        for _ep in range(epochs):
+            for _ in range(steps_per_epoch):
+                step_counter += 1
+    
+                idx = np.random.permutation(n)
+                s_idx = idx[:context_size]
+                q_idx = idx[context_size: context_size + query_size]
+    
+                X_support = X_np[s_idx]
+                y_support = y_norm[s_idx]
+                X_query = X_np[q_idx]
+                y_query = y_norm[q_idx]
+    
+                x_support_t = _to_tensor(X_support).unsqueeze(0)   # (1, S, F)
+                y_support_t = _to_tensor(y_support).unsqueeze(0)   # (1, S)
+                x_query_t = _to_tensor(X_query).unsqueeze(0)       # (1, Q, F)
+    
+                b, n_s, f = x_support_t.shape
+                n_q = x_query_t.shape[1]
+    
+                # In repo predict(), these are all-false masks (no padding)
+                padding_features = torch.zeros(b, f, dtype=torch.bool, device=device)
+                padding_obs_support = torch.zeros(b, n_s, dtype=torch.bool, device=device)
+                padding_obs_query = torch.zeros(b, n_q, dtype=torch.bool, device=device)
+    
+                optimizer.zero_grad(set_to_none=True)
+    
+                pred = torch_model(
+                    x_support=x_support_t,
+                    y_support=y_support_t,
+                    x_query=x_query_t,
+                    padding_features=padding_features,
+                    padding_obs_support=padding_obs_support,
+                    padding_obs_query__=padding_obs_query,  # <-- double underscore matches Tab2D.forward
+                )
+    
+                # Shape-safe: pred -> (Q,)
+                pred_q = pred
+                if pred_q.dim() == 3:
+                    pred_q = pred_q.squeeze(0)
+                if pred_q.dim() == 2 and pred_q.size(-1) == 1:
+                    pred_q = pred_q.squeeze(-1)
+                if pred_q.dim() == 2 and pred_q.size(0) == 1:
+                    pred_q = pred_q.squeeze(0)
+                pred_q = pred_q.reshape(-1)
+    
+                y_q = _to_tensor(y_query).reshape(-1)
+    
+                # Defensive: if pred returns (S+Q,) or something odd, take last Q
+                if pred_q.numel() != y_q.numel():
+                    if pred_q.numel() >= y_q.numel():
+                        pred_q = pred_q[-y_q.numel():]
+                    else:
+                        raise RuntimeError(
+                            f"Prediction length mismatch: pred={pred_q.numel()}, target={y_q.numel()}"
+                        )
+    
+                loss = F.mse_loss(pred_q, y_q)
+                loss.backward()
+    
+                if clip_grad_norm is not None:
+                    torch.nn.utils.clip_grad_norm_(torch_model.parameters(), float(clip_grad_norm))
+    
+                optimizer.step()
+    
+                if show_progress and (step_counter % log_every == 0 or step_counter == total_steps):
+                    logger.info(
+                        f"[TuningManager] Mitra reg FT: step {step_counter}/{total_steps} | loss={loss.item():.6f}"
+                    )
+    
+        torch_model.eval()
+        logger.info("[TuningManager] Mitra regression fine-tuning complete")
+
+        return model
+
+
+
+    def _finetune_tabpfn_regression_turn_by_turn(self, model, X_train, y_train, params: dict):
+        import torch
+        import numpy as np
+        import logging
+        from torch.optim import AdamW
+    
+        # TabPFN helper used in predict() to align borders
+        from tabtune.models.tabpfn.utils import translate_probs_across_borders
+    
+        logger = logging.getLogger(__name__)
+        logger.info("[TuningManager] Starting TabPFN regression fine-tuning (turn-by-turn)")
+    
+        params = params or {}
+        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device(device_str)
+    
+        epochs = int(params.get("epochs", 5))
+        steps_per_epoch = int(params.get("steps_per_epoch", 100))
+        context_size = int(params.get("context_size", params.get("support_size", 512)))
+        query_size = int(params.get("query_size", 128))
+    
+        lr = float(params.get("lr", params.get("learning_rate", 1e-5)))
+        weight_decay = float(params.get("weight_decay", 0.0))
+        clip_grad_norm = params.get("clip_grad_norm", None)
+        show_progress = bool(params.get("show_progress", True))
+        seed = params.get("seed", None)
+    
+        if seed is not None:
+            np.random.seed(int(seed))
+            torch.manual_seed(int(seed))
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(int(seed))
+    
+        # ----------------------------
+        # Data
+        # ----------------------------
+        X_np = X_train.to_numpy() if hasattr(X_train, "to_numpy") else np.asarray(X_train)
+        y_np = y_train.to_numpy() if hasattr(y_train, "to_numpy") else np.asarray(y_train)
+        y_np = np.asarray(y_np).reshape(-1)
+    
+        n = len(X_np)
+        if n < (context_size + query_size):
+            context_size = max(4, min(context_size, n // 2))
+            query_size = max(1, min(query_size, n - context_size))
+            logger.warning(f"[TuningManager] Shrunk episode sizes: context={context_size}, query={query_size}")
+    
+        # -------------------------------------------------------------------------
+        # ✅ CRITICAL: Ensure TabPFN internals exist (creates interface_config_, model_, device_, etc.)
+        # -------------------------------------------------------------------------
+        if not hasattr(model, "interface_config_"):
+            model._initialize_model_variables()
+    
+        optimizer = None
+        total_steps = epochs * steps_per_epoch
+        step_counter = 0
+    
+        for _ep in range(epochs):
+            for _ in range(steps_per_epoch):
+                step_counter += 1
+    
+                idx = np.random.permutation(n)
+                s_idx = idx[:context_size]
+                q_idx = idx[context_size: context_size + query_size]
+    
+                X_support = X_np[s_idx]
+                y_support = y_np[s_idx]
+                X_query = X_np[q_idx]
+                y_query = y_np[q_idx]
+    
+                # Episode dataset = support + query
+                X_episode = np.concatenate([X_support, X_query], axis=0)
+                y_episode = np.concatenate([y_support, y_query], axis=0)
+    
+                def _split_fn(X_full, y_full):
+                    S = context_size
+                    return X_full[:S], X_full[S:], y_full[:S], y_full[S:]
+    
+                ds = model.get_preprocessed_datasets(
+                    X_raw=X_episode,
+                    y_raw=y_episode,
+                    split_fn=_split_fn,
+                    max_data_size=None,
+                )
+    
+                # -----------------------------------------------------------------
+                # ✅ Your version returns 10 values (regression)
+                # -----------------------------------------------------------------
+                (
+                    X_trains_pre,
+                    X_tests_pre,
+                    y_trains_pre,
+                    y_test_std,
+                    cat_ixs,
+                    confs,
+                    raw_space_bardist,
+                    znorm_space_bardist,
+                    _x_test_raw,
+                    _y_test_raw,
+                ) = ds[0]
+
+                y_trains_pre = [yt.unsqueeze(-1) if (isinstance(yt, torch.Tensor) and yt.dim() == 1) else yt for yt in y_trains_pre]
+    
+                # -----------------------------------------------------------------
+                # ✅ Ensure executor_ exists:
+                # fit_from_preprocessed() creates executor_ with fit_mode="batched"
+                # no_refit=True prevents reinitializing weights.
+                # -----------------------------------------------------------------
+
+                
+                
+                cat_ix_batched = cat_ixs
+                if (
+                    isinstance(cat_ixs, list)
+                    and len(cat_ixs) > 0
+                    and isinstance(cat_ixs[0], list)
+                    and (len(cat_ixs[0]) == 0 or isinstance(cat_ixs[0][0], int))
+                ):
+                    # cat_ixs is List[List[int]] -> make it List[List[List[int]]] with batch_size=1
+                    cat_ix_batched = [[ci] for ci in cat_ixs]
+                
+                model.fit_from_preprocessed(
+                    X_preprocessed=X_trains_pre,
+                    y_preprocessed=y_trains_pre,
+                    cat_ix=cat_ix_batched,
+                    configs=confs,
+                    no_refit=True,
+                )
+
+    
+                # Underlying torch module (created by _initialize_model_variables)
+                torch_model = model.model_
+                torch_model.to(device)
+                torch_model.train()
+    
+                if optimizer is None:
+                    optimizer = AdamW(torch_model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+                optimizer.zero_grad(set_to_none=True)
+    
+                # Query targets are standardized already (TabPFN uses z-norm space for loss)
+                yq = y_test_std
+                if isinstance(yq, torch.Tensor) and yq.dim() == 2 and yq.size(-1) == 1:
+                    yq = yq.squeeze(-1)
+                    yq = yq.to(device).reshape(-1)
+
+    
+                # -----------------------------------------------------------------
+                # ✅ Use TabPFN's forward() for batched engine + gradients
+                # This returns:
+                #   averaged_logits (unused here),
+                #   outputs: list[tensor] per estimator (these are PROBS, not log-probs),
+                #   borders: list[np.ndarray] per estimator
+                # -----------------------------------------------------------------
+                _avg, outputs, borders = model.forward(X_tests_pre, use_inference_mode=False)
+    
+                std_borders = model.znorm_space_bardist_.borders.to(device)
+    
+                # Align probs to standard borders + average across estimators
+                transformed_probs = []
+                for probs, b in zip(outputs, borders):
+                    # probs shape commonly: (N_tokens, 1, n_bars) or (N_tokens, n_bars)
+                    p = probs
+                    if p.dim() == 3:
+                        p = p.squeeze(1)  # (N_tokens, n_bars)
+    
+                    # Translate probs from per-config borders -> std borders
+                    p = translate_probs_across_borders(
+                        p,
+                        frm=torch.as_tensor(b, device=device),
+                        to=std_borders,
+                    )
+                    transformed_probs.append(p)
+    
+                # Average across estimators
+                probs_mean = torch.stack(transformed_probs, dim=0).mean(dim=0)  # (N_tokens, n_bars)
+    
+                # Take last Q tokens as query tokens (same convention used earlier)
+                q_probs = probs_mean[-len(yq):]  # (Q, n_bars)
+    
+                # Convert to log-probs for bardist NLL
+                q_log_probs = (q_probs + 1e-12).log()
+    
+                crit = model.znorm_space_bardist_.to(device)
+                loss = crit(q_log_probs, yq).mean()
+    
+                loss.backward()
+    
+                if clip_grad_norm is not None:
+                    torch.nn.utils.clip_grad_norm_(torch_model.parameters(), float(clip_grad_norm))
+    
+                optimizer.step()
+    
+                if show_progress and (step_counter % max(1, total_steps // 20) == 0):
+                    logger.info(
+                        f"[TuningManager] TabPFN reg FT: step {step_counter}/{total_steps} | loss={float(loss.item()):.6f}"
+                    )
+    
+        torch_model.eval()
+        logger.info("[TuningManager] TabPFN regression fine-tuning complete")
+    
+        # -------------------------------------------------------------------------
+        # Post-finetune: fit normally so predict/eval works with standard engine
+        # (Note: this will reset fit_mode from 'batched' to normal, as per TabPFN code.)
+        # -------------------------------------------------------------------------
+        try:
+            model.fit(X_train, y_train)
+        except Exception as e:
+            logger.warning(f"[TuningManager] Post-finetune model.fit failed (predict may break): {e}")
+    
+        return model
+
+
+
+
+
+
+
+
+
+
+    
+

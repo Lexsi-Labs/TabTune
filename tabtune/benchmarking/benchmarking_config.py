@@ -18,7 +18,59 @@ BENCHMARK_DATASETS = {
         "electricity", "eye_movements", "road_safety",
     ],
 
-    "tabarena": None
+    "tabarena": None,
+    
+    "openml-ctr23": [
+        41021, 44956, 44957, 44958, 44959, 44960, 44962, 44963, 44964, 44965,
+        44966, 44967, 44969, 44970, 44971, 44972, 44973, 44974, 44975, 44976,
+        44977, 44978, 44979, 44980, 44981, 44983, 44984, 44987, 44989, 44990,
+        44992, 44993, 44994, 45012, 45402,
+    ],  # OpenML-CTR23 Primary Curated Regression Standard (35 datasets) - Dataset IDs fetched from suite 353
+    
+    "automl-reg-suite": [
+        359944, 359929, 233212, 359937, 359950, 359938, 233213, 359942, 233211, 359936,
+        359952, 359951, 359949, 233215, 360945, 167210, 359943, 359941, 359946, 360933,
+        360932, 359930, 233214, 359948, 359931, 359932, 359933, 359934, 359939, 359945,
+        359935, 317614, 359940
+    ],  # AutoML Regression Suite (33 datasets)
+    
+    "grinsztajn-tabular-benchmark": [
+        197,      # cpu_act regression
+        201,      # pol regression
+        216,      # elevators regression
+        287,      # wine_quality regression
+        296,      # Ailerons regression
+        537,      # houses regression
+        574,      # house_16H regression
+        42225,    # diamonds regression
+        42688,    # Brazilian_houses regression
+        42712,    # Bike_Sharing_Demand regression
+        42208,    # nyc-taxi-green-dec-2016 regression
+        42079,    # house_sales regression
+        23515,    # sulfur regression
+        42130,    # medical_charges regression
+        43093,    # MiamiHousing2016 regression
+        43174,    # superconduct regression
+        416,      # yprop_4_1 regression
+        183,      # abalone regression
+        40753     # delays_zurich_transport regression
+    ],  # Grinsztajn Tabular Benchmark (19 datasets) - Updated with correct dataset IDs
+    
+    "tabarena-study-regression": [
+        363612,  # airfoil_self_noise
+        363615,  # Another-Dataset-on-used-Fiat-500
+        363625,  # concrete_compressive_strength
+        363631,  # diamonds
+        363675,  # healthcare_insurance_expenses
+        363672,  # Food_Delivery_Time
+        363678,  # houses
+        363686,  # miami_housing
+        363693,  # physiochemical_protein
+        363697,  # QSAR-TID-11
+        363698,  # QSAR_fish_toxicity
+        363705,  # superconductivity
+        363708,  # wine_quality
+    ]  # TabArena Study Regression (13 datasets)
 
 #     "talent": ['dry_bean_dataset', 'satellite_image', 'Bank_Customer_Churn_Dataset',  
 #                              'eeg-eye-state', 'compass_reg', 'healthcare_insurance_expenses', 'spambase', 'BNG(tic-tac-toe)', 'estimation_of_obesity_levels', 'Large-scale_Wave_Energy_Farm_Sydney_49', 'Insurance', 'BNG(mv)', 'ada_prior',       

@@ -1,6 +1,5 @@
 """Common logic for TabPFN models."""
 
-#  Copyright (c) Prior Labs GmbH 2025.
 
 from __future__ import annotations
 
@@ -27,7 +26,7 @@ from .inference import (
     InferenceEngineCachePreprocessing,
     InferenceEngineOnDemand,
 )
-from .model_loading import load_model_criterion_config
+from .model_loading import load_model_criterion_config, resolve_model_version
 from .preprocessing import (
     BaseDatasetConfig,
     ClassifierDatasetConfig,
@@ -132,6 +131,9 @@ def initialize_tabpfn_model(
         if isinstance(model_path, str) and model_path == "auto":
             model_path = None  # type: ignore
 
+        # Resolve model version from path (matches original TabPFN behavior)
+        version = resolve_model_version(model_path)
+
         # Load model with potential caching
         if which == "classifier":
             # The classifier's bar distribution is not used;
@@ -141,7 +143,7 @@ def initialize_tabpfn_model(
                 check_bar_distribution_criterion=False,
                 cache_trainset_representation=(fit_mode == "fit_with_cache"),
                 which="classifier",
-                version="v2",
+                version=version.value,
                 download=download,
             )
             norm_criterion = None
@@ -152,7 +154,7 @@ def initialize_tabpfn_model(
                 check_bar_distribution_criterion=True,
                 cache_trainset_representation=(fit_mode == "fit_with_cache"),
                 which="regressor",
-                version="v2",
+                version=version.value,
                 download=download,
             )
             norm_criterion = bardist
@@ -220,7 +222,7 @@ def create_inference_engine(  # noqa: PLR0913
     fit_mode: Literal["low_memory", "fit_preprocessors", "fit_with_cache", "batched"],
     device_: torch.device,
     rng: np.random.Generator,
-    n_jobs: int,
+    n_preprocessing_jobs: int,
     byte_size: int,
     forced_inference_dtype_: torch.dtype | None,
     memory_saving_mode: bool | Literal["auto"] | float | int,
@@ -243,7 +245,7 @@ def create_inference_engine(  # noqa: PLR0913
         fit_mode: Determines how we prepare inference (pre-cache or not).
         device_: The device for inference.
         rng: Numpy random generator.
-        n_jobs: Number of parallel CPU workers.
+        n_preprocessing_jobs: Number of worker processes for preprocessing.
         byte_size: Byte size for the chosen inference precision.
         forced_inference_dtype_: If not None, the forced dtype for inference.
         memory_saving_mode: GPU/CPU memory saving settings.
@@ -265,7 +267,7 @@ def create_inference_engine(  # noqa: PLR0913
             ensemble_configs=ensemble_configs,
             rng=rng,
             model=model,
-            n_workers=n_jobs,
+            n_workers=n_preprocessing_jobs,
             dtype_byte_size=byte_size,
             force_inference_dtype=forced_inference_dtype_,
             save_peak_mem=memory_saving_mode,
@@ -276,7 +278,7 @@ def create_inference_engine(  # noqa: PLR0913
             y_train=y_train,
             cat_ix=cat_ix,
             ensemble_configs=ensemble_configs,
-            n_workers=n_jobs,
+            n_workers=n_preprocessing_jobs,
             model=model,
             rng=rng,
             dtype_byte_size=byte_size,
@@ -291,7 +293,7 @@ def create_inference_engine(  # noqa: PLR0913
             cat_ix=cat_ix,
             model=model,
             ensemble_configs=ensemble_configs,
-            n_workers=n_jobs,
+            n_workers=n_preprocessing_jobs,
             device=device_,
             dtype_byte_size=byte_size,
             rng=rng,

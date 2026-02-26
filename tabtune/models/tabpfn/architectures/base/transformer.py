@@ -22,6 +22,7 @@ from .encoders import (
     SequentialEncoder,
 )
 from .layer import PerFeatureEncoderLayer
+from .thinking_tokens import AddThinkingTokens
 from ..interface import Architecture
 
 if TYPE_CHECKING:
@@ -192,6 +193,14 @@ class PerFeatureTransformer(Architecture):
         self.features_per_group = config.features_per_group
         self.cache_trainset_representation = cache_trainset_representation
         self.cached_embeddings: torch.Tensor | None = None
+
+        if config.num_thinking_rows > 0:
+            self.add_thinking_tokens = AddThinkingTokens(
+                num_thinking_rows=config.num_thinking_rows,
+                emsize=config.emsize,
+            )
+        else:
+            self.add_thinking_tokens = None
 
         layer_creator = lambda: PerFeatureEncoderLayer(
             config=config,
@@ -546,6 +555,12 @@ class PerFeatureTransformer(Architecture):
             )
         del embedded_y, embedded_x
 
+        if self.add_thinking_tokens is not None:
+            embedded_input, single_eval_pos = self.add_thinking_tokens(
+                embedded_input,
+                single_eval_pos,
+            )
+
         encoder_out = self.transformer_encoder(
             (
                 embedded_input
@@ -592,7 +607,14 @@ class PerFeatureTransformer(Architecture):
             )
 
             # out: s b e
-            train_encoder_out = encoder_out[:, :single_eval_pos, -1].transpose(0, 1)
+            thinking_rows_offset = (
+                self.add_thinking_tokens.num_thinking_rows
+                if self.add_thinking_tokens is not None
+                else 0
+            )
+            train_encoder_out = encoder_out[
+                :, thinking_rows_offset:single_eval_pos, -1
+            ].transpose(0, 1)
             output_decoded["train_embeddings"] = train_encoder_out
             output_decoded["test_embeddings"] = test_encoder_out
 

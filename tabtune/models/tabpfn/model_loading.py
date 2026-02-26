@@ -1,6 +1,5 @@
 """Functions for downloading and loading model checkpoints."""
 
-#  Copyright (c) Prior Labs GmbH 2025.
 
 from __future__ import annotations
 
@@ -48,6 +47,7 @@ class ModelType(str, Enum):  # noqa: D101
 
 class ModelVersion(str, Enum):  # noqa: D101
     V2 = "v2"
+    V2_5 = "v2.5"
 
 
 @dataclass
@@ -92,6 +92,42 @@ class ModelSource:  # noqa: D101
             filenames=filenames,
         )
 
+    @classmethod
+    def get_classifier_v2_5(cls) -> ModelSource:  # noqa: D102
+        filenames = [
+            "tabpfn-v2.5-classifier-v2.5_default.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_default-2.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_large-features-L.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_large-features-XL.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_large-samples.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_real-large-features.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_real-large-samples-and-features.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_real.ckpt",
+            "tabpfn-v2.5-classifier-v2.5_variant.ckpt",
+        ]
+        return cls(
+            repo_id="Prior-Labs/tabpfn_2_5",
+            default_filename="tabpfn-v2.5-classifier-v2.5_default.ckpt",
+            filenames=filenames,
+        )
+
+    @classmethod
+    def get_regressor_v2_5(cls) -> ModelSource:  # noqa: D102
+        filenames = [
+            "tabpfn-v2.5-regressor-v2.5_default.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_low-skew.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_quantiles.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_real-variant.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_real.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_small-samples.ckpt",
+            "tabpfn-v2.5-regressor-v2.5_variant.ckpt",
+        ]
+        return cls(
+            repo_id="Prior-Labs/tabpfn_2_5",
+            default_filename="tabpfn-v2.5-regressor-v2.5_default.ckpt",
+            filenames=filenames,
+        )
+
     def get_fallback_urls(self) -> list[str]:  # noqa: D102
         return [
             f"https://huggingface.co/{self.repo_id}/resolve/main/{filename}?download=true"
@@ -105,6 +141,11 @@ def _get_model_source(version: ModelVersion, model_type: ModelType) -> ModelSour
             return ModelSource.get_classifier_v2()
         if model_type == ModelType.REGRESSOR:
             return ModelSource.get_regressor_v2()
+    elif version == ModelVersion.V2_5:
+        if model_type == ModelType.CLASSIFIER:
+            return ModelSource.get_classifier_v2_5()
+        if model_type == ModelType.REGRESSOR:
+            return ModelSource.get_regressor_v2_5()
 
     raise ValueError(
         f"Unsupported version/model combination: {version.value}/{model_type.value}",
@@ -240,7 +281,7 @@ def _try_direct_downloads(
 def download_model(
     to: Path,
     *,
-    version: Literal["v2"],
+    version: Literal["v2", "v2.5"],
     which: Literal["classifier", "regressor"],
     model_name: str | None = None,
 ) -> Literal["ok"] | list[Exception]:
@@ -281,16 +322,18 @@ def download_model(
 
 
 def download_all_models(to: Path) -> None:
-    """Download all v2 classifier and regressor models into a local directory."""
+    """Download all v2 and v2.5 classifier and regressor models into a local directory."""
     to.mkdir(parents=True, exist_ok=True)
-    for model_source, model_type in [
-        (ModelSource.get_classifier_v2(), "classifier"),
-        (ModelSource.get_regressor_v2(), "regressor"),
+    for model_source, model_type, version in [
+        (ModelSource.get_classifier_v2(), "classifier", "v2"),
+        (ModelSource.get_regressor_v2(), "regressor", "v2"),
+        (ModelSource.get_classifier_v2_5(), "classifier", "v2.5"),
+        (ModelSource.get_regressor_v2_5(), "regressor", "v2.5"),
     ]:
         for ckpt_name in model_source.filenames:
             download_model(
                 to=to / ckpt_name,
-                version="v2",
+                version=cast("Literal['v2', 'v2.5']", version),
                 which=cast("Literal['classifier', 'regressor']", model_type),
                 model_name=ckpt_name,
             )
@@ -350,7 +393,7 @@ def load_model_criterion_config(
     *,
     check_bar_distribution_criterion: Literal[False],
     cache_trainset_representation: bool,
-    version: Literal["v2"],
+    version: Literal["v2", "v2.5"],
     which: Literal["classifier"],
     download: bool,
 ) -> tuple[
@@ -366,7 +409,7 @@ def load_model_criterion_config(
     *,
     check_bar_distribution_criterion: Literal[True],
     cache_trainset_representation: bool,
-    version: Literal["v2"],
+    version: Literal["v2", "v2.5"],
     which: Literal["regressor"],
     download: bool,
 ) -> tuple[Architecture, FullSupportBarDistribution, ArchitectureConfig]: ...
@@ -378,7 +421,7 @@ def load_model_criterion_config(
     check_bar_distribution_criterion: bool,
     cache_trainset_representation: bool,
     which: Literal["regressor", "classifier"],
-    version: Literal["v2"] = "v2",
+    version: Literal["v2", "v2.5"] = "v2",
     download: bool,
 ) -> tuple[
     Architecture,
@@ -423,10 +466,14 @@ def load_model_criterion_config(
         )
         if res != "ok":
             repo_type = "clf" if which == "classifier" else "reg"
+            if version == "v2":
+                repo_base = f"Prior-Labs/TabPFN-v2-{repo_type}"
+            else:  # v2.5
+                repo_base = "Prior-Labs/tabpfn_2_5"
             raise RuntimeError(
                 f"Failed to download model to {model_path}!\n\n"
                 f"For offline usage, please download the model manually from:\n"
-                f"https://huggingface.co/Prior-Labs/TabPFN-v2-{repo_type}/resolve/main/{model_name}\n\n"
+                f"https://huggingface.co/{repo_base}/resolve/main/{model_name}\n\n"
                 f"Then place it at: {model_path}",
             ) from res[0]
 
@@ -447,7 +494,7 @@ def load_model_criterion_config(
 def resolve_model_path(
     model_path: None | str | Path,
     which: Literal["regressor", "classifier"],
-    version: Literal["v2"] = "v2",
+    version: Literal["v2", "v2.5"] = "v2",
 ) -> tuple[Path, Path, str, str]:
     """Resolves the model path, using the official default model if no path is provided.
 
@@ -456,7 +503,7 @@ def resolve_model_path(
             model for the given `which` and `version` will be used, resolving
             to the local cache directory.
         which: The type of model ('regressor' or 'classifier').
-        version: The model version (currently only 'v2').
+        version: The model version ('v2' or 'v2.5').
 
     Returns:
         A tuple containing the resolved model Path, the parent directory Path,
@@ -485,6 +532,49 @@ def resolve_model_path(
         model_name = model_path.name
 
     return model_path, model_dir, model_name, which
+
+
+# Special string used to identify v2.5 models in model paths.
+V_2_5_IDENTIFIER = "v2.5"
+
+
+def _resolve_model_version(model_path: None | str | Path) -> ModelVersion:
+    """Resolve the model version from a single model path.
+    
+    Args:
+        model_path: Path to the model file, or None for default.
+        
+    Returns:
+        The detected ModelVersion (V2 or V2_5).
+    """
+    if model_path is None:
+        # Default to v2.5 if no path provided (matching original TabPFN behavior)
+        # Note: TabTune doesn't have settings.tabpfn.model_version, so we default to v2.5
+        return ModelVersion.V2_5
+    if V_2_5_IDENTIFIER in Path(model_path).name:
+        return ModelVersion.V2_5
+    return ModelVersion.V2
+
+
+def resolve_model_version(
+    model_path: None | str | Path | list[str | Path],
+) -> ModelVersion:
+    """Resolve the model version from the model path.
+    
+    Args:
+        model_path: Path(s) to model file(s), or None for default.
+        
+    Returns:
+        The detected ModelVersion. If multiple paths provided, all must have same version.
+    """
+    if isinstance(model_path, list):
+        if len(model_path) == 0:
+            return _resolve_model_version(None)
+        resolved_model_versions = [_resolve_model_version(p) for p in model_path]
+        if len(set(resolved_model_versions)) > 1:
+            raise ValueError("All model paths must have the same version.")
+        return resolved_model_versions[0]
+    return _resolve_model_version(model_path)
 
 
 def get_loss_criterion(

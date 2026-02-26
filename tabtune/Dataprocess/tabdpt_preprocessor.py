@@ -14,16 +14,17 @@ class TabDPTPreprocessor(BaseEstimator, TransformerMixin):
     """
     Minimal preprocessor for TabDPT to handle basic data format conversions.
     1. Converts categorical features to numerical format (OrdinalEncoder)
-    2. Encodes the target variable (LabelEncoder)
+    2. Encodes the target variable (LabelEncoder) - only for classification
     3. Ensures pandas DataFrames are converted to numpy arrays
     
     The standalone TabDPT model handles all advanced preprocessing internally
     (normalization, missing indicators, outlier clipping, feature reduction, etc.)
     """
-    def __init__(self):
+    def __init__(self, task_type='classification'):
         # Removed: model_input_dim parameter - not needed anymore
         self.feature_encoder_ = None
         self.label_encoder_ = None
+        self.task_type = task_type
         # Removed: self.projector_ - standalone TabDPT handles feature projection
         # Removed: self.fitted_input_features_ - not needed
         self._is_fitted = False
@@ -52,9 +53,13 @@ class TabDPTPreprocessor(BaseEstimator, TransformerMixin):
         # self.projector_ = nn.Linear(self.fitted_input_features_, self.model_input_dim)
         # self.projector_.train() # Set to training mode for the finetuning loop
 
-        # 3. Fit the label encoder for the target variable
-        self.label_encoder_ = LabelEncoder()
-        self.label_encoder_.fit(y)
+        # 3. Fit the label encoder for the target variable (only for classification)
+        if self.task_type == 'classification':
+            self.label_encoder_ = LabelEncoder()
+            self.label_encoder_.fit(y)
+        else:
+            # For regression, target should remain numeric
+            self.label_encoder_ = None
 
         self._is_fitted = True
         
@@ -80,9 +85,13 @@ class TabDPTPreprocessor(BaseEstimator, TransformerMixin):
         # X_final = X_projected_tensor.detach().numpy()
         
         if y is not None:
-            if self.label_encoder_ is None:
-                raise logger.error("Label encoder not fitted.")
-            y_final = self.label_encoder_.transform(y)
+            if self.task_type == 'classification':
+                if self.label_encoder_ is None:
+                    raise logger.error("Label encoder not fitted.")
+                y_final = self.label_encoder_.transform(y)
+            else:
+                # For regression, return target as-is (numeric)
+                y_final = np.array(y).flatten().astype(float) if not isinstance(y, np.ndarray) else y.astype(float)
             return X_processed, y_final
             
         return X_processed
@@ -112,9 +121,11 @@ class TabDPTPreprocessor(BaseEstimator, TransformerMixin):
             },
             # REMOVED: "Feature Projection" section - not applicable anymore
             "Target Encoding": {
-                "description": "Encoded the target variable into numerical labels.",
+                "description": "Encoded the target variable into numerical labels." if self.task_type == 'classification' else "Target variable remains numeric (regression).",
                 "details": [
                     f"Fitted LabelEncoder on target, identifying {len(self.label_encoder_.classes_)} unique classes."
+                ] if self.task_type == 'classification' and self.label_encoder_ else [
+                    "Target variable kept as numeric values for regression."
                 ]
             }
         }

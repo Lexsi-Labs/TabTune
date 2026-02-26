@@ -27,7 +27,8 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
                  scaler: str = 'standard', 
                  max_features: int | None = None,
                  shuffle_features: bool = False,
-                 random_mirror_x: bool = False):
+                 random_mirror_x: bool = False,
+                 task_type: str = 'classification'):
         """
         Args:
             scaler (str): The type of scaler to use for numerical features. 
@@ -38,6 +39,9 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
                                      Should be False for inference. Defaults to False.
             random_mirror_x (bool): If True, randomly multiplies numerical features by -1.
                                     Should be False for inference. Defaults to False.
+            task_type (str): Task type - 'classification' or 'regression'. 
+                             For regression, LabelEncoder is not fitted (aligns with AutoGluon's LabelCleanerDummy).
+                             Defaults to 'classification'.
         """
         if scaler not in ['standard', 'quantile']:
             raise ValueError("Scaler must be 'standard' or 'quantile'")
@@ -46,6 +50,7 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
         self.max_features_ = max_features
         self.shuffle_features_ = shuffle_features
         self.random_mirror_x_ = random_mirror_x
+        self.task_type = task_type
 
         # --- Initialize all attributes to prevent AttributeErrors ---
         self._is_fitted = False
@@ -125,9 +130,14 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
             self.final_categorical_cols_ = self.original_categorical_cols_
             logger.info(f"  Categorical encoder fitted for {len(self.final_categorical_cols_)} columns")
 
-        # --- Step 4: Fit Target Encoder ---
-        self.label_encoder_ = LabelEncoder()
-        self.label_encoder_.fit(y)
+        # --- Step 4: Fit Target Encoder (only for classification) ---
+        # For regression, we don't encode targets (aligns with AutoGluon's LabelCleanerDummy)
+        if self.task_type == 'classification':
+            self.label_encoder_ = LabelEncoder()
+            self.label_encoder_.fit(y)
+        else:
+            # For regression, target should remain numeric (no encoding)
+            self.label_encoder_ = None
 
         # --- Step 5: Store final feature list (in order) ---
         self.final_features_ = self.final_numerical_cols_ + self.final_categorical_cols_
@@ -201,7 +211,13 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
         X_final = X_final.astype(np.float32)
 
         if y is not None:
-            y_final = self.label_encoder_.transform(y.astype(str))
+            if self.task_type == 'classification':
+                if self.label_encoder_ is None:
+                    raise RuntimeError("Label encoder not fitted for classification.")
+                y_final = self.label_encoder_.transform(y.astype(str))
+            else:
+                # For regression, return target as-is (numeric)
+                y_final = np.array(y).flatten().astype(float) if not isinstance(y, np.ndarray) else y.astype(float)
             return X_final, y_final
         
         return X_final
@@ -246,10 +262,18 @@ class MitraPreprocessor(BaseEstimator, TransformerMixin):
                 ]
             }
 
-        summary["Target Encoding"] = {
+        if self.task_type == 'classification':
+            summary["Target Encoding"] = {
                 "description": "Encoded the target variable into numerical labels.",
                 "details": [
                     f"Fitted a LabelEncoder on the target, identifying {len(self.label_encoder_.classes_)} unique classes."
+                ]
+            }
+        else:
+            summary["Target Encoding"] = {
+                "description": "Target variable remains numeric (no encoding for regression).",
+                "details": [
+                    "For regression tasks, targets are not encoded (aligns with AutoGluon's LabelCleanerDummy behavior)."
                 ]
             }
         summary["Data Augmentation"] = {
