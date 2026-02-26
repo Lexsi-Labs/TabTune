@@ -1,5 +1,5 @@
 """
-Example 12: Fine-Tuning Strategies Comparison for Regression
+Example 11: Fine-Tuning Strategies Comparison for Regression
 ============================================================
 
 This example demonstrates TabTune's fine-tuning strategies explicitly applied
