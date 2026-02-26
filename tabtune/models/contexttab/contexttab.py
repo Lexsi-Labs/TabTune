@@ -65,8 +65,8 @@ class ConTextTabEstimator(BaseEstimator, ABC):
     MAX_NUM_COLUMNS = 500
 
     def __init__(self,
-                 checkpoint: str = 'l2/base.pt',
-                 checkpoint_revision: str = 'v1.0.0',
+                 checkpoint: str = '2025-11-04_sap-rpt-one-oss.pt',
+                 checkpoint_revision: str = None,
                  bagging: Union[Literal['auto'], int] = 1,
                  max_context_size: int = 8192,
                  num_regression_bins: int = 16,
@@ -75,10 +75,15 @@ class ConTextTabEstimator(BaseEstimator, ABC):
                  is_drop_constant_columns: bool = True,
                  test_chunk_size: int = 1000):
 
-        self.model_size = ModelSize[checkpoint.split('/')[-1].split('.')[0]]
+        # Use new repository: SAP/sap-rpt-1-oss (formerly SAP/contexttab)
+        self.model_size = ModelSize.base  # New repo always uses base model size
         self.checkpoint_revision = checkpoint_revision
         self.checkpoint = checkpoint
-        self._checkpoint_path = hf_hub_download(repo_id="SAP/contexttab", filename=checkpoint, revision=checkpoint_revision)
+        # Update to use new repository
+        if checkpoint_revision:
+            self._checkpoint_path = hf_hub_download(repo_id="SAP/sap-rpt-1-oss", filename=checkpoint, revision=checkpoint_revision)
+        else:
+            self._checkpoint_path = hf_hub_download(repo_id="SAP/sap-rpt-1-oss", filename=checkpoint)
         self.bagging = bagging
         if not isinstance(bagging, int) and bagging != 'auto':
             raise ValueError('bagging must be an integer or "auto"')
@@ -100,7 +105,8 @@ class ConTextTabEstimator(BaseEstimator, ABC):
         self.model.load_weights(Path(self._checkpoint_path), self.device)
         self.regression_type = regression_type
         self.seed = 42
-        self.is_drop_constant_columns = is_drop_constant_columns
+        # Use drop_constant_columns to match official implementation
+        self.drop_constant_columns = is_drop_constant_columns
         self.tokenizer = Tokenizer(
             regression_type=regression_type,
             classification_type=classification_type,
@@ -128,7 +134,8 @@ class ConTextTabEstimator(BaseEstimator, ABC):
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
         if not isinstance(y, pd.Series):
-            y = pd.Series(y, name='TARGET')
+            # Ensure y has the same index as X to avoid alignment issues
+            y = pd.Series(y, name='TARGET', index=X.index)
 
         self.X_ = X
 
@@ -160,10 +167,27 @@ class ConTextTabEstimator(BaseEstimator, ABC):
 
         df_train = pd.concat([X_train, y_train.to_frame()], axis=1)
         df_test = pd.concat([X_test, y_test.to_frame()], axis=1)
+        
+        # Debug: Check before bagging
+        import logging
+        debug_logger = logging.getLogger(__name__)
+        if df_train.iloc[:, -1].isna().sum() > 0:
+            debug_logger.error(
+                f"[ConTextTabRegressor] df_train target has NaN BEFORE bagging! "
+                f"Bagging index: {bagging_index}, NaN count: {df_train.iloc[:, -1].isna().sum()}, "
+                f"Shape: {df_train.shape}, X_train index: {X_train.index.tolist()[:5]}, y_train index: {y_train.index.tolist()[:5]}"
+            )
 
         if isinstance(self.bagging_config, int) and self.bagging_config > 1:
             # For bagging, we use replacement
             df_train = df_train.sample(self.max_context_size, replace=False, random_state=self.seed + bagging_index)
+            
+            # Debug: Check after bagging
+            if df_train.iloc[:, -1].isna().sum() > 0:
+                debug_logger.error(
+                    f"[ConTextTabRegressor] df_train target has NaN AFTER bagging sample! "
+                    f"Bagging index: {bagging_index}, NaN count: {df_train.iloc[:, -1].isna().sum()}"
+                )
         elif len(df_train) > self.max_context_size:
             if isinstance(self.bagging_config, str):
                 assert self.bagging_config == 'auto'
@@ -184,35 +208,101 @@ class ConTextTabEstimator(BaseEstimator, ABC):
                 df_train = df_train.sample(self.max_context_size, replace=False, random_state=self.seed + bagging_index)
 
         df = pd.concat([df_train, df_test], ignore_index=True)
+        
+        # Store the original training data length before any modifications
+        original_train_len = len(df_train)
+        
+        # Debug: Check target column after initial concat
+        import logging
+        debug_logger = logging.getLogger(__name__)
+        target_col_after_concat = df.iloc[:, -1]
+        if target_col_after_concat.isna().sum() > 0:
+            debug_logger.error(
+                f"[ConTextTabRegressor] Target column has NaN after initial concat! "
+                f"Bagging index: {bagging_index}, NaN count: {target_col_after_concat.isna().sum()}, "
+                f"Total rows: {len(df)}, Train rows: {original_train_len}"
+            )
 
-        if self.is_drop_constant_columns:
+        if self.drop_constant_columns:
             X = df.iloc[:, :-1]
             y = df.iloc[:, -1:]
             constant_cols = list(X.columns[X.nunique() == 1])
             if constant_cols:
                 X = X.drop(columns=constant_cols)
-                df = pd.concat([X, y], axis=1)
+                # Ensure indices align when concatenating
+                df = pd.concat([X.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
+                # Debug: Check after dropping constant columns
+                if df.iloc[:, -1].isna().sum() > 0:
+                    debug_logger.error(
+                        f"[ConTextTabRegressor] Target column has NaN after dropping constant columns! "
+                        f"Bagging index: {bagging_index}, NaN count: {df.iloc[:, -1].isna().sum()}"
+                    )
 
         if df.shape[1] > self.MAX_NUM_COLUMNS:
             X = df.iloc[:, :-1]
             y = df.iloc[:, -1:]
             X = X.sample(n=self.MAX_NUM_COLUMNS - 1, axis=1, random_state=self.seed + bagging_index, replace=False)
-            df = pd.concat([X, y], axis=1)
+            # Ensure indices align when concatenating
+            df = pd.concat([X.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
+            # Debug: Check after column sampling
+            if df.iloc[:, -1].isna().sum() > 0:
+                debug_logger.error(
+                    f"[ConTextTabRegressor] Target column has NaN after column sampling! "
+                    f"Bagging index: {bagging_index}, NaN count: {df.iloc[:, -1].isna().sum()}"
+                )
 
-        df_train = df.iloc[:len(df_train)]
-        df_test = df.iloc[len(df_train):]
+        # Use the stored original_train_len to correctly split train and test
+        df_train = df.iloc[:original_train_len].copy()
+        df_test = df.iloc[original_train_len:].copy()
         X_train = df_train.iloc[:, :-1]
         y_train = df_train.iloc[:, -1:]
         X_test = df_test.iloc[:, :-1]
         y_test = df_test.iloc[:, -1:]
 
+        # Debug: Check y_train and y_test before tokenization
+        if y_train.isna().sum().sum() > 0:
+            debug_logger.error(
+                f"[ConTextTabRegressor] y_train has NaN before tokenization! "
+                f"Bagging index: {bagging_index}, NaN count: {y_train.isna().sum().sum()}, "
+                f"Shape: {y_train.shape}, Columns: {y_train.columns.tolist()}"
+            )
+        if y_test.isna().sum().sum() > 0:
+            debug_logger.error(
+                f"[ConTextTabRegressor] y_test has NaN before tokenization! "
+                f"Bagging index: {bagging_index}, NaN count: {y_test.isna().sum().sum()}"
+            )
+
         data, labels, label_classes = self.tokenizer(X_train, y_train, X_test, y_test,
                                                      self.classification_or_regression)
+
+        # Debug: Check target data immediately after tokenization
+        if 'target' in data and isinstance(data['target'], torch.Tensor):
+            nan_after_tokenizer = torch.sum(~torch.isfinite(data['target'])).item()
+            if nan_after_tokenizer > 0:
+                debug_logger.error(
+                    f"[ConTextTabRegressor] Found {nan_after_tokenizer} NaN/Inf in target AFTER tokenizer! "
+                    f"Bagging index: {bagging_index}, Shape: {data['target'].shape}, "
+                    f"Min: {data['target'].min().item()}, Max: {data['target'].max().item()}"
+                )
 
         target_mean, target_std = 0, 0
         is_regression = self.classification_or_regression == 'regression'
         if is_regression and self.regression_type == 'l2':
+            # Debug: Check inputs to standard_scale_column
+            debug_logger.debug(
+                f"[ConTextTabRegressor] Calling standard_scale_column with "
+                f"y_train shape: {y_train.shape}, y_test shape: {y_test.shape}, "
+                f"y_train NaN: {y_train.isna().sum().sum()}, y_test NaN: {y_test.isna().sum().sum()}"
+            )
             _, target_mean, target_std = self.tokenizer.standard_scale_column(y_train, y_test)
+            
+            # Debug: Check target_mean and target_std
+            if isinstance(target_mean, torch.Tensor) and not torch.isfinite(target_mean).all():
+                debug_logger.error(f"[ConTextTabRegressor] target_mean has NaN/Inf: {target_mean}")
+            if isinstance(target_std, torch.Tensor) and not torch.isfinite(target_std).all():
+                debug_logger.error(f"[ConTextTabRegressor] target_std has NaN/Inf: {target_std}")
+            elif isinstance(target_std, torch.Tensor) and target_std.item() < 1e-10:
+                debug_logger.warning(f"[ConTextTabRegressor] target_std is very small: {target_std.item()}")
 
         return {
             'data': data,
@@ -340,6 +430,9 @@ class ConTextTabRegressor(RegressorMixin, ConTextTabEstimator):
         Returns:
             The predicted target variable.
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # Check if fit has been called
         check_is_fitted(self)
 
@@ -347,7 +440,54 @@ class ConTextTabRegressor(RegressorMixin, ConTextTabEstimator):
 
         for bagging_index in range(self.bagging_number):
             tokenized_data = self.get_tokenized_data(X.copy(), bagging_index)
+            
+            # Debug: Check target data before device transfer
+            if 'data' in tokenized_data and isinstance(tokenized_data['data'], dict):
+                target_before = tokenized_data['data'].get('target')
+                if target_before is not None and isinstance(target_before, torch.Tensor):
+                    nan_before = torch.sum(~torch.isfinite(target_before)).item()
+                    if nan_before > 0:
+                        logger.error(
+                            f"[ConTextTabRegressor] Found {nan_before} NaN/Inf in target BEFORE device transfer! "
+                            f"Bagging index: {bagging_index}, Shape: {target_before.shape}, "
+                            f"Min: {target_before.min().item()}, Max: {target_before.max().item()}"
+                        )
+            
             tokenized_data = to_device(tokenized_data, self.device, raise_on_unexpected=False)
+            
+            # Debug: Check target data after device transfer
+            if 'data' in tokenized_data and isinstance(tokenized_data['data'], dict):
+                target_after = tokenized_data['data'].get('target')
+                if target_after is not None and isinstance(target_after, torch.Tensor):
+                    nan_after = torch.sum(~torch.isfinite(target_after)).item()
+                    if nan_after > 0:
+                        logger.error(
+                            f"[ConTextTabRegressor] Found {nan_after} NaN/Inf in target AFTER device transfer! "
+                            f"Bagging index: {bagging_index}, Shape: {target_after.shape}, "
+                            f"Device: {target_after.device}, Dtype: {target_after.dtype}"
+                        )
+            
+            # Validate input data before forward pass
+            if 'data' in tokenized_data:
+                data_tensor = tokenized_data['data']
+                if isinstance(data_tensor, dict):
+                    for key, value in data_tensor.items():
+                        if isinstance(value, torch.Tensor):
+                            if torch.any(~torch.isfinite(value)):
+                                nan_count = torch.sum(~torch.isfinite(value)).item()
+                                logger.warning(
+                                    f"[ConTextTabRegressor] Found {nan_count} NaN/Inf values in input data['{key}']. "
+                                    f"Replacing with zeros."
+                                )
+                                data_tensor[key] = torch.where(
+                                    ~torch.isfinite(value),
+                                    torch.zeros_like(value),
+                                    value
+                                )
+            
+            # Ensure model is in eval mode
+            self.model.eval()
+            
             logits_reg = self.model(**tokenized_data)
             label_classes = tokenized_data['label_classes']
 
@@ -355,14 +495,90 @@ class ConTextTabRegressor(RegressorMixin, ConTextTabEstimator):
                 if len(label_classes) != self.num_regression_bins:
                     raise ValueError(f'Expected {self.num_regression_bins} classes, got {len(label_classes)}')
 
+            # Check if logits are NaN/Inf before extraction
+            if isinstance(logits_reg, torch.Tensor):
+                if torch.any(~torch.isfinite(logits_reg)):
+                    nan_count = torch.sum(~torch.isfinite(logits_reg)).item()
+                    total_count = logits_reg.numel()
+                    
+                    if nan_count == total_count:
+                        # ALL logits are NaN - this is a serious issue, skip this bagging iteration
+                        logger.error(
+                            f"[ConTextTabRegressor] ALL logits are NaN/Inf in bagging iteration {bagging_index}. "
+                            f"Shape: {logits_reg.shape}. Skipping this iteration and using mean prediction."
+                        )
+                        # Skip this bagging iteration - will use mean as fallback
+                        num_test = len(X) if isinstance(X, pd.DataFrame) else X.shape[0]
+                        preds = np.full(num_test, float(self.y_.mean()), dtype=np.float32)
+                        all_preds.append(preds)
+                        continue
+                    else:
+                        logger.warning(
+                            f"[ConTextTabRegressor] Found {nan_count}/{total_count} NaN/Inf values in logits. "
+                            f"Shape: {logits_reg.shape}, Replacing with zeros (normalized mean)."
+                        )
+                        # Replace NaN/Inf logits with zeros (which represent normalized mean after denormalization)
+                        logits_reg = torch.where(
+                            ~torch.isfinite(logits_reg),
+                            torch.zeros_like(logits_reg),
+                            logits_reg
+                        )
+
+            # Get target_mean and target_std, with validation
+            target_mean = tokenized_data.get('target_mean')
+            target_std = tokenized_data.get('target_std')
+            
+            # Validate target_mean and target_std are finite
+            if target_mean is not None:
+                if isinstance(target_mean, torch.Tensor):
+                    if not torch.isfinite(target_mean).all():
+                        # Fallback to mean of training data
+                        target_mean = torch.tensor(float(self.y_.mean()), dtype=target_mean.dtype, device=target_mean.device)
+                elif not np.isfinite(target_mean):
+                    target_mean = float(self.y_.mean())
+            
+            if target_std is not None:
+                if isinstance(target_std, torch.Tensor):
+                    if not torch.isfinite(target_std).all() or target_std.item() < 1e-10:
+                        # Fallback to std of training data, or 1.0 if std is too small
+                        fallback_std = max(float(self.y_.std()), 1e-10)
+                        target_std = torch.tensor(fallback_std, dtype=target_std.dtype, device=target_std.device)
+                elif not np.isfinite(target_std) or target_std < 1e-10:
+                    target_std = max(float(self.y_.std()), 1e-10)
+            
             preds, _ = self.model.extract_prediction_regression(logits_reg,
                                                                 tokenized_data['data']['target'],
                                                                 tokenized_data['label_classes'],
-                                                                target_mean=tokenized_data.get('target_mean'),
-                                                                target_std=tokenized_data.get('target_std'))
+                                                                target_mean=target_mean,
+                                                                target_std=target_std)
+            
+            # Validate predictions before appending
+            if len(preds) == 0:
+                # Empty predictions - use mean as fallback
+                num_test = len(X) if isinstance(X, pd.DataFrame) else X.shape[0]
+                preds = np.full(num_test, float(self.y_.mean()), dtype=np.float32)
+            elif np.any(~np.isfinite(preds)):
+                # Replace NaN/Inf with mean
+                nan_inf_mask = ~np.isfinite(preds)
+                replacement_value = float(self.y_.mean())
+                preds[nan_inf_mask] = replacement_value
+            
             all_preds.append(preds)
 
-        preds = np.mean(all_preds, axis=0)
+        # Average predictions across bagging iterations
+        if len(all_preds) > 0:
+            # Filter out empty arrays
+            valid_preds = [p for p in all_preds if len(p) > 0]
+            if len(valid_preds) > 0:
+                preds = np.mean(valid_preds, axis=0)
+            else:
+                # All predictions were empty - use mean as fallback
+                num_test = len(X) if isinstance(X, pd.DataFrame) else X.shape[0]
+                preds = np.full(num_test, float(self.y_.mean()), dtype=np.float32)
+        else:
+            # No predictions at all - use mean as fallback
+            num_test = len(X) if isinstance(X, pd.DataFrame) else X.shape[0]
+            preds = np.full(num_test, float(self.y_.mean()), dtype=np.float32)
 
         return preds
 

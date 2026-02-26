@@ -21,6 +21,12 @@ from .mitra_preprocessor import MitraPreprocessor
 from .orion_bix_preprocessor import OrionBixPreprocessor
 from .tabdpt_preprocessor import TabDPTPreprocessor
 from .limix_preprocessor import LimixPreprocessor
+from .regression.base_processor import RegressionDataProcessor
+from .regression.tabpfn_processor import TabPFNRegressionProcessor
+from .regression.contexttab_processor import ContextTabRegressionProcessor
+from .regression.tabdpt_processor import TabDPTRegressionProcessor
+from .regression.mitra_processor import MitraRegressionProcessor
+from .regression.limix_processor import LimixRegressionProcessor
 
 class DataProcessor(BaseEstimator, TransformerMixin):
     """
@@ -32,9 +38,10 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                  imputation_strategy='mean', categorical_encoding='onehot', 
                  scaling_strategy='standard', resampling_strategy=None,
                  feature_selection_strategy=None, feature_selection_k=10,
-                 model_params=None):
+                 model_params=None, task_type='classification'):
         
         self.model_name = model_name
+        self.task_type = task_type
         self.override_types = override_types
         self.imputation_strategy = imputation_strategy
         self.categorical_encoding = categorical_encoding
@@ -56,6 +63,8 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self.resampler_ = None
         self.selector_ = None
         self.label_encoder_ = None
+        self.regression_processor_ = None
+        self.feature_names_ = None # Added for tracking feature names
         self._correlation_cols_to_drop = []
         self.original_cols_ = None
         self.processing_summary_ = {}
@@ -67,6 +76,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'TabPFN': {'categorical_encoding': 'tabpfn_special'},
                 'TabICL': {'categorical_encoding': 'tabicl_special'},
                 'OrionMSP': {'categorical_encoding': 'orion_msp_special'},
+                'OrionMSPv1.5': {'categorical_encoding': 'orion_msp_special'},
                 'ContextTab': {'categorical_encoding': 'contexttab_special'},
                 'Mitra': {'categorical_encoding': 'mitra_special'}, 
                 'OrionBix': {'categorical_encoding': 'orion_bix_special'},
@@ -99,9 +109,66 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 # Extract regression parameters from model_params
                 regression_type = self.model_params.get('regression_type', 'l2')
                 num_regression_bins = self.model_params.get('num_regression_bins', 16)
-                return PreprocessorClass(regression_type=regression_type, num_regression_bins=num_regression_bins)
+                # Pass task_type to ContextTab preprocessor
+                return PreprocessorClass(regression_type=regression_type, num_regression_bins=num_regression_bins, task_type=self.task_type)
+            elif self.categorical_encoding == 'tabdpt_special':
+                # Pass task_type to TabDPT preprocessor
+                return PreprocessorClass(task_type=self.task_type)
+            elif self.categorical_encoding == 'limix_special':
+                # Pass task_type to Limix preprocessor
+                return PreprocessorClass(task_type=self.task_type)
+            elif self.categorical_encoding == 'mitra_special':
+                # Pass task_type to Mitra preprocessor
+                return PreprocessorClass(task_type=self.task_type)
             return PreprocessorClass()
         return None
+
+    def _get_regression_processor(self):
+        """Factory method to return the correct regression processor instance.
+        
+        Note: Most models handle target normalization internally, so default is 'none'.
+        Only override if explicitly specified in model_params.
+        """
+        # Get target_scaling from model_params, but use model-specific defaults if not specified
+        target_scaling = self.model_params.get('target_scaling', None)
+        
+        if self.model_name == 'TabPFN':
+            # TabPFN handles normalization internally, default to 'none'
+            if target_scaling is None:
+                target_scaling = 'none'
+            return TabPFNRegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'ContextTab':
+            # ContextTab handles normalization internally, default to 'none'
+            if target_scaling is None:
+                target_scaling = 'none'
+            regression_type = self.model_params.get('regression_type', 'l2')
+            num_regression_bins = self.model_params.get('num_regression_bins', 16)
+            return ContextTabRegressionProcessor(
+                target_scaling_strategy=target_scaling,
+                regression_type=regression_type,
+                num_regression_bins=num_regression_bins
+            )
+        elif self.model_name == 'TabDPT':
+            # TabDPT handles normalization internally, default to 'none'
+            if target_scaling is None:
+                target_scaling = 'none'
+            return TabDPTRegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'Mitra':
+            # Mitra handles normalization internally, default to 'none'
+            if target_scaling is None:
+                target_scaling = 'none'
+            return MitraRegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'Limix':
+            # LimiX handles normalization internally, default to 'none'
+            if target_scaling is None:
+                target_scaling = 'none'
+            return LimixRegressionProcessor(target_scaling_strategy=target_scaling)
+        
+        # Fallback to generic processor (use 'standard' for unknown models)
+        if target_scaling is None:
+            target_scaling = 'standard'
+        return RegressionDataProcessor(target_scaling_strategy=target_scaling)
+
 
     def fit(self, X, y=None):
         X_fit = X.copy()
@@ -121,10 +188,24 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             self.processing_summary_['strategy'] = 'standard'
             self.processing_summary_['steps'] = {}
             self._infer_column_types(X_fit)
-            if y_fit is not None:
+            self._infer_column_types(X_fit)
+        
+        # Handle target encoding/processing (for both custom and standard preprocessors)
+        if self.task_type == 'classification':
+            if y_fit is not None and not self.custom_preprocessor_:
+                # Only set label encoder if no custom preprocessor (custom preprocessors handle their own encoding)
                 self.label_encoder_ = LabelEncoder().fit(y_fit)
                 self.processing_summary_['target_encoding'] = 'LabelEncoder'
-            self._fit_standard_components(X_fit, y_fit)
+        elif self.task_type == 'regression':
+            if y_fit is not None:
+                # Always initialize regression processor for regression tasks
+                self.regression_processor_ = self._get_regression_processor()
+                self.regression_processor_.fit(y_fit)
+                self.processing_summary_['target_encoding'] = f'{type(self.regression_processor_).__name__}'
+            
+            # Only fit standard components if no custom preprocessor
+            if not self.custom_preprocessor_:
+                self._fit_standard_components(X_fit, y_fit)
             
         self._is_fitted = True
         logger.info("[DataProcessor] All components for pipeline have been fitted.")
@@ -144,9 +225,14 @@ class DataProcessor(BaseEstimator, TransformerMixin):
 
         X_transformed = self._apply_standard_transforms(X_transformed)
 
-        if y is not None and self.label_encoder_:
-            y_transformed = self.label_encoder_.transform(y)
-            return X_transformed, y_transformed
+        if y is not None:
+            if self.task_type == 'classification' and self.label_encoder_:
+                y_transformed = self.label_encoder_.transform(y)
+                return X_transformed, y_transformed
+            elif self.task_type == 'regression' and self.regression_processor_:
+                 y_transformed = self.regression_processor_.transform(y)
+                 return X_transformed, y_transformed
+        
         return X_transformed
 
     def fit_transform(self, X, y=None):

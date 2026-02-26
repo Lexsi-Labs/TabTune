@@ -362,7 +362,7 @@ class ConTextTab(nn.Module, ModuleUtilsMixin):
             test_preds = test_probas @ label_classes
         else:
             assert target_mean is not None and target_std is not None
-            test_logits = logits[test_mask]
+            test_logits = logits[test_mask].squeeze()
             # rescale prediction to the original scale
             test_preds = (test_logits * target_std + target_mean).cpu().float().numpy()
             test_probas = None

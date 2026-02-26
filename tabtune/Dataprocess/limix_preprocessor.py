@@ -14,9 +14,10 @@ class LimixPreprocessor(BaseEstimator, TransformerMixin):
     Limix handles normalization and NaN encoding internally within its architecture.
     This processor converts categorical strings to integers (Ordinal Encoding).
     """
-    def __init__(self):
+    def __init__(self, task_type='classification'):
         self.column_transformer_ = None
         self.label_encoder_ = None
+        self.task_type = task_type
         self.categorical_cols_ = []
         self.numerical_cols_ = []
 
@@ -42,9 +43,14 @@ class LimixPreprocessor(BaseEstimator, TransformerMixin):
         self.column_transformer_ = ColumnTransformer(transformers=transformers, verbose_feature_names_out=False)
         self.column_transformer_.fit(X)
 
+        # Only encode target for classification
         if y is not None:
-            self.label_encoder_ = LabelEncoder()
-            self.label_encoder_.fit(y)
+            if self.task_type == 'classification':
+                self.label_encoder_ = LabelEncoder()
+                self.label_encoder_.fit(y)
+            else:
+                # For regression, target should remain numeric
+                self.label_encoder_ = None
 
         return self
 
@@ -58,7 +64,13 @@ class LimixPreprocessor(BaseEstimator, TransformerMixin):
         X_out = X_out.astype(np.float32)
 
         if y is not None:
-            y_out = self.label_encoder_.transform(y)
+            if self.task_type == 'classification':
+                if self.label_encoder_ is None:
+                    raise RuntimeError("Label encoder not fitted for classification.")
+                y_out = self.label_encoder_.transform(y)
+            else:
+                # For regression, return target as-is (numeric)
+                y_out = np.array(y).flatten().astype(float) if not isinstance(y, np.ndarray) else y.astype(float)
             return X_out, y_out
             
         return X_out

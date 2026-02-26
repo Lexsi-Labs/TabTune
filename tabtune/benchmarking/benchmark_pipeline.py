@@ -1,6 +1,7 @@
 import time
 import logging
 import pandas as pd
+import numpy as np
 import torch
 import gc
 from sklearn.model_selection import train_test_split
@@ -11,6 +12,7 @@ from .result_handler import ResultsHandler
 # Import all data loader classes
 from ..data.talent_full import TALENTFullDataset
 from ..data.openml import OpenMLCC18Dataset
+from ..data.openml_ctr23 import OpenMLCTR23Dataset
 from ..data.tabzilla import TabZillaDataset
 from ..data.tabarena import TabArenaDataset
 
@@ -34,6 +36,10 @@ class BenchmarkPipeline:
         self.loader_map = {
             'talent': TALENTFullDataset,
             'openml-cc18': OpenMLCC18Dataset,
+            'openml-ctr23': OpenMLCTR23Dataset,
+            'automl-reg-suite': OpenMLCTR23Dataset,  # Uses same OpenML loader
+            'grinsztajn-tabular-benchmark': OpenMLCTR23Dataset,  # Uses same OpenML loader
+            'tabarena-study-regression': OpenMLCTR23Dataset,  # Uses same OpenML loader
             'tabzilla': TabZillaDataset,
             'tabarena': TabArenaDataset
         }
@@ -88,7 +94,8 @@ class BenchmarkPipeline:
                 # --- START MODIFICATION: Check for existing results ---
                 
                 # Get the dataset name for logging
-                if self.benchmark_name in ('openml-cc18', 'tabzilla'):
+                if self.benchmark_name in ('openml-cc18', 'openml-ctr23', 'automl-reg-suite', 
+                                          'grinsztajn-tabular-benchmark', 'tabarena-study-regression', 'tabzilla'):
                     dataset_name_for_log = f"OpenML-ID-{dataset_identifier}"
                 else:
                     dataset_name_for_log = dataset_identifier
@@ -113,7 +120,8 @@ class BenchmarkPipeline:
                 
                 try:
                     data_loader_config = {**self.data_config}
-                    if self.benchmark_name in ('openml-cc18', 'tabzilla'):
+                    if self.benchmark_name in ('openml-cc18', 'openml-ctr23', 'automl-reg-suite',
+                                              'grinsztajn-tabular-benchmark', 'tabarena-study-regression', 'tabzilla'):
                         data_loader_config['dataset_id'] = dataset_identifier
                         dataset_name_for_log = f"OpenML-ID-{dataset_identifier}"
                     else:
@@ -182,22 +190,67 @@ class BenchmarkPipeline:
             
             # Evaluate model
             start_eval = time.time()
-            metrics = pipeline.evaluate(X_test, y_test, output_format='json')
+            # Use 'rich' format to avoid JSON printing, but we still get the dict
+            metrics = pipeline.evaluate(X_test, y_test, output_format='rich')
             end_eval = time.time()
             
-            # Calibration evaluation
+            # Convert metrics to JSON-serializable format (float32 -> float)
+            # Filter out None values and convert numeric types
+            metrics = {
+                k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
+                else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
+                else v
+                for k, v in metrics.items()
+                if v is not None  # Skip None values (e.g., MAPE/MSLE when undefined)
+            }
+            
+            # Calibration/Interval calibration evaluation (task-specific)
             start_calib = time.time()
-            calibration_metrics = pipeline.evaluate_calibration(
-                X_test=X_test,
-                y_test=y_test,
-                n_bins=15,
-                output_format='json'
-            )
+            if pipeline.task_type == 'regression':
+                # For regression, use interval calibration
+                try:
+                    calibration_metrics = pipeline.evaluate_interval_calibration(
+                        X_test=X_test,
+                        y_test=y_test,
+                        confidence=0.95,
+                        n_bins=10,
+                        output_format='rich'  # Use rich to avoid JSON printing
+                    )
+                    # Convert to JSON-serializable format
+                    # Filter out None values and complex structures
+                    calibration_metrics = {
+                        k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
+                        else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
+                        else v
+                        for k, v in calibration_metrics.items()
+                        if v is not None and k != 'reliability_data'  # Skip None values and complex structures
+                    }
+                except (NotImplementedError, ValueError) as e:
+                    # If interval calibration not supported, use empty dict
+                    logger.warning(f"[BenchmarkPipeline] Interval calibration not available: {e}")
+                    calibration_metrics = {}
+            else:
+                # For classification, use probability calibration
+                calibration_metrics = pipeline.evaluate_calibration(
+                    X_test=X_test,
+                    y_test=y_test,
+                    n_bins=15,
+                    output_format='rich'  # Use rich to avoid JSON printing
+                )
+                # Convert to JSON-serializable format
+                # Filter out None values
+                calibration_metrics = {
+                    k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
+                    else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
+                    else v
+                    for k, v in calibration_metrics.items()
+                    if v is not None  # Skip None values
+                }
             end_calib = time.time()
 
             combined_metrics = {
-                **metrics,  # Standard metrics (accuracy, precision, recall, F1, AUC, MCC)
-                **calibration_metrics  # Calibration metrics (brier_score_loss, expected_calibration_error, maximum_calibration_error)
+                **metrics,  # Standard metrics (regression: MSE, MAE, R²; classification: accuracy, F1, AUC)
+                **calibration_metrics  # Calibration metrics (regression: coverage, interval width; classification: brier, ECE, MCE)
             }
 
             fit_time = end_fit - start_fit
@@ -208,7 +261,11 @@ class BenchmarkPipeline:
                 model_key, dataset_id, dataset_name, combined_metrics, fit_time, eval_time
             )
             
-            logger.info(f"[BenchmarkPipeline] SUCCESS: Model '{model_key}' on '{dataset_name}'. Accuracy: {metrics.get('accuracy', 'N/A'):.4f}")
+            # Log success with appropriate metric
+            if pipeline.task_type == 'regression':
+                logger.info(f"[BenchmarkPipeline] SUCCESS: Model '{model_key}' on '{dataset_name}'. R²: {metrics.get('r2_score', 'N/A'):.4f}, RMSE: {metrics.get('rmse', 'N/A'):.4f}")
+            else:
+                logger.info(f"[BenchmarkPipeline] SUCCESS: Model '{model_key}' on '{dataset_name}'. Accuracy: {metrics.get('accuracy', 'N/A'):.4f}")
             
         except torch.cuda.OutOfMemoryError as e:
             logger.error(f"[BenchmarkPipeline] GPU OOM: Model '{model_key}' on '{dataset_name}'. Reason: {e}")

@@ -44,6 +44,7 @@ class TabDPTEstimator(BaseEstimator):
         use_flash: bool = True,
         compile: bool = True,
         model_weight_path: str | None = None,
+        verbose: bool = True,
     ):
         """
         Initializes the TabDPT Estimator
@@ -101,6 +102,7 @@ class TabDPTEstimator(BaseEstimator):
         self.compile = compile and self.device == "cuda"
         self.feature_reduction = feature_reduction
         self.faiss_metric = faiss_metric
+        self.faiss_knn = None
         assert self.mode in ["cls", "reg"], "mode must be 'cls' or 'reg'"
         assert self.feature_reduction in ["pca", "subsample"], \
                 "feature_reduction must be 'pca' or 'subsample'"
@@ -130,6 +132,9 @@ class TabDPTEstimator(BaseEstimator):
                     '["standard", "minmax", "robust", "power", "quantile-uniform", "quantile-normal", "log1p", None]'
                 )
 
+        self.V = None
+        self.verbose = verbose
+
     def fit(self, X: np.ndarray, y: np.ndarray):
         assert isinstance(X, np.ndarray), "X must be a numpy array"
         assert isinstance(y, np.ndarray), "y must be a numpy array"
@@ -153,7 +158,6 @@ class TabDPTEstimator(BaseEstimator):
         if self.normalizer == 'quantile-uniform':
             X = 2*X - 1
 
-        self.faiss_knn = FAISS(X, metric=self.faiss_metric)
         self.n_instances, self.n_features = X.shape
         
         self.X_train = X
@@ -161,12 +165,26 @@ class TabDPTEstimator(BaseEstimator):
         
         if self.n_features > self.max_features and self.feature_reduction == "pca":
             train_x = convert_to_torch_tensor(self.X_train).to(self.device).float()
-            q = min(train_x.shape[0], self.max_features)
-            _, _, self.V = torch.pca_lowrank(train_x, q=q)
+            _, _, self.V = torch.pca_lowrank(train_x, q=min(train_x.shape[0], self.max_features))
 
         self.is_fitted_ = True
         if self.compile:
-            self.model = torch.compile(self.model)
+            self.model.compile()
+
+    def to(self, device: str):
+        self.device = device
+        self.model.to(device)
+
+        if self.V is not None:
+            self.V = self.V.to(device)
+
+    def _get_faiss_knn_indices(self, X_test: np.ndarray, context_size: int, seed: int | None = None):
+        if self.faiss_knn is None:  # Lazily perform initialization
+            self.faiss_knn = FAISS(self.X_train, metric=self.faiss_metric)
+            if seed is not None:
+                self.faiss_knn.index.seed = seed
+
+        return self.faiss_knn.get_knn_indices(X_test, k=context_size)
 
     def _prepare_prediction(self, X: np.ndarray, class_perm: np.ndarray | None = None, seed: int | None = None):
         check_is_fitted(self)
@@ -205,3 +223,11 @@ class TabDPTEstimator(BaseEstimator):
             train_y = inv_perm[train_y].to(torch.float)
 
         return train_x, train_y, test_x
+
+    def _get_ensemble_iterator(self, n_ensembles: int, seed: int | None = None):
+        generator = np.random.SeedSequence(seed)
+        ensemble_iterator = generator.generate_state(n_ensembles)
+        if self.verbose:
+            from tqdm import tqdm
+            ensemble_iterator = tqdm(ensemble_iterator, desc="ensembles")
+        return ensemble_iterator

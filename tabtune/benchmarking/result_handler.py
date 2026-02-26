@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import os
 import logging
@@ -60,13 +61,21 @@ class ResultsHandler:
         """
         Adds a new result, appends it to the in-memory DataFrame, and writes it to the CSV file immediately.
         """
+        # Filter out None values and round numeric metrics
+        cleaned_metrics = {
+            k: round(v, 4) if v is not None and isinstance(v, (int, float, np.number))
+            else v
+            for k, v in metrics.items()
+            if v is not None
+        }
+        
         result_record = {
             "model_name": model_name,
             "dataset_id": dataset_id,
             "dataset_name": dataset_name,
             "fit_time_seconds": round(fit_time, 2),
             "eval_time_seconds": round(eval_time, 2),
-            **{k: round(v, 4) for k, v in metrics.items()}
+            **cleaned_metrics
         }
         
         # Create a single-row DataFrame for the new result

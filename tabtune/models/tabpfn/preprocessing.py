@@ -2,7 +2,6 @@
 different members.
 """
 
-#  Copyright (c) Prior Labs GmbH 2025.
 
 from __future__ import annotations
 
@@ -157,6 +156,8 @@ class PreprocessorConfig:
         "kdi_alpha_2.0",
         "kdi_alpha_3.0",
         "kdi_alpha_5.0",
+        "squashing_scaler_default",
+        "squashing_scaler_max10",
     ]
     categorical_name: Literal[
         # categorical features are pretty much treated as ordinal, just not resorted
@@ -176,7 +177,15 @@ class PreprocessorConfig:
     ] = "none"
     append_original: bool | Literal["auto"] = False
     subsample_features: float = -1
-    global_transformer_name: str | None = None
+    max_features_per_estimator: int = 500
+    global_transformer_name: (
+        Literal[
+            "scaler",
+            "svd",
+            "svd_quarter_components",
+        ]
+        | None
+    ) = None
     differentiable: bool = False
 
     @override
@@ -189,6 +198,7 @@ class PreprocessorConfig:
                 if self.subsample_features > 0
                 else ""
             )
+            + (f"_max_feats_per_est_{self.max_features_per_estimator}")
             + (
                 f"_global_transformer_{self.global_transformer_name}"
                 if self.global_transformer_name is not None
@@ -207,6 +217,7 @@ class PreprocessorConfig:
             "categorical_name": self.categorical_name,
             "append_original": self.append_original,
             "subsample_features": self.subsample_features,
+            "max_features_per_estimator": self.max_features_per_estimator,
             "global_transformer_name": self.global_transformer_name,
             "differentiable": self.differentiable,
         }
@@ -225,7 +236,8 @@ class PreprocessorConfig:
             name=config_dict["name"],
             categorical_name=config_dict["categorical_name"],
             append_original=config_dict["append_original"],
-            subsample_features=config_dict["subsample_features"],
+            subsample_features=config_dict.get("subsample_features", -1),
+            max_features_per_estimator=config_dict.get("max_features_per_estimator", 500),
             global_transformer_name=config_dict["global_transformer_name"],
             differentiable=config_dict.get("differentiable", False),
         )
@@ -250,15 +262,67 @@ def default_classifier_preprocessor_configs() -> list[PreprocessorConfig]:
 
 
 def default_regressor_preprocessor_configs() -> list[PreprocessorConfig]:
-    """Default preprocessor configurations for regression."""
+    """Default preprocessor configurations for regression.
+    
+    These are the defaults used when training new models, which will then be stored in
+    the model checkpoint.
+    
+    See `v2_regressor_preprocessor_configs()`, `v2_5_regressor_preprocessor_configs()`
+    for the preprocessing used earlier versions of the model.
+    """
     return [
         PreprocessorConfig(
-            "quantile_uni",
+            name="quantile_uni_coarse",
             append_original="auto",
-            categorical_name="ordinal_very_common_categories_shuffled",
-            global_transformer_name="svd",
+            categorical_name="numeric",
+            global_transformer_name=None,
+            max_features_per_estimator=500,
         ),
-        PreprocessorConfig("safepower", categorical_name="onehot"),
+        PreprocessorConfig(
+            name="squashing_scaler_default",
+            append_original=False,
+            categorical_name="ordinal_very_common_categories_shuffled",
+            global_transformer_name="svd_quarter_components",
+            max_features_per_estimator=500,
+        ),
+    ]
+
+
+def v2_5_classifier_preprocessor_configs() -> list[PreprocessorConfig]:
+    """Get the preprocessor configuration for classification in v2.5 of the model."""
+    return [
+        PreprocessorConfig(
+            name="squashing_scaler_default",
+            append_original=False,
+            categorical_name="ordinal_very_common_categories_shuffled",
+            global_transformer_name="svd_quarter_components",
+            max_features_per_estimator=500,
+        ),
+        PreprocessorConfig(
+            name="none",
+            categorical_name="numeric",
+            max_features_per_estimator=500,
+        ),
+    ]
+
+
+def v2_5_regressor_preprocessor_configs() -> list[PreprocessorConfig]:
+    """Get the preprocessor configuration for regression in v2.5 of the model."""
+    return [
+        PreprocessorConfig(
+            name="quantile_uni_coarse",
+            append_original="auto",
+            categorical_name="numeric",
+            global_transformer_name=None,
+            max_features_per_estimator=500,
+        ),
+        PreprocessorConfig(
+            name="squashing_scaler_default",
+            append_original=False,
+            categorical_name="ordinal_very_common_categories_shuffled",
+            global_transformer_name="svd_quarter_components",
+            max_features_per_estimator=500,
+        ),
     ]
 
 
@@ -319,6 +383,8 @@ class EnsembleConfig:
     feature_shift_count: int
     feature_shift_decoder: Literal["shuffle", "rotate"] | None
     subsample_ix: npt.NDArray[np.int64] | None  # OPTIM: Could use uintp
+    # Internal index specifying which model to use for this ensemble member.
+    _model_index: int
 
     @classmethod
     def generate_for_classification(
@@ -334,6 +400,7 @@ class EnsembleConfig:
         class_shift_method: Literal["rotate", "shuffle"] | None,
         n_classes: int,
         random_state: int | np.random.Generator | None,
+        num_models: int = 1,
     ) -> list[ClassifierEnsembleConfig]:
         """Generate ensemble configurations for classification.
 
@@ -410,6 +477,10 @@ class EnsembleConfig:
             # the preprocessor configs should be ordered by performance
             configs_.extend(preprocessor_configs[:leftover])
 
+        # Models are simply cycled through for the estimators.
+        # This ensures that different preprocessings are applied to different models.
+        model_indices = [i % num_models for i in range(n)]
+
         return [
             ClassifierEnsembleConfig(
                 preprocess_config=preprocess_config,
@@ -419,12 +490,14 @@ class EnsembleConfig:
                 feature_shift_decoder=feature_shift_decoder,
                 subsample_ix=subsample_ix,
                 class_permutation=class_perm,
+                _model_index=model_index,
             )
-            for featshift, preprocess_config, subsample_ix, class_perm in zip(
+            for featshift, preprocess_config, subsample_ix, class_perm, model_index in zip(
                 featshifts,
                 configs_,
                 subsamples,
                 class_permutations,
+                model_indices,
             )
         ]
 
@@ -441,6 +514,7 @@ class EnsembleConfig:
         preprocessor_configs: Sequence[PreprocessorConfig],
         target_transforms: Sequence[TransformerMixin | Pipeline | None],
         random_state: int | np.random.Generator | None,
+        num_models: int = 1,
     ) -> list[RegressorEnsembleConfig]:
         """Generate ensemble configurations for regression.
 
@@ -494,6 +568,11 @@ class EnsembleConfig:
             # TODO: what about the target transforms?
             configs_ += combos[:leftover]
 
+        # Models are simply cycled through for the estimators.
+        # This ensures that different preprocessings and target transformations are
+        # applied to different models.
+        model_indices = [i % num_models for i in range(n)]
+
         return [
             RegressorEnsembleConfig(
                 preprocess_config=preprocess_config,
@@ -503,11 +582,13 @@ class EnsembleConfig:
                 feature_shift_decoder=feature_shift_decoder,
                 subsample_ix=subsample_ix,
                 target_transform=target_transform,
+                _model_index=model_index,
             )
-            for featshift, subsample_ix, (preprocess_config, target_transform) in zip(
+            for featshift, subsample_ix, (preprocess_config, target_transform), model_index in zip(
                 featshifts,
                 subsamples,
                 configs_,
+                model_indices,
             )
         ]
 
@@ -553,6 +634,7 @@ class EnsembleConfig:
                         transform_name=self.preprocess_config.name,
                         append_to_original=self.preprocess_config.append_original,
                         subsample_features=self.preprocess_config.subsample_features,
+                        max_features_per_estimator=self.preprocess_config.max_features_per_estimator,
                         global_transformer_name=self.preprocess_config.global_transformer_name,
                         apply_to_categorical=(
                             self.preprocess_config.categorical_name == "numeric"
@@ -684,7 +766,7 @@ def fit_preprocessing(
     *,
     random_state: int | np.random.Generator | None,
     cat_ix: list[int],
-    n_workers: int,  # noqa: ARG001
+    n_preprocessing_jobs: int,
     parallel_mode: Literal["block", "as-ready", "in-order"],
 ) -> Iterator[
     tuple[
@@ -703,7 +785,7 @@ def fit_preprocessing(
         y_train: Training target.
         random_state: Random number generator.
         cat_ix: Indices of categorical features.
-        n_workers: Number of workers to use.
+        n_preprocessing_jobs: Number of worker processes to use for preprocessing.
         parallel_mode:
             Parallel mode to use.
 
@@ -736,13 +818,13 @@ def fit_preprocessing(
     if SUPPORTS_RETURN_AS:
         return_as = PARALLEL_MODE_TO_RETURN_AS[parallel_mode]
         executor = joblib.Parallel(
-            n_jobs=1,
+            n_jobs=n_preprocessing_jobs,
             return_as=return_as,
             batch_size="auto",  # type: ignore
         )
     else:
         executor = joblib.Parallel(
-            n_jobs=1,
+            n_jobs=n_preprocessing_jobs,
             batch_size="auto",  # type: ignore
         )
     func = partial(fit_preprocessing_one, cat_ix=cat_ix)
@@ -798,7 +880,7 @@ class DatasetCollectionWithPreprocessing(Dataset):
             indices (`cat_ix`), and the specific preprocessing configurations
             (`config`) for that dataset. Regression configs require additional
             fields (`znorm_space_bardist_`).
-        n_workers (int, optional): The number of workers to use for potentially
+        n_preprocessing_jobs (int, optional): The number of worker processes to use for potentially
             parallelized preprocessing steps (passed to `fit_preprocessing`).
             Defaults to 1.
 
@@ -807,7 +889,7 @@ class DatasetCollectionWithPreprocessing(Dataset):
             Stores the input dataset configuration collection.
         split_fn (Callable): Stores the splitting function.
         rng (np.random.Generator): Stores the random number generator.
-        n_workers (int): Stores the number of workers for preprocessing.
+        n_preprocessing_jobs (int): Stores the number of worker processes for preprocessing.
     """
 
     def __init__(
@@ -817,12 +899,12 @@ class DatasetCollectionWithPreprocessing(Dataset):
         dataset_config_collection: Sequence[
             RegressorDatasetConfig | ClassifierDatasetConfig
         ],
-        n_workers: int = 1,
+        n_preprocessing_jobs: int = 1,
     ) -> None:
         self.configs = dataset_config_collection
         self.split_fn = split_fn
         self.rng = rng
-        self.n_workers = n_workers
+        self.n_preprocessing_jobs = n_preprocessing_jobs
 
     def __len__(self):
         return len(self.configs)
@@ -943,7 +1025,7 @@ class DatasetCollectionWithPreprocessing(Dataset):
             y_train=y_train,
             random_state=self.rng,
             cat_ix=cat_ix,
-            n_workers=self.n_workers,
+            n_preprocessing_jobs=self.n_preprocessing_jobs,
             parallel_mode="block",
         )
         (

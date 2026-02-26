@@ -189,16 +189,51 @@ class Tab2D(BaseModel):
 
             
     @classmethod
-    def from_pretrained(cls, path: str, device: str = "cuda") -> "Tab2D":
+    def from_pretrained(cls, path_or_repo_id: str, device: str = "cuda") -> "Tab2D":
+        """
+        Load a pretrained Tab2D model from a local path or HuggingFace repository.
         
-        config_path = os.path.join(path, "config.json")
-        weights_path = os.path.join(path, "model.safetensors")
+        Args:
+            path_or_repo_id: Either a local directory path containing config.json and model.safetensors,
+                           or a HuggingFace repository ID (e.g., "autogluon/mitra-regressor")
+            device: Device to load the model on ('cuda' or 'cpu')
         
+        Returns:
+            Loaded Tab2D model instance
+        """
+        # Check if it's a HuggingFace repo ID (contains '/' and doesn't exist as a local path)
+        is_hf_repo = "/" in path_or_repo_id and not os.path.exists(path_or_repo_id)
+        
+        if is_hf_repo:
+            # Download from HuggingFace
+            try:
+                from huggingface_hub import hf_hub_download
+                
+                logger.info(f"[Tab2D] Downloading model from HuggingFace: {path_or_repo_id}")
+                config_path = hf_hub_download(repo_id=path_or_repo_id, filename="config.json")
+                weights_path = hf_hub_download(repo_id=path_or_repo_id, filename="model.safetensors")
+            except ImportError:
+                raise ImportError(
+                    "huggingface_hub is required for downloading models from HuggingFace. "
+                    "Install it with: pip install huggingface_hub"
+                )
+        else:
+            # Load from local path
+            config_path = os.path.join(path_or_repo_id, "config.json")
+            weights_path = os.path.join(path_or_repo_id, "model.safetensors")
+            
+            if not os.path.exists(config_path):
+                raise FileNotFoundError(f"Config file not found: {config_path}")
+            if not os.path.exists(weights_path):
+                raise FileNotFoundError(f"Weights file not found: {weights_path}")
+        
+        # Load config
         with open(config_path, "r") as f:
             config = json.load(f)
         
-        print(config)
+        logger.debug(f"[Tab2D] Loaded config: {config}")
 
+        # Create model with config parameters
         model = cls(
             dim=config["dim"],
             dim_output=config["dim_output"],
@@ -210,9 +245,11 @@ class Tab2D(BaseModel):
             device=device
         )
         
+        # Load weights
         state_dict = load_file(weights_path, device=device)
         model.load_state_dict(state_dict)
-
+        
+        logger.info(f"[Tab2D] Successfully loaded pretrained model from {path_or_repo_id}")
         return model
     
     

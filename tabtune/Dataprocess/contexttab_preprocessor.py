@@ -19,12 +19,16 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
     2. Generating sentence embeddings for each categorical/text feature.
     3. Extracting year, month, day, and weekday components from date features.
     It also generates embeddings for the column names themselves.
+    
+    Note: ContextTab handles target normalization internally for regression (via standard_scale_column),
+    so this preprocessor should NOT encode targets for regression tasks.
     """
-    def __init__(self, model_name='all-MiniLM-L6-v2', regression_type='l2', num_regression_bins=16):
+    def __init__(self, model_name='all-MiniLM-L6-v2', regression_type='l2', num_regression_bins=16, task_type='classification'):
         self.scaler_ = StandardScaler()
         self.model_name_ = model_name
         self.embedding_model_ = SentenceTransformer(model_name)
         self.label_encoder_ = LabelEncoder()
+        self.task_type = task_type
         self.numerical_cols_ = []
         self.categorical_cols_ = []
         self.date_cols_ = []
@@ -57,7 +61,13 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
         # scaler and encoder fitting
         if self.numerical_cols_:
             self.scaler_.fit(X[self.numerical_cols_])
-        self.label_encoder_.fit(y)
+        
+        # Only encode target for classification
+        if self.task_type == 'classification':
+            self.label_encoder_.fit(y)
+        else:
+            # For regression, ContextTab handles target normalization internally
+            self.label_encoder_ = None
 
         # embeddings generation for column names
         # order must match the concatenation order in transform(): Numerical -> Date -> Categorical
@@ -129,7 +139,14 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
             X_final = np.array([[] for _ in range(len(X))]) 
 
         if y is not None:
-            y_final = self.label_encoder_.transform(y)
+            if self.task_type == 'classification':
+                if self.label_encoder_ is None:
+                    raise RuntimeError("Label encoder not fitted for classification.")
+                y_final = self.label_encoder_.transform(y)
+            else:
+                # For regression, return target as-is (numeric)
+                # ContextTab handles target normalization internally
+                y_final = np.array(y).flatten().astype(float) if not isinstance(y, np.ndarray) else y.astype(float)
             return X_final, y_final
         
         return X_final
@@ -243,9 +260,11 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
                 ]
             },
             "Target Encoding": {
-                "description": "Encoded the target variable into numerical labels.",
+                "description": "Encoded the target variable into numerical labels." if self.task_type == 'classification' else "Target variable remains numeric (regression). ContextTab handles target normalization internally.",
                 "details": [
                     f"Fitted a LabelEncoder on the target, identifying {len(self.label_encoder_.classes_)} unique classes."
+                ] if self.task_type == 'classification' and self.label_encoder_ else [
+                    "Target variable kept as numeric values for regression. ContextTab handles normalization internally."
                 ]
             }
         }
