@@ -99,7 +99,7 @@ class OrionMSPv15Classifier(ClassifierMixin, BaseEstimator):
         Whether to allow automatic download if the pretrained checkpoint cannot be found at the
         specified `model_path`.
 
-    checkpoint_version : str, default='Orion-MSP-v1.0.ckpt'
+    checkpoint_version : str, default='OrionMSP-classifier-v1.5-202603.ckpt'
         Specifies the file name of the pre-trained model checkpoint to use when `model_path`
         is `None` or points to a non-existent file (and `allow_auto_download` is true).
         
@@ -166,9 +166,9 @@ class OrionMSPv15Classifier(ClassifierMixin, BaseEstimator):
         use_hierarchical: bool = True,
         use_amp: bool = True,
         batch_size: Optional[int] = 4,
-        model_path: Optional[str | Path] = "/home/user/hdd/aryaxai_labs/MohamedBouadi/checkpoints_dir/stage4_advanced/OrionMSP-v1.5-stage4-advanced-994.ckpt",
-        allow_auto_download: bool = False,
-        checkpoint_version: str = "OrionMSP-v1.5-stage4-advanced-994.ckpt",
+        model_path: Optional[str | Path] = None,
+        allow_auto_download: bool = True,
+        checkpoint_version: str = "OrionMSP-classifier-v1.5-202603.ckpt",
         device: Optional[str | torch.device] = None,
         random_state: int | None = 42,
         n_jobs: Optional[int] = None,
@@ -234,7 +234,7 @@ class OrionMSPv15Classifier(ClassifierMixin, BaseEstimator):
 
         repo_id = "Lexsi/Orion-MSP"
         filename = self.checkpoint_version
-        ckpt = "OrionMSP-v1.5-stage4-advanced-994.ckpt"
+        ckpt = "OrionMSP-classifier-v1.5-202603.ckpt"
 
         if filename == ckpt:
             info_message = (
