@@ -1,7 +1,5 @@
 --extra-index-url https://download.pytorch.org/whl/cu126
 torch>=2.7.0
-torchvision>=0.22.0
-torchaudio>=2.7.0
 transformers>=4.56.0,<5.0.0
 scikit-learn>=1.6.0
 pyzmq>=25.0.0,<28.0.0
