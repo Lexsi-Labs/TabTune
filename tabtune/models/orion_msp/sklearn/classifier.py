@@ -166,7 +166,7 @@ class OrionMSPClassifier(ClassifierMixin, BaseEstimator):
         batch_size: Optional[int] = 8,
         model_path: Optional[str | Path] = None,
         allow_auto_download: bool = True,
-        checkpoint_version: str = "OrionMSP-classifier-v1.0-202510.ckpt",
+        checkpoint_version: str = "Orion-MSP-v1.0.ckpt",
         device: Optional[str | torch.device] = None,
         random_state: int | None = 42,
         n_jobs: Optional[int] = None,
@@ -222,7 +222,7 @@ class OrionMSPClassifier(ClassifierMixin, BaseEstimator):
 
         repo_id = "Lexsi/Orion-MSP"
         filename = self.checkpoint_version
-        ckpt = "OrionMSP-classifier-v1.0-202510.ckpt"
+        ckpt = "Orion-MSP-v1.0.ckpt"
 
         if filename == ckpt:
             info_message = (
