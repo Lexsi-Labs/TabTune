@@ -37,6 +37,24 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
         self.regression_type = regression_type
         self.num_regression_bins = num_regression_bins
 
+    def __getstate__(self):
+        """Exclude the SentenceTransformer and training data from the pickle."""
+        state = self.__dict__.copy()
+        state.pop('embedding_model_', None)
+        state.pop('X_train_', None)
+        return state
+
+    def __setstate__(self, state):
+        """Restore instance and mark the embedding model for lazy reload."""
+        self.__dict__.update(state)
+        self.embedding_model_ = None
+
+    def _ensure_embedding_model(self):
+        """Reload the SentenceTransformer if it was dropped during serialization."""
+        if self.embedding_model_ is None:
+            self.embedding_model_ = SentenceTransformer(self.model_name_)
+        return self.embedding_model_
+
     def fit(self, X: pd.DataFrame, y: pd.Series):
         logger.info("Fitting ContextTab Preprocessor...")
         
@@ -74,7 +92,7 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
         all_feature_cols = self.numerical_cols_ + self.date_cols_ + self.categorical_cols_
         if all_feature_cols:
              logger.debug(" generating embeddings for column names")
-             self.column_embeddings_ = self.embedding_model_.encode(all_feature_cols, show_progress_bar=False)
+             self.column_embeddings_ = self._ensure_embedding_model().encode(all_feature_cols, show_progress_bar=False)
         
         # Store training data for quantization
         self.X_train_ = X.copy()
@@ -124,7 +142,7 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
             column_embeddings = []
             logger.info(f"    - Generating embeddings for {len(self.categorical_cols_)} categorical columns...")
             for col in self.categorical_cols_:
-                embeddings = self.embedding_model_.encode(X[col].astype(str).tolist(), show_progress_bar=False)
+                embeddings = self._ensure_embedding_model().encode(X[col].astype(str).tolist(), show_progress_bar=False)
                 column_embeddings.append(embeddings)
 
             X_cat_embedded_3d = np.stack(column_embeddings, axis=1)
@@ -203,7 +221,7 @@ class ContextTabPreprocessor(BaseEstimator, TransformerMixin):
             try:
                 # For quantization, we need to use the training data to fit the quantiles
                 # and then apply to the test data
-                if hasattr(self, 'X_train_') and col in self.X_train_.columns:
+                if hasattr(self, 'X_train_') and self.X_train_ is not None and col in self.X_train_.columns:
                     # Use training data for context, test data for query
                     context_df = pd.DataFrame({col: self.X_train_[col]})
                     query_df = pd.DataFrame({col: X_num[col]})
