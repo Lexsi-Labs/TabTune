@@ -499,7 +499,7 @@ pipeline = TabularPipeline(
 
 ## 🏆 Example Notebooks
 
-|Below are 11 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
