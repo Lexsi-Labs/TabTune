@@ -42,7 +42,7 @@ The library is built on **four main components** that work together seamlessly:
 
 Using diverse tabular foundation models often requires writing model-specific boilerplate for data preparation, training, and inference. TabTune solves this by providing:
 
-- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) for multiple models like TabPFN, TabICL, Mitra, ContextTab, TabDPT, OrionMSP, and OrionBix.
+- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) for multiple models such as TabPFN, TabPFNv2.6, TabICL, TabICLv2, Mitra, ContextTab, TabDPT, OrionMSP, and OrionBix.
 
 - **Automated Preprocessing**: The DataProcessor is model-aware, automatically applying the correct transformations without manual configuration.
 
@@ -61,14 +61,8 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
--   ✅ **OrionMSP v1.5** -- Improved prototype normalization and
-    stabilized refinement.
--   ✅ **LimiX Model Integration** -- Likelihood-based mixture modeling
-    for uncertainty-aware inference.
--   ✅ **Regression Framework** -- End-to-end regression training,
-    evaluation, and benchmarking.
--   ✅ **Resampling Module** -- Context-aware episodic sampling for ICL
-    models.
+-   ✅ **TabPFNv2.6 Integration** -- Full support for the latest TabPFN release, covering classification and regression (inference + finetune), with a dedicated **native fine-tuning mode** (`finetune_mode='native'`) that leverages `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor`.
+-   ✅ **TabICLv2 Integration** -- Full support for TabICLv2 for both classification (inference + finetune) and regression (inference + finetune), using episodic turn-by-turn fine-tuning.
 
 ---
 
@@ -76,7 +70,7 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 | Model | Family / Paradigm | Key Innovation | Supported Strategies |
 |-------|------------------|----------------|----------------------|
-| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression |
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
 | **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
@@ -85,6 +79,8 @@ Using diverse tabular foundation models often requires writing model-specific bo
 | **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
 | **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
+| **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
+| **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
@@ -171,6 +167,40 @@ pipeline = TabularPipeline(
         "epochs": 5,
         "learning_rate": 1e-5,
         "finetune_mode": "meta-learning"  # or "sft"
+    }
+)
+pipeline.fit(X_train, y_train)
+```
+
+### Native Fine-Tuning (TabPFNv2.6 only)
+TabPFNv2.6 exposes PriorLabs' `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor` directly, offering their native advanced fine-tuning pipeline.
+
+```python
+# Classification
+pipeline = TabularPipeline(
+    model_name="TabPFNv26",
+    task_type="classification",
+    tuning_strategy="finetune",
+    finetune_mode="native",         # uses FinetunedTabPFNClassifier
+    tuning_params={
+        "epochs": 30,
+        "learning_rate": 1e-5,
+        "early_stopping": True,
+        "early_stopping_patience": 8,
+    }
+)
+pipeline.fit(X_train, y_train)
+
+# Regression
+pipeline = TabularPipeline(
+    model_name="TabPFNv26",
+    task_type="regression",
+    tuning_strategy="finetune",
+    finetune_mode="native",         # uses FinetunedTabPFNRegressor
+    tuning_params={
+        "epochs": 30,
+        "learning_rate": 1e-5,
+        "early_stopping": True,
     }
 )
 pipeline.fit(X_train, y_train)
@@ -366,35 +396,41 @@ TabularPipeline(
 
 #### Key Parameters:
 
-- **`model_name`** (str): The name of the model to use (e.g., `'TabPFN'`, `'TabICL'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionBix'`).
+- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`.
 
-- **`task_type`** (str): The type of task, either `'classification'` or `'regression'` (currently only classification is fully supported).
+- **`task_type`** (str): The type of task — `'classification'` or `'regression'`.
 
-- **`tuning_strategy`** (str): The strategy for model adaptation (`'inference'`, `'finetune'`, `'base-ft'`, or `'peft'`).
+- **`tuning_strategy`** (str): The strategy for model adaptation: `'inference'`, `'finetune'`, or `'peft'`.
+
+- **`finetune_mode`** (str, optional): Controls the fine-tuning algorithm. If `None`, a smart default is chosen per task type (`'turn_by_turn'` for regression, `'meta-learning'` for classification). Supported values per model:
+  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26)
+  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, Mitra, TabDPT)
+  - `'native'` — PriorLabs native finetuner with bar distribution loss, AMP, early stopping (**TabPFNv2.6 only**, classification and regression)
+  - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn (TabPFN regression, Mitra regression, TabDPT regression, ContextTab regression)
 
 - **`tuning_params`** (dict, optional): Parameters for the `TuningManager`:
   - `epochs` (int): Number of training epochs
   - `learning_rate` (float): Learning rate for optimization
   - `batch_size` (int): Batch size for fine-tuning
-  - `device` (str): 'cuda' or 'cpu'
+  - `device` (str): `'cuda'` or `'cpu'`
   - `save_checkpoint_path` (str): Path to save fine-tuned weights
   - `checkpoint_dir` (str): Directory for automatic checkpoint saving
-  - `finetune_mode` (str): 'meta-learning' or 'sft' (episodic vs. supervised)
-  - `peft_config` (dict): Configuration for LoRA adapters
   - `show_progress` (bool): Whether to show progress bars
+  - `peft_config` (dict): Configuration for LoRA adapters
+  - `early_stopping` (bool): Enable early stopping — **TabPFNv2.6 native mode only**
+  - `early_stopping_patience` (int): Patience for early stopping — **TabPFNv2.6 native mode only**
+  - `n_estimators_finetune` (int): Ensemble size during fine-tuning — **TabPFNv2.6 native mode only**
 
 - **`processor_params`** (dict, optional): Parameters for the `DataProcessor`:
-  - `imputation_strategy` (str): 'mean', 'median', 'iterative', 'knn'
-  - `categorical_encoding` (str): 'onehot', 'ordinal', 'target', 'hashing', 'binary'
-  - `scaling_strategy` (str): 'standard', 'minmax', 'robust', 'power_transform'
-  - `resampling_strategy` (str): 'smote', 'random_over', 'random_under', 'tomek', 'kmeans', 'knn'
-  - `feature_selection_strategy` (str): 'variance', 'select_k_best_anova', 'select_k_best_chi2'
+  - `imputation_strategy` (str): `'mean'`, `'median'`, `'iterative'`, `'knn'`
+  - `categorical_encoding` (str): `'onehot'`, `'ordinal'`, `'target'`, `'hashing'`, `'binary'`
+  - `scaling_strategy` (str): `'standard'`, `'minmax'`, `'robust'`, `'power_transform'`
+  - `resampling_strategy` (str): `'smote'`, `'random_over'`, `'random_under'`, `'tomek'`, `'kmeans'`, `'knn'`
+  - `feature_selection_strategy` (str): `'variance'`, `'select_k_best_anova'`, `'select_k_best_chi2'`
 
 - **`model_params`** (dict, optional): Model-specific parameters.
 
 - **`model_checkpoint_path`** (str, optional): Path to a `.pt` file containing pre-trained model weights.
-
-- **`finetune_mode`** (str, optional): Default fine-tuning mode. Can be overridden in `tuning_params`.
 
 ---
 
@@ -478,6 +514,9 @@ pipeline = TabularPipeline(
 | 9 | Regression - 2| Introduction to Regression - Finetune |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing) |
 | 10 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
+| 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
+| 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
+
 ---
 
 ## 🚀 Advanced Usage
