@@ -27,7 +27,7 @@ TabularPipeline(
     processor_params: dict | None = None,
     model_params: dict | None = None,
     model_checkpoint_path: str | None = None,
-    finetune_mode: str = 'meta-learning'
+    finetune_mode: str | None = None
 )
 ```
 
@@ -35,33 +35,44 @@ TabularPipeline(
 
 **`model_name`** (str, required)
 - Name of the model to use.
-- Supported values: `'TabPFN'`, `'TabICL'`, `'OrionMSP'`, `'OrionBix'`, `'TabDPT'`, `'Mitra'`, `'ContextTab'`
-- Example: `model_name="TabICL"`
+- Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabICL'`, `'TabICLv2'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'TabDPT'`, `'Mitra'`, `'ContextTab'`, `'Limix'`
+- Example: `model_name="TabICLv2"`
 
 **`task_type`** (str, default: `'classification'`)
 - Type of machine learning task.
-- Currently supported: `'classification'`
-- Planned: `'regression'`
-- Example: `task_type="classification"`
+- Supported: `'classification'`, `'regression'`
+- Regression is supported for: `TabPFN`, `TabPFNv26`, `TabICLv2`, `Mitra`, `ContextTab`, `TabDPT`, `Limix`
+- Example: `task_type="regression"`
 
 **`tuning_strategy`** (str, default: `'inference'`)
 - Training/fine-tuning strategy to use.
 - Options:
   - `'inference'`: Zero-shot predictions (no training)
-  - `'base-ft'`: Full fine-tuning of all parameters
+  - `'finetune'`: Full fine-tuning of all parameters
   - `'peft'`: Parameter-efficient fine-tuning with LoRA adapters
 - Example: `tuning_strategy="peft"`
 
 **`tuning_params`** (dict, optional)
 - Hyperparameters for training/inference.
-- Common parameters:
+- Common parameters for all models:
   - `device` (str): `'cuda'` or `'cpu'` (default: auto-detected)
   - `epochs` (int): Number of training epochs
   - `learning_rate` (float): Learning rate for optimizer
   - `batch_size` (int): Batch size for training
-  - `peft_config` (dict): LoRA configuration for PEFT strategy
-  - `support_size` (int): Context size for episodic training
-  - `query_size` (int): Query size for episodic training
+  - `show_progress` (bool): Show tqdm progress bar
+  - `save_checkpoint_path` (str): Path to save fine-tuned weights
+  - `checkpoint_dir` (str): Directory for automatic checkpoint saving
+  - `weight_decay` (float): AdamW weight decay
+  - `clip_grad_norm` (float): Gradient clipping norm
+- Episodic training parameters (meta-learning / TBT):
+  - `support_size` (int): Support set size per episode
+  - `query_size` (int): Query set size per episode
+  - `n_episodes` (int): Episodes per epoch (classification)
+  - `steps_per_epoch` (int): Steps per epoch (regression TBT)
+  - `context_size` (int): Alias for `support_size` (regression TBT)
+- PEFT parameters:
+  - `peft_config` (dict): LoRA configuration — `r`, `lora_alpha`, `lora_dropout`, `target_modules`
+
 - Example:
   ```python
   tuning_params={
@@ -144,7 +155,7 @@ Returns `self` (allows method chaining).
 ```python
 pipeline = TabularPipeline(
     model_name="TabICL",
-    tuning_strategy="base-ft"
+    tuning_strategy="finetune"
 )
 pipeline.fit(X_train, y_train)
 ```
@@ -419,7 +430,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 ```python
 pipeline = TabularPipeline(
     model_name="OrionBix",
-    tuning_strategy="base-ft",
+    tuning_strategy="finetune",
     tuning_params={
         "device": "cuda",
         "epochs": 10,

@@ -47,7 +47,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 # Create pipeline with fine-tuning
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -144,7 +144,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 # Pipeline
 pipeline = TabularPipeline(
     model_name='OrionMSP',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -198,7 +198,7 @@ print(f"Inference Accuracy: {inf_metrics['accuracy']:.4f}")
 print("\n=== Fine-Tuned Model ===")
 pipeline_ft = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -236,7 +236,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 # Train classifier
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={'epochs': 5}
 )
 
@@ -279,7 +279,7 @@ X_train_balanced, y_train_balanced = smote.fit_resample(X_train, y_train)
 
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={'epochs': 5}
 )
 
@@ -348,7 +348,7 @@ def cross_validate(X, y, model_name, params, k=5):
         # Train
         pipeline = TabularPipeline(
             model_name=model_name,
-            tuning_strategy='base-ft',
+            tuning_strategy='finetune',
             tuning_params=params
         )
         
@@ -403,7 +403,7 @@ def objective(trial):
     # Train
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params={
             'device': 'cuda',
             'learning_rate': learning_rate,
@@ -429,7 +429,7 @@ print(f"Best parameters: {study.best_params}")
 # Train final model with best parameters
 best_pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         **study.best_params
@@ -464,7 +464,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 # Train
 pipeline = TabularPipeline(
     model_name='TabDPT',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,

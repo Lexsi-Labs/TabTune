@@ -1,6 +1,6 @@
 # TabPFN: Prior-Fitted Network
 
-TabPFN is a revolutionary tabular model that demonstrates strong zero-shot performance without any fine-tuning. This document provides an in-depth guide to using TabPFN with TabTune.
+TabPFN is a revolutionary tabular model that demonstrates strong zero-shot performance without any fine-tuning. This document provides an in-depth guide to using TabPFN with TabTune. TabTune supports both **TabPFN v2.5** and the latest **TabPFN v2.6**, each with distinct fine-tuning capabilities.
 
 ---
 
@@ -16,6 +16,9 @@ TabPFN (Prior-Fitted Network) is a neural network trained via in-context learnin
 - Few-shot adaptation
 
 **Key Innovation**: Rather than training on a specific task, TabPFN learns to solve tasks as a **sequence-to-sequence problem**, making it excel in in-context learning scenarios.
+
+
+**v2.5 vs v2.6**: TabPFN v2.6 is the latest PriorLabs release. It introduces a dedicated native fine-tuning API (`FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor`) with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection — in addition to all the meta-learning and SFT modes available in v2.5.
 
 ---
 
@@ -96,7 +99,19 @@ model_params = {
 
 ## 4. Fine-Tuning with TabPFN
 
-TabPFN supports **full fine-tuning** (base-ft strategy) for task adaptation.
+Both v2.5 and v2.6 support `tuning_strategy='finetune'`. The `finetune_mode` parameter controls which algorithm is used.
+
+### finetune_mode options
+
+| `finetune_mode` | v2.5 | v2.6 | Description |
+|-----------------|------|------|-------------|
+| `'meta-learning'` | ✅ | ✅ | Episodic meta-learning with cosine LR, AMP, gradient accumulation |
+| `'sft'` | ✅ | ✅ | SFT-style: single large (support, query) episode repeated for N epochs |
+| `'native'` | ❌ | ✅ | PriorLabs `FinetunedTabPFN{Classifier,Regressor}` with bar distribution loss |
+| `'turn_by_turn'` / `'tbt'` | ✅ | ✅ | Regression only — episodic turn-by-turn with bardist NLL loss |
+
+If `finetune_mode` is not set, TabTune uses a smart default: `'turn_by_turn'` for regression tasks, `'meta-learning'` for classification.
+
 
 ### 4.1 Base Fine-Tuning Parameters
 
@@ -129,7 +144,7 @@ from tabtune import TabularPipeline
 
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -149,6 +164,74 @@ print(f"Accuracy: {metrics['accuracy']:.4f}")
 ```
 
 ---
+
+## 5. TabPFN v2.6 — Fine-Tuning
+
+TabPFN v2.6 adds a **native fine-tuning mode** on top of all v2.5 capabilities.
+
+### 6.1 Classification — Native Fine-Tuning
+
+```python
+pipeline = TabularPipeline(
+    model_name='TabPFNv26',
+    task_type='classification',
+    tuning_strategy='finetune',
+    finetune_mode='native',      # Uses FinetunedTabPFNClassifier
+    tuning_params={
+        'device': 'cuda',
+        'epochs': 30,
+        'learning_rate': 1e-5,
+        'early_stopping': True,
+        'early_stopping_patience': 8,
+        'show_progress': True
+    }
+)
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+```
+
+### 5.2 Regression — Native Fine-Tuning
+
+```python
+pipeline = TabularPipeline(
+    model_name='TabPFNv26',
+    task_type='regression',
+    tuning_strategy='finetune',
+    finetune_mode='native',      # Uses FinetunedTabPFNRegressor
+    tuning_params={
+        'device': 'cuda',
+        'epochs': 30,
+        'learning_rate': 1e-5,
+        'early_stopping': True,
+        'early_stopping_patience': 8,
+    }
+)
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+```
+
+### 5.3 Native Fine-Tuning Parameters (v2.6 only)
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `epochs` | int | 30 | Maximum training epochs |
+| `learning_rate` | float | 1e-5 | Learning rate |
+| `weight_decay` | float | 0.01 | AdamW weight decay |
+| `early_stopping` | bool | True | Enable early stopping |
+| `early_stopping_patience` | int | 8 | Patience before stopping |
+| `validation_split_ratio` | float | 0.1 | Fraction of data for validation |
+| `n_finetune_ctx_plus_query_samples` | int | 10000 | Context + query pool size |
+| `finetune_ctx_query_split_ratio` | float | 0.2 | Fraction used as query |
+| `n_estimators_finetune` | int | 2 | Ensemble size during FT |
+| `n_estimators_validation` | int | 2 | Ensemble size during validation |
+| `n_estimators_final_inference` | int | 8 | Ensemble size for final predict |
+| `grad_clip_value` | float | 1.0 | Gradient clipping value |
+| `use_lr_scheduler` | bool | True | Cosine LR with warmup |
+| `use_activation_checkpointing` | bool | True | Save memory via gradient checkpointing |
+| `random_state` | int | 0 | Reproducibility seed |
+
+---
+
 
 ## 5. Inference-Only Usage
 
@@ -215,7 +298,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={'epochs': 3}
 )
 pipeline.fit(X_train, y_train)
@@ -262,19 +345,19 @@ pipeline.fit(X_train, y_train)
 
 ### 8.2 When to Use PEFT
 
-**Not Recommended** for TabPFN. Use `base-ft` strategy instead:
+**Not Recommended** for TabPFN. Use `finetune` strategy instead:
 
 ```python
 # ❌ Not recommended
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='peft'  # May have issues - will override to base-ft
+    tuning_strategy='peft'  # May have issues - will override 
 )
 
 # ✅ Recommended
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft'  # Fully supported
+    tuning_strategy='finetune'  # Fully supported
 )
 ```
 
@@ -340,12 +423,12 @@ model_params = {
 ```
 
 ### Issue: "PEFT causing prediction errors"
-**Solution**: Use base-ft strategy instead
+**Solution**: Use finetuning strategy instead
 
 ```python
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft'  # Not peft
+    tuning_strategy='finetune'  # Not peft
 )
 ```
 
@@ -382,7 +465,7 @@ print(f"Baseline Accuracy: {baseline_metrics['accuracy']:.4f}")
 print("\n=== Fine-Tuned ===")
 finetuned = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -398,7 +481,7 @@ print(f"Fine-tuned Accuracy: {finetuned_metrics['accuracy']:.4f}")
 print("\n=== Model Comparison ===")
 lb = TabularLeaderboard(X_train, X_test, y_train, y_test)
 lb.add_model('TabPFN', 'inference', name='TabPFN-Inference')
-lb.add_model('TabPFN', 'base-ft', name='TabPFN-FineTune', tuning_params={'epochs': 5})
+lb.add_model('TabPFN', 'finetune', name='TabPFN-FineTune', tuning_params={'epochs': 5})
 lb.add_model('TabICL', 'peft', name='TabICL-PEFT')
 
 lb.run(rank_by='accuracy')
@@ -414,8 +497,8 @@ lb.run(rank_by='accuracy')
 | Task | Strategy | Time | Accuracy |
 |------|----------|------|----------|
 | Instant baseline | inference | <1s | Medium |
-| Rapid prototyping | base-ft + 3 epochs | 5m | Good |
-| Production model | base-ft + 5 epochs | 15m | High |
+| Rapid prototyping | finetune + 3 epochs | 5m | Good |
+| Production model | finetune + 5 epochs | 15m | High |
 | Uncertainty estimation | inference | <1s | With uncertainty |
 
 ---

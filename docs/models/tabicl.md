@@ -1,6 +1,6 @@
-# TabICL: In-Context Learning for Tabular Data
+# TabICL & TabICLv2: In-Context Learning for Tabular Data
 
-TabICL is a scalable, ensemble-based in-context learning model designed for general-purpose tabular classification. This document provides comprehensive guidance for using TabICL with TabTune.
+TabTune supports two generations of TabICL: the original **TabICL** for classification, and the improved **TabICLv2** which adds regression support and an enhanced architecture. This document covers both.
 
 ---
 
@@ -16,6 +16,10 @@ TabICL (Tabular In-Context Learning) is a neural model that leverages in-context
 - Handle mixed data types naturally
 
 **Key Innovation**: Two-stage attention mechanism (column → row) enabling efficient feature processing and interaction modeling.
+
+### TabICLv2
+
+TabICLv2 is the second generation of TabICL with an improved architecture. It extends support to **both classification and regression** with inference and episodic fine-tuning for both tasks.
 
 ---
 
@@ -195,9 +199,77 @@ Epoch = 1000 episodes with gradient updates
 
 ---
 
-## 5. Usage Patterns
+## 5. Fine-Tuning — TabICLv2 (Regression)
 
-### 5.1 Inference Only
+TabICLv2 supports **episodic regression fine-tuning** using turn-by-turn MSE training. It samples random (support, query) episodes, feeds them through the transformer, and backpropagates MSE loss on query predictions.
+
+### 5.1 Regression Inference
+
+```python
+pipeline = TabularPipeline(
+    model_name='TabICLv2',
+    task_type='regression',
+    tuning_strategy='inference',
+)
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+# Returns: mse, rmse, mae, r2_score, medae, explained_variance, ...
+```
+
+### 5.2 Regression Fine-Tuning
+
+```python
+pipeline = TabularPipeline(
+    model_name='TabICLv2',
+    task_type='regression',
+    tuning_strategy='finetune',
+    tuning_params={
+        'device': 'cuda',
+        'epochs': 5,
+        'learning_rate': 2e-6,
+        'support_size': 128,
+        'query_size': 64,
+        'steps_per_epoch': 200,
+        'grad_clip': 1.0,
+        'show_progress': True
+    }
+)
+pipeline.fit(X_train, y_train)
+metrics = pipeline.evaluate(X_test, y_test)
+```
+
+### 5.3 Regression Fine-Tuning Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `epochs` | int | 5 | Training epochs |
+| `learning_rate` | float | 2e-6 | Optimizer learning rate (lower than classification) |
+| `support_size` | int | 128 | Context (support) set size per episode |
+| `query_size` | int | 64 | Query set size per episode |
+| `steps_per_epoch` | int | 200 | Random episodes sampled per epoch |
+| `grad_clip` | float | 1.0 | Gradient clipping norm |
+| `weight_decay` | float | 0.01 | AdamW weight decay |
+| `show_progress` | bool | True | Show tqdm progress bar |
+
+### 5.4 How TabICLv2 Regression Fine-Tuning Works
+
+```
+One step:
+  ├─ Sample random support indices (128 rows)
+  ├─ Sample random query indices (64 rows)
+  ├─ Concatenate: X_episode = [X_support | X_query]  (1, 192, F)
+  ├─ Forward: model_(X_episode, y_support) → predictions for query
+  ├─ If output has multiple bins: take weighted mean (distribution output)
+  └─ MSE loss on query predictions vs ground truth
+
+Post-finetune: model.fit(X_train, y_train) re-caches for inference
+```
+
+---
+
+## 6. Usage Patterns
+
+### 6.1 Inference Only
 
 ```python
 from tabtune import TabularPipeline
@@ -213,7 +285,7 @@ pipeline.fit(X_train, y_train)  # Only preprocesses
 predictions = pipeline.predict(X_test)
 ```
 
-### 5.2 Base Fine-Tuning (Full Parameters)
+### 6.2 Base Fine-Tuning (Full Parameters)
 
 ```python
 pipeline = TabularPipeline(
@@ -232,7 +304,7 @@ pipeline.fit(X_train, y_train)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 5.3 PEFT Fine-Tuning (LoRA Adapters)
+### 6.3 PEFT Fine-Tuning (LoRA Adapters)
 
 ```python
 pipeline = TabularPipeline(
@@ -255,7 +327,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 5.4 Ensemble Configuration
+### 6.4 Ensemble Configuration
 
 ```python
 # Increase ensemble for robustness
@@ -271,7 +343,7 @@ pipeline = TabularPipeline(
 
 ---
 
-## 6. LoRA Target Modules
+## 7. LoRA Target Modules
 
 When using PEFT, TabICL automatically targets these modules:
 
@@ -297,9 +369,9 @@ peft_config = {
 
 ---
 
-## 7. Complete Examples
+## 8. Complete Examples
 
-### 7.1 Basic Workflow
+### 8.1 Basic Workflow
 
 ```python
 from tabtune import TabularPipeline
@@ -335,7 +407,7 @@ print(f"Accuracy: {metrics['accuracy']:.4f}")
 print(f"F1 Score: {metrics['f1_score']:.4f}")
 ```
 
-### 7.2 PEFT for Memory-Constrained Environments
+### 8.2 PEFT for Memory-Constrained Environments
 
 ```python
 # Fit large model in limited memory with PEFT
@@ -360,7 +432,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 7.3 Hyperparameter Tuning
+### 8.3 Hyperparameter Tuning
 
 ```python
 from tabtune import TabularLeaderboard
@@ -470,71 +542,18 @@ tuning_params = {
 
 ---
 
-## 10. Advanced Topics
+## 10. Quick Reference
 
-<!-- ### 10.1 Custom Feature Normalization
-
-```python
-# Experiment with normalization methods
-for norm in ['none', 'power', 'quantile']:
-    pipeline = TabularPipeline(
-        model_name='TabICL',
-        model_params={'norm_methods': [norm]}
-    )
-    # Evaluate...
-``` -->
-
-<!-- ### 10.2 Feature Importance
-
-```python
-from sklearn.inspection import permutation_importance
-
-# Get feature importance with TabICL
-result = permutation_importance(
-    pipeline.model,
-    X_test,
-    y_test,
-    n_repeats=10
-)
-
-importance_df = pd.DataFrame({
-    'feature': X_test.columns,
-    'importance': result.importances_mean
-}).sort_values('importance', ascending=False)
-```
- -->
-<!-- ### 10.3 Cross-Validation
-
-```python
-from sklearn.model_selection import cross_validate
-
-# 5-fold cross-validation
-scores = cross_validate(
-    pipeline,
-    X_train,
-    y_train,
-    cv=5,
-    scoring=['accuracy', 'f1_weighted']
-)
-
-print(f"Mean Accuracy: {scores['test_accuracy'].mean():.4f}")
-print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
-``` -->
-
----
-
-## 11. Quick Reference
-
-| Use Case | Strategy | Config | Time |
-|----------|----------|--------|------|
-| Quick test | inference | n_est=16 | <1s |
-| Rapid proto | peft | r=8, epochs=3 | 5-10m |
-| Production | base-ft | epochs=5 | 20-30m |
-| Max accuracy | base-ft | epochs=10 | 40-60m |
-| Memory limited | peft | r=4 | 5-10m |
+| Use Case | Model | Strategy | Config | Notes |
+|----------|-------|----------|--------|-------|
+| Quick classification | TabICL | inference | n_est=16 | <1s |
+| Classification FT | TabICL | finetune | epochs=5 | Episodic |
+| Classification PEFT | TabICL | peft | r=8, epochs=5 | Memory efficient |
+| Regression inference | TabICLv2 | inference | — | |
+| Regression FT | TabICLv2 | finetune | lr=2e-6, epochs=5 | Turn-by-turn MSE |
 
 
-<!-- ## 12. Comparison with Other Models
+<!-- ## 11. Comparison with Other Models
 
 | Aspect | TabICL | TabPFN | TabDPT | Mitra |
 |--------|--------|--------|--------|-------|
@@ -546,7 +565,7 @@ print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
  -->
 ---
 
-## 13. Next Steps
+## 12. Next Steps
 
 - [Model Selection](../user-guide/model-selection.md) - Compare with other models
 - [Tuning Strategies](../user-guide/tuning-strategies.md) - Deep dive into strategies
@@ -555,4 +574,4 @@ print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
 
 ---
 
-TabICL offers an excellent balance of speed, accuracy, and scalability. Use it for most tabular classification tasks!
+TabICL offers an excellent balance of speed, accuracy, and scalability. Use it for most tabular classification tasks! Use TabICLv2 when you need regression support or an improved architecture.

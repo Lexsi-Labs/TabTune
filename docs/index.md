@@ -33,7 +33,7 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 **Key Capabilities:**
 
 - ✅ **Multiple Training Paradigms:** Supports supervised fine-tuning (SFT) with full parameter updates, episodic meta-learning for in-context learning models, and parameter-efficient PEFT strategies.
-- ✅ **PEFT (LoRA) Support:** Parameter-efficient fine-tuning for 5 out of 7 models (TabICL, OrionMSP, OrionBix, TabDPT, Mitra) with full support.
+- ✅ **PEFT (LoRA) Support:** Parameter-efficient fine-tuning for 5 out of 9 models (TabICL, OrionMSP, OrionBix, TabDPT, Mitra) with full support.
 - ✅ **Meta-Learning Integration:** Episodic training with support/query sets for ICL models (TabICL, OrionMSP, OrionBix, Mitra) enabling fast task adaptation.
 - ✅ **Comprehensive Documentation:** Extensive guides, API references, troubleshooting, and model-specific documentation.
 - ✅ **Production Ready:** Model serialization, reproducible training, and deployment-ready pipelines.
@@ -52,19 +52,13 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 ---
 ## 🆕 New in This Release
 
-### ✅ OrionMSP v1.5 and Limix Model Support
+### ✅ TabPFNv2.6 Integration
 
-### Regression Framework
+Full support for PriorLabs' latest TabPFN release, covering both classification and regression with inference and fine-tuning. A dedicated **native fine-tuning mode** (`finetune_mode='native'`) leverages `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor` with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection.
 
--   Unified regression training API
--   Standardized metric handling
--   Benchmark-ready evaluation utilities
+### ✅ TabICLv2 Integration
 
-### Resampling Module
-
--   Context-aware support/query sampling
--   Configurable episodic batching
--   Optimized for ICL models
+Full support for TabICLv2 for both classification and regression, with inference and episodic fine-tuning. Regression fine-tuning uses turn-by-turn episodic MSE training.
 
 ---
 
@@ -72,7 +66,7 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 
 | Model | Family / Paradigm | Key Innovation | Supported Strategies |
 |-------|------------------|----------------|----------------------|
-| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression |
+| **TabPFN-v2.5** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
 | **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
@@ -81,6 +75,8 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 | **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
 | **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
+| **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
+| **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
@@ -103,7 +99,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 pipeline = TabularPipeline(
     model_name="TabPFN",
     task_type="classification",
-    tuning_strategy="base-ft",
+    tuning_strategy="finetune",
     tuning_params={"device": "cpu"}
 )
 pipeline.fit(X_train, y_train)
@@ -149,7 +145,7 @@ print(metrics)
 
 ## 🏆 Example Notebooks
 
-|Below are 11 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -164,6 +160,8 @@ print(metrics)
 | 9 | Regression - 2| Introduction to Regression - Finetune |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing) |
 | 10 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
+| 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression|[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
+| 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
 
 
 ---

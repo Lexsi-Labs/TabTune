@@ -11,16 +11,21 @@ flowchart TD
     A[Tabular Foundation Models] --> B[ICL-Based Models]
     A --> C[Transformer-Based Models]
     A --> D[PFN-Based Models]
-    
-    B --> E[TabICL]
-    B --> F[OrionMSP]
-    B --> G[Orion BIX]
-    B --> H[Mitra]
-    B --> I[ContextTab]
-    
-    C --> J[TabDPT]
-    
-    D --> K[TabPFN]
+    A --> E[Probabilistic Models]
+
+    B --> F[TabICL]
+    B --> G[TabICLv2]
+    B --> H[OrionMSP]
+    B --> I[Orion BIX]
+    B --> J[Mitra]
+    B --> K[ContextTab]
+
+    C --> L[TabDPT]
+
+    D --> M[TabPFN-v2.5]
+    D --> N[TabPFN-v2.6]
+
+    E --> O[LimiX]
 ```
 
 ---
@@ -36,6 +41,8 @@ flowchart TD
 | **TabDPT** | Denoising | Transformer | Large Datasets | 100K-5M | ⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ |
 | **Mitra** | 2D Attention | Cross‑Attention | Complex Patterns | 10K-500K | ⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ |
 | **ContextTab** | Semantic ICL | Text + Embeddings | Text-Heavy | 10K-500K | ⭐⭐ | ⭐⭐⭐ | ⚠️ |
+| **TabPFN-v2.6** | PFN/ICL | Approximate Bayesian + Native FT | Small datasets | <10K | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⚠️ |
+| **TabICLv2** | Scalable ICL | Improved Column-Row Attention | Balanced + Regression | 10K-1M | ⭐⭐⭐⭐ | ⭐⭐⭐ | ❌ |
 
 ---
 
@@ -48,20 +55,18 @@ flowchart TD
 
 ---
 
-## 4. Feature Support Matrix
-
-| Feature | TabPFN | TabICL | OrionMSP | OrionBix | TabDPT | Mitra | ContextTab |
-|---------|--------|--------|-----------|-----------|--------|-------|------------|
-| Numerical Features | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Categorical Features | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Missing Values | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Text Features | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Large Datasets (>1M) | ❌ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ |
-| Small Datasets (<10K) | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ |
-| PEFT Support | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
-| Multi-GPU Training | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
----
+| Feature | TabPFN | TabPFNv2.6 | TabICL | TabICLv2 | OrionMSP | OrionBix | TabDPT | Mitra | ContextTab | LimiX |
+|---------|--------|------------|--------|----------|-----------|-----------|--------|-------|------------|-------|
+| Numerical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Categorical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Missing Values | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Text Features | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| Large Datasets (>1M) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ❌ |
+| Small Datasets (<10K) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
+| Classification | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Regression | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| PEFT Support | ⚠️ | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ |
+| Multi-GPU Training | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 
 ## 5. Performance Benchmarks
 
@@ -76,65 +81,23 @@ Performance characteristics vary significantly based on dataset size, hardware, 
     
     Use these as rough guidelines for relative comparisons.
 
-### 5.1 Accuracy Benchmarks
 
-Typical accuracy ranges on standard OpenML datasets (medium-sized, ~10K-50K samples):
-
-| Model | Strategy | Accuracy Range | Notes |
-|-------|----------|----------------|-------|
-| **TabPFN** | inference | 0.75-0.85 | Best on small, clean datasets |
-| **TabICL** | base-ft | 0.80-0.92 | Balanced performance |
-| **TabICL** | peft | 0.78-0.90 | ~2-5% below base-ft |
-| **OrionMSP** | base-ft | 0.82-0.93 | Strong generalization |
-| **OrionBix** | base-ft | 0.85-0.94 | Highest accuracy potential |
-| **TabDPT** | base-ft | 0.83-0.92 | Excellent on large datasets |
-| **Mitra** | base-ft | 0.84-0.93 | Complex pattern handling |
-| **ContextTab** | base-ft | 0.75-0.88 | Best with text features |
-
-**Notes:**
-- Ranges represent typical performance on diverse datasets
-- Your results may vary significantly based on dataset characteristics
-- Fine-tuning (base-ft/peft) generally outperforms inference by 5-15%
-
-### 5.2 Training Time Benchmarks
-
-Approximate training times (5 epochs, medium dataset ~20K samples, NVIDIA RTX 3090):
-
-| Model | Strategy | Training Time | Speed Factor |
-|-------|----------|--------------|--------------|
-| **TabPFN** | inference | 0s | Instant |
-| **TabPFN** | base-ft | 10-30 min | Fast |
-| **TabICL** | inference | <1 min | Very fast |
-| **TabICL** | base-ft | 15-45 min | Moderate |
-| **TabICL** | peft | 8-20 min | Fast |
-| **OrionMSP** | base-ft | 30-90 min | Moderate-Slow |
-| **OrionBix** | base-ft | 45-120 min | Slow |
-| **TabDPT** | base-ft | 20-60 min | Moderate |
-| **Mitra** | base-ft | 60-180 min | Slow |
-| **ContextTab** | base-ft | 30-90 min | Moderate-Slow |
-
-**Factors affecting training time:**
-- Dataset size (rows × features)
-- Number of epochs
-- Batch size
-- GPU/CPU speed
-- Model complexity
-
-### 5.3 Memory Usage Estimates
+### 5.1 Memory Usage Estimates
 
 Peak memory usage during training (approximate, GPU memory):
 
 | Model | Strategy | Memory Range | Notes |
 |-------|----------|--------------|-------|
-| **TabPFN** | inference | 2-4 GB | Small datasets |
-| **TabICL** | inference | 3-6 GB | Moderate |
-| **TabICL** | base-ft | 8-16 GB | Full model |
+| **TabPFN-v2.5/v2.6** | inference | 2-4 GB | Small datasets |
+| **TabPFN-v2.6** | finetune (native) | 6-10 GB | AMP helps |
+| **TabICL / TabICLv2** | inference | 3-6 GB | |
+| **TabICL / TabICLv2** | finetune | 8-16 GB | |
 | **TabICL** | peft | 4-8 GB | 40-50% reduction |
-| **OrionMSP** | base-ft | 10-20 GB | Large context |
-| **OrionBix** | base-ft | 12-24 GB | Biaxial layers |
-| **TabDPT** | base-ft | 12-28 GB | Large transformer |
-| **Mitra** | base-ft | 16-32 GB | 2D attention |
-| **ContextTab** | base-ft | 8-16 GB | Embedding overhead |
+| **OrionMSP** | finetune | 10-20 GB | |
+| **OrionBix** | finetune | 12-24 GB | |
+| **TabDPT** | finetune | 12-28 GB | |
+| **Mitra** | finetune | 16-32 GB | |
+| **ContextTab** | finetune | 8-16 GB | |
 
 **Memory optimization tips:**
 - Use PEFT strategy (reduces memory by 40-60%)
@@ -142,19 +105,20 @@ Peak memory usage during training (approximate, GPU memory):
 - Use gradient accumulation
 - Process large datasets in chunks
 
-### 5.4 Inference Latency
+### 5.2 Inference Latency
 
 Average inference time per batch (batch_size=32, GPU):
 
 | Model | Latency (ms/batch) | Throughput (samples/s) |
 |-------|-------------------|------------------------|
-| **TabPFN** | 10-50 | 640-3200 |
-| **TabICL** | 20-80 | 400-1600 |
+| **TabPFN-v2.5/v2.6** | 10-50 | 640-3200 |
+| **TabICL / TabICLv2** | 20-80 | 400-1600 |
 | **OrionMSP** | 40-120 | 267-800 |
 | **OrionBix** | 60-150 | 213-533 |
 | **TabDPT** | 30-100 | 320-1067 |
 | **Mitra** | 80-200 | 160-400 |
 | **ContextTab** | 100-300 | 107-320 |
+| **LimiX** | 40-120 | 267-800 |
 
 **Note:** Latency increases with dataset size (for ICL models that use training data as context).
 
