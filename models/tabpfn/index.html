@@ -270,9 +270,14 @@
 <li class="third-level"><a href="#32-parameter-descriptions">3.2 Parameter Descriptions</a></li>
 <li class="third-level"><a href="#33-parameter-tuning-guidelines">3.3 Parameter Tuning Guidelines</a></li>
 <li class="second-level"><a href="#4-fine-tuning-with-tabpfn">4. Fine-Tuning with TabPFN</a></li>
+<li class="third-level"><a href="#finetune_mode-options">finetune_mode options</a></li>
 <li class="third-level"><a href="#41-base-fine-tuning-parameters">4.1 Base Fine-Tuning Parameters</a></li>
 <li class="third-level"><a href="#42-fine-tuning-best-practices">4.2 Fine-Tuning Best Practices</a></li>
 <li class="third-level"><a href="#43-fine-tuning-example">4.3 Fine-Tuning Example</a></li>
+<li class="second-level"><a href="#5-tabpfn-v26-fine-tuning">5. TabPFN v2.6 — Fine-Tuning</a></li>
+<li class="third-level"><a href="#61-classification-native-fine-tuning">6.1 Classification — Native Fine-Tuning</a></li>
+<li class="third-level"><a href="#52-regression-native-fine-tuning">5.2 Regression — Native Fine-Tuning</a></li>
+<li class="third-level"><a href="#53-native-fine-tuning-parameters-v26-only">5.3 Native Fine-Tuning Parameters (v2.6 only)</a></li>
 <li class="second-level"><a href="#5-inference-only-usage">5. Inference-Only Usage</a></li>
 <li class="third-level"><a href="#51-zero-shot-predictions">5.1 Zero-Shot Predictions</a></li>
 <li class="third-level"><a href="#52-uncertainty-estimation">5.2 Uncertainty Estimation</a></li>
@@ -298,7 +303,7 @@
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="tabpfn-prior-fitted-network">TabPFN: Prior-Fitted Network<a class="headerlink" href="#tabpfn-prior-fitted-network" title="Permanent link">¶</a></h1>
-<p>TabPFN is a revolutionary tabular model that demonstrates strong zero-shot performance without any fine-tuning. This document provides an in-depth guide to using TabPFN with TabTune.</p>
+<p>TabPFN is a revolutionary tabular model that demonstrates strong zero-shot performance without any fine-tuning. This document provides an in-depth guide to using TabPFN with TabTune. TabTune supports both <strong>TabPFN v2.5</strong> and the latest <strong>TabPFN v2.6</strong>, each with distinct fine-tuning capabilities.</p>
 <hr/>
 <h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
 <p><strong>What is TabPFN?</strong></p>
@@ -310,6 +315,7 @@
 <li>Few-shot adaptation</li>
 </ul>
 <p><strong>Key Innovation</strong>: Rather than training on a specific task, TabPFN learns to solve tasks as a <strong>sequence-to-sequence problem</strong>, making it excel in in-context learning scenarios.</p>
+<p><strong>v2.5 vs v2.6</strong>: TabPFN v2.6 is the latest PriorLabs release. It introduces a dedicated native fine-tuning API (<code>FinetunedTabPFNClassifier</code> / <code>FinetunedTabPFNRegressor</code>) with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection — in addition to all the meta-learning and SFT modes available in v2.5.</p>
 <hr/>
 <h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
 <h3 id="21-high-level-design">2.1 High-Level Design<a class="headerlink" href="#21-high-level-design" title="Permanent link">¶</a></h3>
@@ -415,7 +421,45 @@
 - <code>False</code>: Better for probability calibration</p>
 <hr/>
 <h2 id="4-fine-tuning-with-tabpfn">4. Fine-Tuning with TabPFN<a class="headerlink" href="#4-fine-tuning-with-tabpfn" title="Permanent link">¶</a></h2>
-<p>TabPFN supports <strong>full fine-tuning</strong> (base-ft strategy) for task adaptation.</p>
+<p>Both v2.5 and v2.6 support <code>tuning_strategy='finetune'</code>. The <code>finetune_mode</code> parameter controls which algorithm is used.</p>
+<h3 id="finetune_mode-options">finetune_mode options<a class="headerlink" href="#finetune_mode-options" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>finetune_mode</code></th>
+<th>v2.5</th>
+<th>v2.6</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'meta-learning'</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>Episodic meta-learning with cosine LR, AMP, gradient accumulation</td>
+</tr>
+<tr>
+<td><code>'sft'</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>SFT-style: single large (support, query) episode repeated for N epochs</td>
+</tr>
+<tr>
+<td><code>'native'</code></td>
+<td>❌</td>
+<td>✅</td>
+<td>PriorLabs <code>FinetunedTabPFN{Classifier,Regressor}</code> with bar distribution loss</td>
+</tr>
+<tr>
+<td><code>'turn_by_turn'</code> / <code>'tbt'</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>Regression only — episodic turn-by-turn with bardist NLL loss</td>
+</tr>
+</tbody>
+</table>
+<p>If <code>finetune_mode</code> is not set, TabTune uses a smart default: <code>'turn_by_turn'</code> for regression tasks, <code>'meta-learning'</code> for classification.</p>
 <h3 id="41-base-fine-tuning-parameters">4.1 Base Fine-Tuning Parameters<a class="headerlink" href="#41-base-fine-tuning-parameters" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
@@ -442,7 +486,7 @@
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -460,6 +504,147 @@
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
+<hr/>
+<h2 id="5-tabpfn-v26-fine-tuning">5. TabPFN v2.6 — Fine-Tuning<a class="headerlink" href="#5-tabpfn-v26-fine-tuning" title="Permanent link">¶</a></h2>
+<p>TabPFN v2.6 adds a <strong>native fine-tuning mode</strong> on top of all v2.5 capabilities.</p>
+<h3 id="61-classification-native-fine-tuning">6.1 Classification — Native Fine-Tuning<a class="headerlink" href="#61-classification-native-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFNv26'</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">'classification'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
+    <span class="n">finetune_mode</span><span class="o">=</span><span class="s1">'native'</span><span class="p">,</span>      <span class="c1"># Uses FinetunedTabPFNClassifier</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s1">'early_stopping'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">'early_stopping_patience'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="52-regression-native-fine-tuning">5.2 Regression — Native Fine-Tuning<a class="headerlink" href="#52-regression-native-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFNv26'</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
+    <span class="n">finetune_mode</span><span class="o">=</span><span class="s1">'native'</span><span class="p">,</span>      <span class="c1"># Uses FinetunedTabPFNRegressor</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s1">'early_stopping'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">'early_stopping_patience'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="53-native-fine-tuning-parameters-v26-only">5.3 Native Fine-Tuning Parameters (v2.6 only)<a class="headerlink" href="#53-native-fine-tuning-parameters-v26-only" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td>30</td>
+<td>Maximum training epochs</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td>1e-5</td>
+<td>Learning rate</td>
+</tr>
+<tr>
+<td><code>weight_decay</code></td>
+<td>float</td>
+<td>0.01</td>
+<td>AdamW weight decay</td>
+</tr>
+<tr>
+<td><code>early_stopping</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Enable early stopping</td>
+</tr>
+<tr>
+<td><code>early_stopping_patience</code></td>
+<td>int</td>
+<td>8</td>
+<td>Patience before stopping</td>
+</tr>
+<tr>
+<td><code>validation_split_ratio</code></td>
+<td>float</td>
+<td>0.1</td>
+<td>Fraction of data for validation</td>
+</tr>
+<tr>
+<td><code>n_finetune_ctx_plus_query_samples</code></td>
+<td>int</td>
+<td>10000</td>
+<td>Context + query pool size</td>
+</tr>
+<tr>
+<td><code>finetune_ctx_query_split_ratio</code></td>
+<td>float</td>
+<td>0.2</td>
+<td>Fraction used as query</td>
+</tr>
+<tr>
+<td><code>n_estimators_finetune</code></td>
+<td>int</td>
+<td>2</td>
+<td>Ensemble size during FT</td>
+</tr>
+<tr>
+<td><code>n_estimators_validation</code></td>
+<td>int</td>
+<td>2</td>
+<td>Ensemble size during validation</td>
+</tr>
+<tr>
+<td><code>n_estimators_final_inference</code></td>
+<td>int</td>
+<td>8</td>
+<td>Ensemble size for final predict</td>
+</tr>
+<tr>
+<td><code>grad_clip_value</code></td>
+<td>float</td>
+<td>1.0</td>
+<td>Gradient clipping value</td>
+</tr>
+<tr>
+<td><code>use_lr_scheduler</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Cosine LR with warmup</td>
+</tr>
+<tr>
+<td><code>use_activation_checkpointing</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Save memory via gradient checkpointing</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>int</td>
+<td>0</td>
+<td>Reproducibility seed</td>
+</tr>
+</tbody>
+</table>
 <hr/>
 <h2 id="5-inference-only-usage">5. Inference-Only Usage<a class="headerlink" href="#5-inference-only-usage" title="Permanent link">¶</a></h2>
 <h3 id="51-zero-shot-predictions">5.1 Zero-Shot Predictions<a class="headerlink" href="#51-zero-shot-predictions" title="Permanent link">¶</a></h3>
@@ -511,7 +696,7 @@
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -572,17 +757,17 @@
 - Adapter state management conflicts
 - Potential prediction inconsistencies</p>
 <h3 id="82-when-to-use-peft">8.2 When to Use PEFT<a class="headerlink" href="#82-when-to-use-peft" title="Permanent link">¶</a></h3>
-<p><strong>Not Recommended</strong> for TabPFN. Use <code>base-ft</code> strategy instead:</p>
+<p><strong>Not Recommended</strong> for TabPFN. Use <code>finetune</code> strategy instead:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># ❌ Not recommended</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span>  <span class="c1"># May have issues - will override to base-ft</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span>  <span class="c1"># May have issues - will override </span>
 <span class="p">)</span>
 
 <span class="c1"># ✅ Recommended</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span>  <span class="c1"># Fully supported</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span>  <span class="c1"># Fully supported</span>
 <span class="p">)</span>
 </code></pre></div>
 <hr/>
@@ -635,10 +820,10 @@
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="issue-peft-causing-prediction-errors">Issue: "PEFT causing prediction errors"<a class="headerlink" href="#issue-peft-causing-prediction-errors" title="Permanent link">¶</a></h3>
-<p><strong>Solution</strong>: Use base-ft strategy instead</p>
+<p><strong>Solution</strong>: Use finetuning strategy instead</p>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span>  <span class="c1"># Not peft</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span>  <span class="c1"># Not peft</span>
 <span class="p">)</span>
 </code></pre></div>
 <hr/>
@@ -671,7 +856,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Fine-Tuned ==="</span><span class="p">)</span>
 <span class="n">finetuned</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabPFN'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -687,7 +872,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Model Comparison ==="</span><span class="p">)</span>
 <span class="n">lb</span> <span class="o">=</span> <span class="n">TabularLeaderboard</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="s1">'inference'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TabPFN-Inference'</span><span class="p">)</span>
-<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="s1">'base-ft'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TabPFN-FineTune'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabPFN'</span><span class="p">,</span> <span class="s1">'finetune'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TabPFN-FineTune'</span><span class="p">,</span> <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
 <span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">'TabICL'</span><span class="p">,</span> <span class="s1">'peft'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TabICL-PEFT'</span><span class="p">)</span>
 
 <span class="n">lb</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rank_by</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
@@ -712,13 +897,13 @@
 </tr>
 <tr>
 <td>Rapid prototyping</td>
-<td>base-ft + 3 epochs</td>
+<td>finetune + 3 epochs</td>
 <td>5m</td>
 <td>Good</td>
 </tr>
 <tr>
 <td>Production model</td>
-<td>base-ft + 5 epochs</td>
+<td>finetune + 5 epochs</td>
 <td>15m</td>
 <td>High</td>
 </tr>

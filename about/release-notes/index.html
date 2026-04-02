@@ -260,8 +260,10 @@
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#release-notes">Release Notes</a></li>
-<li class="second-level"><a href="#release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026</a></li>
+<li class="second-level"><a href="#release-2nd-april-2026">Release — 2nd April 2026</a></li>
 <li class="third-level"><a href="#major-highlights">🎯 Major Highlights</a></li>
+<li class="second-level"><a href="#release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026</a></li>
+<li class="third-level"><a href="#major-highlights_1">🎯 Major Highlights</a></li>
 <li class="third-level"><a href="#supported-models-9-total">🧠 Supported Models (9 Total)</a></li>
 <li class="third-level"><a href="#new-additions">🆕 New Additions</a></li>
 <li class="third-level"><a href="#improvements">⚙️ Improvements</a></li>
@@ -272,17 +274,23 @@
 <div class="col-md-9" role="main">
 <h1 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">¶</a></h1>
 <hr/>
+<h2 id="release-2nd-april-2026">Release — 2nd April 2026<a class="headerlink" href="#release-2nd-april-2026" title="Permanent link">¶</a></h2>
+<h3 id="major-highlights">🎯 Major Highlights<a class="headerlink" href="#major-highlights" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>TabPFNv2.6 Integration</strong> — Full support for PriorLabs' latest TabPFN release, covering classification and regression with inference and fine-tuning. Includes a dedicated <strong>native fine-tuning mode</strong> (<code>finetune_mode='native'</code>) backed by <code>FinetunedTabPFNClassifier</code> / <code>FinetunedTabPFNRegressor</code> with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection.</li>
+<li><strong>TabICLv2 Integration</strong> — Full support for TabICLv2 for both classification and regression, with inference and episodic fine-tuning for both tasks. Regression fine-tuning uses turn-by-turn episodic MSE training.</li>
+</ul>
 <h2 id="release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026<a class="headerlink" href="#release-notes-26th-feb-2026" title="Permanent link">¶</a></h2>
 <p><strong>TabTune</strong> marks the first production-ready release of the unified
 tabular foundation model framework.</p>
-<h3 id="major-highlights">🎯 Major Highlights<a class="headerlink" href="#major-highlights" title="Permanent link">¶</a></h3>
+<h3 id="major-highlights_1">🎯 Major Highlights<a class="headerlink" href="#major-highlights_1" title="Permanent link">¶</a></h3>
 <ul>
 <li>Fully unified <code>TabularPipeline</code> API (<code>fit</code>, <code>predict</code>, <code>evaluate</code>,
     <code>save</code>, <code>load</code>)</li>
 <li>Model-aware <code>DataProcessor</code> for automated preprocessing</li>
 <li><code>TuningManager</code> with three strategies:<ul>
 <li><code>inference</code> (zero-shot)</li>
-<li><code>base-ft</code> (full fine-tuning)</li>
+<li><code>finetune</code> (full fine-tuning)</li>
 <li><code>peft</code> (LoRA-based parameter-efficient fine-tuning)</li>
 </ul>
 </li>
@@ -303,18 +311,25 @@ tabular foundation model framework.</p>
 </ul>
 <hr/>
 <h3 id="new-additions">🆕 New Additions<a class="headerlink" href="#new-additions" title="Permanent link">¶</a></h3>
-<h4 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h4>
-<h4 id="regression-framework">✅ Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h4>
+<h4 id="tabpfn-v26-model_nametabpfnv26">✅ TabPFN v2.6 (<code>model_name='TabPFNv26'</code>)<a class="headerlink" href="#tabpfn-v26-model_nametabpfnv26" title="Permanent link">¶</a></h4>
 <ul>
-<li>Unified regression training pipeline</li>
-<li>Standardized evaluation metrics</li>
-<li>Benchmark-ready structure</li>
+<li>Classification: inference, meta-learning FT, SFT, native FT</li>
+<li>Regression: inference, turn-by-turn FT, native FT</li>
+<li><code>finetune_mode='native'</code> uses <code>FinetunedTabPFNClassifier</code> / <code>FinetunedTabPFNRegressor</code> with:</li>
+<li>Bar distribution loss (regression)</li>
+<li>Cosine LR with warmup</li>
+<li>Mixed-precision (AMP)</li>
+<li>Early stopping with patience</li>
+<li>Validation-based model selection</li>
+<li>Gradient clipping</li>
+<li>Activation checkpointing</li>
+<li>New <code>tuning_params</code> keys: <code>early_stopping</code>, <code>early_stopping_patience</code>, <code>validation_split_ratio</code>, <code>n_estimators_finetune</code>, <code>n_estimators_validation</code>, <code>n_estimators_final_inference</code>, <code>grad_clip_value</code>, <code>use_lr_scheduler</code>, <code>use_activation_checkpointing</code></li>
 </ul>
-<h4 id="resampling-module">✅ Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h4>
+<h4 id="tabiclv2-model_nametabiclv2">✅ TabICLv2 (<code>model_name='TabICLv2'</code>)<a class="headerlink" href="#tabiclv2-model_nametabiclv2" title="Permanent link">¶</a></h4>
 <ul>
-<li>Context-aware support/query sampling</li>
-<li>Episodic batching utilities</li>
-<li>ICL model optimization support</li>
+<li>Classification: inference + finetune (episodic meta-learning)</li>
+<li>Regression: inference + finetune (episodic turn-by-turn MSE)</li>
+<li>Regression FT uses AdamW with gradient clipping and post-finetune re-fit for inference cache rebuild</li>
 </ul>
 <hr/>
 <h3 id="improvements">⚙️ Improvements<a class="headerlink" href="#improvements" title="Permanent link">¶</a></h3>

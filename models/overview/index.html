@@ -263,12 +263,9 @@
 <li class="second-level"><a href="#1-model-ecosystem">1. Model Ecosystem</a></li>
 <li class="second-level"><a href="#2-model-comparison-matrix">2. Model Comparison Matrix</a></li>
 <li class="second-level"><a href="#3-selection-quick-tips">3. Selection Quick Tips</a></li>
-<li class="second-level"><a href="#4-feature-support-matrix">4. Feature Support Matrix</a></li>
 <li class="second-level"><a href="#5-performance-benchmarks">5. Performance Benchmarks</a></li>
-<li class="third-level"><a href="#51-accuracy-benchmarks">5.1 Accuracy Benchmarks</a></li>
-<li class="third-level"><a href="#52-training-time-benchmarks">5.2 Training Time Benchmarks</a></li>
-<li class="third-level"><a href="#53-memory-usage-estimates">5.3 Memory Usage Estimates</a></li>
-<li class="third-level"><a href="#54-inference-latency">5.4 Inference Latency</a></li>
+<li class="third-level"><a href="#51-memory-usage-estimates">5.1 Memory Usage Estimates</a></li>
+<li class="third-level"><a href="#52-inference-latency">5.2 Inference Latency</a></li>
 <li class="third-level"><a href="#55-benchmark-methodology">5.5 Benchmark Methodology</a></li>
 </ul>
 </div></div>
@@ -281,16 +278,21 @@
     A[Tabular Foundation Models] --&gt; B[ICL-Based Models]
     A --&gt; C[Transformer-Based Models]
     A --&gt; D[PFN-Based Models]
+    A --&gt; E[Probabilistic Models]
 
-    B --&gt; E[TabICL]
-    B --&gt; F[OrionMSP]
-    B --&gt; G[Orion BIX]
-    B --&gt; H[Mitra]
-    B --&gt; I[ContextTab]
+    B --&gt; F[TabICL]
+    B --&gt; G[TabICLv2]
+    B --&gt; H[OrionMSP]
+    B --&gt; I[Orion BIX]
+    B --&gt; J[Mitra]
+    B --&gt; K[ContextTab]
 
-    C --&gt; J[TabDPT]
+    C --&gt; L[TabDPT]
 
-    D --&gt; K[TabPFN]
+    D --&gt; M[TabPFN-v2.5]
+    D --&gt; N[TabPFN-v2.6]
+
+    E --&gt; O[LimiX]
 </div>
 <hr/>
 <h2 id="2-model-comparison-matrix">2. Model Comparison Matrix<a class="headerlink" href="#2-model-comparison-matrix" title="Permanent link">¶</a></h2>
@@ -378,6 +380,26 @@
 <td>⭐⭐⭐</td>
 <td>⚠️</td>
 </tr>
+<tr>
+<td><strong>TabPFN-v2.6</strong></td>
+<td>PFN/ICL</td>
+<td>Approximate Bayesian + Native FT</td>
+<td>Small datasets</td>
+<td>&lt;10K</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td><strong>TabICLv2</strong></td>
+<td>Scalable ICL</td>
+<td>Improved Column-Row Attention</td>
+<td>Balanced + Regression</td>
+<td>10K-1M</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>❌</td>
+</tr>
 </tbody>
 </table>
 <hr/>
@@ -393,23 +415,28 @@
 <li>Text‑heavy features: ContextTab</li>
 </ul>
 <hr/>
-<h2 id="4-feature-support-matrix">4. Feature Support Matrix<a class="headerlink" href="#4-feature-support-matrix" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
 <th>Feature</th>
 <th>TabPFN</th>
+<th>TabPFNv2.6</th>
 <th>TabICL</th>
+<th>TabICLv2</th>
 <th>OrionMSP</th>
 <th>OrionBix</th>
 <th>TabDPT</th>
 <th>Mitra</th>
 <th>ContextTab</th>
+<th>LimiX</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Numerical Features</td>
+<td>Numerical</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
@@ -419,7 +446,10 @@
 <td>✅</td>
 </tr>
 <tr>
-<td>Categorical Features</td>
+<td>Categorical</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
@@ -437,6 +467,9 @@
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
 </tr>
 <tr>
 <td>Text Features</td>
@@ -446,40 +479,79 @@
 <td>❌</td>
 <td>❌</td>
 <td>❌</td>
+<td>❌</td>
+<td>❌</td>
 <td>✅</td>
+<td>❌</td>
 </tr>
 <tr>
 <td>Large Datasets (&gt;1M)</td>
+<td>❌</td>
 <td>❌</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>✅</td>
 <td>⚠️</td>
+<td>❌</td>
 <td>❌</td>
 </tr>
 <tr>
 <td>Small Datasets (&lt;10K)</td>
 <td>✅</td>
 <td>✅</td>
+<td>✅</td>
+<td>✅</td>
 <td>⚠️</td>
 <td>⚠️</td>
 <td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Regression</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
 <tr>
 <td>PEFT Support</td>
 <td>⚠️</td>
+<td>⚠️</td>
 <td>✅</td>
+<td>❌</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>⚠️</td>
+<td>❌</td>
 </tr>
 <tr>
 <td>Multi-GPU Training</td>
+<td>❌</td>
 <td>❌</td>
 <td>✅</td>
 <td>✅</td>
@@ -487,10 +559,11 @@
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>✅</td>
+<td>❌</td>
 </tr>
 </tbody>
 </table>
-<hr/>
 <h2 id="5-performance-benchmarks">5. Performance Benchmarks<a class="headerlink" href="#5-performance-benchmarks" title="Permanent link">¶</a></h2>
 <p>Performance characteristics vary significantly based on dataset size, hardware, and hyperparameters. The following benchmarks provide rough estimates based on typical configurations.</p>
 <div class="admonition note">
@@ -502,153 +575,7 @@
 - Software versions</p>
 <p>Use these as rough guidelines for relative comparisons.</p>
 </div>
-<h3 id="51-accuracy-benchmarks">5.1 Accuracy Benchmarks<a class="headerlink" href="#51-accuracy-benchmarks" title="Permanent link">¶</a></h3>
-<p>Typical accuracy ranges on standard OpenML datasets (medium-sized, ~10K-50K samples):</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
-<th>Strategy</th>
-<th>Accuracy Range</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>TabPFN</strong></td>
-<td>inference</td>
-<td>0.75-0.85</td>
-<td>Best on small, clean datasets</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>base-ft</td>
-<td>0.80-0.92</td>
-<td>Balanced performance</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>peft</td>
-<td>0.78-0.90</td>
-<td>~2-5% below base-ft</td>
-</tr>
-<tr>
-<td><strong>OrionMSP</strong></td>
-<td>base-ft</td>
-<td>0.82-0.93</td>
-<td>Strong generalization</td>
-</tr>
-<tr>
-<td><strong>OrionBix</strong></td>
-<td>base-ft</td>
-<td>0.85-0.94</td>
-<td>Highest accuracy potential</td>
-</tr>
-<tr>
-<td><strong>TabDPT</strong></td>
-<td>base-ft</td>
-<td>0.83-0.92</td>
-<td>Excellent on large datasets</td>
-</tr>
-<tr>
-<td><strong>Mitra</strong></td>
-<td>base-ft</td>
-<td>0.84-0.93</td>
-<td>Complex pattern handling</td>
-</tr>
-<tr>
-<td><strong>ContextTab</strong></td>
-<td>base-ft</td>
-<td>0.75-0.88</td>
-<td>Best with text features</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Notes:</strong>
-- Ranges represent typical performance on diverse datasets
-- Your results may vary significantly based on dataset characteristics
-- Fine-tuning (base-ft/peft) generally outperforms inference by 5-15%</p>
-<h3 id="52-training-time-benchmarks">5.2 Training Time Benchmarks<a class="headerlink" href="#52-training-time-benchmarks" title="Permanent link">¶</a></h3>
-<p>Approximate training times (5 epochs, medium dataset ~20K samples, NVIDIA RTX 3090):</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
-<th>Strategy</th>
-<th>Training Time</th>
-<th>Speed Factor</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>TabPFN</strong></td>
-<td>inference</td>
-<td>0s</td>
-<td>Instant</td>
-</tr>
-<tr>
-<td><strong>TabPFN</strong></td>
-<td>base-ft</td>
-<td>10-30 min</td>
-<td>Fast</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>inference</td>
-<td>&lt;1 min</td>
-<td>Very fast</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>base-ft</td>
-<td>15-45 min</td>
-<td>Moderate</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>peft</td>
-<td>8-20 min</td>
-<td>Fast</td>
-</tr>
-<tr>
-<td><strong>OrionMSP</strong></td>
-<td>base-ft</td>
-<td>30-90 min</td>
-<td>Moderate-Slow</td>
-</tr>
-<tr>
-<td><strong>OrionBix</strong></td>
-<td>base-ft</td>
-<td>45-120 min</td>
-<td>Slow</td>
-</tr>
-<tr>
-<td><strong>TabDPT</strong></td>
-<td>base-ft</td>
-<td>20-60 min</td>
-<td>Moderate</td>
-</tr>
-<tr>
-<td><strong>Mitra</strong></td>
-<td>base-ft</td>
-<td>60-180 min</td>
-<td>Slow</td>
-</tr>
-<tr>
-<td><strong>ContextTab</strong></td>
-<td>base-ft</td>
-<td>30-90 min</td>
-<td>Moderate-Slow</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Factors affecting training time:</strong>
-- Dataset size (rows × features)
-- Number of epochs
-- Batch size
-- GPU/CPU speed
-- Model complexity</p>
-<h3 id="53-memory-usage-estimates">5.3 Memory Usage Estimates<a class="headerlink" href="#53-memory-usage-estimates" title="Permanent link">¶</a></h3>
+<h3 id="51-memory-usage-estimates">5.1 Memory Usage Estimates<a class="headerlink" href="#51-memory-usage-estimates" title="Permanent link">¶</a></h3>
 <p>Peak memory usage during training (approximate, GPU memory):</p>
 <table>
 <thead>
@@ -661,22 +588,28 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN</strong></td>
+<td><strong>TabPFN-v2.5/v2.6</strong></td>
 <td>inference</td>
 <td>2-4 GB</td>
 <td>Small datasets</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
-<td>inference</td>
-<td>3-6 GB</td>
-<td>Moderate</td>
+<td><strong>TabPFN-v2.6</strong></td>
+<td>finetune (native)</td>
+<td>6-10 GB</td>
+<td>AMP helps</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
-<td>base-ft</td>
+<td><strong>TabICL / TabICLv2</strong></td>
+<td>inference</td>
+<td>3-6 GB</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TabICL / TabICLv2</strong></td>
+<td>finetune</td>
 <td>8-16 GB</td>
-<td>Full model</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>TabICL</strong></td>
@@ -686,33 +619,33 @@
 </tr>
 <tr>
 <td><strong>OrionMSP</strong></td>
-<td>base-ft</td>
+<td>finetune</td>
 <td>10-20 GB</td>
-<td>Large context</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>OrionBix</strong></td>
-<td>base-ft</td>
+<td>finetune</td>
 <td>12-24 GB</td>
-<td>Biaxial layers</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>TabDPT</strong></td>
-<td>base-ft</td>
+<td>finetune</td>
 <td>12-28 GB</td>
-<td>Large transformer</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>Mitra</strong></td>
-<td>base-ft</td>
+<td>finetune</td>
 <td>16-32 GB</td>
-<td>2D attention</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>ContextTab</strong></td>
-<td>base-ft</td>
+<td>finetune</td>
 <td>8-16 GB</td>
-<td>Embedding overhead</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -721,7 +654,7 @@
 - Reduce batch size
 - Use gradient accumulation
 - Process large datasets in chunks</p>
-<h3 id="54-inference-latency">5.4 Inference Latency<a class="headerlink" href="#54-inference-latency" title="Permanent link">¶</a></h3>
+<h3 id="52-inference-latency">5.2 Inference Latency<a class="headerlink" href="#52-inference-latency" title="Permanent link">¶</a></h3>
 <p>Average inference time per batch (batch_size=32, GPU):</p>
 <table>
 <thead>
@@ -733,12 +666,12 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN</strong></td>
+<td><strong>TabPFN-v2.5/v2.6</strong></td>
 <td>10-50</td>
 <td>640-3200</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
+<td><strong>TabICL / TabICLv2</strong></td>
 <td>20-80</td>
 <td>400-1600</td>
 </tr>
@@ -766,6 +699,11 @@
 <td><strong>ContextTab</strong></td>
 <td>100-300</td>
 <td>107-320</td>
+</tr>
+<tr>
+<td><strong>LimiX</strong></td>
+<td>40-120</td>
+<td>267-800</td>
 </tr>
 </tbody>
 </table>

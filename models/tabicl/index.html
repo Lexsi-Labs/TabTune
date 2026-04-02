@@ -259,8 +259,9 @@
 <div class="container">
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#tabicl-in-context-learning-for-tabular-data">TabICL: In-Context Learning for Tabular Data</a></li>
+<li class="first-level active"><a href="#tabicl-tabiclv2-in-context-learning-for-tabular-data">TabICL &amp; TabICLv2: In-Context Learning for Tabular Data</a></li>
 <li class="second-level"><a href="#1-introduction">1. Introduction</a></li>
+<li class="third-level"><a href="#tabiclv2">TabICLv2</a></li>
 <li class="second-level"><a href="#2-architecture">2. Architecture</a></li>
 <li class="third-level"><a href="#21-high-level-design">2.1 High-Level Design</a></li>
 <li class="third-level"><a href="#23-two-stage-attention">2.3 Two-Stage Attention</a></li>
@@ -275,29 +276,33 @@
 <li class="third-level"><a href="#42-parameter-descriptions">4.2 Parameter Descriptions</a></li>
 <li class="third-level"><a href="#43-episodic-training-concept">4.3 Episodic Training Concept</a></li>
 <li class="third-level"><a href="#44-fine-tuning-guidelines">4.4 Fine-Tuning Guidelines</a></li>
-<li class="second-level"><a href="#5-usage-patterns">5. Usage Patterns</a></li>
-<li class="third-level"><a href="#51-inference-only">5.1 Inference Only</a></li>
-<li class="third-level"><a href="#52-base-fine-tuning-full-parameters">5.2 Base Fine-Tuning (Full Parameters)</a></li>
-<li class="third-level"><a href="#53-peft-fine-tuning-lora-adapters">5.3 PEFT Fine-Tuning (LoRA Adapters)</a></li>
-<li class="third-level"><a href="#54-ensemble-configuration">5.4 Ensemble Configuration</a></li>
-<li class="second-level"><a href="#6-lora-target-modules">6. LoRA Target Modules</a></li>
-<li class="second-level"><a href="#7-complete-examples">7. Complete Examples</a></li>
-<li class="third-level"><a href="#71-basic-workflow">7.1 Basic Workflow</a></li>
-<li class="third-level"><a href="#72-peft-for-memory-constrained-environments">7.2 PEFT for Memory-Constrained Environments</a></li>
-<li class="third-level"><a href="#73-hyperparameter-tuning">7.3 Hyperparameter Tuning</a></li>
+<li class="second-level"><a href="#5-fine-tuning-tabiclv2-regression">5. Fine-Tuning — TabICLv2 (Regression)</a></li>
+<li class="third-level"><a href="#51-regression-inference">5.1 Regression Inference</a></li>
+<li class="third-level"><a href="#52-regression-fine-tuning">5.2 Regression Fine-Tuning</a></li>
+<li class="third-level"><a href="#53-regression-fine-tuning-parameters">5.3 Regression Fine-Tuning Parameters</a></li>
+<li class="third-level"><a href="#54-how-tabiclv2-regression-fine-tuning-works">5.4 How TabICLv2 Regression Fine-Tuning Works</a></li>
+<li class="second-level"><a href="#6-usage-patterns">6. Usage Patterns</a></li>
+<li class="third-level"><a href="#61-inference-only">6.1 Inference Only</a></li>
+<li class="third-level"><a href="#62-base-fine-tuning-full-parameters">6.2 Base Fine-Tuning (Full Parameters)</a></li>
+<li class="third-level"><a href="#63-peft-fine-tuning-lora-adapters">6.3 PEFT Fine-Tuning (LoRA Adapters)</a></li>
+<li class="third-level"><a href="#64-ensemble-configuration">6.4 Ensemble Configuration</a></li>
+<li class="second-level"><a href="#7-lora-target-modules">7. LoRA Target Modules</a></li>
+<li class="second-level"><a href="#8-complete-examples">8. Complete Examples</a></li>
+<li class="third-level"><a href="#81-basic-workflow">8.1 Basic Workflow</a></li>
+<li class="third-level"><a href="#82-peft-for-memory-constrained-environments">8.2 PEFT for Memory-Constrained Environments</a></li>
+<li class="third-level"><a href="#83-hyperparameter-tuning">8.3 Hyperparameter Tuning</a></li>
 <li class="second-level"><a href="#9-troubleshooting">9. Troubleshooting</a></li>
 <li class="third-level"><a href="#issue-out-of-memory-during-training">Issue: "Out of memory during training"</a></li>
 <li class="third-level"><a href="#issue-model-not-converging">Issue: "Model not converging"</a></li>
 <li class="third-level"><a href="#issue-inference-too-slow">Issue: "Inference too slow"</a></li>
 <li class="third-level"><a href="#issue-low-accuracy-on-small-datasets">Issue: "Low accuracy on small datasets"</a></li>
-<li class="second-level"><a href="#10-advanced-topics">10. Advanced Topics</a></li>
-<li class="second-level"><a href="#11-quick-reference">11. Quick Reference</a></li>
-<li class="second-level"><a href="#13-next-steps">13. Next Steps</a></li>
+<li class="second-level"><a href="#10-quick-reference">10. Quick Reference</a></li>
+<li class="second-level"><a href="#12-next-steps">12. Next Steps</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="tabicl-in-context-learning-for-tabular-data">TabICL: In-Context Learning for Tabular Data<a class="headerlink" href="#tabicl-in-context-learning-for-tabular-data" title="Permanent link">¶</a></h1>
-<p>TabICL is a scalable, ensemble-based in-context learning model designed for general-purpose tabular classification. This document provides comprehensive guidance for using TabICL with TabTune.</p>
+<h1 id="tabicl-tabiclv2-in-context-learning-for-tabular-data">TabICL &amp; TabICLv2: In-Context Learning for Tabular Data<a class="headerlink" href="#tabicl-tabiclv2-in-context-learning-for-tabular-data" title="Permanent link">¶</a></h1>
+<p>TabTune supports two generations of TabICL: the original <strong>TabICL</strong> for classification, and the improved <strong>TabICLv2</strong> which adds regression support and an enhanced architecture. This document covers both.</p>
 <hr/>
 <h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">¶</a></h2>
 <p><strong>What is TabICL?</strong></p>
@@ -309,6 +314,8 @@
 <li>Handle mixed data types naturally</li>
 </ul>
 <p><strong>Key Innovation</strong>: Two-stage attention mechanism (column → row) enabling efficient feature processing and interaction modeling.</p>
+<h3 id="tabiclv2">TabICLv2<a class="headerlink" href="#tabiclv2" title="Permanent link">¶</a></h3>
+<p>TabICLv2 is the second generation of TabICL with an improved architecture. It extends support to <strong>both classification and regression</strong> with inference and episodic fine-tuning for both tasks.</p>
 <hr/>
 <h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
 <h3 id="21-high-level-design">2.1 High-Level Design<a class="headerlink" href="#21-high-level-design" title="Permanent link">¶</a></h3>
@@ -557,8 +564,112 @@ Epoch = 1000 episodes with gradient updates
 - 2e-5: Balanced (default)
 - 5e-5: Aggressive, higher variance</p>
 <hr/>
-<h2 id="5-usage-patterns">5. Usage Patterns<a class="headerlink" href="#5-usage-patterns" title="Permanent link">¶</a></h2>
-<h3 id="51-inference-only">5.1 Inference Only<a class="headerlink" href="#51-inference-only" title="Permanent link">¶</a></h3>
+<h2 id="5-fine-tuning-tabiclv2-regression">5. Fine-Tuning — TabICLv2 (Regression)<a class="headerlink" href="#5-fine-tuning-tabiclv2-regression" title="Permanent link">¶</a></h2>
+<p>TabICLv2 supports <strong>episodic regression fine-tuning</strong> using turn-by-turn MSE training. It samples random (support, query) episodes, feeds them through the transformer, and backpropagates MSE loss on query predictions.</p>
+<h3 id="51-regression-inference">5.1 Regression Inference<a class="headerlink" href="#51-regression-inference" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICLv2'</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'inference'</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="c1"># Returns: mse, rmse, mae, r2_score, medae, explained_variance, ...</span>
+</code></pre></div>
+<h3 id="52-regression-fine-tuning">5.2 Regression Fine-Tuning<a class="headerlink" href="#52-regression-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICLv2'</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s1">'regression'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
+        <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">'learning_rate'</span><span class="p">:</span> <span class="mf">2e-6</span><span class="p">,</span>
+        <span class="s1">'support_size'</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="s1">'query_size'</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s1">'steps_per_epoch'</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">'grad_clip'</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s1">'show_progress'</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="53-regression-fine-tuning-parameters">5.3 Regression Fine-Tuning Parameters<a class="headerlink" href="#53-regression-fine-tuning-parameters" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td>5</td>
+<td>Training epochs</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td>2e-6</td>
+<td>Optimizer learning rate (lower than classification)</td>
+</tr>
+<tr>
+<td><code>support_size</code></td>
+<td>int</td>
+<td>128</td>
+<td>Context (support) set size per episode</td>
+</tr>
+<tr>
+<td><code>query_size</code></td>
+<td>int</td>
+<td>64</td>
+<td>Query set size per episode</td>
+</tr>
+<tr>
+<td><code>steps_per_epoch</code></td>
+<td>int</td>
+<td>200</td>
+<td>Random episodes sampled per epoch</td>
+</tr>
+<tr>
+<td><code>grad_clip</code></td>
+<td>float</td>
+<td>1.0</td>
+<td>Gradient clipping norm</td>
+</tr>
+<tr>
+<td><code>weight_decay</code></td>
+<td>float</td>
+<td>0.01</td>
+<td>AdamW weight decay</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Show tqdm progress bar</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-how-tabiclv2-regression-fine-tuning-works">5.4 How TabICLv2 Regression Fine-Tuning Works<a class="headerlink" href="#54-how-tabiclv2-regression-fine-tuning-works" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>One step:
+  ├─ Sample random support indices (128 rows)
+  ├─ Sample random query indices (64 rows)
+  ├─ Concatenate: X_episode = [X_support | X_query]  (1, 192, F)
+  ├─ Forward: model_(X_episode, y_support) → predictions for query
+  ├─ If output has multiple bins: take weighted mean (distribution output)
+  └─ MSE loss on query predictions vs ground truth
+
+Post-finetune: model.fit(X_train, y_train) re-caches for inference
+</code></pre></div>
+<hr/>
+<h2 id="6-usage-patterns">6. Usage Patterns<a class="headerlink" href="#6-usage-patterns" title="Permanent link">¶</a></h2>
+<h3 id="61-inference-only">6.1 Inference Only<a class="headerlink" href="#61-inference-only" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
 <span class="c1"># Zero-shot with pre-trained weights</span>
@@ -571,7 +682,7 @@ Epoch = 1000 episodes with gradient updates
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>  <span class="c1"># Only preprocesses</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="52-base-fine-tuning-full-parameters">5.2 Base Fine-Tuning (Full Parameters)<a class="headerlink" href="#52-base-fine-tuning-full-parameters" title="Permanent link">¶</a></h3>
+<h3 id="62-base-fine-tuning-full-parameters">6.2 Base Fine-Tuning (Full Parameters)<a class="headerlink" href="#62-base-fine-tuning-full-parameters" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
     <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
@@ -587,7 +698,7 @@ Epoch = 1000 episodes with gradient updates
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="53-peft-fine-tuning-lora-adapters">5.3 PEFT Fine-Tuning (LoRA Adapters)<a class="headerlink" href="#53-peft-fine-tuning-lora-adapters" title="Permanent link">¶</a></h3>
+<h3 id="63-peft-fine-tuning-lora-adapters">6.3 PEFT Fine-Tuning (LoRA Adapters)<a class="headerlink" href="#63-peft-fine-tuning-lora-adapters" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
     <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'peft'</span><span class="p">,</span>
@@ -607,7 +718,7 @@ Epoch = 1000 episodes with gradient updates
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="54-ensemble-configuration">5.4 Ensemble Configuration<a class="headerlink" href="#54-ensemble-configuration" title="Permanent link">¶</a></h3>
+<h3 id="64-ensemble-configuration">6.4 Ensemble Configuration<a class="headerlink" href="#64-ensemble-configuration" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Increase ensemble for robustness</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
@@ -619,7 +730,7 @@ Epoch = 1000 episodes with gradient updates
 <span class="p">)</span>
 </code></pre></div>
 <hr/>
-<h2 id="6-lora-target-modules">6. LoRA Target Modules<a class="headerlink" href="#6-lora-target-modules" title="Permanent link">¶</a></h2>
+<h2 id="7-lora-target-modules">7. LoRA Target Modules<a class="headerlink" href="#7-lora-target-modules" title="Permanent link">¶</a></h2>
 <p>When using PEFT, TabICL automatically targets these modules:</p>
 <div class="highlight"><pre><span></span><code><span class="n">target_modules</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'col_embedder.tf_col'</span><span class="p">,</span>          <span class="c1"># Column transformer</span>
@@ -638,8 +749,8 @@ Epoch = 1000 episodes with gradient updates
 <span class="p">}</span>
 </code></pre></div></p>
 <hr/>
-<h2 id="7-complete-examples">7. Complete Examples<a class="headerlink" href="#7-complete-examples" title="Permanent link">¶</a></h2>
-<h3 id="71-basic-workflow">7.1 Basic Workflow<a class="headerlink" href="#71-basic-workflow" title="Permanent link">¶</a></h3>
+<h2 id="8-complete-examples">8. Complete Examples<a class="headerlink" href="#8-complete-examples" title="Permanent link">¶</a></h2>
+<h3 id="81-basic-workflow">8.1 Basic Workflow<a class="headerlink" href="#81-basic-workflow" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -672,7 +783,7 @@ Epoch = 1000 episodes with gradient updates
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"F1 Score: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">'f1_score'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="72-peft-for-memory-constrained-environments">7.2 PEFT for Memory-Constrained Environments<a class="headerlink" href="#72-peft-for-memory-constrained-environments" title="Permanent link">¶</a></h3>
+<h3 id="82-peft-for-memory-constrained-environments">8.2 PEFT for Memory-Constrained Environments<a class="headerlink" href="#82-peft-for-memory-constrained-environments" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Fit large model in limited memory with PEFT</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
@@ -694,7 +805,7 @@ Epoch = 1000 episodes with gradient updates
 
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="73-hyperparameter-tuning">7.3 Hyperparameter Tuning<a class="headerlink" href="#73-hyperparameter-tuning" title="Permanent link">¶</a></h3>
+<h3 id="83-hyperparameter-tuning">8.3 Hyperparameter Tuning<a class="headerlink" href="#83-hyperparameter-tuning" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularLeaderboard</span>
 
 <span class="c1"># Compare different configurations</span>
@@ -787,99 +898,56 @@ Epoch = 1000 episodes with gradient updates
 <span class="p">}</span>
 </code></pre></div></p>
 <hr/>
-<h2 id="10-advanced-topics">10. Advanced Topics<a class="headerlink" href="#10-advanced-topics" title="Permanent link">¶</a></h2>
-<!-- ### 10.1 Custom Feature Normalization
-
-<div class="highlight"><pre><span></span><code><span class="c1"># Experiment with normalization methods</span>
-<span class="k">for</span> <span class="n">norm</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="s1">&#39;quantile&#39;</span><span class="p">]:</span>
-    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-        <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;norm_methods&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">norm</span><span class="p">]}</span>
-    <span class="p">)</span>
-    <span class="c1"># Evaluate...</span>
-<span class="err">```</span> <span class="o">--&gt;</span>
-
-<span class="o">&lt;</span><span class="err">!</span><span class="o">--</span> <span class="c1">### 10.2 Feature Importance</span>
-
-<span class="err">```</span><span class="n">python</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.inspection</span><span class="w"> </span><span class="kn">import</span> <span class="n">permutation_importance</span>
-
-<span class="c1"># Get feature importance with TabICL</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">permutation_importance</span><span class="p">(</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-    <span class="n">X_test</span><span class="p">,</span>
-    <span class="n">y_test</span><span class="p">,</span>
-    <span class="n">n_repeats</span><span class="o">=</span><span class="mi">10</span>
-<span class="p">)</span>
-
-<span class="n">importance_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">&#39;feature&#39;</span><span class="p">:</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
-    <span class="s1">&#39;importance&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">importances_mean</span>
-<span class="p">})</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;importance&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</code></pre></div>
- -->
-<!-- ### 10.3 Cross-Validation
-
-```python
-from sklearn.model_selection import cross_validate
-
-# 5-fold cross-validation
-scores = cross_validate(
-    pipeline,
-    X_train,
-    y_train,
-    cv=5,
-    scoring=['accuracy', 'f1_weighted']
-)
-
-print(f"Mean Accuracy: {scores['test_accuracy'].mean():.4f}")
-print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
-``` -->
-<hr/>
-<h2 id="11-quick-reference">11. Quick Reference<a class="headerlink" href="#11-quick-reference" title="Permanent link">¶</a></h2>
+<h2 id="10-quick-reference">10. Quick Reference<a class="headerlink" href="#10-quick-reference" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
 <th>Use Case</th>
+<th>Model</th>
 <th>Strategy</th>
 <th>Config</th>
-<th>Time</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Quick test</td>
+<td>Quick classification</td>
+<td>TabICL</td>
 <td>inference</td>
 <td>n_est=16</td>
 <td>&lt;1s</td>
 </tr>
 <tr>
-<td>Rapid proto</td>
-<td>peft</td>
-<td>r=8, epochs=3</td>
-<td>5-10m</td>
-</tr>
-<tr>
-<td>Production</td>
-<td>base-ft</td>
+<td>Classification FT</td>
+<td>TabICL</td>
+<td>finetune</td>
 <td>epochs=5</td>
-<td>20-30m</td>
+<td>Episodic</td>
 </tr>
 <tr>
-<td>Max accuracy</td>
-<td>base-ft</td>
-<td>epochs=10</td>
-<td>40-60m</td>
-</tr>
-<tr>
-<td>Memory limited</td>
+<td>Classification PEFT</td>
+<td>TabICL</td>
 <td>peft</td>
-<td>r=4</td>
-<td>5-10m</td>
+<td>r=8, epochs=5</td>
+<td>Memory efficient</td>
+</tr>
+<tr>
+<td>Regression inference</td>
+<td>TabICLv2</td>
+<td>inference</td>
+<td>—</td>
+<td></td>
+</tr>
+<tr>
+<td>Regression FT</td>
+<td>TabICLv2</td>
+<td>finetune</td>
+<td>lr=2e-6, epochs=5</td>
+<td>Turn-by-turn MSE</td>
 </tr>
 </tbody>
 </table>
-<!-- ## 12. Comparison with Other Models
+<!-- ## 11. Comparison with Other Models
 
 | Aspect | TabICL | TabPFN | TabDPT | Mitra |
 |--------|--------|--------|--------|-------|
@@ -890,7 +958,7 @@ print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
 | PEFT | ✅ Full | ⚠️ Exp | ✅ Full | ✅ Full |
  -->
 <hr/>
-<h2 id="13-next-steps">13. Next Steps<a class="headerlink" href="#13-next-steps" title="Permanent link">¶</a></h2>
+<h2 id="12-next-steps">12. Next Steps<a class="headerlink" href="#12-next-steps" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="../../user-guide/model-selection/">Model Selection</a> - Compare with other models</li>
 <li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a> - Deep dive into strategies</li>
@@ -898,7 +966,7 @@ print(f"Std Accuracy: {scores['test_accuracy'].std():.4f}")
 <li><a href="../../user-guide/leaderboard/">TabularLeaderboard</a> - Benchmark TabICL</li>
 </ul>
 <hr/>
-<p>TabICL offers an excellent balance of speed, accuracy, and scalability. Use it for most tabular classification tasks!</p></div>
+<p>TabICL offers an excellent balance of speed, accuracy, and scalability. Use it for most tabular classification tasks! Use TabICLv2 when you need regression support or an improved architecture.</p></div>
 </div>
 <footer class="col-md-12 text-center">
 <hr/>

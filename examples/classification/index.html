@@ -319,7 +319,7 @@
 <span class="c1"># Create pipeline with fine-tuning</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -407,7 +407,7 @@
 <span class="c1"># Pipeline</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'OrionMSP'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -455,7 +455,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Fine-Tuned Model ==="</span><span class="p">)</span>
 <span class="n">pipeline_ft</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -490,7 +490,7 @@
 <span class="c1"># Train classifier</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabICL'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
 <span class="p">)</span>
 
@@ -530,7 +530,7 @@
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;finetune&#39;</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
 <span class="p">)</span>
 
@@ -592,7 +592,7 @@
         <span class="c1"># Train</span>
         <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
             <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
-            <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+            <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
             <span class="n">tuning_params</span><span class="o">=</span><span class="n">params</span>
         <span class="p">)</span>
 
@@ -644,7 +644,7 @@
     <span class="c1"># Train</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
         <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+        <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;finetune&#39;</span><span class="p">,</span>
         <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
             <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
             <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="n">learning_rate</span><span class="p">,</span>
@@ -670,7 +670,7 @@
 <span class="c1"># Train final model with best parameters</span>
 <span class="n">best_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;TabICL&#39;</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;base-ft&#39;</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">&#39;finetune&#39;</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span>
@@ -700,7 +700,7 @@
 <span class="c1"># Train</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s1">'TabDPT'</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'base-ft'</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s1">'finetune'</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>
         <span class="s1">'epochs'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>

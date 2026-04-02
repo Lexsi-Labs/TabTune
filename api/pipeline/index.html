@@ -3568,44 +3568,56 @@ Required for calculating AUC score.</p>
     <span class="n">processor_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model_checkpoint_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">finetune_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'meta-learning'</span>
+    <span class="n">finetune_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">¶</a></h4>
 <p><strong><code>model_name</code></strong> (str, required)
 - Name of the model to use.
-- Supported values: <code>'TabPFN'</code>, <code>'TabICL'</code>, <code>'OrionMSP'</code>, <code>'OrionBix'</code>, <code>'TabDPT'</code>, <code>'Mitra'</code>, <code>'ContextTab'</code>
-- Example: <code>model_name="TabICL"</code></p>
+- Supported values: <code>'TabPFN'</code>, <code>'TabPFNv26'</code>, <code>'TabICL'</code>, <code>'TabICLv2'</code>, <code>'OrionMSP'</code>, <code>'OrionMSPv1.5'</code>, <code>'OrionBix'</code>, <code>'TabDPT'</code>, <code>'Mitra'</code>, <code>'ContextTab'</code>, <code>'Limix'</code>
+- Example: <code>model_name="TabICLv2"</code></p>
 <p><strong><code>task_type</code></strong> (str, default: <code>'classification'</code>)
 - Type of machine learning task.
-- Currently supported: <code>'classification'</code>
-- Planned: <code>'regression'</code>
-- Example: <code>task_type="classification"</code></p>
+- Supported: <code>'classification'</code>, <code>'regression'</code>
+- Regression is supported for: <code>TabPFN</code>, <code>TabPFNv26</code>, <code>TabICLv2</code>, <code>Mitra</code>, <code>ContextTab</code>, <code>TabDPT</code>, <code>Limix</code>
+- Example: <code>task_type="regression"</code></p>
 <p><strong><code>tuning_strategy</code></strong> (str, default: <code>'inference'</code>)
 - Training/fine-tuning strategy to use.
 - Options:
   - <code>'inference'</code>: Zero-shot predictions (no training)
-  - <code>'base-ft'</code>: Full fine-tuning of all parameters
+  - <code>'finetune'</code>: Full fine-tuning of all parameters
   - <code>'peft'</code>: Parameter-efficient fine-tuning with LoRA adapters
 - Example: <code>tuning_strategy="peft"</code></p>
 <p><strong><code>tuning_params</code></strong> (dict, optional)
 - Hyperparameters for training/inference.
-- Common parameters:
+- Common parameters for all models:
   - <code>device</code> (str): <code>'cuda'</code> or <code>'cpu'</code> (default: auto-detected)
   - <code>epochs</code> (int): Number of training epochs
   - <code>learning_rate</code> (float): Learning rate for optimizer
   - <code>batch_size</code> (int): Batch size for training
-  - <code>peft_config</code> (dict): LoRA configuration for PEFT strategy
-  - <code>support_size</code> (int): Context size for episodic training
-  - <code>query_size</code> (int): Query size for episodic training
-- Example:
+  - <code>show_progress</code> (bool): Show tqdm progress bar
+  - <code>save_checkpoint_path</code> (str): Path to save fine-tuned weights
+  - <code>checkpoint_dir</code> (str): Directory for automatic checkpoint saving
+  - <code>weight_decay</code> (float): AdamW weight decay
+  - <code>clip_grad_norm</code> (float): Gradient clipping norm
+- Episodic training parameters (meta-learning / TBT):
+  - <code>support_size</code> (int): Support set size per episode
+  - <code>query_size</code> (int): Query set size per episode
+  - <code>n_episodes</code> (int): Episodes per epoch (classification)
+  - <code>steps_per_epoch</code> (int): Steps per epoch (regression TBT)
+  - <code>context_size</code> (int): Alias for <code>support_size</code> (regression TBT)
+- PEFT parameters:
+  - <code>peft_config</code> (dict): LoRA configuration — <code>r</code>, <code>lora_alpha</code>, <code>lora_dropout</code>, <code>target_modules</code></p>
+<ul>
+<li>Example:
   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
     <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
     <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
     <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
     <span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">8</span>
 <span class="p">}</span>
-</code></pre></div></p>
+</code></pre></div></li>
+</ul>
 <p><strong><code>processor_params</code></strong> (dict, optional)
 - Parameters for data preprocessing.
 - Common parameters:
@@ -3660,7 +3672,7 @@ Required for calculating AUC score.</p>
 <h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">¶</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span>
 <span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </code></pre></div>
@@ -3863,7 +3875,7 @@ Required for calculating AUC score.</p>
 <h3 id="pattern-2-production-fine-tuning">Pattern 2: Production Fine-Tuning<a class="headerlink" href="#pattern-2-production-fine-tuning" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s2">"OrionBix"</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">,</span>
         <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>

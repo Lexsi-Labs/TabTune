@@ -252,9 +252,8 @@
 <li class="first-level active"><a href="#welcome-to-tabtune">🚀 Welcome to TabTune</a></li>
 <li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
 <li class="first-level"><a href="#new-in-this-release">🆕 New in This Release</a></li>
-<li class="second-level"><a href="#orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support</a></li>
-<li class="second-level"><a href="#regression-framework">Regression Framework</a></li>
-<li class="second-level"><a href="#resampling-module">Resampling Module</a></li>
+<li class="second-level"><a href="#tabpfnv26-integration">✅ TabPFNv2.6 Integration</a></li>
+<li class="second-level"><a href="#tabiclv2-integration">✅ TabICLv2 Integration</a></li>
 <li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
 <li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
 <li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
@@ -295,7 +294,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <p><strong>Key Capabilities:</strong></p>
 <ul>
 <li>✅ <strong>Multiple Training Paradigms:</strong> Supports supervised fine-tuning (SFT) with full parameter updates, episodic meta-learning for in-context learning models, and parameter-efficient PEFT strategies.</li>
-<li>✅ <strong>PEFT (LoRA) Support:</strong> Parameter-efficient fine-tuning for 5 out of 7 models (TabICL, OrionMSP, OrionBix, TabDPT, Mitra) with full support.</li>
+<li>✅ <strong>PEFT (LoRA) Support:</strong> Parameter-efficient fine-tuning for 5 out of 9 models (TabICL, OrionMSP, OrionBix, TabDPT, Mitra) with full support.</li>
 <li>✅ <strong>Meta-Learning Integration:</strong> Episodic training with support/query sets for ICL models (TabICL, OrionMSP, OrionBix, Mitra) enabling fast task adaptation.</li>
 <li>✅ <strong>Comprehensive Documentation:</strong> Extensive guides, API references, troubleshooting, and model-specific documentation.</li>
 <li>✅ <strong>Production Ready:</strong> Model serialization, reproducible training, and deployment-ready pipelines.</li>
@@ -312,19 +311,10 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </ul>
 <hr/>
 <h2 id="new-in-this-release">🆕 New in This Release<a class="headerlink" href="#new-in-this-release" title="Permanent link">¶</a></h2>
-<h3 id="orionmsp-v15-and-limix-model-support">✅ OrionMSP v1.5 and Limix Model Support<a class="headerlink" href="#orionmsp-v15-and-limix-model-support" title="Permanent link">¶</a></h3>
-<h3 id="regression-framework">Regression Framework<a class="headerlink" href="#regression-framework" title="Permanent link">¶</a></h3>
-<ul>
-<li>Unified regression training API</li>
-<li>Standardized metric handling</li>
-<li>Benchmark-ready evaluation utilities</li>
-</ul>
-<h3 id="resampling-module">Resampling Module<a class="headerlink" href="#resampling-module" title="Permanent link">¶</a></h3>
-<ul>
-<li>Context-aware support/query sampling</li>
-<li>Configurable episodic batching</li>
-<li>Optimized for ICL models</li>
-</ul>
+<h3 id="tabpfnv26-integration">✅ TabPFNv2.6 Integration<a class="headerlink" href="#tabpfnv26-integration" title="Permanent link">¶</a></h3>
+<p>Full support for PriorLabs' latest TabPFN release, covering both classification and regression with inference and fine-tuning. A dedicated <strong>native fine-tuning mode</strong> (<code>finetune_mode='native'</code>) leverages <code>FinetunedTabPFNClassifier</code> / <code>FinetunedTabPFNRegressor</code> with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection.</p>
+<h3 id="tabiclv2-integration">✅ TabICLv2 Integration<a class="headerlink" href="#tabiclv2-integration" title="Permanent link">¶</a></h3>
+<p>Full support for TabICLv2 for both classification and regression, with inference and episodic fine-tuning. Regression fine-tuning uses turn-by-turn episodic MSE training.</p>
 <hr/>
 <h2 id="supported-models">📊 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
 <table>
@@ -338,10 +328,10 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN-v2</strong></td>
+<td><strong>TabPFN-v2.5</strong></td>
 <td>PFN / ICL</td>
 <td>Approximates Bayesian inference on synthetic data</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT*, Regression</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT</td>
 </tr>
 <tr>
 <td><strong>TabICL</strong></td>
@@ -391,6 +381,18 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <td>Likelihood-based mixture modeling; uncertainty-aware</td>
 <td>Inference, Regression, Regression-FT</td>
 </tr>
+<tr>
+<td><strong>TabPFN-v2.6</strong></td>
+<td>PFN / ICL</td>
+<td>Latest PriorLabs release with native finetuning API</td>
+<td>Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>TabICLv2</strong></td>
+<td>Scalable ICL</td>
+<td>Improved column-then-row attention</td>
+<td>Inference, FT, Regression, Regression FT</td>
+</tr>
 </tbody>
 </table>
 <p><em>Note: PEFT for ContextTab and TabPFN is experimental; <code>inference</code> strategy is fully supported.</em></p>
@@ -410,7 +412,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span>
     <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"base-ft"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
     <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -450,7 +452,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </ul>
 <hr/>
 <h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">¶</a></h2>
-<p>|Below are 11 Example Notebooks showcasing all the features of the Library in-depth!</p>
+<p>|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!</p>
 <table>
 <thead>
 <tr>
@@ -526,6 +528,18 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <td>Benchmarking</td>
 <td>Standard Benchmarking Techniques</td>
 <td><a href="https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+</tr>
+<tr>
+<td>12</td>
+<td>TabPFNv2.6</td>
+<td>TabPFNv2.6 — Classification and Regression</td>
+<td><a href="https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+</tr>
+<tr>
+<td>13</td>
+<td>TabICLv2</td>
+<td>TabICLv2 — Classification and Regression</td>
+<td><a href="https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
 </tr>
 </tbody>
 </table>
@@ -700,5 +714,5 @@ Please cite appropriately if used in academic or production projects.</p>
 </html>
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-02-26 13:30:45.066703+00:00
+Build Date UTC : 2026-04-02 13:59:56.924643+00:00
 -->
