@@ -27,6 +27,7 @@ from ..models.tabpfn.classifier import TabPFNClassifier
 from ..models.tabpfn.utils import meta_dataset_collator
 from ..models.tabicl.sklearn.classifier import TabICLClassifier
 from ..models.tabicl.sklearn.preprocessing import TabICLMetaDataset
+from ..models.tabiclv2.sklearn.classifier import TabICLClassifier as TabICLv2Classifier
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
 from ..models.orionmsp_v15.sklearn.classifier import OrionMSPv15Classifier
 from ..models.orion_msp.sklearn.preprocessing import OrionMSPMetaDataset
@@ -38,11 +39,17 @@ from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.tabdpt.utils import pad_x
 from ..models.tabdpt.model import TabDPTModel
 from ..models.limix.classifier import LimixClassifier
+
 from ..models.regression.tabpfn.regressor import TabPFNRegressorWrapper
 from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
 from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
 from ..models.regression.mitra.regressor import MitraRegressorWrapper
 from ..models.regression.limix.regressor_wrapper import LimixRegressorWrapper
+from ..models.tabiclv2.sklearn.regressor import TabICLRegressor as TabICLv2Regressor
+
+from ..models.tabpfnv26 import TabPFNv26Classifier
+from ..models.tabpfnv26.regressor import TabPFNRegressor as TabPFNv26Regressor
+from ..models.regression.tabpfnv26.regressor import TabPFNv26RegressorWrapper
 
 
 from ..models.contexttab.contexttab import to_device
@@ -64,7 +71,7 @@ class TuningManager:
 
         # --- Regression wrappers: allow ContextTab finetune (turn-by-turn) ---
         if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
-                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper)):
+                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabICLv2Regressor)):
             if strategy == 'inference':
                 logger.info("[TuningManager] Regression model - inference path")
                 model.fit(X_train, y_train)
@@ -93,14 +100,25 @@ class TuningManager:
                     raise ValueError(f"Mitra regression finetune supports finetune_mode 'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'.")
                 return self._finetune_mitra_regression_turn_by_turn(model, X_train, y_train, params_copy)
 
-            # TabPFN regression finetune (turn-by-turn)
+
             if isinstance(model, TabPFNRegressorWrapper) and strategy == "finetune":
                 if finetune_mode not in ("turn_by_turn", "tbt"):
-                    raise ValueError(
-                        f"TabPFN regression finetune supports finetune_mode 'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'."
+                    logger.warning(
+                        f"[TuningManager] TabPFN regression finetune received "
+                        f"finetune_mode='{finetune_mode}' — only 'turn_by_turn'/'tbt' "
+                        f"is supported. Auto-correcting to 'turn_by_turn'."
                     )
+                    finetune_mode = "turn_by_turn"
                 return self._finetune_tabpfn_regression_turn_by_turn(model, X_train, y_train, params_copy)
 
+            # TabPFNv26 regression finetune
+            if isinstance(model, TabPFNv26RegressorWrapper) and strategy == "finetune":
+                logger.info("[TuningManager] Using v2.6 native FinetunedTabPFNRegressor")
+                return self._finetune_tabpfnv26_native_regressor(model, X_train, y_train, params_copy)
+
+            if isinstance(model, TabICLv2Regressor) and strategy == "finetune":
+                logger.info("[TuningManager] Fine-tuning TabICLv2 regressor")
+                return self._finetune_tabiclv2_regression(model, X_train, y_train, params_copy)
 
 
             raise NotImplementedError(
@@ -138,8 +156,20 @@ class TuningManager:
                 logger.info("[TuningManager] Using Episodic Meta-Learning for Mitra (default)")
                 self._finetune_mitra(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
+
+        elif isinstance(model, TabPFNv26Classifier) and selected_strategy in ('finetune'):
+            if finetune_mode == 'native':
+                logger.info("[TuningManager] Using v2.6 native FinetunedTabPFNClassifier")
+                model = self._finetune_tabpfnv26_native_classifier(model, X_train, y_train, params=params_copy)
+            elif finetune_mode == 'sft':
+                logger.info("[TuningManager] Using Pure SFT for TabPFNv26 (task-optimized)")
+                self._finetune_tabpfnv26_sft(model, X_train, y_train, params=params_copy)
+            else:  # default: 'meta-learning'
+                logger.info("[TuningManager] Using Episodic Meta-Learning for TabPFNv26 (default)")
+                self._finetune_tabpfnv26_meta(model, X_train, y_train, params=params_copy)
+            is_finetuned = True
         
-        elif isinstance(model, TabPFNClassifier) and selected_strategy in ('finetune', 'peft'):
+        elif isinstance(model, (TabPFNClassifier)) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'sft':
                 logger.info("[TuningManager] Using Pure SFT for TabPFN (task-optimized)")
                 self._finetune_tabpfn_pure_sft(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -148,7 +178,7 @@ class TuningManager:
                 self._finetune_tabpfn(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
         
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier)) and selected_strategy in ('finetune', 'peft'):
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)) and selected_strategy in ('finetune', 'peft'):
             if finetune_mode == 'meta-learning':
                 logger.info("[TuningManager] Meta Learning based FT")
                 self._finetune_tabicl(model, X_train, y_train, params=params_copy, peft_config=peft_config)
@@ -187,8 +217,11 @@ class TuningManager:
         elif isinstance(model, (Tab2D)) and selected_strategy == 'inference':
             logger.info("[TuningManager] In-context learning model in inference mode. No training needed.")
             pass
-        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier)) and selected_strategy == 'inference':
+        elif isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabICL setup (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, TabPFNv26Classifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for TabPFNv26 (inference mode)")
             model.fit(X_train, y_train)
         else:
             logger.info("[TuningManager] Applying standard model fitting (.fit)")
@@ -335,7 +368,6 @@ class TuningManager:
                 
                 if is_contexttab:
                     # Use the model's own tokenizer to prepare the batch
-                    # This guarantees the correct format.
                     data_batch = model.get_tokenized_data(X_batch_raw, bagging_index=epoch)
                     
                     # Move tensors to the correct device
@@ -582,7 +614,7 @@ class TuningManager:
             X_train_processed_np, 
             y_train_processed_np, 
             sft_episode_splitter, 
-            config["max_episode_size"] # <-- This makes it ONE episode
+            config["max_episode_size"] 
         )
 
         episode_dataloader = DataLoader(
@@ -705,7 +737,6 @@ class TuningManager:
 
             X_ep = torch.from_numpy(X_np[idx]).float().unsqueeze(0).to(device)   # [1, S+Q, F]
             ys   = torch.full((s_sz,), 0, dtype=torch.long, device=device)       # all support -> class 0
-            # pack as your forward expects: first S as support, rest as query
             logits_probe = model.model_(X_ep, ys.unsqueeze(0))                   # [1, Q, C_eff] typically
             C_out = int(logits_probe.squeeze(0).size(-1))
 
@@ -742,17 +773,14 @@ class TuningManager:
                 yq = y_query.squeeze(0).long()
 
                 supp = torch.unique(ys)
-                # keep at most C_out classes so the head can represent them
                 keep = supp[:C_out]
-
-                # build map only for kept classes; others -> -1 (excluded)
                 yq_m = torch.full_like(yq, -1)
                 ys_m = torch.full_like(ys, -1)
                 for i, c in enumerate(keep):
                     ys_m[ys == c] = i
                     yq_m[yq == c] = i
 
-                # prune support rows that were dropped
+
                 keep_mask = (ys_m >= 0)
                 if not keep_mask.any():
                     continue
@@ -760,17 +788,13 @@ class TuningManager:
                 X_support_kept = X_episode[:, :ys.shape[0], :][:, keep_mask, :]
                 X_query_part   = X_episode[:, ys.shape[0]:, :]
                 X_episode = torch.cat([X_support_kept, X_query_part], dim=1)
-
-                # if any query label was excluded, skip this episode (avoids OOB gathers)
                 if (yq_m < 0).any():
                     continue
 
-                # forward with episodic labels (contiguous, ≤ C_out)
-                logits = model.model_(X_episode, ys_m.unsqueeze(0))  # [1, Q, <=C_out]
-                logits = logits.squeeze(0) # [Q, <=C_out]
-                 # ensure mapping fits the actual head width (in case adapters changed it mid-run)
+                logits = model.model_(X_episode, ys_m.unsqueeze(0))  
+                logits = logits.squeeze(0) 
                 if logits.size(-1) < yq_m.max().item() + 1:
-                    continue  # skip this episode if it exceeds head capacity
+                    continue  
                 loss = loss_fn(logits, yq_m)
 
 
@@ -825,11 +849,10 @@ class TuningManager:
         
         C_out = None
         with torch.no_grad():
-            # make one tiny 1-class episode from the first few rows
             X_np = X_train_processed if isinstance(X_train_processed, np.ndarray) else X_train_processed.to_numpy()
             y_np = y_train_processed if isinstance(y_train_processed, np.ndarray) else y_train_processed.to_numpy()
 
-            # pick a class that has >= (support_size + query_size) examples; fall back to any class
+            
             s_sz = int(config.get("support_size", 48))
             q_sz = int(config.get("query_size", 32))
             need = s_sz + q_sz
@@ -845,13 +868,12 @@ class TuningManager:
                 idx = np.arange(min(need, len(y_np)))
                 cls = y_np[idx[0]]
 
-            X_ep = torch.from_numpy(X_np[idx]).float().unsqueeze(0).to(device)   # [1, S+Q, F]
-            ys   = torch.full((s_sz,), 0, dtype=torch.long, device=device)       # all support -> class 0
-            # pack as your forward expects: first S as support, rest as query
-            logits_probe = model.model_(X_ep, ys.unsqueeze(0))                   # [1, Q, C_eff] typically
+            X_ep = torch.from_numpy(X_np[idx]).float().unsqueeze(0).to(device)   
+            ys   = torch.full((s_sz,), 0, dtype=torch.long, device=device)       
+            logits_probe = model.model_(X_ep, ys.unsqueeze(0))                
             C_out = int(logits_probe.squeeze(0).size(-1))
 
-        # safety
+
         if C_out <= 0:
             raise RuntimeError("Could not infer logits width (C_out).")
     
@@ -865,7 +887,6 @@ class TuningManager:
             except Exception as e:
                 logger.warning(f"[TuningManager] LoRA failed: {e}. Proceeding with base pure SFT fine-tuning")
     
-    # Create standard supervised dataset
         dataset = TensorDataset(
             torch.from_numpy(X_train_processed).float(),
             torch.from_numpy(y_train_processed).long()
@@ -877,7 +898,7 @@ class TuningManager:
                                 weight_decay=config["weight_decay"])
         loss_fn = torch.nn.CrossEntropyLoss()
     
-        # Optional: Learning rate scheduler
+
         total_steps = len(dataloader) * config["epochs"]
         warmup_steps = len(dataloader) * config["warmup_epochs"]
     
@@ -899,7 +920,6 @@ class TuningManager:
                 X_batch = X_batch.to(device)
                 y_batch = y_batch.to(device)
 
-                # split batch into a small pseudo-episode: half support, half query
                 mid = X_batch.size(0) // 2
                 X_support, y_support = X_batch[:mid], y_batch[:mid]
                 X_query,   y_query   = X_batch[mid:], y_batch[mid:]
@@ -1009,7 +1029,6 @@ class TuningManager:
                 
                 X_episodes, y_episodes = [], []
                 for _ in range(config['batch_size']):
-                    # episode size does not exceed available samples
                     if episode_size > n_samples:
                         logger.warning(f"[TuningManager] Warning: Episode size ({episode_size}) is larger than the dataset size ({n_samples}). Using all samples")
                         indices = np.arange(n_samples)
@@ -1160,8 +1179,6 @@ class TuningManager:
 
                 ys_m = emap[ys]
                 yq_m = emap[yq]
-
-                # Skip episode if query label isn't in support (avoids OOB inside model/CE)
                 if (yq_m < 0).any():
                     continue
 
@@ -1182,7 +1199,6 @@ class TuningManager:
                 else:
                     raise ValueError(f"Unexpected logits shape {tuple(logits.shape)}; expected 2D or 3D.")
 
-                # --- Guard CE range and compute loss with EPISODIC targets ---
                 if int(yq_m.max().item()) >= logits.size(-1):
                     continue
                 loss = loss_fn(logits, yq_m)
@@ -1192,12 +1208,10 @@ class TuningManager:
                 
                 if config["show_progress"]:
                     iterable.set_postfix(loss=f"{loss.item():.4f}")
-        
-        # Clean up: ensure model is in eval mode and on correct device after finetuning
+
         model.model.eval()
         model.model.to(device)
-        
-        # Ensure all parameters and buffers are on the correct device
+
         for param in model.model.parameters():
             param.data = param.data.to(device)
         for buffer in model.model.buffers():
@@ -1247,7 +1261,6 @@ class TuningManager:
             except Exception as e:
                 logger.warning(f"[TuningManager] LoRA failed: {e}")
 
-    # Create dataset
         dataset = TensorDataset(
             torch.from_numpy(X_train_processed).float(),
             torch.from_numpy(y_train_processed).long()
@@ -1259,7 +1272,7 @@ class TuningManager:
                                 weight_decay=config["weight_decay"])
         loss_fn = torch.nn.CrossEntropyLoss()
 
-        # LR scheduler
+
         total_steps = len(dataloader) * config["epochs"]
         warmup_steps = len(dataloader) * config["warmup_epochs"]
 
@@ -1279,9 +1292,6 @@ class TuningManager:
             for X_batch, y_batch in iterable:
                 X_batch = X_batch.to(device)
                 y_batch = y_batch.to(device)
-
-            # Convert to episodic format for Mitra
-            # [B, F] -> [B, 1, F] (treat entire batch as query with no support)
                 X_support = X_batch.unsqueeze(1)
                 y_support = y_batch.unsqueeze(1)
                 X_query = X_batch.unsqueeze(1)
@@ -1332,13 +1342,11 @@ class TuningManager:
         """
     
         logger.info("[TuningManager] Starting TabDPT Pure Supervised Fine-Tuning")
-        
-        # Normalize labels to contiguous 0..C-1 IDs (prevents CE out-of-range)
+
         classes, y_train_processed = np.unique(y_train_processed, return_inverse=True)
         y_train_processed = y_train_processed.astype(np.int64)
         num_classes = len(classes)
         logger.info(f"[TuningManager] Detected {num_classes} classes in training data (contiguous remap)")
-        # (Optional) keep mapping if you need to inverse-transform later
         model.classes_ = classes
 
 
@@ -1373,8 +1381,6 @@ class TuningManager:
             buffer.data = buffer.data.to(device)
     
         model.device = str(device)
-        
-        # Compute PCA basis on GPU once, no autograd (only if needed)
         if getattr(model, "feature_reduction", "pca") == "pca" and X_train_processed.shape[1] > model.max_features:
             with torch.no_grad():
                 if not hasattr(model, "V"):
@@ -1423,8 +1429,6 @@ class TuningManager:
             for X_batch, y_batch in iterable:
                 X_batch = X_batch.to(device)
                 y_batch = y_batch.to(device)
-                
-            # JIT PCA projection on GPU without affecting gradients
                 if getattr(model, "feature_reduction", "pca") == "pca" and X_batch.shape[-1] > model.max_features and hasattr(model, "V"):
                     with torch.no_grad():
                         X_batch = X_batch @ model.V
@@ -1446,9 +1450,9 @@ class TuningManager:
                     task='cls'
                 )
                 
-                logits = logits[..., :num_classes]            # trim to observed classes cap
+                logits = logits[..., :num_classes]            
                 if logits.dim() == 3:
-                    logits = logits.squeeze(0)                # normalize to [B, C]
+                    logits = logits.squeeze(0)                
                 elif logits.dim() != 2:
                     raise ValueError(f"Unexpected logits shape: {tuple(logits.shape)}")
 
@@ -1604,13 +1608,9 @@ class TuningManager:
                 if not keep_mask.any():
                     continue
                 ys_m = ys_m[keep_mask]
-                # Use mid directly for support size (before filtering) and apply keep_mask correctly
-                # X_episode shape: [1, batch_size, features], mid is the original support size
-                # Index support samples first, then apply keep_mask to avoid dimension issues
                 X_support_all = X_episode[:, :mid, :]  # [1, mid, F]
                 X_support_kept = X_support_all[:, keep_mask, :]  # [1, kept_support, F]
                 X_query_part = X_episode[:, mid:, :]  # [1, query_size, F]
-                # Ensure both tensors have same number of dimensions (both should be 3D)
                 X_episode = torch.cat([X_support_kept, X_query_part], dim=1)
 
                 # if any query label was excluded, skip this episode (avoids OOB gathers)
@@ -1640,6 +1640,860 @@ class TuningManager:
         return model
 
 
+    def _finetune_tabpfnv26_meta(self, model, X_train_processed, y_train_processed,
+                               params=None):
+        """
+        Episodic meta-learning finetuning for TabPFNv26.
+     
+        Creates multiple (support, query) episodes from the dataset and trains
+        the model to generalize across episode splits. This is the default
+        finetuning mode for classification.
+     
+        Improvements over v2.5 meta-learning:
+          - Cosine LR schedule with warmup
+          - Mixed precision (AMP) when on CUDA
+          - Gradient accumulation for effective larger batch sizes
+          - Per-epoch dataset re-shuffling for better generalization
+        """
+        import torch
+        import numpy as np
+        import pandas as pd
+        from torch.optim import AdamW
+        from torch.utils.data import DataLoader
+        from tqdm import tqdm
+        from sklearn.model_selection import train_test_split
+        from sklearn.preprocessing import LabelEncoder
+        from functools import partial
+     
+        logger.info("[TuningManager] Starting TabPFNv26 meta-learning fine-tuning")
+     
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 5,
+            "learning_rate": 1e-5,
+            "weight_decay": 0.01,
+            "batch_size": 256,
+            "grad_clip": 1.0,
+            "warmup_ratio": 0.1,
+            "grad_accum_steps": 1,
+            "show_progress": True,
+        }
+        if params:
+            config.update(params)
+     
+        device = torch.device(config["device"])
+     
+        # Initialize model internals if needed
+        if not hasattr(model, 'model_') or model.model_ is None:
+            model._initialize_model_variables()
+     
+        model.model_.to(device)
+        model.model_.train()
+     
+        # Data prep
+        if isinstance(X_train_processed, pd.DataFrame):
+            X_np = X_train_processed.to_numpy()
+        else:
+            X_np = np.asarray(X_train_processed)
+     
+        if isinstance(y_train_processed, (pd.Series, pd.DataFrame)):
+            y_np = y_train_processed.to_numpy().ravel()
+        else:
+            y_np = np.asarray(y_train_processed).ravel()
+     
+        if y_np.dtype == object or not np.issubdtype(y_np.dtype, np.number):
+            le = LabelEncoder()
+            y_np = le.fit_transform(y_np)
+            if not hasattr(model, 'label_encoder_'):
+                model.label_encoder_ = le
+     
+        optimizer = AdamW(model.model_.parameters(),
+                          lr=config["learning_rate"],
+                          weight_decay=config["weight_decay"])
+     
+        loss_fn = torch.nn.CrossEntropyLoss()
+        use_amp = device.type == "cuda"
+        scaler = torch.amp.GradScaler() if use_amp else None
+     
+        # Collator
+        try:
+            from ..models.tabpfnv26.finetuning.data_util import (
+                meta_dataset_collator, get_preprocessed_dataset_chunks
+            )
+            use_v26_data_util = True
+        except ImportError:
+            use_v26_data_util = False
+            try:
+                from ..models.tabpfn.utils import meta_dataset_collator
+            except ImportError:
+                def meta_dataset_collator(batch):
+                    return batch[0]
+     
+        def _move(item, dev):
+            if isinstance(item, torch.Tensor):
+                return item.to(dev)
+            if isinstance(item, list):
+                return [_move(x, dev) for x in item]
+            if isinstance(item, tuple):
+                return tuple(_move(x, dev) for x in item)
+            if isinstance(item, dict):
+                return {k: _move(v, dev) for k, v in item.items()}
+            return item
+     
+        def _stratified_split(X, y):
+            y_s = pd.Series(y)
+            if y_s.nunique() > 1 and y_s.value_counts().min() > 1:
+                return train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
+            return train_test_split(X, y, test_size=0.3, random_state=42)
+     
+        # Cosine schedule with warmup
+        total_steps = None  # computed after first epoch
+     
+        for epoch in range(1, config["epochs"] + 1):
+            # Re-shuffle each epoch for diversity
+            seed = 42 + epoch
+            splitter = partial(train_test_split, test_size=0.3,
+                               random_state=seed)
+     
+            if use_v26_data_util:
+                training_datasets = get_preprocessed_dataset_chunks(
+                    calling_instance=model,
+                    X_raw=X_np, y_raw=y_np,
+                    split_fn=splitter,
+                    max_data_size=config["batch_size"],
+                    model_type="classifier",
+                    equal_split_size=False,
+                    data_shuffle_seed=seed,
+                    preprocessing_random_state=seed,
+                )
+            else:
+                training_datasets = model.get_preprocessed_datasets(
+                    X_np, y_np, splitter, config["batch_size"]
+                )
+     
+            dataloader = DataLoader(
+                training_datasets, batch_size=1,
+                collate_fn=meta_dataset_collator, shuffle=True,
+            )
+     
+            if total_steps is None:
+                total_steps = len(dataloader) * config["epochs"]
+                warmup_steps = int(total_steps * config["warmup_ratio"])
+     
+                def lr_lambda(step):
+                    if step < warmup_steps:
+                        return float(step) / max(1, warmup_steps)
+                    progress = float(step - warmup_steps) / max(1, total_steps - warmup_steps)
+                    return max(0.01, 0.5 * (1.0 + np.cos(np.pi * progress)))
+     
+                scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+            else:
+                scheduler = getattr(self, '_v26_scheduler', None)
+     
+            iterable = tqdm(dataloader, desc=f"TabPFNv26 Meta Epoch {epoch}",
+                            disable=not config["show_progress"])
+            epoch_losses = []
+     
+            for step_i, batch in enumerate(iterable):
+                # v2.6 uses dataclass batches; v2.5 uses tuples
+                if hasattr(batch, 'X_context'):
+                    # v2.6 ClassifierBatch dataclass
+                    X_ctx = _move(batch.X_context, device)
+                    y_ctx = _move(batch.y_context, device)
+                    X_qry = _move(batch.X_query, device)
+                    y_qry = _move(batch.y_query, device)
+                    cat_ixs = batch.cat_indices
+                    confs = batch.configs
+     
+                    # Skip if query labels not subset of context labels
+                    ctx_uniq = torch.unique(torch.cat([torch.unique(t.reshape(-1)) for t in y_ctx]))
+                    qry_uniq = torch.unique(y_qry.reshape(-1))
+                    if not torch.isin(qry_uniq, ctx_uniq).all():
+                        continue
+     
+                    model.fit_from_preprocessed(X_ctx, y_ctx, cat_ixs, confs)
+     
+                    with torch.amp.autocast(device_type=device.type, enabled=use_amp):
+                        logits = model.forward(X_qry, return_raw_logits=True)
+                        if logits.dim() == 4:
+                            Q, B, E, L = logits.shape
+                            logits_BLQ = logits.permute(1, 2, 3, 0).reshape(B * E, L, Q)
+                            targets_BQ = y_qry.repeat(B * E, 1).to(device)
+                            loss = torch.nn.functional.cross_entropy(logits_BLQ, targets_BQ)
+                        else:
+                            loss = loss_fn(logits, y_qry.to(device))
+     
+                else:
+                    # v2.5-style tuple: (X_train, X_test, y_train, y_test, cat_ixs, confs)
+                    X_s, X_q, y_s, y_q, cat_ixs, confs = batch
+                    if len(np.unique(y_s)) != len(np.unique(y_q)):
+                        continue
+                    X_s = _move(X_s, device)
+                    y_s = _move(y_s, device)
+                    X_q = _move(X_q, device)
+                    y_q = _move(y_q, device)
+     
+                    model.fit_from_preprocessed(X_s, y_s, cat_ixs, confs)
+     
+                    with torch.amp.autocast(device_type=device.type, enabled=use_amp):
+                        preds = model.forward(X_q, return_logits=True)
+                        if isinstance(preds, torch.Tensor) and preds.device != device:
+                            preds = preds.to(device)
+                        target = y_q[0] if isinstance(y_q, list) else y_q
+                        loss = loss_fn(preds, target)
+     
+                # Gradient accumulation
+                loss = loss / config["grad_accum_steps"]
+     
+                if use_amp and scaler is not None:
+                    scaler.scale(loss).backward()
+                    if (step_i + 1) % config["grad_accum_steps"] == 0:
+                        scaler.unscale_(optimizer)
+                        torch.nn.utils.clip_grad_norm_(model.model_.parameters(),
+                                                        config["grad_clip"])
+                        scaler.step(optimizer)
+                        scaler.update()
+                        optimizer.zero_grad()
+                else:
+                    loss.backward()
+                    if (step_i + 1) % config["grad_accum_steps"] == 0:
+                        torch.nn.utils.clip_grad_norm_(model.model_.parameters(),
+                                                        config["grad_clip"])
+                        optimizer.step()
+                        optimizer.zero_grad()
+     
+                if scheduler is not None:
+                    scheduler.step()
+     
+                epoch_losses.append(loss.item() * config["grad_accum_steps"])
+                iterable.set_postfix(loss=f"{epoch_losses[-1]:.4f}",
+                                      lr=f"{optimizer.param_groups[0]['lr']:.2e}")
+     
+            avg = np.mean(epoch_losses) if epoch_losses else float('nan')
+            logger.info(f"[TuningManager] TabPFNv26 Meta Epoch [{epoch}/{config['epochs']}]: "
+                        f"Loss={avg:.4f}")
+     
+        model.model_.eval()
+        if hasattr(model, 'batched'):
+            model.batched = False
+        logger.info("[TuningManager] TabPFNv26 meta-learning fine-tuning complete")
+        return model
+ 
+ 
+ 
+    def _finetune_tabpfnv26_sft(self, model, X_train_processed, y_train_processed,
+                                  params=None):
+        """
+        SFT-style finetuning for TabPFNv26.
+     
+        Uses the ENTIRE dataset as ONE single large (support, query) episode and
+        trains over it for multiple epochs. Forces the model to specialize on
+        the single task.
+     
+        Improvements over v2.5 SFT:
+          - Cosine LR schedule with warmup
+          - AMP for speed
+          - Label smoothing option
+          - Gradient clipping
+        """
+        import torch
+        import numpy as np
+        import pandas as pd
+        from torch.optim import AdamW
+        from torch.utils.data import DataLoader
+        from tqdm import tqdm
+        from sklearn.model_selection import train_test_split
+        from sklearn.preprocessing import LabelEncoder
+     
+        logger.info("[TuningManager] Starting TabPFNv26 SFT fine-tuning")
+     
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 25,
+            "learning_rate": 1e-5,
+            "weight_decay": 1e-4,
+            "query_set_ratio": 0.3,
+            "grad_clip": 1.0,
+            "label_smoothing": 0.0,
+            "warmup_ratio": 0.1,
+            "show_progress": True,
+        }
+        if params:
+            config.update(params)
+     
+        device = torch.device(config["device"])
+     
+        if not hasattr(model, 'model_') or model.model_ is None:
+            model._initialize_model_variables()
+     
+        model.model_.to(device)
+        model.model_.train()
+     
+        # Data prep
+        if isinstance(X_train_processed, pd.DataFrame):
+            X_np = X_train_processed.to_numpy()
+        else:
+            X_np = np.asarray(X_train_processed)
+     
+        if isinstance(y_train_processed, (pd.Series, pd.DataFrame)):
+            y_np = y_train_processed.to_numpy().ravel()
+        else:
+            y_np = np.asarray(y_train_processed).ravel()
+     
+        if y_np.dtype == object or not np.issubdtype(y_np.dtype, np.number):
+            le = LabelEncoder()
+            y_np = le.fit_transform(y_np)
+            if not hasattr(model, 'label_encoder_'):
+                model.label_encoder_ = le
+     
+        optimizer = AdamW(model.model_.parameters(),
+                          lr=config["learning_rate"],
+                          weight_decay=config["weight_decay"])
+     
+        loss_fn = torch.nn.CrossEntropyLoss(
+            label_smoothing=config["label_smoothing"]
+        )
+        use_amp = device.type == "cuda"
+        scaler = torch.amp.GradScaler() if use_amp else None
+     
+        try:
+            from ..models.tabpfn.utils import meta_dataset_collator
+        except ImportError:
+            def meta_dataset_collator(batch):
+                return batch[0]
+     
+        def _move(item, dev):
+            if isinstance(item, torch.Tensor):
+                return item.to(dev)
+            if isinstance(item, list):
+                return [_move(x, dev) for x in item]
+            if isinstance(item, tuple):
+                return tuple(_move(x, dev) for x in item)
+            if isinstance(item, dict):
+                return {k: _move(v, dev) for k, v in item.items()}
+            return item
+     
+        def sft_splitter(X, y, **kwargs):
+            test_size = kwargs.get('test_size', config["query_set_ratio"])
+            random_state = kwargs.get('random_state', 42)
+            stratify = kwargs.get('stratify', None)
+            if stratify is None:
+                y_s = pd.Series(y)
+                if y_s.nunique() > 1 and y_s.value_counts().min() > 1:
+                    stratify = y
+            try:
+                return train_test_split(X, y, test_size=test_size, stratify=stratify, random_state=random_state)
+            except ValueError:
+                return train_test_split(X, y, test_size=test_size, random_state=random_state)
+     
+        # Create ONE large episode from the entire dataset
+        try:
+            from ..models.tabpfnv26.finetuning.data_util import (
+                get_preprocessed_dataset_chunks, meta_dataset_collator as v26_collator
+            )
+            if not hasattr(model, 'model_') or model.model_ is None:
+                model._initialize_model_variables()
+            training_datasets = get_preprocessed_dataset_chunks(
+                calling_instance=model,
+                X_raw=X_np, y_raw=y_np,
+                split_fn=sft_splitter,
+                max_data_size=len(X_np),
+                model_type="classifier",
+                equal_split_size=False,
+                data_shuffle_seed=42,
+                preprocessing_random_state=42,
+            )
+            meta_collator = v26_collator
+        except ImportError:
+            # Fallback for older API
+            training_datasets = model.get_preprocessed_datasets(
+                X_np, y_np, sft_splitter, len(X_np)
+            )
+            try:
+                from ..models.tabpfn.utils import meta_dataset_collator as meta_collator
+            except ImportError:
+                def meta_collator(batch): return batch[0]
+    
+        episode_loader = DataLoader(
+            training_datasets, batch_size=1,
+            collate_fn=meta_collator, shuffle=False,
+        )
+     
+        # Cosine schedule
+        total_steps = config["epochs"]
+        warmup_steps = max(1, int(total_steps * config["warmup_ratio"]))
+     
+        def lr_lambda(step):
+            if step < warmup_steps:
+                return float(step) / max(1, warmup_steps)
+            progress = float(step - warmup_steps) / max(1, total_steps - warmup_steps)
+            return max(0.01, 0.5 * (1.0 + np.cos(np.pi * progress)))
+     
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+     
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(episode_loader,
+                            desc=f"TabPFNv26 SFT Epoch {epoch}",
+                            leave=False, disable=not config["show_progress"])
+            epoch_losses = []
+     
+            for batch in iterable:
+                if hasattr(batch, 'X_context'):
+                    X_s = _move(batch.X_context, device)
+                    y_s = _move(batch.y_context, device)
+                    X_q = _move(batch.X_query, device)
+                    y_q = _move(batch.y_query, device)
+                    cat_ixs = batch.cat_indices
+                    confs = batch.configs
+                else:
+                    X_s, X_q, y_s, y_q, cat_ixs, confs = batch
+                    X_s = _move(X_s, device)
+                    y_s = _move(y_s, device)
+                    X_q = _move(X_q, device)
+                    y_q = _move(y_q, device)
+     
+                optimizer.zero_grad()
+                model.fit_from_preprocessed(X_s, y_s, cat_ixs, confs)
+     
+                with torch.amp.autocast(device_type=device.type, enabled=use_amp):
+                    preds = model.forward(X_q, return_logits=True)
+                    if isinstance(preds, torch.Tensor) and preds.device != device:
+                        preds = preds.to(device)
+                    target = y_q[0] if isinstance(y_q, list) else y_q
+                    loss = loss_fn(preds, target)
+     
+                if use_amp and scaler is not None:
+                    scaler.scale(loss).backward()
+                    scaler.unscale_(optimizer)
+                    torch.nn.utils.clip_grad_norm_(model.model_.parameters(),
+                                                    config["grad_clip"])
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(model.model_.parameters(),
+                                                    config["grad_clip"])
+                    optimizer.step()
+     
+                scheduler.step()
+                epoch_losses.append(loss.item())
+                iterable.set_postfix(loss=f"{loss.item():.4f}")
+     
+            avg = np.mean(epoch_losses) if epoch_losses else float('nan')
+            logger.info(f"[TuningManager] TabPFNv26 SFT [{epoch}/{config['epochs']}]: "
+                        f"Loss={avg:.4f}")
+     
+        model.model_.eval()
+        if hasattr(model, 'batched'):
+            model.batched = False
+        logger.info("[TuningManager] TabPFNv26 SFT fine-tuning complete")
+        return model
+ 
+ 
+ 
+    def _finetune_tabpfnv26_native_classifier(self, model, X_train, y_train,
+                                                params=None):
+        """
+        Uses PriorLabs' FinetunedTabPFNClassifier for classification finetuning.
+     
+        This is the most advanced finetuning mode — it uses:
+          - Cosine LR with warmup
+          - Mixed precision (AMP)
+          - Early stopping with patience
+          - Validation-based model selection
+          - Gradient clipping
+          - Checkpoint saving
+          - Multi-GPU DDP support (if available)
+     
+        The finetuned model replaces model.model_ weights in place.
+        """
+        import torch
+        import numpy as np
+        import pandas as pd
+     
+        logger.info("[TuningManager] Starting TabPFNv26 native FinetunedTabPFNClassifier")
+     
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 30,
+            "learning_rate": 1e-5,
+            "weight_decay": 0.01,
+            "early_stopping": True,
+            "early_stopping_patience": 8,
+            "validation_split_ratio": 0.1,
+            "n_finetune_ctx_plus_query_samples": 10_000,
+            "finetune_ctx_query_split_ratio": 0.2,
+            "n_estimators_finetune": 2,
+            "n_estimators_validation": 2,
+            "n_estimators_final_inference": 8,
+            "grad_clip_value": 1.0,
+            "use_lr_scheduler": True,
+            "use_activation_checkpointing": True,
+            "random_state": 0,
+            "show_progress": True,
+        }
+        if params:
+            config.update(params)
+     
+        try:
+            from ..models.tabpfnv26.finetuning import FinetunedTabPFNClassifier
+        except ImportError:
+            logger.error("[TuningManager] FinetunedTabPFNClassifier not available. "
+                         "Falling back to meta-learning.")
+            return self._finetune_tabpfnv26_meta(model, X_train, y_train, params)
+     
+        # Convert data
+        if isinstance(X_train, pd.DataFrame):
+            X_np = X_train.to_numpy()
+        else:
+            X_np = np.asarray(X_train)
+     
+        if isinstance(y_train, (pd.Series, pd.DataFrame)):
+            y_np = y_train.to_numpy().ravel()
+        else:
+            y_np = np.asarray(y_train).ravel()
+     
+        finetuner = FinetunedTabPFNClassifier(
+            device=config["device"],
+            epochs=config["epochs"],
+            learning_rate=config["learning_rate"],
+            weight_decay=config["weight_decay"],
+            early_stopping=config["early_stopping"],
+            early_stopping_patience=config["early_stopping_patience"],
+            validation_split_ratio=config["validation_split_ratio"],
+            n_finetune_ctx_plus_query_samples=config["n_finetune_ctx_plus_query_samples"],
+            finetune_ctx_query_split_ratio=config["finetune_ctx_query_split_ratio"],
+            n_estimators_finetune=config["n_estimators_finetune"],
+            n_estimators_validation=config["n_estimators_validation"],
+            n_estimators_final_inference=config["n_estimators_final_inference"],
+            grad_clip_value=config["grad_clip_value"],
+            use_lr_scheduler=config["use_lr_scheduler"],
+            use_activation_checkpointing=config["use_activation_checkpointing"],
+            random_state=config["random_state"],
+        )
+     
+        finetuner.fit(X_np, y_np)
+
+        # if hasattr(finetuner, 'finetuned_estimator_') and finetuner.finetuned_estimator_ is not None:
+        #     ft_est = finetuner.finetuned_estimator_
+        #     # model_ is a property in v2.6 — use load_state_dict instead of direct assignment
+        #     try:
+        #         if not hasattr(model, 'model_') or model.model_ is None:
+        #             model._initialize_model_variables()
+        #         model.model_.load_state_dict(ft_est.model_.state_dict())
+        #         logger.info("[TuningManager] Transferred finetuned weights via load_state_dict")
+        #     except Exception as e:
+        #         logger.warning(f"[TuningManager] load_state_dict failed: {e}, using finetuned estimator directly")
+        #         # Fallback: replace model entirely with the finetuned estimator
+        #         model = ft_est
+        #     # Copy fitted attributes
+        #     for attr in ('classes_', 'n_classes_', 'label_encoder_', 'is_fitted_',
+        #                  'softmax_temperature_', 'executor_'):
+        #         if hasattr(ft_est, attr):
+        #             try:
+        #                 setattr(model, attr, getattr(ft_est, attr))
+        #             except (AttributeError, TypeError):
+        #                 pass
+    
+        # # Store finetuner reference
+        # model._finetuner_ = finetuner
+    
+        # if hasattr(model, 'model_') and model.model_ is not None:
+        #     model.model_.eval()
+        # logger.info("[TuningManager] TabPFNv26 native classification finetuning complete")
+        # return model
+
+        if hasattr(finetuner, 'finetuned_estimator_') and finetuner.finetuned_estimator_ is not None:
+            ft_est = finetuner.finetuned_estimator_
+            ft_est._finetuner_ = finetuner
+    
+            # Re-fit in standard mode so predict/predict_proba works
+            try:
+                ft_est.fit(X_np, y_np)
+                logger.info("[TuningManager] Re-fitted finetuned classifier for standard inference")
+            except Exception as e:
+                logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
+    
+            if hasattr(ft_est, 'model_') and ft_est.model_ is not None:
+                ft_est.model_.eval()
+            logger.info("[TuningManager] TabPFNv26 native classification finetuning complete")
+            return ft_est
+    
+        logger.warning("[TuningManager] No finetuned estimator found, returning original")
+        return model
+ 
+ 
+    def _finetune_tabpfnv26_native_regressor(self, model, X_train, y_train,
+                                               params=None):
+        """
+        Uses PriorLabs' FinetunedTabPFNRegressor for regression finetuning.
+     
+        Uses bar distribution loss (better than raw MSE for TabPFN) plus
+        optional CRPS/CRLS/MSE/MAE auxiliary losses.
+        """
+        import torch
+        import numpy as np
+        import pandas as pd
+     
+        logger.info("[TuningManager] Starting TabPFNv26 native FinetunedTabPFNRegressor")
+     
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 30,
+            "learning_rate": 1e-5,
+            "weight_decay": 0.01,
+            "early_stopping": True,
+            "early_stopping_patience": 8,
+            "validation_split_ratio": 0.1,
+            "n_finetune_ctx_plus_query_samples": 10_000,
+            "finetune_ctx_query_split_ratio": 0.2,
+            "n_estimators_finetune": 2,
+            "n_estimators_validation": 2,
+            "n_estimators_final_inference": 8,
+            "grad_clip_value": 1.0,
+            "use_lr_scheduler": True,
+            "use_activation_checkpointing": True,
+            "random_state": 0,
+        }
+        if params:
+            config.update(params)
+     
+        try:
+            from ..models.tabpfnv26.finetuning import FinetunedTabPFNRegressor
+        except ImportError:
+            logger.error("[TuningManager] FinetunedTabPFNRegressor not available. "
+                         "Falling back to turn-by-turn.")
+            return self._finetune_tabpfnv26_regression_turn_by_turn(model, X_train, y_train, params)
+     
+        if isinstance(X_train, pd.DataFrame):
+            X_np = X_train.to_numpy()
+        else:
+            X_np = np.asarray(X_train)
+     
+        if isinstance(y_train, (pd.Series, pd.DataFrame)):
+            y_np = y_train.to_numpy().ravel()
+        else:
+            y_np = np.asarray(y_train).ravel()
+     
+        finetuner = FinetunedTabPFNRegressor(
+            device=config["device"],
+            epochs=config["epochs"],
+            learning_rate=config["learning_rate"],
+            weight_decay=config["weight_decay"],
+            early_stopping=config["early_stopping"],
+            early_stopping_patience=config["early_stopping_patience"],
+            validation_split_ratio=config["validation_split_ratio"],
+            n_finetune_ctx_plus_query_samples=config["n_finetune_ctx_plus_query_samples"],
+            finetune_ctx_query_split_ratio=config["finetune_ctx_query_split_ratio"],
+            n_estimators_finetune=config["n_estimators_finetune"],
+            n_estimators_validation=config["n_estimators_validation"],
+            n_estimators_final_inference=config["n_estimators_final_inference"],
+            grad_clip_value=config["grad_clip_value"],
+            use_lr_scheduler=config["use_lr_scheduler"],
+            use_activation_checkpointing=config["use_activation_checkpointing"],
+            random_state=config["random_state"],
+        )
+     
+        finetuner.fit(X_np, y_np)
+     
+        # if hasattr(finetuner, 'finetuned_estimator_') and finetuner.finetuned_estimator_ is not None:
+        #     ft_est = finetuner.finetuned_estimator_
+        #     try:
+        #         if not hasattr(model, 'model_') or model.model_ is None:
+        #             model._initialize_model_variables()
+        #         model.model_.load_state_dict(ft_est.model_.state_dict())
+        #         logger.info("[TuningManager] Transferred finetuned regressor weights via load_state_dict")
+        #     except Exception as e:
+        #         logger.warning(f"[TuningManager] load_state_dict failed: {e}, using finetuned estimator directly")
+        #         model = ft_est
+        #     for attr in ('is_fitted_', 'executor_', 'znorm_space_bardist_', 'raw_space_bardist_'):
+        #         if hasattr(ft_est, attr):
+        #             try:
+        #                 setattr(model, attr, getattr(ft_est, attr))
+        #             except (AttributeError, TypeError):
+        #                 pass
+
+        if hasattr(finetuner, 'finetuned_estimator_') and finetuner.finetuned_estimator_ is not None:
+            ft_est = finetuner.finetuned_estimator_
+            ft_est._finetuner_ = finetuner
+
+            # Re-fit in standard mode so predict() works
+            # (finetuning uses 'batched' mode which doesn't support standard predict)
+            try:
+                ft_est.fit(X_np, y_np)
+                logger.info("[TuningManager] Re-fitted finetuned regressor for standard inference")
+            except Exception as e:
+                logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
+
+            if hasattr(ft_est, 'model_') and ft_est.model_ is not None:
+                ft_est.model_.eval()
+            logger.info("[TuningManager] TabPFNv26 native regression finetuning complete")
+            return ft_est
+
+        logger.warning("[TuningManager] No finetuned estimator, returning original")
+        return model
+ 
+
+
+
+    def _finetune_tabiclv2_regression(self, model, X_train, y_train, params=None):
+        """
+        Episodic turn-by-turn finetuning for TabICLv2 regressor.
+
+        TabICLv2's model_ is a transformer that takes:
+            input:  (batch, n_train+n_test, n_features) — concatenated support+query
+            labels: (batch, n_train) — support labels only
+            output: (batch, n_test, 1) — predicted query values
+
+        We create random (support, query) episodes and backprop MSE loss
+        through the transformer.
+        """
+        import torch
+        import numpy as np
+        import pandas as pd
+        from torch.optim import AdamW
+        from sklearn.preprocessing import StandardScaler
+        from tqdm import tqdm
+
+        logger.info("[TuningManager] Starting TabICLv2 regression fine-tuning")
+
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 5,
+            "learning_rate": 2e-6,
+            "weight_decay": 0.01,
+            "support_size": 128,
+            "query_size": 64,
+            "steps_per_epoch": 200,
+            "grad_clip": 1.0,
+            "show_progress": True,
+        }
+        if params:
+            config.update(params)
+
+        device = torch.device(config["device"])
+
+        # Prepare data
+        X_np = X_train.to_numpy() if hasattr(X_train, "to_numpy") else np.asarray(X_train, dtype=np.float32)
+        y_np = y_train.to_numpy() if hasattr(y_train, "to_numpy") else np.asarray(y_train, dtype=np.float32)
+        y_np = y_np.reshape(-1)
+
+        # Ensure model is loaded
+        if not hasattr(model, 'model_') or model.model_ is None:
+            model._load_model()
+        model.fit(X_np, y_np)  # sets up scaler, encoder, ensemble_generator
+
+        # Scale targets (TabICLv2 regressor uses StandardScaler internally)
+        y_scaler = model.y_scaler_ if hasattr(model, 'y_scaler_') else StandardScaler().fit(y_np.reshape(-1, 1))
+        y_scaled = y_scaler.transform(y_np.reshape(-1, 1)).flatten()
+
+        # Transform features through the ensemble generator
+        # Get the first ensemble member's transformed data
+        X_encoder = model.X_encoder_ if hasattr(model, 'X_encoder_') else None
+        if X_encoder is not None:
+            X_encoded = X_encoder.transform(X_np)
+        else:
+            X_encoded = X_np.copy()
+
+        model.model_.to(device)
+        model.model_.train()
+
+        support_size = min(config["support_size"], len(X_encoded) // 2)
+        query_size = min(config["query_size"], len(X_encoded) - support_size)
+
+        optimizer = AdamW(model.model_.parameters(),
+                          lr=config["learning_rate"],
+                          weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.MSELoss()
+
+        total_steps = config["epochs"] * config["steps_per_epoch"]
+        step = 0
+
+        for epoch in range(1, config["epochs"] + 1):
+            epoch_losses = []
+
+            iterator = range(config["steps_per_epoch"])
+            if config["show_progress"]:
+                iterator = tqdm(iterator, desc=f"TabICLv2 Reg FT Epoch {epoch}")
+
+            for _ in iterator:
+                step += 1
+
+                # Sample random episode
+                idx = np.random.permutation(len(X_encoded))
+                s_idx = idx[:support_size]
+                q_idx = idx[support_size:support_size + query_size]
+
+                X_support = X_encoded[s_idx]
+                y_support = y_scaled[s_idx]
+                X_query = X_encoded[q_idx]
+                y_query = y_scaled[q_idx]
+
+                # Concatenate support + query features: (1, S+Q, F)
+                X_episode = np.concatenate([X_support, X_query], axis=0)
+                X_t = torch.from_numpy(X_episode).float().unsqueeze(0).to(device)
+
+                # Support labels: (1, S)
+                y_s = torch.from_numpy(y_support).float().unsqueeze(0).to(device)
+
+                # Query ground truth
+                y_q_true = torch.from_numpy(y_query).float().to(device)
+
+                optimizer.zero_grad()
+
+                # Forward: model expects (batch, S+Q, F) and (batch, S) labels
+                # Returns predictions for the query portion: (batch, Q, 1) or (batch, Q)
+                with torch.enable_grad():
+                    raw_out = model.model_(X_t, y_s)
+
+                # raw_out shape: (batch, Q, n_bins) or (batch, Q, 1) or (batch, Q)
+                if raw_out.dim() == 3:
+                    raw_out = raw_out.squeeze(0)  # (Q, n_bins) or (Q, 1)
+
+                if raw_out.dim() == 2 and raw_out.size(-1) > 1:
+                    # Distribution output — take weighted mean across bins
+                    # Softmax to get probabilities, then weighted sum
+                    probs = torch.softmax(raw_out, dim=-1)  # (Q, n_bins)
+                    n_bins = probs.size(-1)
+                    # Create evenly spaced bin centers in [-3, 3] (z-normalized space)
+                    bin_centers = torch.linspace(-3, 3, n_bins, device=device)
+                    preds = (probs * bin_centers.unsqueeze(0)).sum(dim=-1)  # (Q,)
+                elif raw_out.dim() == 2 and raw_out.size(-1) == 1:
+                    preds = raw_out.squeeze(-1)  # (Q,)
+                else:
+                    preds = raw_out  # already (Q,)
+
+                # Take only query predictions if needed
+                if preds.shape[0] > query_size:
+                    preds = preds[-query_size:]
+
+                loss = loss_fn(preds, y_q_true)
+                loss.backward()
+
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(),
+                                                config["grad_clip"])
+                optimizer.step()
+
+                epoch_losses.append(loss.item())
+                if config["show_progress"]:
+                    iterator.set_postfix(loss=f"{loss.item():.6f}")
+
+            avg = np.mean(epoch_losses) if epoch_losses else float('nan')
+            logger.info(f"[TuningManager] TabICLv2 Reg FT Epoch [{epoch}/{config['epochs']}]: "
+                        f"MSE Loss={avg:.6f}")
+
+        model.model_.eval()
+        logger.info("[TuningManager] TabICLv2 regression fine-tuning complete")
+
+        # Re-fit for inference (rebuilds caches etc.)
+        try:
+            model.fit(X_np, y_np)
+        except Exception as e:
+            logger.warning(f"[TuningManager] Post-finetune re-fit: {e}")
+
+        return model
+
+
     def get_default_config(self, model, selected_strategy: str, finetune_mode: str, processor=None) -> dict:
         """
         Return the default config that would be used for this model/strategy/mode.
@@ -1648,7 +2502,7 @@ class TuningManager:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # TabICL / Orion MSP / Orion Bix
-        if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier)):
+        if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
             if finetune_mode == "meta-learning":
                 return {
                     "device": device,
@@ -1673,7 +2527,51 @@ class TuningManager:
                 }
 
         # TabPFN
-        if isinstance(model, TabPFNClassifier):
+        if isinstance(model, TabPFNv26Classifier):
+            if finetune_mode == "native":
+                return {
+                    "device": device,
+                    "epochs": 30,
+                    "learning_rate": 1e-5,
+                    "weight_decay": 0.01,
+                    "early_stopping": True,
+                    "early_stopping_patience": 8,
+                    "validation_split_ratio": 0.1,
+                    "n_finetune_ctx_plus_query_samples": 10_000,
+                    "finetune_ctx_query_split_ratio": 0.2,
+                    "n_estimators_finetune": 2,
+                    "n_estimators_validation": 2,
+                    "n_estimators_final_inference": 8,
+                    "grad_clip_value": 1.0,
+                    "use_lr_scheduler": True,
+                    "use_activation_checkpointing": True,
+                    "random_state": 0,
+                }
+            elif finetune_mode == "sft":
+                return {
+                    "device": device,
+                    "epochs": 25,
+                    "learning_rate": 1e-5,
+                    "weight_decay": 1e-4,
+                    "query_set_ratio": 0.3,
+                    "grad_clip": 1.0,
+                    "label_smoothing": 0.0,
+                    "warmup_ratio": 0.1,
+                    "show_progress": True,
+                }
+            else:  # meta-learning
+                return {
+                    "device": device,
+                    "epochs": 5,
+                    "learning_rate": 1e-5,
+                    "weight_decay": 0.01,
+                    "batch_size": 256,
+                    "grad_clip": 1.0,
+                    "warmup_ratio": 0.1,
+                    "grad_accum_steps": 1,
+                    "show_progress": True,
+                }
+        if isinstance(model, (TabPFNClassifier)):
             if finetune_mode == "sft":
                 return {
                     "device": device,
@@ -1750,6 +2648,19 @@ class TuningManager:
                     "steps_per_epoch": 50,
                     "show_progress": True,
                 }
+
+        if isinstance(model, TabICLv2Regressor):
+            return {
+                "device": device,
+                "epochs": 5,
+                "learning_rate": 2e-6,
+                "weight_decay": 0.01,
+                "support_size": 128,
+                "query_size": 64,
+                "steps_per_epoch": 200,
+                "grad_clip": 1.0,
+                "show_progress": True,
+            }
 
         # Limix
         # if isinstance(model, LimixClassifier):
@@ -2596,211 +3507,179 @@ class TuningManager:
         return model
 
 
-
     def _finetune_tabpfn_regression_turn_by_turn(self, model, X_train, y_train, params: dict):
         import torch
         import numpy as np
         import logging
         from torch.optim import AdamW
     
-        # TabPFN helper used in predict() to align borders
         from tabtune.models.tabpfn.utils import translate_probs_across_borders
     
         logger = logging.getLogger(__name__)
         logger.info("[TuningManager] Starting TabPFN regression fine-tuning (turn-by-turn)")
     
-        params = params or {}
-        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
-        device = torch.device(device_str)
-    
-        epochs = int(params.get("epochs", 5))
+        params          = params or {}
+        device_str      = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device          = torch.device(device_str)
+        epochs          = int(params.get("epochs", 5))
         steps_per_epoch = int(params.get("steps_per_epoch", 100))
-        context_size = int(params.get("context_size", params.get("support_size", 512)))
-        query_size = int(params.get("query_size", 128))
-    
-        lr = float(params.get("lr", params.get("learning_rate", 1e-5)))
-        weight_decay = float(params.get("weight_decay", 0.0))
-        clip_grad_norm = params.get("clip_grad_norm", None)
-        show_progress = bool(params.get("show_progress", True))
-        seed = params.get("seed", None)
+        context_size    = int(params.get("context_size", params.get("support_size", 512)))
+        query_size      = int(params.get("query_size", 128))
+        lr              = float(params.get("lr", params.get("learning_rate", 1e-5)))
+        weight_decay    = float(params.get("weight_decay", 0.0))
+        clip_grad_norm  = params.get("clip_grad_norm", None)
+        show_progress   = bool(params.get("show_progress", True))
+        seed            = params.get("seed", None)
     
         if seed is not None:
             np.random.seed(int(seed))
             torch.manual_seed(int(seed))
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(int(seed))
-    
-        # ----------------------------
-        # Data
-        # ----------------------------
+
         X_np = X_train.to_numpy() if hasattr(X_train, "to_numpy") else np.asarray(X_train)
         y_np = y_train.to_numpy() if hasattr(y_train, "to_numpy") else np.asarray(y_train)
         y_np = np.asarray(y_np).reshape(-1)
+        n    = len(X_np)
     
-        n = len(X_np)
         if n < (context_size + query_size):
             context_size = max(4, min(context_size, n // 2))
-            query_size = max(1, min(query_size, n - context_size))
+            query_size   = max(1, min(query_size, n - context_size))
             logger.warning(f"[TuningManager] Shrunk episode sizes: context={context_size}, query={query_size}")
-    
-        # -------------------------------------------------------------------------
-        # ✅ CRITICAL: Ensure TabPFN internals exist (creates interface_config_, model_, device_, etc.)
-        # -------------------------------------------------------------------------
+
         if not hasattr(model, "interface_config_"):
             model._initialize_model_variables()
+
+        _orig_n_estimators = model.n_estimators
+        model.n_estimators = 1
     
-        optimizer = None
-        total_steps = epochs * steps_per_epoch
+        optimizer    = None
+        total_steps  = epochs * steps_per_epoch
         step_counter = 0
     
-        for _ep in range(epochs):
-            for _ in range(steps_per_epoch):
-                step_counter += 1
+        try:
+            for _ep in range(epochs):
+                for _ in range(steps_per_epoch):
+                    step_counter += 1
     
-                idx = np.random.permutation(n)
-                s_idx = idx[:context_size]
-                q_idx = idx[context_size: context_size + query_size]
+                    idx   = np.random.permutation(n)
+                    s_idx = idx[:context_size]
+                    q_idx = idx[context_size: context_size + query_size]
     
-                X_support = X_np[s_idx]
-                y_support = y_np[s_idx]
-                X_query = X_np[q_idx]
-                y_query = y_np[q_idx]
+                    X_episode = np.concatenate([X_np[s_idx], X_np[q_idx]], axis=0)
+                    y_episode = np.concatenate([y_np[s_idx], y_np[q_idx]], axis=0)
     
-                # Episode dataset = support + query
-                X_episode = np.concatenate([X_support, X_query], axis=0)
-                y_episode = np.concatenate([y_support, y_query], axis=0)
+                    def _split_fn(X_full, y_full):
+                        S = context_size
+                        return X_full[:S], X_full[S:], y_full[:S], y_full[S:]
     
-                def _split_fn(X_full, y_full):
-                    S = context_size
-                    return X_full[:S], X_full[S:], y_full[:S], y_full[S:]
-    
-                ds = model.get_preprocessed_datasets(
-                    X_raw=X_episode,
-                    y_raw=y_episode,
-                    split_fn=_split_fn,
-                    max_data_size=None,
-                )
-    
-                # -----------------------------------------------------------------
-                # ✅ Your version returns 10 values (regression)
-                # -----------------------------------------------------------------
-                (
-                    X_trains_pre,
-                    X_tests_pre,
-                    y_trains_pre,
-                    y_test_std,
-                    cat_ixs,
-                    confs,
-                    raw_space_bardist,
-                    znorm_space_bardist,
-                    _x_test_raw,
-                    _y_test_raw,
-                ) = ds[0]
-
-                y_trains_pre = [yt.unsqueeze(-1) if (isinstance(yt, torch.Tensor) and yt.dim() == 1) else yt for yt in y_trains_pre]
-    
-                # -----------------------------------------------------------------
-                # ✅ Ensure executor_ exists:
-                # fit_from_preprocessed() creates executor_ with fit_mode="batched"
-                # no_refit=True prevents reinitializing weights.
-                # -----------------------------------------------------------------
-
-                
-                
-                cat_ix_batched = cat_ixs
-                if (
-                    isinstance(cat_ixs, list)
-                    and len(cat_ixs) > 0
-                    and isinstance(cat_ixs[0], list)
-                    and (len(cat_ixs[0]) == 0 or isinstance(cat_ixs[0][0], int))
-                ):
-                    # cat_ixs is List[List[int]] -> make it List[List[List[int]]] with batch_size=1
-                    cat_ix_batched = [[ci] for ci in cat_ixs]
-                
-                model.fit_from_preprocessed(
-                    X_preprocessed=X_trains_pre,
-                    y_preprocessed=y_trains_pre,
-                    cat_ix=cat_ix_batched,
-                    configs=confs,
-                    no_refit=True,
-                )
-
-    
-                # Underlying torch module (created by _initialize_model_variables)
-                torch_model = model.model_
-                torch_model.to(device)
-                torch_model.train()
-    
-                if optimizer is None:
-                    optimizer = AdamW(torch_model.parameters(), lr=lr, weight_decay=weight_decay)
-    
-                optimizer.zero_grad(set_to_none=True)
-    
-                # Query targets are standardized already (TabPFN uses z-norm space for loss)
-                yq = y_test_std
-                if isinstance(yq, torch.Tensor) and yq.dim() == 2 and yq.size(-1) == 1:
-                    yq = yq.squeeze(-1)
-                    yq = yq.to(device).reshape(-1)
-
-    
-                # -----------------------------------------------------------------
-                # ✅ Use TabPFN's forward() for batched engine + gradients
-                # This returns:
-                #   averaged_logits (unused here),
-                #   outputs: list[tensor] per estimator (these are PROBS, not log-probs),
-                #   borders: list[np.ndarray] per estimator
-                # -----------------------------------------------------------------
-                _avg, outputs, borders = model.forward(X_tests_pre, use_inference_mode=False)
-    
-                std_borders = model.znorm_space_bardist_.borders.to(device)
-    
-                # Align probs to standard borders + average across estimators
-                transformed_probs = []
-                for probs, b in zip(outputs, borders):
-                    # probs shape commonly: (N_tokens, 1, n_bars) or (N_tokens, n_bars)
-                    p = probs
-                    if p.dim() == 3:
-                        p = p.squeeze(1)  # (N_tokens, n_bars)
-    
-                    # Translate probs from per-config borders -> std borders
-                    p = translate_probs_across_borders(
-                        p,
-                        frm=torch.as_tensor(b, device=device),
-                        to=std_borders,
+                    ds = model.get_preprocessed_datasets(
+                        X_raw=X_episode,
+                        y_raw=y_episode,
+                        split_fn=_split_fn,
+                        max_data_size=None,
                     )
-                    transformed_probs.append(p)
+
+                    (
+                        X_trains_pre,   # List[Tensor] len=1, each (context_size, n_feat) — 2D
+                        X_tests_pre,    # List[Tensor] len=1, each (query_size,   n_feat) — 2D
+                        y_trains_pre,   # List[Tensor] len=1, each (context_size,)        — 1D
+                        y_test_std,     # Tensor (query_size,) — standardised query targets
+                        cat_ixs,        # List[List[int]] len=1
+                        confs,          # List[EnsembleConfig] len=1
+                        raw_space_bardist,
+                        znorm_space_bardist,
+                        _x_test_raw,
+                        _y_test_raw,
+                    ) = ds[0]
     
-                # Average across estimators
-                probs_mean = torch.stack(transformed_probs, dim=0).mean(dim=0)  # (N_tokens, n_bars)
+                    X_trains_pre = [
+                        x.unsqueeze(0) if (isinstance(x, torch.Tensor) and x.dim() == 2) else x
+                        for x in X_trains_pre
+                    ]
+
     
-                # Take last Q tokens as query tokens (same convention used earlier)
-                q_probs = probs_mean[-len(yq):]  # (Q, n_bars)
+                    X_tests_pre = [
+                        x.unsqueeze(0) if (isinstance(x, torch.Tensor) and x.dim() == 2) else x
+                        for x in X_tests_pre
+                    ]
+
+                    y_trains_pre = [
+                        yt.unsqueeze(0) if (isinstance(yt, torch.Tensor) and yt.dim() == 1) else yt
+                        for yt in y_trains_pre
+                    ]
+
+                    cat_ix_batched = [cat_ixs]
     
-                # Convert to log-probs for bardist NLL
-                q_log_probs = (q_probs + 1e-12).log()
-    
-                crit = model.znorm_space_bardist_.to(device)
-                loss = crit(q_log_probs, yq).mean()
-    
-                loss.backward()
-    
-                if clip_grad_norm is not None:
-                    torch.nn.utils.clip_grad_norm_(torch_model.parameters(), float(clip_grad_norm))
-    
-                optimizer.step()
-    
-                if show_progress and (step_counter % max(1, total_steps // 20) == 0):
-                    logger.info(
-                        f"[TuningManager] TabPFN reg FT: step {step_counter}/{total_steps} | loss={float(loss.item()):.6f}"
+                    model.fit_from_preprocessed(
+                        X_preprocessed=X_trains_pre,
+                        y_preprocessed=y_trains_pre,
+                        cat_ix=cat_ix_batched,
+                        configs=confs,
+                        no_refit=True,
                     )
+
+                    torch_model = model.model_
+                    torch_model.to(device)
+                    torch_model.train()
+    
+                    if optimizer is None:
+                        optimizer = AdamW(torch_model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+                    optimizer.zero_grad(set_to_none=True)
+
+                    yq = y_test_std
+                    if isinstance(yq, torch.Tensor):
+                        if yq.dim() == 2 and yq.size(-1) == 1:
+                            yq = yq.squeeze(-1)
+                        yq = yq.to(device).reshape(-1)
+
+    
+                    _avg, outputs, borders = model.forward(
+                        X_tests_pre, use_inference_mode=False
+                    )
+    
+
+                    std_borders = model.znorm_space_bardist_.borders.to(device)
+    
+                    transformed_probs = []
+                    for probs, b in zip(outputs, borders):
+                        p = probs
+                        if p.dim() == 3:
+                            p = p.squeeze(1)
+                        p = translate_probs_across_borders(
+                            p,
+                            frm=torch.as_tensor(b, device=device),
+                            to=std_borders,
+                        )
+                        transformed_probs.append(p)
+    
+                    probs_mean  = torch.stack(transformed_probs, dim=0).mean(dim=0)
+                    q_probs     = probs_mean[-len(yq):]
+                    q_log_probs = (q_probs + 1e-12).log()
+    
+                    crit = model.znorm_space_bardist_.to(device)
+                    loss = crit(q_log_probs, yq).mean()
+    
+                    loss.backward()
+    
+                    if clip_grad_norm is not None:
+                        torch.nn.utils.clip_grad_norm_(torch_model.parameters(), float(clip_grad_norm))
+    
+                    optimizer.step()
+    
+                    if show_progress and (step_counter % max(1, total_steps // 20) == 0):
+                        logger.info(
+                            f"[TuningManager] TabPFN reg FT: step {step_counter}/{total_steps}"
+                            f" | loss={float(loss.item()):.6f}"
+                        )
+    
+        finally:
+            model.n_estimators = _orig_n_estimators
     
         torch_model.eval()
         logger.info("[TuningManager] TabPFN regression fine-tuning complete")
     
-        # -------------------------------------------------------------------------
-        # Post-finetune: fit normally so predict/eval works with standard engine
-        # (Note: this will reset fit_mode from 'batched' to normal, as per TabPFN code.)
-        # -------------------------------------------------------------------------
         try:
             model.fit(X_train, y_train)
         except Exception as e:

@@ -21,6 +21,7 @@ from .mitra_preprocessor import MitraPreprocessor
 from .orion_bix_preprocessor import OrionBixPreprocessor
 from .tabdpt_preprocessor import TabDPTPreprocessor
 from .limix_preprocessor import LimixPreprocessor
+from .tabiclv2_preprocessor import TabICLv2Preprocessor
 from .regression.base_processor import RegressionDataProcessor
 from .regression.tabpfn_processor import TabPFNRegressionProcessor
 from .regression.contexttab_processor import ContextTabRegressionProcessor
@@ -81,7 +82,10 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'Mitra': {'categorical_encoding': 'mitra_special'}, 
                 'OrionBix': {'categorical_encoding': 'orion_bix_special'},
                 'TabDPT': {'categorical_encoding': 'tabdpt_special'},
-                'Limix': {'categorical_encoding': 'limix_special'}
+                'Limix': {'categorical_encoding': 'limix_special'},
+                'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
+                'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
+                'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
                 
             }
             config = model_defaults.get(self.model_name)
@@ -101,6 +105,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'orion_bix_special': OrionBixPreprocessor,
             'tabdpt_special': TabDPTPreprocessor,
             'limix_special': LimixPreprocessor,
+            'tabiclv2_special': TabICLv2Preprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
