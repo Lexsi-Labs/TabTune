@@ -32,7 +32,7 @@ def read_requirements():
 
 setup(
     name="tabtune",
-    version="0.1.0",
+    version="0.1.14",
     author="Aditya Tanna, Pratinav Seth, Mohamed Bouadi, Utsav Avaiya, Vinay Kumar Sankarapu",
     author_email="aditya.tanna@lexsi.ai",
     maintainer="Aditya Tanna",

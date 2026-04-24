@@ -61,8 +61,11 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
--   ✅ **TabPFNv2.6 Integration** -- Full support for the latest TabPFN release, covering classification and regression (inference + finetune), with a dedicated **native fine-tuning mode** (`finetune_mode='native'`) that leverages `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor`.
--   ✅ **TabICLv2 Integration** -- Full support for TabICLv2 for both classification (inference + finetune) and regression (inference + finetune), using episodic turn-by-turn fine-tuning.
+-   ✅ **Ensembling Module Integration** -- Full support for combining multiple tabular foundation models (TFMs) using a unified `TabularEnsemble` API, compatible with both classification and regression workflows.
+
+-   ✅ **Six Ensemble Strategies** -- Includes weighted averaging, greedy selection , stacking , temperature-scaled blending , cascade stacking , and deep ensembles .
+
+-   ✅ **Advanced Capabilities** -- Supports hybrid TFM + GBDT ensembles, epistemic uncertainty estimation, calibrated probability outputs, and benchmark-ready evaluation with leaderboard and metrics.
 
 ---
 
@@ -341,7 +344,45 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 ----
+### 🧩 Ensembling Strategies
 
+TabTune-Ensemble extends the core library with multi-model ensembling via the `TabularEnsemble` class, combining predictions from multiple TFMs for improved accuracy and robustness.
+
+Six strategies are supported, from simple averaging to competition-grade cascade stacking:
+
+| Strategy | Best For |
+|----------|----------|
+| `weighted_averaging` | Fast baseline; low-latency production |
+| `greedy_selection` | **Recommended default** — general-purpose |
+| `stacking` | Diverse model errors; large datasets |
+| `temperature_scaled` | Calibrated probabilities; risk-sensitive tasks |
+| `cascade_stacking` | Maximum accuracy; competition settings |
+| `random_init` | Epistemic uncertainty estimation |
+
+```python
+from tabtune.ensemble import TabularEnsemble
+
+ensemble = TabularEnsemble(
+    models=[
+        {"model_name": "TabPFN",   "tuning_strategy": "inference"},
+        {"model_name": "TabICLv2", "tuning_strategy": "inference"},
+        {"model_name": "OrionMSP", "tuning_strategy": "inference"},
+    ],
+    ensemble_strategy="greedy_selection",  
+    task_type="classification",
+)
+
+ensemble.fit(X_train, y_train)
+predictions = ensemble.predict(X_test)
+metrics = ensemble.evaluate(X_test, y_test)
+
+print(metrics["ensemble"])          
+print(ensemble.get_leaderboard())   
+```
+
+
+
+---
 ## 🏆 Model Comparison with TabularLeaderboard
 
 The `TabularLeaderboard` makes it easy to compare multiple models and strategies on the same dataset.
@@ -499,7 +540,7 @@ pipeline = TabularPipeline(
 
 ## 🏆 Example Notebooks
 
-|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 14 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -516,8 +557,7 @@ pipeline = TabularPipeline(
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
 | 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
 | 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
-
----
+| 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1ObanSJPJnYZsL7FHvlEquXrGZ-21m4iL?usp=sharing) |
 
 ## 🚀 Advanced Usage
 
@@ -561,6 +601,7 @@ pipeline = TabularPipeline(
 ```
 
 ---
+
 
 ## 📖 Documentation
 

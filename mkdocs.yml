@@ -33,7 +33,8 @@ nav:
       - Saving and Loading: user-guide/saving-loading.md
       - Model Comparison: user-guide/leaderboard.md
       - Troubleshooting: user-guide/troubleshooting.md
-  
+      - Ensembling Strategies: user-guide/ensembling.md
+
   - Models:
       - Overview: models/overview.md
       - TabPFN: models/tabpfn.md
@@ -113,5 +114,4 @@ plugins:
         python:
           options:
             show_source: true
-
 
