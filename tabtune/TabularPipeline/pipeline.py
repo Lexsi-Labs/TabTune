@@ -1,3 +1,4 @@
+pipeline.py
 import pandas as pd
 import numpy as np
 import joblib
@@ -1463,6 +1464,36 @@ class TabularPipeline:
         logger.info("[Pipeline] Pipeline loaded successfully")
         return pipeline
 
+    def distill(self, X_train: pd.DataFrame, y_train: pd.Series, 
+                student: str = "mlp", temperature: float = 3.0, alpha: float = 0.7,
+                n_folds: int = 5, adaptive_temperature: bool = True,
+                confidence_weighting: bool = True, student_params: dict = None,
+                device: str = "cpu", **kwargs):
+        """Distill this pipeline's knowledge into a lightweight student model."""
+        if not self._is_fitted:
+            raise RuntimeError("Pipeline must be fitted before distillation. Call fit() first.")
+        if self.task_type not in ("classification", "regression"):
+            raise ValueError(f"Distillation supports classification and regression, got: {self.task_type}")
+
+        from ..distillation import TabDistiller
+
+        distiller = TabDistiller(
+            teachers=[self],
+            student=student,
+            task_type=self.task_type,
+            temperature=temperature,
+            alpha=alpha,
+            n_folds=n_folds,
+            adaptive_temperature=adaptive_temperature,
+            confidence_weighting=confidence_weighting,
+            student_params=student_params or {},
+            device=device,
+            **kwargs,
+        )
+        distiller.fit(X_train, y_train)
+        logger.info("[Pipeline] Distillation complete. Use the returned distiller for predictions.")
+        return distiller
+
     def show_processing_summary(self):
         """
         Retrieves and logs the data processing summary from the DataProcessor.
@@ -1474,6 +1505,7 @@ class TabularPipeline:
         
         for line in summary_lines:
             logger.info(line)
+
 
 
     def _calculate_calibration_errors(self, y_true, y_prob, n_bins=10):

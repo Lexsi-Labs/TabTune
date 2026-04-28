@@ -61,8 +61,13 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
--   ✅ **TabPFNv2.6 Integration** -- Full support for the latest TabPFN release, covering classification and regression (inference + finetune), with a dedicated **native fine-tuning mode** (`finetune_mode='native'`) that leverages `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor`.
--   ✅ **TabICLv2 Integration** -- Full support for TabICLv2 for both classification (inference + finetune) and regression (inference + finetune), using episodic turn-by-turn fine-tuning.
+-   ✅ **Ensembling Module Integration** -- Full support for combining multiple tabular foundation models (TFMs) using a unified `TabularEnsemble` API, compatible with both classification and regression workflows.
+
+-   ✅ **Six Ensemble Strategies** -- Includes weighted averaging, greedy selection , stacking , temperature-scaled blending , cascade stacking , and deep ensembles .
+
+-   ✅ **Advanced Capabilities** -- Supports hybrid TFM + GBDT ensembles, epistemic uncertainty estimation, calibrated probability outputs, and benchmark-ready evaluation with leaderboard and metrics.
+  
+-   ✅ Distillation  — Full support for compressing tabular foundation model teachers into lightweight student models using a unified TabDistiller API, with multi-teacher support, k-fold soft-label collection, and four student backends (MLP, LightGBM, XGBoost, CatBoost).
 
 ---
 
@@ -341,6 +346,107 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 ----
+### 🧩 Ensembling Strategies
+
+TabTune-Ensemble extends the core library with multi-model ensembling via the `TabularEnsemble` class, combining predictions from multiple TFMs for improved accuracy and robustness.
+
+Six strategies are supported, from simple averaging to competition-grade cascade stacking:
+
+| Strategy | Best For |
+|----------|----------|
+| `weighted_averaging` | Fast baseline; low-latency production |
+| `greedy_selection` | **Recommended default** — general-purpose |
+| `stacking` | Diverse model errors; large datasets |
+| `temperature_scaled` | Calibrated probabilities; risk-sensitive tasks |
+| `cascade_stacking` | Maximum accuracy; competition settings |
+| `random_init` | Epistemic uncertainty estimation |
+
+```python
+from tabtune.ensemble import TabularEnsemble
+
+ensemble = TabularEnsemble(
+    models=[
+        {"model_name": "TabPFN",   "tuning_strategy": "inference"},
+        {"model_name": "TabICLv2", "tuning_strategy": "inference"},
+        {"model_name": "OrionMSP", "tuning_strategy": "inference"},
+    ],
+    ensemble_strategy="greedy_selection",  
+    task_type="classification",
+)
+
+ensemble.fit(X_train, y_train)
+predictions = ensemble.predict(X_test)
+metrics = ensemble.evaluate(X_test, y_test)
+
+print(metrics["ensemble"])          
+print(ensemble.get_leaderboard())   
+```
+
+
+
+---
+
+### 🧩 Distillation
+TabTune extends the core library with model-agnostic knowledge distillation via the `TabDistiller` class, compressing any TFM teacher into a lightweight student model for fast, deployable inference.
+
+Four student backends are supported, each suited to different deployment constraints:
+
+| Student | `student` value | Best For |
+|---------|-----------------|----------|
+| LightGBM | `"lgbm"` | **Recommended default** — fast, robust, near-teacher accuracy |
+| XGBoost | `"xgb"` | Strong GBDT alternative; marginally slower than LightGBM |
+| CatBoost | `"catboost"` | Datasets with high-cardinality categorical features |
+| MLP (PyTorch) | `"mlp"` | Neural student requirement; high variance on small datasets |
+
+```python
+from tabtune.distillation import TabDistiller
+
+# Single teacher → student
+distiller = TabDistiller(
+    teachers="TabPFNv26",         # exact model name string required
+    student="lgbm",               # or "xgb", "catboost", "mlp"
+    task_type="classification",
+    temperature=3.0,              # Hinton-style soft-label temperature
+    alpha=0.7,                    # KL loss weight; (1 - alpha) = CE weight
+    n_folds=5,                    # k-fold cross-prediction (leakage fix for ICL models)
+    adaptive_temperature=True,    # per-sample temperature scaling
+    confidence_weighting=True,    # weight loss by teacher confidence
+)
+distiller.fit(X_train, y_train)
+predictions = distiller.predict(X_test)
+metrics = distiller.compare(X_test, y_test)   # teacher vs student + retention %
+print(metrics)
+
+distiller.save("student.pkl")     # serializes student only; teacher stripped
+```
+
+Multi-teacher distillation is supported by passing a list — soft labels are averaged across teachers before student training:
+
+```python
+# Multi-teacher → student (soft labels averaged)
+distiller = TabDistiller(
+    teachers=["TabPFNv26", "TabICLv2", "OrionMSPv1.5"],
+    student="xgb",
+    task_type="classification",
+    temperature=4.0,
+    alpha=0.6,
+)
+distiller.fit(X_train, y_train)
+predictions = distiller.predict(X_test)
+```
+
+Pre-fitted `TabularPipeline` objects can also be passed directly, skipping the teacher fit step:
+
+```python
+from tabtune import TabularPipeline
+from tabtune.distillation import TabDistiller
+
+pipe = TabularPipeline(model_name="TabICLv2", tuning_strategy="inference")
+pipe.fit(X_train, y_train)
+
+distiller = TabDistiller(teachers=[pipe], student="lgbm", task_type="classification")
+distiller.fit(X_train, y_train)
+```
 
 ## 🏆 Model Comparison with TabularLeaderboard
 
@@ -499,7 +605,7 @@ pipeline = TabularPipeline(
 
 ## 🏆 Example Notebooks
 
-|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 15 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -516,8 +622,8 @@ pipeline = TabularPipeline(
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
 | 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
 | 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
-
----
+| 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
+| 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)
 
 ## 🚀 Advanced Usage
 
@@ -561,6 +667,7 @@ pipeline = TabularPipeline(
 ```
 
 ---
+
 
 ## 📖 Documentation
 
