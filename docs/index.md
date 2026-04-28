@@ -28,6 +28,7 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 - **Smart Data Processing (`DataProcessor`):** Model-aware preprocessing that automatically handles imputation, scaling, categorical encoding, and feature transformations for each model.
 - **Flexible Tuning (`TuningManager`):** Three tuning strategies—zero-shot `inference`, supervised fine-tuning (`base-ft`) with full parameter updates, and memory-efficient `peft` (LoRA) adapters. Supports episodic meta-learning for ICL models.
 - **Model Comparison (`TabularLeaderboard`):** Systematic benchmarking tool for comparing multiple models and strategies on your datasets.
+- **🆕 Ensembling Module (`TabularEnsemble`):** Unified framework to combine multiple tabular foundation models using six strategies, including weighted averaging, stacking, and deep ensembles for improved accuracy and uncertainty estimation. 
 
 
 **Key Capabilities:**
@@ -52,13 +53,46 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 ---
 ## 🆕 New in This Release
 
-### ✅ TabPFNv2.6 Integration
+#### ✅ Ensembling Module with TabTune with 6 Strategies !
 
-Full support for PriorLabs' latest TabPFN release, covering both classification and regression with inference and fine-tuning. A dedicated **native fine-tuning mode** (`finetune_mode='native'`) leverages `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor` with bar distribution loss, cosine LR scheduling with warmup, mixed-precision (AMP), early stopping, and validation-based model selection.
 
-### ✅ TabICLv2 Integration
+### Ensemble Framework
 
-Full support for TabICLv2 for both classification and regression, with inference and episodic fine-tuning. Regression fine-tuning uses turn-by-turn episodic MSE training.
+-   Unified API for combining multiple tabular foundation models (TFMs)
+-   Supports six strategies: weighted averaging, greedy selection, stacking, temperature scaling, cascade stacking, and deep ensembles.
+
+### Strategy Capabilities
+
+-   Performance-driven model weighting and selection
+-   Meta-learning via stacking with multiple learners (LR, GBDT, MLP)
+-   Calibration-aware blending using temperature scaling
+-   Multi-level cascade stacking for state-of-the-art performance
+
+### Advanced Features
+
+-   Hybrid TFM + GBDT ensembles (XGBoost, LightGBM, sklearn)
+-   Epistemic uncertainty estimation via deep ensembles
+
+
+#### ✅ Distillation Module with TabTune — Compress TFMs into Lightweight Students!
+
+### Distillation Framework
+
+-   Unified `TabDistiller` API for compressing tabular foundation model teachers into lightweight student models
+-   Supports four student backends: MLP, LightGBM, XGBoost, and CatBoost
+
+### Distillation Capabilities
+
+-   Hinton-style temperature-scaled KL + hard CE combined loss
+-   Adaptive per-sample temperature scaling based on teacher confidence
+-   Confidence weighting to upweight high-certainty teacher predictions
+-   K-fold cross-prediction to prevent identity leakage in ICL models
+
+### Advanced Features
+
+-   Multi-teacher distillation with averaged soft labels (TabPFNv26, TabICLv2, Limix, OrionMSPv1.5)
+-   Soft-label caching to drastically reduce compute overhead across student configurations
+-   Deploy-ready exports: ONNX, INT8 quantization, and inference latency benchmarking
 
 ---
 
@@ -145,7 +179,7 @@ print(metrics)
 
 ## 🏆 Example Notebooks
 
-|Below are 13 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 15 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -162,7 +196,8 @@ print(metrics)
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
 | 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression|[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
 | 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
-
+| 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
+| 15 | Distillation | Using Single and Multi Teachers  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)
 
 ---
 
@@ -176,6 +211,7 @@ tabtune/
 ├── TuningManager/
 ├── TabularLeaderboard/
 ├── benchmarking/
+├── ensemble/
 ├── data/
 ├── logger.py
 └── run.py
