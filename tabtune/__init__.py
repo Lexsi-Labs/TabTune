@@ -20,6 +20,7 @@ try:
     from .TabularLeaderboard.leaderboard import TabularLeaderboard
     from .Dataprocess.data_processor import DataProcessor
     from .TuningManager.tuning import TuningManager
+    from .ensemble.tabular_ensemble import TabularEnsemble
 except ImportError as e:
     # Fallback to lazy imports if direct imports fail
     def __getattr__(name):
@@ -30,6 +31,9 @@ except ImportError as e:
             elif name == "TabularLeaderboard":
                 from .TabularLeaderboard.leaderboard import TabularLeaderboard
                 return TabularLeaderboard
+            elif name == "TabularEnsemble":
+                from .ensemble.tabular_ensemble import TabularEnsemble
+                return TabularEnsemble
             elif name == "DataProcessor":
                 from .Dataprocess.data_processor import DataProcessor
                 return DataProcessor
@@ -45,6 +49,7 @@ __all__ = [
     "TabularPipeline",
     "TabularLeaderboard", 
     "DataProcessor",
-    "TuningManager"
+    "TuningManager",
+    "TabularEnsemble",
 ]
 
