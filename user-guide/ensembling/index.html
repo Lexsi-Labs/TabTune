@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>TabTune Ensemble Module - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/ensembling.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#tabtune-ensemble-module">TabTune Ensemble Module</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="third-level"><a href="#key-features">Key Features</a></li>
+<li class="second-level"><a href="#2-installation-setup">2. Installation &amp; Setup</a></li>
+<li class="third-level"><a href="#dependencies">Dependencies</a></li>
+<li class="third-level"><a href="#file-structure">File Structure</a></li>
+<li class="second-level"><a href="#3-quick-start">3. Quick Start</a></li>
+<li class="third-level"><a href="#classification-with-greedy-selection-recommended-default">Classification with Greedy Selection (Recommended Default)</a></li>
+<li class="third-level"><a href="#regression-with-weighted-averaging">Regression with Weighted Averaging</a></li>
+<li class="second-level"><a href="#4-architecture">4. Architecture</a></li>
+<li class="second-level"><a href="#5-strategy-reference">5. Strategy Reference</a></li>
+<li class="third-level"><a href="#51-weighted-averaging">5.1 Weighted Averaging</a></li>
+<li class="third-level"><a href="#52-greedy-ensemble-selection">5.2 Greedy Ensemble Selection</a></li>
+<li class="third-level"><a href="#53-stacking-meta-learning">5.3 Stacking (Meta-Learning)</a></li>
+<li class="third-level"><a href="#54-temperature-scaled-blending">5.4 Temperature-Scaled Blending</a></li>
+<li class="third-level"><a href="#55-cascade-stacking">5.5 Cascade Stacking</a></li>
+<li class="third-level"><a href="#56-random-init-ensemble-deep-ensembles">5.6 Random-Init Ensemble (Deep Ensembles)</a></li>
+<li class="second-level"><a href="#6-tabularensemble-api-reference">6. TabularEnsemble API Reference</a></li>
+<li class="third-level"><a href="#constructor">Constructor</a></li>
+<li class="third-level"><a href="#model-configuration-dict">Model Configuration Dict</a></li>
+<li class="third-level"><a href="#methods">Methods</a></li>
+<li class="second-level"><a href="#7-strategy-selection-guide">7. Strategy Selection Guide</a></li>
+<li class="third-level"><a href="#decision-flowchart">Decision Flowchart</a></li>
+<li class="second-level"><a href="#8-references">8. References</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="tabtune-ensemble-module">TabTune Ensemble Module<a class="headerlink" href="#tabtune-ensemble-module" title="Permanent link">¶</a></h1>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
+<p>The TabTune Ensemble module provides a unified, production-ready API for combining predictions from multiple tabular foundation models (TFMs). It implements <strong>six ensemble strategies</strong>, ranging from simple weighted averaging to AutoGluon-style multi-level cascade stacking and deep ensembles with epistemic uncertainty estimation.</p>
+<p>The module is designed to integrate seamlessly with TabTune's <code>TabularPipeline</code> and follows TabTune's conventions for configuration, fitting, prediction, and evaluation.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Six strategies</strong> covering the full spectrum from simple to state-of-the-art.</li>
+<li><strong>Unified API</strong> — <code>TabularEnsemble</code> class handles all strategies with a consistent interface.</li>
+<li><strong>Hybrid TFM+GBDT ensembles</strong> — optionally include XGBoost / LightGBM / sklearn GBTs as base models.</li>
+<li><strong>Epistemic uncertainty</strong> — free uncertainty estimates from the deep ensembles strategy.</li>
+<li><strong>Production-grade</strong> — comprehensive input validation, try/catch error handling, verbose logging, and serialisable summaries.</li>
+</ul>
+<hr/>
+<h2 id="2-installation-setup">2. Installation &amp; Setup<a class="headerlink" href="#2-installation-setup" title="Permanent link">¶</a></h2>
+<p>The ensemble module lives under <code>tabtune/ensemble/</code> and is imported as:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularEnsemble</span>
+</code></pre></div>
+<h3 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numpy</code></td>
+<td>Yes</td>
+<td>Core array operations</td>
+</tr>
+<tr>
+<td><code>pandas</code></td>
+<td>Yes</td>
+<td>DataFrame handling</td>
+</tr>
+<tr>
+<td><code>scikit-learn</code></td>
+<td>Yes</td>
+<td>Metrics, meta-learners, CV splitting</td>
+</tr>
+<tr>
+<td><code>scipy</code></td>
+<td>Yes</td>
+<td>Temperature optimisation , softmax</td>
+</tr>
+<tr>
+<td><code>lightgbm</code></td>
+<td>Optional</td>
+<td>GBDT meta-learner / baselines (falls back to sklearn)</td>
+</tr>
+<tr>
+<td><code>xgboost</code></td>
+<td>Optional</td>
+<td>GBDT baselines</td>
+</tr>
+<tr>
+<td><code>tabtune</code></td>
+<td>Yes (for integration)</td>
+<td>Strategy-only tests run without it</td>
+</tr>
+</tbody>
+</table>
+<h3 id="file-structure">File Structure<a class="headerlink" href="#file-structure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>tabtune/ensemble/
+├── __init__.py              # Public API exports
+├── strategies.py            # All 6 strategy implementations
+├── tabular_ensemble.py      # TabularEnsemble orchestrator class
+tests/
+└── test_ensemble.py         # Unit + integration tests
+</code></pre></div>
+<hr/>
+<h2 id="3-quick-start">3. Quick Start<a class="headerlink" href="#3-quick-start" title="Permanent link">¶</a></h2>
+<h3 id="classification-with-greedy-selection-recommended-default">Classification with Greedy Selection (Recommended Default)<a class="headerlink" href="#classification-with-greedy-selection-recommended-default" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularEnsemble</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Prepare data</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="c1"># Build ensemble</span>
+<span class="n">ensemble</span> <span class="o">=</span> <span class="n">TabularEnsemble</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabPFN"</span><span class="p">,</span>   <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"OrionMSP"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">ensemble_strategy</span><span class="o">=</span><span class="s2">"greedy_selection"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit &amp; evaluate</span>
+<span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">"ensemble"</span><span class="p">])</span>        
+<span class="nb">print</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">get_leaderboard</span><span class="p">())</span> 
+</code></pre></div>
+<h3 id="regression-with-weighted-averaging">Regression with Weighted Averaging<a class="headerlink" href="#regression-with-weighted-averaging" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">ensemble</span> <span class="o">=</span> <span class="n">TabularEnsemble</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabPFN"</span><span class="p">,</span>   <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">ensemble_strategy</span><span class="o">=</span><span class="s2">"weighted_averaging"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s2">"mse"</span><span class="p">,</span>
+    <span class="n">weight_scheme</span><span class="o">=</span><span class="s2">"inverse_error"</span><span class="p">,</span>  
+<span class="p">)</span>
+<span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="4-architecture">4. Architecture<a class="headerlink" href="#4-architecture" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>TabularEnsemble (orchestrator)
+│
+├── fit()
+│   ├── Build &amp; fit N TabTune pipelines
+│   ├── (Optional) Build &amp; fit GBDT baselines
+│   ├── Collect validation predictions
+│   ├── Instantiate strategy via get_strategy()
+│   └── Fit strategy on collected predictions
+│
+├── predict() / predict_proba()
+│   ├── Collect test predictions from all pipelines
+│   └── Delegate to strategy.predict() / predict_proba()
+│
+├── evaluate()  → Dict with ensemble + individual metrics
+└── get_leaderboard() → DataFrame ranking all models
+</code></pre></div>
+<p>Internally, each strategy class follows the same interface:
+- <code>fit(model_outputs, y_val, ...)</code> — learn combination weights/parameters
+- <code>predict(model_outputs)</code> — return combined predictions
+- <code>predict_proba(model_outputs)</code> — return combined probabilities</p>
+<hr/>
+<h2 id="5-strategy-reference">5. Strategy Reference<a class="headerlink" href="#5-strategy-reference" title="Permanent link">¶</a></h2>
+<h3 id="51-weighted-averaging">5.1 Weighted Averaging<a class="headerlink" href="#51-weighted-averaging" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>WeightedAveraging</code><br/>
+<strong>Strategy key:</strong> <code>"weighted_averaging"</code></p>
+<p>Combines model probability matrices (or point predictions for regression) via a weighted sum normalised to 1.</p>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td><code>"classification"</code> or <code>"regression"</code></td>
+</tr>
+<tr>
+<td><code>weight_scheme</code></td>
+<td>str</td>
+<td><code>"performance"</code></td>
+<td>One of <code>"uniform"</code>, <code>"performance"</code>, <code>"inverse_error"</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="tabularensemble-parameters">TabularEnsemble Parameters<a class="headerlink" href="#tabularensemble-parameters" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>weight_scheme</code></td>
+<td>str</td>
+<td><code>"performance"</code></td>
+<td>Passed through to <code>WeightedAveraging</code></td>
+</tr>
+<tr>
+<td><code>metric</code></td>
+<td>str</td>
+<td><code>"accuracy"</code></td>
+<td>Metric used to compute performance-based weights</td>
+</tr>
+</tbody>
+</table>
+<h4 id="weight-schemes">Weight Schemes<a class="headerlink" href="#weight-schemes" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong><code>"uniform"</code></strong> — All models get equal weight <code>1/K</code>.</li>
+<li><strong><code>"performance"</code></strong> — Weight proportional to validation score. For "lower-is-better" metrics (MSE, log_loss), scores are inverted.</li>
+<li><strong><code>"inverse_error"</code></strong> — Weight <code>= 1 / (1 - score + ε)</code> for "higher-is-better" metrics, concentrating mass on the very best models.</li>
+</ul>
+<h4 id="manual-weights">Manual Weights<a class="headerlink" href="#manual-weights" title="Permanent link">¶</a></h4>
+<p>You can also supply manual weights via the <code>fit()</code> method:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.ensemble.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">WeightedAveraging</span>
+
+<span class="n">wa</span> <span class="o">=</span> <span class="n">WeightedAveraging</span><span class="p">(</span><span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span> <span class="n">weight_scheme</span><span class="o">=</span><span class="s2">"performance"</span><span class="p">)</span>
+<span class="n">wa</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">model_outputs</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">,</span>
+    <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s2">"TabPFN_inference"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"TabICLv2_inference"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"OrionMSP_inference"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<h4 id="formula">Formula<a class="headerlink" href="#formula" title="Permanent link">¶</a></h4>
+<p>$$\hat{p} = \sum_{k=1}^{K} w_k \cdot p_k \quad \text{where} \quad \sum_k w_k = 1$$</p>
+<p>The final prediction $\hat{p}$ is computed as the weighted sum of predictions $p_k$ from $K$ models, where $w_k$ is the weight assigned to the $k$-th model and all weights sum to 1.</p>
+<hr/>
+<h3 id="52-greedy-ensemble-selection">5.2 Greedy Ensemble Selection<a class="headerlink" href="#52-greedy-ensemble-selection" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>GreedyEnsembleSelection</code><br/>
+<strong>Strategy key:</strong> <code>"greedy_selection"</code> </p>
+<p>Iteratively builds an ensemble by adding the model that maximises validation performance at each step. Selection is with replacement, so a model can be picked multiple times (earning proportionally higher weight). This is the same algorithm used by <strong>AutoGluon's WeightedEnsembleModel</strong>.</p>
+<h4 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ensemble_size</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Number of greedy iterations</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td>Task type</td>
+</tr>
+<tr>
+<td><code>metric</code></td>
+<td>str</td>
+<td><code>"accuracy"</code></td>
+<td>Metric to optimise</td>
+</tr>
+<tr>
+<td><code>with_replacement</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Allow repeated selection</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tabularensemble-parameters_1">TabularEnsemble Parameters<a class="headerlink" href="#tabularensemble-parameters_1" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>greedy_ensemble_size</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Forwarded to <code>ensemble_size</code></td>
+</tr>
+<tr>
+<td><code>metric</code></td>
+<td>str</td>
+<td><code>"accuracy"</code></td>
+<td>Validation metric to maximise/minimise</td>
+</tr>
+</tbody>
+</table>
+<h4 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">¶</a></h4>
+<ol>
+<li>Start with an empty ensemble.</li>
+<li>For <code>ensemble_size</code> iterations: find the model whose addition maximises the validation metric.</li>
+<li>Add it (with replacement).</li>
+<li>Final weight = selection count / total selections.</li>
+</ol>
+<h4 id="attributes-after-fit">Attributes After Fit<a class="headerlink" href="#attributes-after-fit" title="Permanent link">¶</a></h4>
+<ul>
+<li><code>weights_</code> — <code>dict[str, float]</code>: normalised selection-count-based weights.</li>
+<li><code>selection_history_</code> — <code>list[tuple[str, float]]</code>: <code>(model_name, score)</code> per iteration.</li>
+</ul>
+<hr/>
+<h3 id="53-stacking-meta-learning">5.3 Stacking (Meta-Learning)<a class="headerlink" href="#53-stacking-meta-learning" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>StackingEnsemble</code><br/>
+<strong>Strategy key:</strong> <code>"stacking"</code> </p>
+<p>Trains a second-level meta-learner on cross-validated out-of-fold (OOF) predictions from base models.</p>
+<h4 id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meta_learner</code></td>
+<td>str</td>
+<td><code>"lr"</code></td>
+<td><code>"lr"</code> (LogisticRegression/Ridge), <code>"gbdt"</code> (LightGBM→sklearn fallback), <code>"mlp"</code></td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td>Task type</td>
+</tr>
+<tr>
+<td><code>n_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>CV folds for OOF generation (used externally)</td>
+</tr>
+<tr>
+<td><code>use_original_features</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Append raw features to meta-feature matrix</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tabularensemble-parameters_2">TabularEnsemble Parameters<a class="headerlink" href="#tabularensemble-parameters_2" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meta_learner</code></td>
+<td>str</td>
+<td><code>"lr"</code></td>
+<td>Forwarded to <code>StackingEnsemble</code></td>
+</tr>
+<tr>
+<td><code>cv_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>K-fold splits for stacking OOF</td>
+</tr>
+</tbody>
+</table>
+<h4 id="meta-learner-details">Meta-Learner Details<a class="headerlink" href="#meta-learner-details" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th><code>meta_learner</code></th>
+<th>Classification</th>
+<th>Regression</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"lr"</code></td>
+<td><code>LogisticRegression(max_iter=1000, C=1.0)</code></td>
+<td><code>Ridge(alpha=1.0)</code></td>
+</tr>
+<tr>
+<td><code>"gbdt"</code></td>
+<td><code>LGBMClassifier(n_estimators=100, max_depth=3)</code></td>
+<td><code>LGBMRegressor(...)</code></td>
+</tr>
+<tr>
+<td><code>"mlp"</code></td>
+<td><code>MLPClassifier(hidden_layer_sizes=(64,32), max_iter=500)</code></td>
+<td><code>MLPRegressor(...)</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="how-oof-prevents-leakage">How OOF Prevents Leakage<a class="headerlink" href="#how-oof-prevents-leakage" title="Permanent link">¶</a></h4>
+<p>The meta-learner never sees the same data the base models trained on. During K-fold CV, each fold's held-out predictions become the meta-features for those samples.</p>
+<hr/>
+<h3 id="54-temperature-scaled-blending">5.4 Temperature-Scaled Blending<a class="headerlink" href="#54-temperature-scaled-blending" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>TemperatureScaledBlending</code><br/>
+<strong>Strategy key:</strong> <code>"temperature_scaled"</code> </p>
+<p>Calibrates each model's predictions using a single temperature parameter <code>T</code>, then combines with uniform weights. This is particularly valuable for TabTune models since different TFMs have varying calibration quality.</p>
+<h4 id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td>Task type</td>
+</tr>
+</tbody>
+</table>
+<h4 id="how-temperature-scaling-works">How Temperature Scaling Works<a class="headerlink" href="#how-temperature-scaling-works" title="Permanent link">¶</a></h4>
+<p>For each model, learn <code>T</code> by minimising NLL on the validation set:</p>
+<p>$$\hat{p} = \text{softmax}(\log(p) / T)$$</p>
+<p>Here, $p$ represents the original predicted probabilities, $\log(p)$ converts them to logits, $T$ is the temperature scaling parameter, and $\hat{p}$ is the calibrated probability after applying softmax. Dividing by $T$ adjusts the confidence of predictions without changing their relative ordering.</p>
+<ul>
+<li><strong>T &lt; 1</strong> — Model was overconfident → sharpen predictions.</li>
+<li><strong>T &gt; 1</strong> — Model was underconfident → soften predictions.</li>
+<li><strong>T = 1</strong> — Already well-calibrated.</li>
+</ul>
+<h4 id="optimisation">Optimisation<a class="headerlink" href="#optimisation" title="Permanent link">¶</a></h4>
+<p>Temperature is optimised  in log-space (to enforce <code>T &gt; 0</code>), clamped to <code>[0.01, 20.0]</code>.</p>
+<h4 id="attributes-after-fit_1">Attributes After Fit<a class="headerlink" href="#attributes-after-fit_1" title="Permanent link">¶</a></h4>
+<ul>
+<li><code>temperatures_</code> — <code>dict[str, float]</code>: learned temperature per model.</li>
+<li><code>weights_</code> — <code>dict[str, float]</code>: uniform weights <code>1/K</code>.</li>
+</ul>
+<h4 id="when-to-use">When To Use<a class="headerlink" href="#when-to-use" title="Permanent link">¶</a></h4>
+<p>When calibrated probabilities matter (risk-sensitive applications, expected calibration error evaluation). Pairs well with reliability diagrams and ECE analysis.</p>
+<hr/>
+<h3 id="55-cascade-stacking">5.5 Cascade Stacking<a class="headerlink" href="#55-cascade-stacking" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>CascadeStackingEnsemble</code><br/>
+<strong>Strategy key:</strong> <code>"cascade_stacking"</code> </p>
+<p>Multi-level stacking with skip connections, mirroring AutoGluon's <code>best_quality</code> architecture. At each level, K-fold OOF predictions are concatenated with the original features and fed to the next level. A final Greedy Ensemble Selection (GES) layer picks the optimal combination across all level outputs.</p>
+<h4 id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_levels</code></td>
+<td>int</td>
+<td><code>2</code></td>
+<td>Number of stacking levels</td>
+</tr>
+<tr>
+<td><code>n_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>K-fold splits per level</td>
+</tr>
+<tr>
+<td><code>ges_size</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>GES iterations at final layer</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td>Task type</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Seed for reproducibility</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tabularensemble-parameters_3">TabularEnsemble Parameters<a class="headerlink" href="#tabularensemble-parameters_3" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_cascade_levels</code></td>
+<td>int</td>
+<td><code>2</code></td>
+<td>Forwarded to <code>n_levels</code></td>
+</tr>
+<tr>
+<td><code>cv_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Forwarded to <code>n_folds</code></td>
+</tr>
+<tr>
+<td><code>greedy_ensemble_size</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Forwarded to <code>ges_size</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code>Level 1:
+  Input: Original features
+  → K-fold OOF (n_models × n_classes columns)
+  → Skip connection: [OOF | Original features]
+
+Level 2:
+  Input: [Level-1 OOF | Original features]
+  → K-fold OOF (n_models × n_classes columns)
+  → Skip connection: [OOF | Original features]
+
+Final Layer:
+  GES over ALL stacker outputs from all levels
+  → Weighted combination
+</code></pre></div>
+<h4 id="key-design-choices">Key Design Choices<a class="headerlink" href="#key-design-choices" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Skip connections</strong> — Higher levels always see the original features, preventing information loss.</li>
+<li><strong>OrdinalEncoder for skip features</strong> — Categorical columns are encoded to float arrays (fitted on train only) so skip-connection hstacking always succeeds.</li>
+<li><strong>GES final layer</strong> — Instead of training yet another meta-learner, GES picks the optimal weighted mix across all stacker outputs.</li>
+</ul>
+<h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">ensemble</span> <span class="o">=</span> <span class="n">TabularEnsemble</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabPFN"</span><span class="p">,</span>   <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"OrionMSP"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">ensemble_strategy</span><span class="o">=</span><span class="s2">"cascade_stacking"</span><span class="p">,</span>
+    <span class="n">n_cascade_levels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>           
+    <span class="n">greedy_ensemble_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h3 id="56-random-init-ensemble-deep-ensembles">5.6 Random-Init Ensemble (Deep Ensembles)<a class="headerlink" href="#56-random-init-ensemble-deep-ensembles" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>RandomInitEnsemble</code><br/>
+<strong>Strategy key:</strong> <code>"random_init"</code> </p>
+<p>Trains each model <code>M</code> times with different random seeds, producing diverse predictions from different local minima. Per-model predictions are averaged across seeds, then cross-model averaging uses performance-based weights.</p>
+<h4 id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_seeds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Number of random seeds per model</td>
+</tr>
+<tr>
+<td><code>base_seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Starting seed (seeds: base, base+1, ..., base+M-1)</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"classification"</code></td>
+<td>Task type</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tabularensemble-parameters_4">TabularEnsemble Parameters<a class="headerlink" href="#tabularensemble-parameters_4" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_seeds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Forwarded to <code>RandomInitEnsemble</code></td>
+</tr>
+<tr>
+<td><code>base_seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Forwarded</td>
+</tr>
+</tbody>
+</table>
+<h4 id="epistemic-uncertainty">Epistemic Uncertainty<a class="headerlink" href="#epistemic-uncertainty" title="Permanent link">¶</a></h4>
+<p>The variance across ensemble members provides a free epistemic uncertainty estimate per sample:</p>
+<p>$$\text{uncertainty}(x) = \frac{1}{M \cdot K} \sum_{m=1}^{M} \sum_{c=1}^{K} \left( p_{m,c}(x) - \bar{p}_c(x) \right)^2$$</p>
+<p>The uncertainty for input $x$ is computed as the average squared deviation between each model’s predicted probability $p_{m,c}(x)$ (for model $m$ and class $c$) and the mean prediction $\bar{p}_c(x)$ across all $M$ models, averaged over all $K$ classes—capturing how much the models disagree.</p>
+<p>Access via:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">uncertainty</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">()</span>  
+</code></pre></div>
+<p>High uncertainty = models disagree across seeds = uncertain prediction.</p>
+<h4 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">ensemble</span> <span class="o">=</span> <span class="n">TabularEnsemble</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabPFN"</span><span class="p">,</span>   <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">ensemble_strategy</span><span class="o">=</span><span class="s2">"random_init"</span><span class="p">,</span>
+    <span class="n">n_seeds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>            
+    <span class="n">base_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Access uncertainty</span>
+<span class="n">uncertainty</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_uncertainty</span><span class="p">()</span>
+<span class="n">most_uncertain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">uncertainty</span><span class="p">)[</span><span class="o">-</span><span class="mi">10</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Most uncertain test indices: </span><span class="si">{</span><span class="n">most_uncertain</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="6-tabularensemble-api-reference">6. TabularEnsemble API Reference<a class="headerlink" href="#6-tabularensemble-api-reference" title="Permanent link">¶</a></h2>
+<h3 id="constructor">Constructor<a class="headerlink" href="#constructor" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">TabularEnsemble</span><span class="p">(</span>
+    <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>              
+    <span class="n">ensemble_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"greedy_selection"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"accuracy"</span><span class="p">,</span>
+    <span class="n">cv_folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">holdout_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">meta_learner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lr"</span><span class="p">,</span>
+    <span class="n">greedy_ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">include_gbdt_baselines</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_cascade_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_seeds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">base_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">weight_scheme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"performance"</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="model-configuration-dict">Model Configuration Dict<a class="headerlink" href="#model-configuration-dict" title="Permanent link">¶</a></h3>
+<p>Each entry in <code>models</code> is a dict:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabPFN"</span><span class="p">,</span>              <span class="c1"># Required: TabTune model name</span>
+    <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">,</span>       <span class="c1"># Optional (default: "inference")</span>
+    <span class="s2">"tuning_params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">},</span>  <span class="c1"># Optional: passed to TabularPipeline</span>
+    <span class="s2">"model_params"</span><span class="p">:</span> <span class="p">{},</span>                   <span class="c1"># Optional: model-specific params</span>
+    <span class="s2">"finetune_mode"</span><span class="p">:</span> <span class="s2">"meta-learning"</span><span class="p">,</span>     <span class="c1"># Optional: for finetune strategy</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fit(X_train, y_train, X_val=None, y_val=None)</code></td>
+<td><code>self</code></td>
+<td>Fit all base models + ensemble strategy</td>
+</tr>
+<tr>
+<td><code>predict(X_test)</code></td>
+<td><code>ndarray (n,)</code></td>
+<td>Class labels or point estimates</td>
+</tr>
+<tr>
+<td><code>predict_proba(X_test)</code></td>
+<td><code>ndarray (n, k)</code></td>
+<td>Probability matrix (classification only)</td>
+</tr>
+<tr>
+<td><code>evaluate(X_test, y_test)</code></td>
+<td><code>dict</code></td>
+<td>Full evaluation with ensemble + individual metrics</td>
+</tr>
+<tr>
+<td><code>get_leaderboard()</code></td>
+<td><code>DataFrame</code></td>
+<td>Ranked model comparison table</td>
+</tr>
+<tr>
+<td><code>get_uncertainty()</code></td>
+<td><code>ndarray (n,)</code> or <code>None</code></td>
+<td>Epistemic uncertainty (deep ensembles only)</td>
+</tr>
+<tr>
+<td><code>summary()</code></td>
+<td><code>dict</code></td>
+<td>JSON-serialisable ensemble summary</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-strategy-selection-guide">7. Strategy Selection Guide<a class="headerlink" href="#7-strategy-selection-guide" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Best For</th>
+<th>Speed</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Weighted Averaging</strong></td>
+<td>Quick baseline; production with low latency</td>
+<td>Fastest</td>
+<td>Lowest</td>
+</tr>
+<tr>
+<td><strong>Greedy Selection</strong></td>
+<td>General-purpose default (recommended)</td>
+<td>Fast</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>Stacking</strong></td>
+<td>Diverse model errors; large datasets</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Temperature Scaled</strong></td>
+<td>Risk-sensitive; calibrated probabilities</td>
+<td>Fast</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>Cascade Stacking</strong></td>
+<td>Maximum accuracy; competition settings</td>
+<td>Slow</td>
+<td>High</td>
+</tr>
+<tr>
+<td><strong>Random-Init</strong></td>
+<td>Uncertainty estimation; robust predictions</td>
+<td>Slow</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision-flowchart">Decision Flowchart<a class="headerlink" href="#decision-flowchart" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
+    A([Start]) --&gt; B{Uncertainty?}
+    B --&gt;|Yes| C[random_init]
+    B --&gt;|No| D{Calibrated\nprobabilities?}
+    D --&gt;|Yes| E[temperature_scaled]
+    D --&gt;|No| F{Maximum\naccuracy?}
+    F --&gt;|Yes| G[cascade_stacking]
+    F --&gt;|No| H{Diverse\nmodel types?}
+    H --&gt;|Yes| I[stacking\ngbdt]
+    H --&gt;|No| J{General\npurpose?}
+    J --&gt;|Yes| K[greedy_selection]
+    J --&gt;|No| L[weighted_averaging\nperformance]
+</div>
+<hr/>
+<h2 id="8-references">8. References<a class="headerlink" href="#8-references" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Paper</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Tanna, A. et al. (2025). <em>TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models.</em> arXiv:2511.02802.</td>
+<td>TabTune framework</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Caruana, R. et al. (2004). <em>Ensemble Selection from Libraries of Models.</em> ICML.</td>
+<td>Greedy Selection</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Wolpert, D. H. (1992). <em>Stacked Generalization.</em> Neural Networks 5, 241-259.</td>
+<td>Stacking</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Guo, C. et al. (2017). <em>On Calibration of Modern Neural Networks.</em> ICML.</td>
+<td>Temperature Scaling</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Erickson, N. et al. (2020). <em>AutoGluon-Tabular.</em> arXiv:2003.06505.</td>
+<td>Cascade Stacking</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Ting, K. M. &amp; Witten, I. H. (1999). <em>Issues in Stacked Generalization.</em> JAIR.</td>
+<td>Cascade Stacking</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Lakshminarayanan, B. et al. (2017). <em>Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles.</em> NeurIPS.</td>
+<td>Deep Ensembles</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<!-- ## Appendix: Strategy Factory
+
+Use `get_strategy()` for direct strategy instantiation (without `TabularEnsemble`):
+
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.ensemble.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_strategy</span><span class="p">,</span> <span class="n">STRATEGY_MAP</span>
+
+<span class="c1"># List all available strategies</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">STRATEGY_MAP</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="c1"># [&#39;weighted_averaging&#39;, &#39;greedy_selection&#39;, &#39;stacking&#39;,</span>
+<span class="c1">#  &#39;temperature_scaled&#39;, &#39;cascade_stacking&#39;, &#39;random_init&#39;]</span>
+
+<span class="c1"># Instantiate directly</span>
+<span class="n">strategy</span> <span class="o">=</span> <span class="n">get_strategy</span><span class="p">(</span><span class="s2">&quot;greedy_selection&quot;</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;classification&quot;</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">strategy</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_outputs_dict</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">model_outputs_dict</span><span class="p">)</span>
+</code></pre></div>
+
+This is useful when you already have pre-computed model outputs and want to experiment with different combination strategies without refitting the base models. --></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

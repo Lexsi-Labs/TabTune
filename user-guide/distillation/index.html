@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>TabTune Distillation Module - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/distillation.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#tabtune-distillation-module">TabTune Distillation Module</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="third-level"><a href="#key-features">Key Features</a></li>
+<li class="second-level"><a href="#2-installation-setup">2. Installation &amp; Setup</a></li>
+<li class="third-level"><a href="#dependencies">Dependencies</a></li>
+<li class="third-level"><a href="#file-structure">File Structure</a></li>
+<li class="second-level"><a href="#3-quick-start">3. Quick Start</a></li>
+<li class="third-level"><a href="#classification-tabiclv2-lightgbm-example">Classification — TabICLv2 → LightGBM (Example)</a></li>
+<li class="second-level"><a href="#4-architecture">4. Architecture</a></li>
+<li class="second-level"><a href="#5-strategy-reference">5. Strategy Reference</a></li>
+<li class="third-level"><a href="#51-soft-labels-default">5.1 Soft Labels (Default)</a></li>
+<li class="third-level"><a href="#52-adaptive-temperature">5.2 Adaptive Temperature</a></li>
+<li class="third-level"><a href="#53-confidence-weighting">5.3 Confidence Weighting</a></li>
+<li class="third-level"><a href="#54-k-fold-cross-prediction">5.4 K-Fold Cross-Prediction</a></li>
+<li class="third-level"><a href="#55-multi-teacher-distillation">5.5 Multi-Teacher Distillation</a></li>
+<li class="third-level"><a href="#56-data-augmentation">5.6 Data Augmentation</a></li>
+<li class="second-level"><a href="#6-advanced-strategies">6. Advanced Strategies</a></li>
+<li class="third-level"><a href="#61-cross-validation-distillation">6.1 Cross-Validation Distillation</a></li>
+<li class="third-level"><a href="#62-progressive-curriculum-distillation">6.2 Progressive / Curriculum Distillation</a></li>
+<li class="third-level"><a href="#63-probability-calibration">6.3 Probability Calibration</a></li>
+<li class="third-level"><a href="#64-self-distillation">6.4 Self-Distillation</a></li>
+<li class="second-level"><a href="#7-tabdistiller-api-reference">7. TabDistiller API Reference</a></li>
+<li class="third-level"><a href="#constructor">Constructor</a></li>
+<li class="third-level"><a href="#teacher-configuration">Teacher Configuration</a></li>
+<li class="third-level"><a href="#student-backends">Student Backends</a></li>
+<li class="third-level"><a href="#methods_1">Methods</a></li>
+<li class="third-level"><a href="#fitted-attributes">Fitted Attributes</a></li>
+<li class="second-level"><a href="#8-strategy-selection-guide">8. Strategy Selection Guide</a></li>
+<li class="third-level"><a href="#student-selection">Student Selection</a></li>
+<li class="second-level"><a href="#9-save-deployment">9. Save &amp; Deployment</a></li>
+<li class="second-level"><a href="#10-error-handling-logging">10. Error Handling &amp; Logging</a></li>
+<li class="third-level"><a href="#logging">Logging</a></li>
+<li class="third-level"><a href="#error-handling-design">Error Handling Design</a></li>
+<li class="third-level"><a href="#verbose-logging-output">Verbose Logging Output</a></li>
+<li class="second-level"><a href="#11-testing">11. Testing</a></li>
+<li class="third-level"><a href="#running-tests">Running Tests</a></li>
+<li class="third-level"><a href="#test-coverage">Test Coverage</a></li>
+<li class="second-level"><a href="#12-references">12. References</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="tabtune-distillation-module">TabTune Distillation Module<a class="headerlink" href="#tabtune-distillation-module" title="Permanent link">¶</a></h1>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
+<p>The TabTune Distillation module compresses any tabular foundation model (TFM) into a lightweight, production-deployable student using <strong>model-agnostic soft-label knowledge distillation</strong>. It requires only <code>predict_proba()</code> — no access to model internals, gradients, or architecture details.</p>
+<p>The core algorithm uses <strong>k-fold cross-prediction</strong> to generate out-of-fold soft labels, which prevents <em>ICL identity leakage</em> — the failure mode where in-context learning models label their own training data, producing artificially overconfident soft targets that mislead the student.</p>
+<p>The module integrates seamlessly with TabTune's <code>TabularPipeline</code> and follows TabTune's conventions for configuration, fitting, prediction, and evaluation.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Model-agnostic</strong> — works with any TFM that exposes <code>predict_proba()</code>: TabPFNv2.6, TabICLv2, TabDPT, Mitra, and others.</li>
+<li><strong>Four student backends</strong> — <code>mlp</code>, <code>lgbm</code>, <code>xgb</code>/<code>xgboost</code>, <code>catboost</code>/<code>cb</code>.</li>
+<li><strong>K-fold cross-prediction</strong> — eliminates ICL identity leakage by ensuring teachers never label their own training samples.</li>
+<li><strong>Adaptive temperature</strong> — per-sample temperature scaling based on teacher entropy, rather than a single global <code>T</code>.</li>
+<li><strong>Confidence weighting</strong> — bell-shaped sample weighting that focuses student training on the clearest teacher signals.</li>
+<li><strong>Multi-teacher distillation</strong> — averages soft labels across multiple TFMs before training the student.</li>
+<li><strong>Deployment-ready</strong> — <code>save()</code> strips the teacher entirely; the serialised student has no TFM dependency.</li>
+<li><strong>Advanced strategies</strong> — progressive/curriculum distillation, post-hoc calibration, and self-distillation available via <code>tabtune.distillation.strategies</code>.</li>
+</ul>
+<hr/>
+<h2 id="2-installation-setup">2. Installation &amp; Setup<a class="headerlink" href="#2-installation-setup" title="Permanent link">¶</a></h2>
+<p>The distillation module lives under <code>tabtune/distillation/</code> and is imported as:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabDistiller</span>
+</code></pre></div>
+<h3 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numpy</code></td>
+<td>Yes</td>
+<td>Core array operations</td>
+</tr>
+<tr>
+<td><code>pandas</code></td>
+<td>Yes</td>
+<td>DataFrame handling</td>
+</tr>
+<tr>
+<td><code>scikit-learn</code></td>
+<td>Yes</td>
+<td>Metrics, CV splitting, preprocessing</td>
+</tr>
+<tr>
+<td><code>scipy</code></td>
+<td>Yes</td>
+<td>Temperature optimisation (L-BFGS-B), NLL minimisation</td>
+</tr>
+<tr>
+<td><code>joblib</code></td>
+<td>Yes</td>
+<td>Student serialisation (<code>save</code>/<code>load</code>)</td>
+</tr>
+<tr>
+<td><code>lightgbm</code></td>
+<td>Optional</td>
+<td><code>student="lgbm"</code> backend</td>
+</tr>
+<tr>
+<td><code>xgboost</code></td>
+<td>Optional</td>
+<td><code>student="xgb"</code> / <code>"xgboost"</code> backend</td>
+</tr>
+<tr>
+<td><code>catboost</code></td>
+<td>Optional</td>
+<td><code>student="catboost"</code> / <code>"cb"</code> backend</td>
+</tr>
+<tr>
+<td><code>torch</code></td>
+<td>Optional</td>
+<td><code>student="mlp"</code> backend</td>
+</tr>
+<tr>
+<td><code>tabtune</code></td>
+<td>Yes (for integration)</td>
+<td>Strategy-only tests run without it</td>
+</tr>
+</tbody>
+</table>
+<h3 id="file-structure">File Structure<a class="headerlink" href="#file-structure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>tabtune/distillation/
+├── __init__.py              # Public API exports
+├── distiller.py             # TabDistiller orchestrator class
+├── losses.py                # Hinton KD loss, adaptive temperature, confidence weights
+├── strategies.py            # Advanced strategies: CV distillation, progressive,
+│                            #   calibration, self-distillation
+├── students/
+│   ├── mlp_student.py       # PyTorch MLP student
+│   └── gbdt_student.py      # GBDTStudent: lgbm / xgb / catboost backends
+tests/
+└── test_distillation.py     # Unit + integration tests
+</code></pre></div>
+<hr/>
+<h2 id="3-quick-start">3. Quick Start<a class="headerlink" href="#3-quick-start" title="Permanent link">¶</a></h2>
+<h3 id="classification-tabiclv2-lightgbm-example">Classification — TabICLv2 → LightGBM (Example)<a class="headerlink" href="#classification-tabiclv2-lightgbm-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabDistiller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Prepare data</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Build distiller</span>
+<span class="n">distiller</span> <span class="o">=</span> <span class="n">TabDistiller</span><span class="p">(</span>
+    <span class="n">teachers</span><span class="o">=</span><span class="s2">"TabICLv2"</span><span class="p">,</span>
+    <span class="n">student</span><span class="o">=</span><span class="s2">"lgbm"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">n_folds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">adaptive_temperature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">confidence_weighting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">"cuda"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit &amp; compare</span>
+<span class="n">distiller</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">distiller</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="4-architecture">4. Architecture<a class="headerlink" href="#4-architecture" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>TabDistiller (orchestrator)
+│
+├── fit(X_train, y_train)
+│   ├── Step 1: Fit teacher pipeline(s)           [TabularPipeline per teacher]
+│   ├── Step 2: Extract label encoder             [from teacher processor]
+│   ├── Step 3: Collect soft labels               [k-fold cross-prediction]
+│   │           └── Normalize soft labels         [fixes TabDPT float bug]
+│   ├── Step 4: Compute adaptive temperatures     [per-sample, from entropy]
+│   ├── Step 4: Compute confidence weights        [bell-shaped weighting]
+│   ├── Step 5: (Optional) Augment data           [Gaussian noise]
+│   ├── Step 6: Preprocess features               [numeric, fillna, float32]
+│   └── Step 7: Train student                     [MLP or GBDTStudent]
+│
+├── predict(X_test)
+│   └── student_.predict(preprocess(X_test))
+│
+├── predict_proba(X_test)
+│   └── student_.predict_proba(preprocess(X_test))
+│
+├── evaluate(X_test, y_test)   → Dict with student metrics
+├── compare(X_test, y_test)    → Dict with student + teacher metrics + retention
+├── save(path)                 → joblib dump (teacher stripped)
+└── TabDistiller.load(path)    → restored student, no TFM dependency
+</code></pre></div>
+<p>Internally, <code>_collect_soft_labels</code> routes each teacher through either:
+- <strong>K-fold cross-prediction</strong> (ICL inference-mode teachers) — teacher never labels its own training samples
+- <strong>Direct prediction</strong> (fine-tuned or pre-fitted teachers) — teacher predicts on full training set</p>
+<hr/>
+<h2 id="5-strategy-reference">5. Strategy Reference<a class="headerlink" href="#5-strategy-reference" title="Permanent link">¶</a></h2>
+<h3 id="51-soft-labels-default">5.1 Soft Labels (Default)<a class="headerlink" href="#51-soft-labels-default" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Standard Hinton knowledge distillation via soft label targets.</p>
+<p>The teacher's probability distribution over classes contains richer information than the hard one-hot label. A temperature parameter <code>T</code> smooths the distribution: high <code>T</code> flattens it (more information transfer), low <code>T</code> sharpens it (closer to hard labels).</p>
+<h4 id="loss-function">Loss Function<a class="headerlink" href="#loss-function" title="Permanent link">¶</a></h4>
+<p>$$\mathcal{L} = \alpha \cdot T^2 \cdot \text{KL}(p_\text{teacher}^{(T)} | p_\text{student}^{(T)}) + (1 - \alpha) \cdot \text{CE}(y_\text{hard}, p_\text{student})$$</p>
+<ul>
+<li><code>alpha</code> controls the balance between soft-label loss and hard-label loss.</li>
+<li>The <code>T²</code> scaling factor corrects for gradient magnitude (Hinton et al., 2015).</li>
+</ul>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>3.0</code></td>
+<td>Base temperature <code>T</code> for soft label smoothing</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td>Soft-label loss weight (1-alpha = hard-label loss weight)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use">When To Use<a class="headerlink" href="#when-to-use" title="Permanent link">¶</a></h4>
+<p>Default for all classification distillation tasks. Works with any GBDT or MLP student.</p>
+<hr/>
+<h3 id="52-adaptive-temperature">5.2 Adaptive Temperature<a class="headerlink" href="#52-adaptive-temperature" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Per-sample temperature scaling based on teacher entropy.</p>
+<p>Instead of a single global <code>T</code>, each training sample gets a temperature proportional to the teacher's local uncertainty (entropy). High-entropy samples (teacher unsure) get a higher temperature, preventing oversmoothing on already-uncertain samples.</p>
+<h4 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code>entropy(x) = -Σ p_i log(p_i)
+
+T_adaptive(x) = T_base × (1 + β × (entropy(x) - mean_entropy) / std_entropy)
+</code></pre></div>
+<p>The resulting per-sample temperatures are passed to the loss function, replacing the global <code>T</code>.</p>
+<h4 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>adaptive_temperature</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable adaptive per-sample temperature</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>3.0</code></td>
+<td>Base temperature used as anchor</td>
+</tr>
+</tbody>
+</table>
+<h4 id="attributes-after-fit">Attributes After Fit<a class="headerlink" href="#attributes-after-fit" title="Permanent link">¶</a></h4>
+<ul>
+<li><code>distiller.soft_labels_</code> — the collected soft label matrix <code>(n, n_classes)</code>.</li>
+</ul>
+<h4 id="when-to-use_1">When To Use<a class="headerlink" href="#when-to-use_1" title="Permanent link">¶</a></h4>
+<p>Recommended when the teacher has uneven confidence across samples — common with small datasets or near-boundary regions. Enabled by default alongside <code>confidence_weighting</code>.</p>
+<hr/>
+<h3 id="53-confidence-weighting">5.3 Confidence Weighting<a class="headerlink" href="#53-confidence-weighting" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Bell-shaped sample weighting that upweights high-confidence teacher predictions.</p>
+<p>Each training sample receives a scalar weight based on the teacher's peak probability (max soft label value). Samples where the teacher is most confident receive higher weight; ambiguous near-boundary samples receive lower weight. This prevents noisy, uncertain teacher predictions from dominating the student's training signal.</p>
+<h4 id="how-it-works_1">How It Works<a class="headerlink" href="#how-it-works_1" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code>confidence(x) = max(soft_labels(x))
+weight(x) = bell_curve(confidence(x))  # peaks at high confidence
+</code></pre></div>
+<p>Weights are passed as <code>sample_weight</code> to the student's <code>fit()</code> call.</p>
+<h4 id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>confidence_weighting</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable bell-shaped confidence weighting</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use_2">When To Use<a class="headerlink" href="#when-to-use_2" title="Permanent link">¶</a></h4>
+<p>Recommended for small datasets where teacher errors have an outsized effect. Enabled by default. Can be disabled if teacher quality is high and confidence is uniformly distributed.</p>
+<hr/>
+<h3 id="54-k-fold-cross-prediction">5.4 K-Fold Cross-Prediction<a class="headerlink" href="#54-k-fold-cross-prediction" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Out-of-fold soft label generation to prevent ICL identity leakage.</p>
+<p>In-context learning models (TabPFN, TabICLv2) condition their predictions on the training set passed at inference time. If the full training set is passed and the model labels <em>its own</em> training examples, the soft labels are artificially sharp and overconfident — inflated by memorization rather than generalization. K-fold cross-prediction eliminates this by ensuring each sample's soft label is generated by a model that was <strong>not</strong> trained on it.</p>
+<h4 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">¶</a></h4>
+<ol>
+<li>Split training data into <code>n_folds</code> stratified folds.</li>
+<li>For each fold: fit a fresh teacher on the other <code>n_folds - 1</code> folds, predict on the held-out fold.</li>
+<li>Assemble out-of-fold predictions into a full soft-label array <code>(n, n_classes)</code>.</li>
+<li>Student trains on these OOF soft labels.</li>
+</ol>
+<h4 id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Number of CV folds for cross-prediction</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use_3">When To Use<a class="headerlink" href="#when-to-use_3" title="Permanent link">¶</a></h4>
+<p><strong>Always enabled for inference-mode ICL teachers.</strong> Automatically skipped for fine-tuned teachers (where the model doesn't memorize training data via in-context conditioning). Increasing <code>n_folds</code> reduces variance in soft labels at the cost of <code>n_folds</code> teacher fits.</p>
+<hr/>
+<h3 id="55-multi-teacher-distillation">5.5 Multi-Teacher Distillation<a class="headerlink" href="#55-multi-teacher-distillation" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Average soft labels across multiple TFM teachers before training the student.</p>
+<p>When multiple teachers are provided, each teacher runs its own k-fold cross-prediction independently. The resulting soft label matrices are averaged element-wise before the student trains. This produces better-calibrated, lower-variance soft targets than any single teacher alone.</p>
+<h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">¶</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">distiller</span> <span class="o">=</span> <span class="n">TabDistiller</span><span class="p">(</span>
+    <span class="n">teachers</span><span class="o">=</span><span class="p">[</span><span class="s2">"TabDPT"</span><span class="p">,</span> <span class="s2">"TabICLv2"</span><span class="p">],</span>
+    <span class="n">student</span><span class="o">=</span><span class="s2">"lgbm"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">n_folds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">distiller</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>teachers</code></td>
+<td>str or list[str]</td>
+<td><code>"TabDPT"</code></td>
+<td>Single teacher name or list for multi-teacher</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use_4">When To Use<a class="headerlink" href="#when-to-use_4" title="Permanent link">¶</a></h4>
+<p>When two or more TFMs are available and their predictions are complementary. Compute cost scales linearly with the number of teachers × <code>n_folds</code>.</p>
+<hr/>
+<h3 id="56-data-augmentation">5.6 Data Augmentation<a class="headerlink" href="#56-data-augmentation" title="Permanent link">¶</a></h3>
+<p><strong>Strategy:</strong> Gaussian noise augmentation to expand the soft-label training set.</p>
+<p>If <code>augment_factor</code> is set, the distiller creates <code>augment_factor × n</code> synthetic samples by adding small Gaussian noise (scaled to each feature's standard deviation) to randomly sampled training points. Soft labels and sample weights/temperatures for augmented samples are copied from their source samples.</p>
+<h4 id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>augment_factor</code></td>
+<td>float or None</td>
+<td><code>None</code></td>
+<td>Fraction of original dataset to augment (e.g. <code>0.5</code> adds 50% more samples)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use_5">When To Use<a class="headerlink" href="#when-to-use_5" title="Permanent link">¶</a></h4>
+<p>Primarily useful for very small datasets (&lt;200 samples). Disabled by default. Note: augmentation occurs <em>after</em> soft label collection, so teacher predictions are not re-run on synthetic samples.</p>
+<hr/>
+<h2 id="6-advanced-strategies">6. Advanced Strategies<a class="headerlink" href="#6-advanced-strategies" title="Permanent link">¶</a></h2>
+<p>Available via <code>tabtune.distillation.strategies</code>:</p>
+<h3 id="61-cross-validation-distillation">6.1 Cross-Validation Distillation<a class="headerlink" href="#61-cross-validation-distillation" title="Permanent link">¶</a></h3>
+<p>Standalone function for generating OOF soft labels without instantiating a full <code>TabDistiller</code>. Useful when you want to experiment with different student architectures on pre-computed soft labels.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_validate_soft_labels</span>
+
+<span class="n">soft_labels</span> <span class="o">=</span> <span class="n">cross_validate_soft_labels</span><span class="p">(</span>
+    <span class="n">teacher_name</span><span class="o">=</span><span class="s2">"TabDPT"</span><span class="p">,</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">n_folds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># soft_labels: ndarray (n, n_classes) — OOF predictions for every training sample</span>
+</code></pre></div>
+<hr/>
+<h3 id="62-progressive-curriculum-distillation">6.2 Progressive / Curriculum Distillation<a class="headerlink" href="#62-progressive-curriculum-distillation" title="Permanent link">¶</a></h3>
+<p>Curriculum-based training: student first learns on the teacher's most confident predictions, then progressively expands to harder, more ambiguous samples.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">progressive_distillation</span>
+
+<span class="c1"># After collecting soft labels:</span>
+<span class="n">student</span> <span class="o">=</span> <span class="n">progressive_distillation</span><span class="p">(</span>
+    <span class="n">distiller</span><span class="o">=</span><span class="n">distiller</span><span class="p">,</span>
+    <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">soft_labels</span><span class="o">=</span><span class="n">soft_labels</span><span class="p">,</span>
+    <span class="n">n_stages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">confidence_percentiles</span><span class="o">=</span><span class="p">[</span><span class="mf">33.0</span><span class="p">,</span> <span class="mf">66.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Stage breakdown (3 stages, default):</strong>
+1. Top 33% most confident samples only
+2. Top 66% — includes medium-confidence samples
+3. Full dataset</p>
+<h4 id="when-to-use_6">When To Use<a class="headerlink" href="#when-to-use_6" title="Permanent link">¶</a></h4>
+<p>Useful for MLP students on datasets with significant class imbalance or ambiguous boundary regions. GBDT students are less sensitive to curriculum ordering due to boosting's built-in focus on hard samples.</p>
+<hr/>
+<h3 id="63-probability-calibration">6.3 Probability Calibration<a class="headerlink" href="#63-probability-calibration" title="Permanent link">¶</a></h3>
+<p>Post-hoc calibration of the distilled student's output probabilities via temperature scaling (Platt) or isotonic regression.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibrate_student</span>
+
+<span class="c1"># Requires a held-out calibration split</span>
+<span class="n">T_star</span> <span class="o">=</span> <span class="n">calibrate_student</span><span class="p">(</span>
+    <span class="n">distiller</span><span class="o">=</span><span class="n">distiller</span><span class="p">,</span>
+    <span class="n">X_cal</span><span class="o">=</span><span class="n">X_cal</span><span class="p">,</span>
+    <span class="n">y_cal</span><span class="o">=</span><span class="n">y_cal</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">"temperature"</span><span class="p">,</span>   <span class="c1"># or "isotonic"</span>
+<span class="p">)</span>
+<span class="c1"># T_star: optimal temperature (stored on student for subsequent predict_proba calls)</span>
+</code></pre></div>
+<h4 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+<th>When To Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"temperature"</code></td>
+<td>Learn scalar <code>T*</code> minimising NLL on calibration set via L-BFGS-B</td>
+<td>General purpose; low data</td>
+</tr>
+<tr>
+<td><code>"isotonic"</code></td>
+<td>Per-class isotonic regression calibration</td>
+<td>Larger calibration sets (&gt;500 samples)</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h3 id="64-self-distillation">6.4 Self-Distillation<a class="headerlink" href="#64-self-distillation" title="Permanent link">¶</a></h3>
+<p>Train a model on its own soft predictions for additional generalization improvement — no larger teacher required.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.distillation.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">self_distill</span>
+
+<span class="n">distiller</span> <span class="o">=</span> <span class="n">self_distill</span><span class="p">(</span>
+    <span class="n">teacher_name</span><span class="o">=</span><span class="s2">"TabDPT"</span><span class="p">,</span>
+    <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">n_rounds</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">student_type</span><span class="o">=</span><span class="s2">"lgbm"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Round 1:</strong> Standard distillation from TFM teacher.<br/>
+<strong>Round 2:</strong> Previous student's predictions used as soft targets for a fresh student.</p>
+<hr/>
+<h2 id="7-tabdistiller-api-reference">7. TabDistiller API Reference<a class="headerlink" href="#7-tabdistiller-api-reference" title="Permanent link">¶</a></h2>
+<h3 id="constructor">Constructor<a class="headerlink" href="#constructor" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">TabDistiller</span><span class="p">(</span>
+    <span class="n">teachers</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"TabDPT"</span><span class="p">,</span>
+    <span class="n">student</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lgbm"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">n_folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">adaptive_temperature</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">confidence_weighting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">augment_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">student_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">teacher_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="teacher-configuration">Teacher Configuration<a class="headerlink" href="#teacher-configuration" title="Permanent link">¶</a></h3>
+<p><code>teachers</code> accepts a string, list of strings, or list of pre-fitted <code>TabularPipeline</code> objects:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Single teacher</span>
+<span class="n">TabDistiller</span><span class="p">(</span><span class="n">teachers</span><span class="o">=</span><span class="s2">"TabDPT"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># Multi-teacher (soft labels averaged)</span>
+<span class="n">TabDistiller</span><span class="p">(</span><span class="n">teachers</span><span class="o">=</span><span class="p">[</span><span class="s2">"TabDPT"</span><span class="p">,</span> <span class="s2">"TabICLv2"</span><span class="p">],</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># Pre-fitted pipelines (skips teacher fit step)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">TabDistiller</span><span class="p">(</span><span class="n">teachers</span><span class="o">=</span><span class="p">[</span><span class="n">pipe</span><span class="p">],</span> <span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="student-backends">Student Backends<a class="headerlink" href="#student-backends" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>student</code> value</th>
+<th>Backend</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"lgbm"</code></td>
+<td>LightGBM</td>
+<td>Recommended default: fast, robust, near-teacher accuracy</td>
+</tr>
+<tr>
+<td><code>"xgb"</code> / <code>"xgboost"</code></td>
+<td>XGBoost</td>
+<td>Strong alternative; slightly slower than LightGBM</td>
+</tr>
+<tr>
+<td><code>"catboost"</code> / <code>"cb"</code></td>
+<td>CatBoost</td>
+<td>Best on datasets with categorical features</td>
+</tr>
+<tr>
+<td><code>"mlp"</code></td>
+<td>PyTorch MLP</td>
+<td>Use only when neural student is required; collapses on small/hard datasets</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fit(X_train, y_train)</code></td>
+<td><code>self</code></td>
+<td>Fit teacher(s), collect soft labels, train student</td>
+</tr>
+<tr>
+<td><code>predict(X_test)</code></td>
+<td><code>ndarray (n,)</code></td>
+<td>Student class predictions or regression values</td>
+</tr>
+<tr>
+<td><code>predict_proba(X_test)</code></td>
+<td><code>ndarray (n, k)</code></td>
+<td>Student probability matrix (classification only)</td>
+</tr>
+<tr>
+<td><code>evaluate(X_test, y_test)</code></td>
+<td><code>dict</code></td>
+<td>Student metrics only</td>
+</tr>
+<tr>
+<td><code>compare(X_test, y_test)</code></td>
+<td><code>dict</code></td>
+<td>Student + teacher metrics + retention percentage</td>
+</tr>
+<tr>
+<td><code>save(path)</code></td>
+<td>—</td>
+<td>Serialize student to disk (teacher stripped)</td>
+</tr>
+<tr>
+<td><code>TabDistiller.load(path)</code></td>
+<td><code>TabDistiller</code></td>
+<td>Restore fitted distiller from disk</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fitted-attributes">Fitted Attributes<a class="headerlink" href="#fitted-attributes" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>teacher_pipelines_</code></td>
+<td>list</td>
+<td>Fitted teacher <code>TabularPipeline</code> objects</td>
+</tr>
+<tr>
+<td><code>student_</code></td>
+<td>object</td>
+<td>Fitted student (<code>MLPStudent</code> or <code>GBDTStudent</code>)</td>
+</tr>
+<tr>
+<td><code>soft_labels_</code></td>
+<td>ndarray</td>
+<td>Collected soft labels <code>(n, n_classes)</code></td>
+</tr>
+<tr>
+<td><code>n_classes_</code></td>
+<td>int</td>
+<td>Number of classes (classification only)</td>
+</tr>
+<tr>
+<td><code>label_encoder_</code></td>
+<td>LabelEncoder</td>
+<td>Extracted from teacher pipeline</td>
+</tr>
+<tr>
+<td><code>_fit_time</code></td>
+<td>float</td>
+<td>Wall-clock time of <code>fit()</code> in seconds</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="8-strategy-selection-guide">8. Strategy Selection Guide<a class="headerlink" href="#8-strategy-selection-guide" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Best For</th>
+<th>Compute</th>
+<th>Typical Retention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Soft Labels + Adaptive T</strong></td>
+<td>General purpose; recommended default</td>
+<td>Medium (n_folds × teacher fits)</td>
+<td>97–99%</td>
+</tr>
+<tr>
+<td><strong>Soft Labels (fixed T)</strong></td>
+<td>When adaptive T adds no benefit; fast iteration</td>
+<td>Medium</td>
+<td>96–98%</td>
+</tr>
+<tr>
+<td><strong>Multi-Teacher</strong></td>
+<td>Two+ available TFMs; noisy datasets</td>
+<td>High (n_teachers × n_folds)</td>
+<td>98–99%</td>
+</tr>
+<tr>
+<td><strong>Confidence Weighting</strong></td>
+<td>Small datasets; high teacher variance</td>
+<td>+0 overhead</td>
+<td>+1–2% on hard samples</td>
+</tr>
+<tr>
+<td><strong>Progressive/Curriculum</strong></td>
+<td>Large datasets; MLP students; class imbalance</td>
+<td>Medium + staging overhead</td>
+<td>+1–3% on boundary samples</td>
+</tr>
+<tr>
+<td><strong>Self-Distillation</strong></td>
+<td>No larger teacher available</td>
+<td>Low (student-only)</td>
+<td>+1–2% generalisation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="student-selection">Student Selection<a class="headerlink" href="#student-selection" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>Need fast inference + near-teacher accuracy?
+├── Tabular, mixed numeric/categorical → lgbm (default)
+├── Pure numeric, regularisation needed → xgb
+├── Significant categorical features → catboost
+└── Must be neural / downstream fine-tuning → mlp
+    └── Note: MLP collapses on small (&lt;300 samples) or hard datasets.
+        Use GBDT students for robustness.
+</code></pre></div>
+<hr/>
+<h2 id="9-save-deployment">9. Save &amp; Deployment<a class="headerlink" href="#9-save-deployment" title="Permanent link">¶</a></h2>
+<p>After distillation, <code>save()</code> strips the teacher and serialises only the student. The loaded student runs inference with no TFM dependency — suitable for production environments without GPU.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save (teacher stripped)</span>
+<span class="n">distiller</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"student_lgbm_v1.joblib"</span><span class="p">)</span>
+
+<span class="c1"># Reload &amp; predict — no TFM dependency at runtime</span>
+<span class="n">distiller_prod</span> <span class="o">=</span> <span class="n">TabDistiller</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"student_lgbm_v1.joblib"</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">distiller_prod</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">distiller_prod</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Typical file sizes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Serialised Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LightGBM</td>
+<td>~50–500 KB</td>
+</tr>
+<tr>
+<td>XGBoost</td>
+<td>~100–800 KB</td>
+</tr>
+<tr>
+<td>CatBoost</td>
+<td>~200 KB – 2 MB</td>
+</tr>
+<tr>
+<td>MLP</td>
+<td>~1–5 MB</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="10-error-handling-logging">10. Error Handling &amp; Logging<a class="headerlink" href="#10-error-handling-logging" title="Permanent link">¶</a></h2>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">¶</a></h3>
+<p>The module uses Python's <code>logging</code> module with logger name <code>tabtune.distillation</code>. Set log level for detailed output:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="error-handling-design">Error Handling Design<a class="headerlink" href="#error-handling-design" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Invalid <code>student</code> string</strong> raises <code>ValueError</code> with supported values listed.</li>
+<li><strong><code>predict()</code> / <code>predict_proba()</code> before <code>fit()</code></strong> raises <code>RuntimeError</code>.</li>
+<li><strong><code>predict_proba()</code> on regression</strong> raises <code>ValueError</code>.</li>
+<li><strong><code>StratifiedKFold</code> failure</strong> (too few samples per class) falls back automatically to <code>KFold</code> with a logged warning.</li>
+<li><strong>Teacher <code>predict_proba()</code> failure</strong> during <code>compare()</code> is caught per-teacher — one failed teacher does not abort the comparison; error is logged and <code>{"error": str(e)}</code> returned for that teacher.</li>
+<li><strong>Soft label normalisation</strong> — TabDPT floating-point bug produces rows that don't sum to 1. The distiller detects and renormalises automatically before student training.</li>
+<li><strong>Label encoder extraction</strong> — supports TabPFN, TabICL, TabICLv2, TabDPT, Mitra, OrionMSP, OrionBiX, ContextTab, Limix. Unsupported models log a warning and continue.</li>
+</ul>
+<h3 id="verbose-logging-output">Verbose Logging Output<a class="headerlink" href="#verbose-logging-output" title="Permanent link">¶</a></h3>
+<p>When <code>logging.INFO</code> is set, <code>TabDistiller</code> logs:
+- Teacher fit start/complete per teacher
+- K-fold progress (<code>K-fold 1/5 complete</code>, etc.)
+- Soft labels shape after collection
+- Adaptive temperature statistics (<code>mean</code>, <code>std</code>)
+- Confidence weight statistics
+- Augmentation summary (if enabled)
+- Distillation total time</p>
+<hr/>
+<h2 id="11-testing">11. Testing<a class="headerlink" href="#11-testing" title="Permanent link">¶</a></h2>
+<h3 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Strategy unit tests (no GPU needed):</span>
+pytest<span class="w"> </span>tests/test_distillation.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">"TestDistillerUnit or TestSoftLabels or TestGBDTStudent"</span><span class="w"> </span>-v
+
+<span class="c1"># Full integration tests (GPU + TabTune installed):</span>
+pytest<span class="w"> </span>tests/test_distillation.py::TestFullDistillation<span class="w"> </span>-v
+
+<span class="c1"># Quick smoke test:</span>
+python<span class="w"> </span>tests/test_distillation.py
+</code></pre></div>
+<h3 id="test-coverage">Test Coverage<a class="headerlink" href="#test-coverage" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Test Class</th>
+<th>What It Tests</th>
+<th>GPU Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TestDistillerUnit</code></td>
+<td>Constructor, param validation, <code>_check_fitted</code> guard, student routing</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestSoftLabels</code></td>
+<td>K-fold OOF shape, normalisation fix, direct prediction path</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestGBDTStudent</code></td>
+<td>lgbm / xgb / catboost backends, fit/predict, classification + regression</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestMLPStudent</code></td>
+<td>Fit/predict, early stopping, soft-label loss</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestAdvancedStrategies</code></td>
+<td><code>cross_validate_soft_labels</code>, <code>calibrate_student</code> (T + isotonic), <code>progressive_distillation</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestSaveLoad</code></td>
+<td><code>save()</code> / <code>load()</code> roundtrip, student-only serialisation</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>TestFullDistillation</code></td>
+<td>End-to-end with real TabTune pipelines: TabPFN → lgbm/xgb, multi-teacher</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="12-references">12. References<a class="headerlink" href="#12-references" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Paper</th>
+<th>Relevance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Hinton, G. et al. (2015). <em>Distilling the Knowledge in a Neural Network.</em> NeurIPS Workshop.</td>
+<td>Soft-label KD loss, temperature scaling, <code>T²</code> gradient correction</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Hollmann, N. et al. (2023). <em>TabPFN: A Transformer That Solves Small Tabular Classification Problems in a Second.</em> ICLR.</td>
+<td>Primary teacher model</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ye, H. et al. (2024). <em>TabICL: In-Context Learning for Tabular Data.</em> arXiv.</td>
+<td>TabICLv2 teacher; ICL identity leakage motivation</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tanna, A. et al. (2025). <em>TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models.</em> arXiv:2511.02802.</td>
+<td>TabTune framework</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Guo, C. et al. (2017). <em>On Calibration of Modern Neural Networks.</em> ICML.</td>
+<td>Temperature calibration (<code>calibrate_student</code>)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Xu, Z. et al. (2020). <em>Data-Free Knowledge Distillation for Object Detection.</em> CVPR.</td>
+<td>Self-distillation motivation</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Bengio, Y. et al. (2009). <em>Curriculum Learning.</em> ICML.</td>
+<td>Progressive distillation curriculum design</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
