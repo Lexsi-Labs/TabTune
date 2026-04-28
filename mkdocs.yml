@@ -33,7 +33,9 @@ nav:
       - Saving and Loading: user-guide/saving-loading.md
       - Model Comparison: user-guide/leaderboard.md
       - Troubleshooting: user-guide/troubleshooting.md
-  
+      - Ensembling Strategies: user-guide/ensembling.md
+      - Distillation: user-guide/distillation.md
+
   - Models:
       - Overview: models/overview.md
       - TabPFN: models/tabpfn.md
@@ -47,8 +49,8 @@ nav:
       - Limix: models/limix.md
 
   - Regression:
-      - Regression Overview: regression/regression.md
-      - Regression Data Processing: regression/regression_data_processing.md
+      - Regression Overview: framework/regression/regression.md
+      - Regression Data Processing: framework/regression/regression_data_processing.md
     
 
   - Advanced Topics:
@@ -113,5 +115,4 @@ plugins:
         python:
           options:
             show_source: true
-
 
