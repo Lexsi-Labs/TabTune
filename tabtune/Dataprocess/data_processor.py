@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import logging
+from typing import Any, Dict, List, Optional, Tuple, Union
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer, KNNImputer
@@ -29,18 +30,54 @@ from .regression.tabdpt_processor import TabDPTRegressionProcessor
 from .regression.mitra_processor import MitraRegressionProcessor
 from .regression.limix_processor import LimixRegressionProcessor
 
+
 class DataProcessor(BaseEstimator, TransformerMixin):
+    """The complete Data Preparation Engine for the TabTune library.
+
+    Integrates a full suite of standard preprocessing tools (imputation,
+    categorical encoding, scaling, resampling, and feature selection) with
+    custom, model-specific logic.
     """
-    The complete Data Preparation Engine for the TabTune library. Integrates
-    a full suite of standard preprocessing tools with custom, model-specific
-    logic.
-    """
-    def __init__(self, model_name=None, override_types=None, 
-                 imputation_strategy='mean', categorical_encoding='onehot', 
-                 scaling_strategy='standard', resampling_strategy=None,
-                 feature_selection_strategy=None, feature_selection_k=10,
-                 model_params=None, task_type='classification'):
-        
+
+    def __init__(
+        self,
+        model_name: Optional[str] = None,
+        override_types: Optional[Dict[str, Any]] = None,
+        imputation_strategy: str = 'mean',
+        categorical_encoding: str = 'onehot',
+        scaling_strategy: str = 'standard',
+        resampling_strategy: Optional[str] = None,
+        feature_selection_strategy: Optional[str] = None,
+        feature_selection_k: int = 10,
+        model_params: Optional[Dict[str, Any]] = None,
+        task_type: str = 'classification'
+    ) -> None:
+        """Initializes the DataProcessor with configuration settings.
+
+        Args:
+            model_name (str, optional): The name of the tabular foundation model (e.g., 'TabPFN').
+                Defaults to None.
+            override_types (dict, optional): Manual mapping of columns to feature types.
+                Defaults to None.
+            imputation_strategy (str): Strategy for missing value imputation ('mean', 'median',
+                'iterative', 'knn', 'none'). Defaults to 'mean'.
+            categorical_encoding (str): Strategy for categorical encoding ('onehot', 'ordinal',
+                'target', 'hashing', 'binary', 'none'). Defaults to 'onehot'.
+            scaling_strategy (str): Strategy for numerical feature scaling ('standard', 'minmax',
+                'robust', 'power_transform', 'none'). Defaults to 'standard'.
+            resampling_strategy (str, optional): Resampling strategy for handling imbalanced classes
+                ('smote', 'random_over', 'random_under', 'tomek', 'kmeans', 'knn', 'none').
+                Defaults to None.
+            feature_selection_strategy (str, optional): Feature selection strategy ('variance',
+                'select_k_best_anova', 'select_k_best_chi2', 'correlation', 'none').
+                Defaults to None.
+            feature_selection_k (int): Number of features to select if utilizing SelectKBest strategy.
+                Defaults to 10.
+            model_params (dict, optional): Parameters passed to downstream models. Used to infer
+                regression attributes or specific configurations. Defaults to None.
+            task_type (str): Type of ML task, either 'classification' or 'regression'.
+                Defaults to 'classification'.
+        """
         self.model_name = model_name
         self.task_type = task_type
         self.override_types = override_types
@@ -55,22 +92,22 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self._set_model_aware_defaults()
         
         # --- Internal State Attributes ---
-        self.column_types_ = {}
-        self._is_fitted = False
-        self.custom_preprocessor_ = None
-        self.imputer_ = None
-        self.scaler_ = None
-        self.encoder_ = None
-        self.resampler_ = None
-        self.selector_ = None
-        self.label_encoder_ = None
-        self.regression_processor_ = None
-        self.feature_names_ = None # Added for tracking feature names
-        self._correlation_cols_to_drop = []
-        self.original_cols_ = None
-        self.processing_summary_ = {}
+        self.column_types_: Dict[str, Any] = {}
+        self._is_fitted: bool = False
+        self.custom_preprocessor_: Optional[Any] = None
+        self.imputer_: Optional[Any] = None
+        self.scaler_: Optional[Any] = None
+        self.encoder_: Optional[Any] = None
+        self.resampler_: Optional[Any] = None
+        self.selector_: Optional[Any] = None
+        self.label_encoder_: Optional[Any] = None
+        self.regression_processor_: Optional[Any] = None
+        self.feature_names_: Optional[List[str]] = None
+        self._correlation_cols_to_drop: List[str] = []
+        self.original_cols_: Optional[List[str]] = None
+        self.processing_summary_: Dict[str, Any] = {}
 
-    def _set_model_aware_defaults(self):
+    def _set_model_aware_defaults(self) -> None:
         """Sets default strategies based on the model_name to ensure compatibility."""
         if self.model_name:
             model_defaults = {
@@ -85,8 +122,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'Limix': {'categorical_encoding': 'limix_special'},
                 'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
                 'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
-                'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
-                
             }
             config = model_defaults.get(self.model_name)
             if config:
@@ -94,8 +129,12 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 self.categorical_encoding = config.get('categorical_encoding', self.categorical_encoding)
                 self.scaling_strategy = config.get('scaling_strategy', self.scaling_strategy)
 
-    def _get_custom_preprocessor(self):
-        """Factory method to return the correct custom preprocessor instance."""
+    def _get_custom_preprocessor(self) -> Optional[Any]:
+        """Factory method to return the correct custom preprocessor instance.
+
+        Returns:
+            Optional[Any]: A model-specific preprocessor instance or None if using standard steps.
+        """
         special_encoders = {
             'tabpfn_special': TabPFNPreprocessor,
             'tabicl_special': TabICLPreprocessor,
@@ -128,11 +167,11 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             return PreprocessorClass()
         return None
 
-    def _get_regression_processor(self):
+    def _get_regression_processor(self) -> Any:
         """Factory method to return the correct regression processor instance.
-        
-        Note: Most models handle target normalization internally, so default is 'none'.
-        Only override if explicitly specified in model_params.
+
+        Returns:
+            Any: A RegressionDataProcessor or a model-specific regression wrapper processor.
         """
         # Get target_scaling from model_params, but use model-specific defaults if not specified
         target_scaling = self.model_params.get('target_scaling', None)
@@ -174,8 +213,24 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             target_scaling = 'standard'
         return RegressionDataProcessor(target_scaling_strategy=target_scaling)
 
+    def fit(self, X: pd.DataFrame, y: Optional[Union[pd.Series, np.ndarray]] = None) -> "DataProcessor":
+        """Fits all preprocessing steps on the training features X and optional target y.
 
-    def fit(self, X, y=None):
+        Args:
+            X (pd.DataFrame): Training features of shape (n_samples, n_features).
+            y (pd.Series or np.ndarray, optional): Training targets. Defaults to None.
+
+        Returns:
+            DataProcessor: The fitted instance of the DataProcessor.
+
+        Raises:
+            TypeError: If X is not a pandas DataFrame or if y is not a pandas Series or numpy array.
+        """
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(f"Input X must be a pandas.DataFrame, but got {type(X).__name__}")
+        if y is not None and not isinstance(y, (pd.Series, np.ndarray)):
+            raise TypeError(f"Input y must be a pandas.Series or numpy.ndarray, but got {type(y).__name__}")
+
         X_fit = X.copy()
         self.original_cols_ = X_fit.columns.tolist()
         y_fit = y.copy() if y is not None else None
@@ -192,7 +247,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             # Log summary for standard path
             self.processing_summary_['strategy'] = 'standard'
             self.processing_summary_['steps'] = {}
-            self._infer_column_types(X_fit)
             self._infer_column_types(X_fit)
         
         # Handle target encoding/processing (for both custom and standard preprocessors)
@@ -216,10 +270,28 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         logger.info("[DataProcessor] All components for pipeline have been fitted.")
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X: pd.DataFrame, y: Optional[Union[pd.Series, np.ndarray]] = None) -> Any:
+        """Transforms features X and target y using the fitted preprocessing steps.
+
+        Args:
+            X (pd.DataFrame): Features to transform.
+            y (pd.Series or np.ndarray, optional): Target to transform. Defaults to None.
+
+        Returns:
+            Any: Transformed features DataFrame, or a tuple of (transformed features, transformed target)
+                if y is provided.
+
+        Raises:
+            RuntimeError: If the DataProcessor has not been fitted yet.
+            TypeError: If X is not a pandas DataFrame or if y is not a pandas Series or numpy array.
+        """
         if not self._is_fitted:
             raise RuntimeError("Must call fit() before calling transform().")
-        
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(f"Input X must be a pandas.DataFrame, but got {type(X).__name__}")
+        if y is not None and not isinstance(y, (pd.Series, np.ndarray)):
+            raise TypeError(f"Input y must be a pandas.Series or numpy.ndarray, but got {type(y).__name__}")
+
         X_transformed = X.copy()
         
         if self.custom_preprocessor_:
@@ -240,7 +312,25 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         
         return X_transformed
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: pd.DataFrame, y: Optional[Union[pd.Series, np.ndarray]] = None) -> Any:
+        """Fits the preprocessors and transforms the data in a single step.
+
+        Args:
+            X (pd.DataFrame): Training features.
+            y (pd.Series or np.ndarray, optional): Training targets. Defaults to None.
+
+        Returns:
+            Any: Transformed features DataFrame, or a tuple of (transformed features, transformed target)
+                if y is provided.
+
+        Raises:
+            TypeError: If X is not a pandas DataFrame or if y is not a pandas Series or numpy array.
+        """
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(f"Input X must be a pandas.DataFrame, but got {type(X).__name__}")
+        if y is not None and not isinstance(y, (pd.Series, np.ndarray)):
+            raise TypeError(f"Input y must be a pandas.Series or numpy.ndarray, but got {type(y).__name__}")
+
         self.fit(X, y)
         
         if self.custom_preprocessor_:
@@ -257,9 +347,14 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         
         return X_transformed, y_transformed
     
-    def get_processing_summary(self):
-        """
-        Returns a formatted string summarizing the data processing steps.
+    def get_processing_summary(self) -> str:
+        """Returns a formatted string summarizing the data processing steps.
+
+        Returns:
+            str: A multi-line string containing a clean report of standard or custom preprocessing.
+
+        Raises:
+            RuntimeError: If the DataProcessor has not been fitted yet.
         """
         if not self._is_fitted:
             logger.warning("[DataProcessor] DataProcessor has not been fitted yet.")
@@ -275,12 +370,15 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 summary_lines.append("  - No detailed summary available for this preprocessor.")
             else:
                 summary_lines.append("\n  Applied Steps:")
-                # --- NEW: Detailed loop for rich summary ---
                 for i, (step_name, step_info) in enumerate(steps.items()):
                     summary_lines.append(f"    {i+1}. {step_name}:")
-                    summary_lines.append(f"       - {step_info['description']}")
-                    for detail_line in step_info.get('details', []):
-                        summary_lines.append(f"       - {detail_line}")
+                    if isinstance(step_info, dict):
+                        if 'description' in step_info:
+                            summary_lines.append(f"       - {step_info['description']}")
+                        for detail_line in step_info.get('details', []):
+                            summary_lines.append(f"       - {detail_line}")
+                    else:
+                        summary_lines.append(f"       - {step_info}")
                 
         elif self.processing_summary_.get('strategy') == 'standard':
             summary_lines.append("\n[Standard Preprocessing Pipeline]")
@@ -329,11 +427,22 @@ class DataProcessor(BaseEstimator, TransformerMixin):
 
         return "\n".join(summary_lines)
 
-    def _infer_column_types(self, X):
+    def _infer_column_types(self, X: pd.DataFrame) -> None:
+        """Infers feature columns as numerical or categorical based on data type.
+
+        Args:
+            X (pd.DataFrame): Input features to infer types from.
+        """
         self.numerical_cols_ = X.select_dtypes(include=np.number).columns.tolist()
         self.categorical_cols_ = X.select_dtypes(exclude=np.number).columns.tolist()
 
-    def _fit_standard_components(self, X, y):
+    def _fit_standard_components(self, X: pd.DataFrame, y: Optional[Union[pd.Series, np.ndarray]]) -> None:
+        """Fits standard scikit-learn preprocessing components (imputer, encoder, scaler).
+
+        Args:
+            X (pd.DataFrame): Features DataFrame.
+            y (pd.Series or np.ndarray, optional): Target data.
+        """
         if self.imputation_strategy != 'none' and self.numerical_cols_:
             imputer_map = {'mean': SimpleImputer(strategy='mean'), 'median': SimpleImputer(strategy='median'), 'iterative': IterativeImputer(random_state=42), 'knn': KNNImputer()}
             self.imputer_ = imputer_map.get(self.imputation_strategy, SimpleImputer(strategy='mean'))
@@ -360,7 +469,15 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         if self.feature_selection_strategy:
             self._fit_feature_selector(X_scaled, y)
 
-    def _apply_standard_transforms(self, X):
+    def _apply_standard_transforms(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Applies standard fitted transforms (imputer, encoder, scaler, feature selection) to X.
+
+        Args:
+            X (pd.DataFrame): Input features to transform.
+
+        Returns:
+            pd.DataFrame: Transformed features.
+        """
         X_transformed = X.copy()
         if self.imputer_ and self.numerical_cols_:
             X_transformed[self.numerical_cols_] = self.imputer_.transform(X_transformed[self.numerical_cols_])
@@ -374,7 +491,15 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             
         return X_transformed
         
-    def _apply_encoding(self, X):
+    def _apply_encoding(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Encodes categorical columns using the fitted categorical encoder.
+
+        Args:
+            X (pd.DataFrame): Input features.
+
+        Returns:
+            pd.DataFrame: Features with encoded categorical columns and dropped original columns.
+        """
         if not self.encoder_ or not self.categorical_cols_: return X
         encoded_data = self.encoder_.transform(X[self.categorical_cols_])
         try:
@@ -385,13 +510,28 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         X_transformed = X.drop(columns=self.categorical_cols_)
         return pd.concat([X_transformed, encoded_df], axis=1)
 
-    def _apply_scaling(self, X, cols_to_scale):
+    def _apply_scaling(self, X: pd.DataFrame, cols_to_scale: List[str]) -> pd.DataFrame:
+        """Scales numerical features using the fitted scaler.
+
+        Args:
+            X (pd.DataFrame): Input features.
+            cols_to_scale (List[str]): List of column names to apply scaling to.
+
+        Returns:
+            pd.DataFrame: Scaled features DataFrame.
+        """
         if not self.scaler_ or not cols_to_scale: return X
         X_scaled = X.copy()
         X_scaled[cols_to_scale] = self.scaler_.transform(X_scaled[cols_to_scale])
         return X_scaled
         
-    def _fit_feature_selector(self, X, y):
+    def _fit_feature_selector(self, X: pd.DataFrame, y: Optional[Union[pd.Series, np.ndarray]]) -> None:
+        """Fits the configured feature selector on the scaled training features.
+
+        Args:
+            X (pd.DataFrame): Preprocessed features DataFrame.
+            y (pd.Series or np.ndarray, optional): Target data.
+        """
         logger.debug(f"[DataProcessor] Fitting feature selector: '{self.feature_selection_strategy}'...")
         selector_map = {'variance': VarianceThreshold(threshold=0.0), 'select_k_best_anova': SelectKBest(f_classif, k=self.feature_selection_k), 'select_k_best_chi2': SelectKBest(chi2, k=self.feature_selection_k)}
         self.selector_ = selector_map.get(self.feature_selection_strategy)
@@ -407,7 +547,15 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         if self.feature_selection_strategy == 'correlation':
             self._fit_correlation_selector(X)
             
-    def _apply_feature_selection(self, X):
+    def _apply_feature_selection(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Applies feature selection to drop low-variance or non-informative features.
+
+        Args:
+            X (pd.DataFrame): Input features DataFrame.
+
+        Returns:
+            pd.DataFrame: Reduced features DataFrame.
+        """
         X_selected = X
         if self.selector_ and self.feature_selection_strategy != 'correlation':
              selected_cols = X.columns[self.selector_.get_support()]
@@ -418,14 +566,25 @@ class DataProcessor(BaseEstimator, TransformerMixin):
              
         return X_selected
         
-    def _fit_correlation_selector(self, X, threshold=0.9):
+    def _fit_correlation_selector(self, X: pd.DataFrame, threshold: float = 0.9) -> None:
+        """Identifies highly correlated features to be dropped.
+
+        Args:
+            X (pd.DataFrame): Input features DataFrame.
+            threshold (float): Pearson correlation coefficient threshold. Defaults to 0.9.
+        """
         corr_matrix = X.corr().abs()
         upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
         self._correlation_cols_to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
         logger.debug(f"[DataProcessor] Correlation filter identified {len(self._correlation_cols_to_drop)} columns to drop.")
         self.processing_summary_['steps']['feature_selection'] = {'strategy': 'correlation', 'threshold': threshold, 'dropped_columns': self._correlation_cols_to_drop}
 
-    def _fit_resampler(self, y):
+    def _fit_resampler(self, y: Union[pd.Series, np.ndarray]) -> None:
+        """Fits the class balancing resampler based on the target vector distribution.
+
+        Args:
+            y (pd.Series or np.ndarray): Target data used to compute class distributions.
+        """
         if self.resampling_strategy:
             k_neighbors = 5
             if self.resampling_strategy == 'smote':
