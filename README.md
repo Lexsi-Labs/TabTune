@@ -42,7 +42,7 @@ The library is built on **four main components** that work together seamlessly:
 
 Using diverse tabular foundation models often requires writing model-specific boilerplate for data preparation, training, and inference. TabTune solves this by providing:
 
-- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) for multiple models such as TabPFN, TabPFNv2.6, TabICL, TabICLv2, Mitra, ContextTab, TabDPT, OrionMSP, and OrionBix.
+- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) for multiple models such as TabPFN, TabPFNv2.6, TabPFNv3, TabICL, TabICLv2, Mitra, ContextTab, TabDPT, OrionMSP, and OrionBix.
 
 - **Automated Preprocessing**: The DataProcessor is model-aware, automatically applying the correct transformations without manual configuration.
 
@@ -61,13 +61,19 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
--   ✅ **Ensembling Module Integration** -- Full support for combining multiple tabular foundation models (TFMs) using a unified `TabularEnsemble` API, compatible with both classification and regression workflows.
+-   ✅ **TabPFN v3 Integration** -- Full support for the latest PriorLabs Model : `TabPFNv3`, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.
 
--   ✅ **Six Ensemble Strategies** -- Includes weighted averaging, greedy selection , stacking , temperature-scaled blending , cascade stacking , and deep ensembles .
+-   ✅ **Causal Inference Module Integration** -- Full support for treatment effect estimation using tabular foundation models through a unified `CausalAnalysis` API, enabling identification, estimation, and refutation workflows.
 
--   ✅ **Advanced Capabilities** -- Supports hybrid TFM + GBDT ensembles, epistemic uncertainty estimation, calibrated probability outputs, and benchmark-ready evaluation with leaderboard and metrics.
-  
--   ✅ Distillation  — Full support for compressing tabular foundation model teachers into lightweight student models using a unified TabDistiller API, with multi-teacher support, k-fold soft-label collection, and four student backends (MLP, LightGBM, XGBoost, CatBoost).
+-   ✅ **Six Causal Estimators** -- Includes Double Machine Learning (DML), S-Learner, T-Learner, X-Learner, R-Learner, and Causal Forests for robust average and heterogeneous treatment effect estimation.
+
+-   ✅ **Built-in Causal Validation** -- Supports formal causal identification, placebo tests, random common cause checks, subset stability analysis, and sensitivity analysis through an integrated refutation framework.
+
+-   ✅ **Fairness & Compliance Audits** -- Includes proxy attribute detection and counterfactual fairness evaluation with automated reporting for fairness-critical deployments.
+
+-   ✅ **Counterfactual & Heterogeneous Effect Analysis** -- Supports per-row Conditional Average Treatment Effects (CATE), counterfactual prediction, and treatment effect exploration at the individual level.
+
+-   ✅ **CausalLeaderboard Benchmarking** -- Compare multiple `(Estimator × TFM)` combinations using treatment effect stability, confidence intervals, and refutation pass rates.
 
 ---
 
@@ -85,6 +91,7 @@ Using diverse tabular foundation models often requires writing model-specific bo
 | **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
 | **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
+| **TabPFN-v3** | PFN / ICL | Newest PriorLabs Prior-Fitted Network; updated architecture and checkpoints | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
 | **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
@@ -177,8 +184,8 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### Native Fine-Tuning (TabPFNv2.6 only)
-TabPFNv2.6 exposes PriorLabs' `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor` directly, offering their native advanced fine-tuning pipeline.
+### Native Fine-Tuning (TabPFNv2.6 and TabPFNv3)
+TabPFNv2.6 and TabPFNv3 expose PriorLabs' `FinetunedTabPFNClassifier` / `FinetunedTabPFNRegressor` directly, offering their native advanced fine-tuning pipeline. For TabPFNv3, TabTune pins the v3 checkpoint so native fine-tuning updates the v3 weights.
 
 ```python
 # Classification
@@ -206,6 +213,21 @@ pipeline = TabularPipeline(
         "epochs": 30,
         "learning_rate": 1e-5,
         "early_stopping": True,
+    }
+)
+pipeline.fit(X_train, y_train)
+
+# TabPFNv3 — same native API (V3 checkpoint pinned automatically)
+pipeline = TabularPipeline(
+    model_name="TabPFNv3",
+    task_type="classification",
+    tuning_strategy="finetune",
+    tuning_params={
+        "finetune_mode": "native",  # uses FinetunedTabPFNClassifier (V3-pinned)
+        "epochs": 30,
+        "learning_rate": 1e-5,
+        "early_stopping": True,
+        "early_stopping_patience": 8,
     }
 )
 pipeline.fit(X_train, y_train)
@@ -447,7 +469,60 @@ pipe.fit(X_train, y_train)
 distiller = TabDistiller(teachers=[pipe], student="lgbm", task_type="classification")
 distiller.fit(X_train, y_train)
 ```
+---
 
+### 🔬 Causal Inference
+
+TabTune extends the core library with causal reasoning through the `CausalAnalysis` class, enabling estimation of treatment effects rather than only making predictions.
+
+The module follows the standard causal workflow:
+
+- **Identify** — Construct causal graphs and identify valid adjustment sets.
+- **Estimate** — Compute treatment effects using state-of-the-art causal estimators powered by TFMs.
+- **Refute** — Validate estimates using placebo, sensitivity, and robustness checks.
+
+Six estimators are supported:
+
+| Estimator | Best For |
+|------------|----------|
+| `dml` | **Recommended default** — robust ATE estimation |
+| `s_learner` | Simple baseline |
+| `t_learner` | Balanced treatment groups |
+| `x_learner` | Imbalanced treatment assignment |
+| `r_learner` | Advanced heterogeneous effects |
+| `causal_forest` | Non-parametric CATE estimation |
+
+```python
+from tabtune.causal import CausalAnalysis
+
+causal = CausalAnalysis(
+    model_name="TabPFNv26",
+    task_type="regression",
+    treatment="treated",
+    outcome="outcome",
+    confounders=["age", "income", "score"],
+    estimator="dml"
+)
+
+causal.fit(X_train, y_train)
+
+results = causal.evaluate(
+    X_test,
+    y_test,
+    include=("effect", "refutation")
+)
+
+print(results["effect"])
+```
+
+**Additional capabilities** include:
+- Heterogeneous treatment effect (CATE) estimation
+- Counterfactual prediction
+- Proxy attribute auditing
+- Counterfactual fairness evaluation
+- Multi-model benchmarking with `CausalLeaderboard`
+
+---
 ## 🏆 Model Comparison with TabularLeaderboard
 
 The `TabularLeaderboard` makes it easy to compare multiple models and strategies on the same dataset.
@@ -502,17 +577,17 @@ TabularPipeline(
 
 #### Key Parameters:
 
-- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`.
+- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabPFNv3'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`.
 
 - **`task_type`** (str): The type of task — `'classification'` or `'regression'`.
 
 - **`tuning_strategy`** (str): The strategy for model adaptation: `'inference'`, `'finetune'`, or `'peft'`.
 
 - **`finetune_mode`** (str, optional): Controls the fine-tuning algorithm. If `None`, a smart default is chosen per task type (`'turn_by_turn'` for regression, `'meta-learning'` for classification). Supported values per model:
-  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26)
-  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, Mitra, TabDPT)
-  - `'native'` — PriorLabs native finetuner with bar distribution loss, AMP, early stopping (**TabPFNv2.6 only**, classification and regression)
-  - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn (TabPFN regression, Mitra regression, TabDPT regression, ContextTab regression)
+  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3)
+  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT)
+  - `'native'` — PriorLabs native finetuner with bar distribution loss, AMP, early stopping (**TabPFNv2.6 and TabPFNv3**, classification and regression)
+  - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn (TabPFN regression, TabPFNv3 regression, Mitra regression, TabDPT regression, ContextTab regression)
 
 - **`tuning_params`** (dict, optional): Parameters for the `TuningManager`:
   - `epochs` (int): Number of training epochs
@@ -523,9 +598,9 @@ TabularPipeline(
   - `checkpoint_dir` (str): Directory for automatic checkpoint saving
   - `show_progress` (bool): Whether to show progress bars
   - `peft_config` (dict): Configuration for LoRA adapters
-  - `early_stopping` (bool): Enable early stopping — **TabPFNv2.6 native mode only**
-  - `early_stopping_patience` (int): Patience for early stopping — **TabPFNv2.6 native mode only**
-  - `n_estimators_finetune` (int): Ensemble size during fine-tuning — **TabPFNv2.6 native mode only**
+  - `early_stopping` (bool): Enable early stopping — **TabPFNv2.6 / TabPFNv3 native mode only**
+  - `early_stopping_patience` (int): Patience for early stopping — **TabPFNv2.6 / TabPFNv3 native mode only**
+  - `n_estimators_finetune` (int): Ensemble size during fine-tuning — **TabPFNv2.6 / TabPFNv3 native mode only**
 
 - **`processor_params`** (dict, optional): Parameters for the `DataProcessor`:
   - `imputation_strategy` (str): `'mean'`, `'median'`, `'iterative'`, `'knn'`
@@ -605,7 +680,7 @@ pipeline = TabularPipeline(
 
 ## 🏆 Example Notebooks
 
-|Below are 15 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 17 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -623,7 +698,8 @@ pipeline = TabularPipeline(
 | 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
 | 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
 | 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
-| 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)
+| 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
+| 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
 
 ## 🚀 Advanced Usage
 

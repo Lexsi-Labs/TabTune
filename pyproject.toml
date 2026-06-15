@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tabtune"
-version = "0.1.16"
+version = "0.1.17"
 authors = [
   { name="Aditya Tanna", email="aditya.tanna@lexsi.ai" },
   { name="Pratinav Seth", email="pratinav.seth@lexsi.ai" },
@@ -122,4 +122,4 @@ where = ["."]
 include = ["tabtune*"]
 
 [tool.setuptools.package-data]
-tabtune = ["*.py", "**/*.py"]
+tabtune = ["**/*"]

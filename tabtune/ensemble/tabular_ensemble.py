@@ -224,6 +224,7 @@ class TabularEnsemble:
         self.fit_times_: Dict[str, float] = {}
         self._is_fitted: bool = False
         self._n_classes: Optional[int] = None
+        self._y_le_: Optional[Any] = None
 
     # ==================================================================
     # Internal helpers
@@ -462,6 +463,9 @@ class TabularEnsemble:
             y_train = pd.Series(y_train)
 
         self._n_classes = int(y_train.nunique()) if self.task_type == "classification" else None
+        if self.task_type == "classification":
+            from sklearn.preprocessing import LabelEncoder as _LabelEncoder
+            self._y_le_ = _LabelEncoder().fit(y_train)
 
         # --- Dispatch to strategy-specific fitting ---
         if self.ensemble_strategy == "cascade_stacking":
@@ -500,6 +504,11 @@ class TabularEnsemble:
                 y_val = pd.Series(y_val)
 
         y_val_np = _to_numpy(y_val)
+        
+        
+        
+        if self.task_type == "classification" and self._y_le_ is not None:
+            y_val_np = self._y_le_.transform(y_val_np)
 
         # --- Step 1: Fit TFM base models ---
         model_val_outputs: Dict[str, np.ndarray] = {}
@@ -641,6 +650,9 @@ class TabularEnsemble:
 
         y_fit_np = _to_numpy(y_fit)
         y_val_np = _to_numpy(y_val)
+        
+        if self.task_type == "classification" and self._y_le_ is not None:
+            y_val_np = self._y_le_.transform(y_val_np)
 
         # --- FIX: For regression, n_classes=1 (one output column per model).
         # For classification, n_classes = number of unique classes.
@@ -860,6 +872,9 @@ class TabularEnsemble:
                 y_val = pd.Series(y_val)
 
         y_val_np = _to_numpy(y_val)
+        # Encode for scoring 
+        if self.task_type == "classification" and self._y_le_ is not None:
+            y_val_np = self._y_le_.transform(y_val_np)
         seeds = [self.base_seed + m for m in range(self.n_seeds)]
 
         self._log(f"\n{'='*60}")
@@ -1001,12 +1016,21 @@ class TabularEnsemble:
             X_test = pd.DataFrame(X_test)
 
         if self.ensemble_strategy == "random_init":
-            return self._predict_random_init(X_test)
+            preds = self._predict_random_init(X_test)
         elif self.ensemble_strategy == "cascade_stacking":
-            return self._predict_cascade(X_test)
+            preds = self._predict_cascade(X_test)
+        else:
+            model_outputs = self._collect_predictions(X_test)
+            preds = self.strategy_.predict(model_outputs)
 
-        model_outputs = self._collect_predictions(X_test)
-        return self.strategy_.predict(model_outputs)
+        
+        if self.task_type == "classification" and self._y_le_ is not None:
+            try:
+                preds = self._y_le_.inverse_transform(np.asarray(preds).astype(int))
+            except Exception:
+                pass  # Fall back to returning raw indices if decoding fails
+
+        return preds
 
     def predict_proba(self, X_test: Any) -> np.ndarray:
         """Generate probability predictions (classification only).
@@ -1161,6 +1185,12 @@ class TabularEnsemble:
             X_test = pd.DataFrame(X_test)
         y_test = _to_numpy(y_test)
 
+        
+        if self.task_type == "classification" and self._y_le_ is not None:
+            y_test_enc = self._y_le_.transform(y_test)
+        else:
+            y_test_enc = y_test
+
         preds = self.predict(X_test)
         result: Dict[str, Any] = {
             "ensemble": {},
@@ -1171,21 +1201,23 @@ class TabularEnsemble:
 
         # Ensemble metrics
         if self.task_type == "classification":
+            # preds and y_test are both in original label space → direct comparison
             result["ensemble"]["accuracy"] = float(accuracy_score(y_test, preds))
             result["ensemble"]["f1_score"] = float(f1_score(y_test, preds, average="weighted"))
             try:
                 probas = self.predict_proba(X_test)
+                # Use integer-encoded y_test for probability-based metrics
                 if probas.shape[1] == 2:
                     result["ensemble"]["roc_auc"] = float(
-                        roc_auc_score(y_test, probas[:, 1])
+                        roc_auc_score(y_test_enc, probas[:, 1])
                     )
                 else:
                     result["ensemble"]["roc_auc"] = float(
-                        roc_auc_score(y_test, probas, multi_class="ovr")
+                        roc_auc_score(y_test_enc, probas, multi_class="ovr")
                     )
-                result["ensemble"]["log_loss"] = float(log_loss(y_test, probas))
+                result["ensemble"]["log_loss"] = float(log_loss(y_test_enc, probas))
                 result["ensemble"]["brier_score"] = float(np.mean([
-                    brier_score_loss((y_test == c).astype(int), probas[:, c])
+                    brier_score_loss((y_test_enc == c).astype(int), probas[:, c])
                     for c in range(probas.shape[1])
                 ]))
             except Exception:
