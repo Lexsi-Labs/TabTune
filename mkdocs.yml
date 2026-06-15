@@ -34,11 +34,13 @@ nav:
       - Model Comparison: user-guide/leaderboard.md
       - Troubleshooting: user-guide/troubleshooting.md
       - Ensembling Strategies: user-guide/ensembling.md
-      - Distillation: user-guide/distillation.md
+      - Causal Inference: user-guide/causal.md
+
 
   - Models:
       - Overview: models/overview.md
       - TabPFN: models/tabpfn.md
+      - TabPFN v3: models/tabpfnv3.md
       - TabICL: models/tabicl.md
       - Orion MSP: models/orion-msp.md
       - Orion MSP V1.5: models/orionmsp1.5.md
@@ -96,6 +98,8 @@ markdown_extensions:
   - pymdownx.tabbed
   - pymdownx.details
   - pymdownx.emoji
+  - pymdownx.arithmatex:
+      generic: true
   - toc:
       permalink: true
   - tables
@@ -115,4 +119,7 @@ plugins:
         python:
           options:
             show_source: true
+extra_javascript:               
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
