@@ -356,8 +356,11 @@ class TabularPipeline:
                     torch_model = self.model
 
                 if torch_model:
-                    torch_model.load_state_dict(torch.load(self.model_checkpoint_path, map_location=torch.device('cpu')))
-                    logger.info(f"[Pipeline] Successfully loaded checkpoint for {type(self.model)._name_}.")
+                    checkpoint = torch.load(self.model_checkpoint_path, map_location=torch.device('cpu'))
+                    if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+                        checkpoint = checkpoint["model_state_dict"]
+                    torch_model.load_state_dict(checkpoint)
+                    logger.info(f"[Pipeline] Successfully loaded checkpoint for {type(self.model).__name__}.")
                 else:
                     logger.warning(f"[Pipeline] Could not determine the underlying torch model for {type(self.model)._name_} to load checkpoint.")
             except Exception as e:
