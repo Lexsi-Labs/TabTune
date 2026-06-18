@@ -5,8 +5,17 @@ A powerful and flexible Python library designed to simplify the training and fin
 of modern foundation models on tabular data.
 """
 
-__version__ = "0.1.0"
-__author__ = "Aditya Tanna, Pratinav Seth, Mohamed Bouadi, Utsav Avaiya, Vinay Kumar Sankarapu"
+# Version is sourced from the installed package metadata (pyproject.toml) so it
+# never drifts. The literal is only a fallback when running from a source tree
+# that hasn't been installed.
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+try:
+    __version__ = _pkg_version("tabtune")
+except PackageNotFoundError:  # running from an uninstalled source checkout
+    __version__ = "0.1.17"
+
+__author__ = "Aditya Tanna, Pratinav Seth, Mohamed Bouadi, Utsav Avaiya, Yash Desai, Nassim Bouarour, Vinay Kumar Sankarapu"
 __maintainer__ = "Aditya Tanna"
 __email__ = "contact@lexsi.ai"
 __maintainer_email__ = "contact@lexsi.ai"
