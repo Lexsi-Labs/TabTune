@@ -34,6 +34,7 @@ nav:
       - Model Comparison: user-guide/leaderboard.md
       - Troubleshooting: user-guide/troubleshooting.md
       - Ensembling Strategies: user-guide/ensembling.md
+      - Distillation: user-guide/distillation.md
       - Causal Inference: user-guide/causal.md
 
 
@@ -51,8 +52,8 @@ nav:
       - Limix: models/limix.md
 
   - Regression:
-      - Regression Overview: framework/regression/regression.md
-      - Regression Data Processing: framework/regression/regression_data_processing.md
+      - Regression Overview: regression/regression.md
+      - Regression Data Processing: regression/regression_data_processing.md
     
 
   - Advanced Topics:
