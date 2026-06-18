@@ -27,8 +27,16 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import os
+
 _HAS_TORCH = importlib.util.find_spec("torch") is not None
 requires_torch = pytest.mark.skipif(not _HAS_TORCH, reason="torch not installed")
+
+_HAS_TABPFN_TOKEN = bool(os.environ.get("TABPFN_TOKEN"))
+requires_tabpfn_token = pytest.mark.skipif(
+    not _HAS_TABPFN_TOKEN,
+    reason="requires TABPFN_TOKEN env var to download v3 weights",
+)
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 _PIN_PATH = _REPO_ROOT / "tabtune/models/tabpfnv3/finetuning/_tabtune_v3_pin.py"
@@ -239,6 +247,7 @@ class TestPipelineConstruction:
                             tuning_strategy="inference", model_params={"device": "cpu"})
         assert isinstance(p.model, TabPFNv3RegressorWrapper)
 
+    @requires_tabpfn_token
     def test_classification_finetune_builds(self):
         from tabtune import TabularPipeline
         p = TabularPipeline(model_name="TabPFNv3", task_type="classification",
@@ -247,6 +256,7 @@ class TestPipelineConstruction:
                             model_params={"device": "cpu"})
         assert p.model is not None
 
+    @requires_tabpfn_token
     def test_regression_finetune_allowed(self):
         from tabtune import TabularPipeline
         p = TabularPipeline(model_name="TabPFNv3", task_type="regression",
