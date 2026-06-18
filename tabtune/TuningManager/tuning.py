@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import logging
 import os
+import warnings
 from sklearn.metrics import r2_score
 
 
@@ -2727,12 +2728,21 @@ class TuningManager:
                 warmup_steps = int(total_steps * config["warmup_ratio"])
 
                 def lr_lambda(step):
-                    if step < warmup_steps:
-                        return float(step) / max(1, warmup_steps)
-                    progress = float(step - warmup_steps) / max(1, total_steps - warmup_steps)
+                    # +1: LambdaLR.__init__ calls step() before the first optimizer.step(),
+                    # consuming step 0. The offset ensures the first training batch gets
+                    # warmup LR > 0 rather than 0.
+                    s = step + 1
+                    if s < warmup_steps:
+                        return float(s) / max(1, warmup_steps)
+                    progress = float(s - warmup_steps) / max(1, total_steps - warmup_steps)
                     return max(0.01, 0.5 * (1.0 + np.cos(np.pi * progress)))
 
-                scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore", category=UserWarning,
+                        message="Detected call of `lr_scheduler.step\\(\\)`",
+                    )
+                    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
             iterable = tqdm(dataloader, desc=f"TabPFNv3 Meta Epoch {epoch}",
                             disable=not config["show_progress"])
@@ -2912,12 +2922,18 @@ class TuningManager:
         warmup_steps = int(total_steps * config["warmup_ratio"])
 
         def lr_lambda(step):
-            if step < warmup_steps:
-                return float(step) / max(1, warmup_steps)
-            progress = float(step - warmup_steps) / max(1, total_steps - warmup_steps)
+            s = step + 1  # offset: LambdaLR.__init__ consumes step 0 before first optimizer.step()
+            if s < warmup_steps:
+                return float(s) / max(1, warmup_steps)
+            progress = float(s - warmup_steps) / max(1, total_steps - warmup_steps)
             return max(0.01, 0.5 * (1.0 + np.cos(np.pi * progress)))
 
-        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=UserWarning,
+                message="Detected call of `lr_scheduler.step\\(\\)`",
+            )
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
         for epoch in range(1, config["epochs"] + 1):
             iterable = tqdm(dataloader, desc=f"TabPFNv3 SFT Epoch {epoch}",
@@ -3067,12 +3083,21 @@ class TuningManager:
                 warmup_steps = int(total_steps * config["warmup_ratio"])
 
                 def lr_lambda(step):
-                    if step < warmup_steps:
-                        return float(step) / max(1, warmup_steps)
-                    progress = float(step - warmup_steps) / max(1, total_steps - warmup_steps)
+                    # +1: LambdaLR.__init__ calls step() before the first optimizer.step(),
+                    # consuming step 0. The offset ensures the first training batch gets
+                    # warmup LR > 0 rather than 0.
+                    s = step + 1
+                    if s < warmup_steps:
+                        return float(s) / max(1, warmup_steps)
+                    progress = float(s - warmup_steps) / max(1, total_steps - warmup_steps)
                     return max(0.01, 0.5 * (1.0 + np.cos(np.pi * progress)))
 
-                scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore", category=UserWarning,
+                        message="Detected call of `lr_scheduler.step\\(\\)`",
+                    )
+                    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
             iterable = tqdm(dataloader, desc=f"TabPFNv3 Reg-TBT Epoch {epoch}",
                             disable=not config["show_progress"])
@@ -3152,7 +3177,7 @@ class TuningManager:
         try:
             if hasattr(model, "fit_mode") and model.fit_mode == "batched":
                 model.fit_mode = "fit_preprocessors"
-            model.fit(X_np, y_np)
+            model.fit(X_train, y_train)
             logger.info("[TuningManager] Re-fitted v3 regressor for standard inference")
         except Exception as e:  # noqa: BLE001
             logger.warning(f"[TuningManager] Post-FT re-fit failed: {e}")
