@@ -51,48 +51,21 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 - **Extensible Design:** Modular codebase for easy integration of custom data processors and models.
 
 ---
-## 🆕 New in This Release
+## 🚀 What's New in this release
 
-#### ✅ Ensembling Module with TabTune with 6 Strategies !
+-   ✅ **TabPFN v3 Integration** -- Full support for the latest PriorLabs Model : `TabPFNv3`, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.
 
+-   ✅ **Causal Inference Module Integration** -- Full support for treatment effect estimation using tabular foundation models through a unified `CausalAnalysis` API, enabling identification, estimation, and refutation workflows.
 
-### Ensemble Framework
+-   ✅ **Six Causal Estimators** -- Includes Double Machine Learning (DML), S-Learner, T-Learner, X-Learner, R-Learner, and Causal Forests for robust average and heterogeneous treatment effect estimation.
 
--   Unified API for combining multiple tabular foundation models (TFMs)
--   Supports six strategies: weighted averaging, greedy selection, stacking, temperature scaling, cascade stacking, and deep ensembles.
+-   ✅ **Built-in Causal Validation** -- Supports formal causal identification, placebo tests, random common cause checks, subset stability analysis, and sensitivity analysis through an integrated refutation framework.
 
-### Strategy Capabilities
+-   ✅ **Fairness & Compliance Audits** -- Includes proxy attribute detection and counterfactual fairness evaluation with automated reporting for fairness-critical deployments.
 
--   Performance-driven model weighting and selection
--   Meta-learning via stacking with multiple learners (LR, GBDT, MLP)
--   Calibration-aware blending using temperature scaling
--   Multi-level cascade stacking for state-of-the-art performance
+-   ✅ **Counterfactual & Heterogeneous Effect Analysis** -- Supports per-row Conditional Average Treatment Effects (CATE), counterfactual prediction, and treatment effect exploration at the individual level.
 
-### Advanced Features
-
--   Hybrid TFM + GBDT ensembles (XGBoost, LightGBM, sklearn)
--   Epistemic uncertainty estimation via deep ensembles
-
-
-#### ✅ Distillation Module with TabTune — Compress TFMs into Lightweight Students!
-
-### Distillation Framework
-
--   Unified `TabDistiller` API for compressing tabular foundation model teachers into lightweight student models
--   Supports four student backends: MLP, LightGBM, XGBoost, and CatBoost
-
-### Distillation Capabilities
-
--   Hinton-style temperature-scaled KL + hard CE combined loss
--   Adaptive per-sample temperature scaling based on teacher confidence
--   Confidence weighting to upweight high-certainty teacher predictions
--   K-fold cross-prediction to prevent identity leakage in ICL models
-
-### Advanced Features
-
--   Multi-teacher distillation with averaged soft labels (TabPFNv26, TabICLv2, Limix, OrionMSPv1.5)
--   Soft-label caching to drastically reduce compute overhead across student configurations
--   Deploy-ready exports: ONNX, INT8 quantization, and inference latency benchmarking
+-   ✅ **CausalLeaderboard Benchmarking** -- Compare multiple `(Estimator × TFM)` combinations using treatment effect stability, confidence intervals, and refutation pass rates.
 
 ---
 
@@ -100,7 +73,7 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 
 | Model | Family / Paradigm | Key Innovation | Supported Strategies |
 |-------|------------------|----------------|----------------------|
-| **TabPFN-v2.5** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
 | **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
 | **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
@@ -110,6 +83,7 @@ Whether you are a practitioner aiming for production-grade pipelines or a resear
 | **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
 | **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
+| **TabPFN-v3** | PFN / ICL | Newest PriorLabs Prior-Fitted Network; updated architecture and checkpoints | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
 | **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
@@ -179,7 +153,7 @@ print(metrics)
 
 ## 🏆 Example Notebooks
 
-|Below are 15 Example Notebooks showcasing all the features of the Library in-depth!
+|Below are 16 Example Notebooks showcasing all the features of the Library in-depth!
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -194,10 +168,11 @@ print(metrics)
 | 9 | Regression - 2| Introduction to Regression - Finetune |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing) |
 | 10 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
 | 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
-| 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression|[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
+| 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
 | 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
 | 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
-| 15 | Distillation | Using Single and Multi Teachers  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)
+| 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
+| 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
 
 ---
 
@@ -212,6 +187,8 @@ tabtune/
 ├── TabularLeaderboard/
 ├── benchmarking/
 ├── ensemble/
+├── distillation/
+├── causal/
 ├── data/
 ├── logger.py
 └── run.py
