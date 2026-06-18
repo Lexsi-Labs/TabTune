@@ -25,8 +25,16 @@ import logging
 import re
 from typing import Any
 
-import networkx as nx
 import pandas as pd
+
+try:
+    import networkx as nx
+except ImportError as exc:  # pragma: no cover
+    raise ImportError(
+        "The TabTune causal module requires additional dependencies "
+        "(networkx, doubleml, econml, dowhy, causal-learn, jinja2). "
+        "Install them with `pip install tabtune[causal]`."
+    ) from exc
 
 logger = logging.getLogger(__name__)
 

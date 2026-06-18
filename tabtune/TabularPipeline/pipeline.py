@@ -362,7 +362,7 @@ class TabularPipeline:
                     torch_model.load_state_dict(checkpoint)
                     logger.info(f"[Pipeline] Successfully loaded checkpoint for {type(self.model).__name__}.")
                 else:
-                    logger.warning(f"[Pipeline] Could not determine the underlying torch model for {type(self.model)._name_} to load checkpoint.")
+                    logger.warning(f"[Pipeline] Could not determine the underlying torch model for {type(self.model).__name__} to load checkpoint.")
             except Exception as e:
                 logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
             
@@ -674,7 +674,7 @@ class TabularPipeline:
                     logger.info(f"[Pipeline] Attempting to load model state from checkpoint for late-initialized model: {self.model_checkpoint_path}")
                     try:
                         self.model.load_state_dict(torch.load(self.model_checkpoint_path, map_location=torch.device()))
-                        logger.info(f"[Pipeline] Successfully loaded checkpoint for {type(self.model)._name_}.")
+                        logger.info(f"[Pipeline] Successfully loaded checkpoint for {type(self.model).__name__}.")
                     except Exception as e:
                         logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
 
