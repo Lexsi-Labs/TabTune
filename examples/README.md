@@ -25,6 +25,28 @@ The examples are organized in a logical progression from basic concepts to advan
 | **08** | `08_evaluation_metrics.py` | Fairness and calibration evaluation | OpenML 31 (credit-g) | Finance |
 | **09** | `09_benchmarking.py` | Running comprehensive benchmarks | Multiple datasets | Various |
 
+### Regression & Model-Specific Examples (Examples 10-12)
+
+| Example | File | Description | Dataset | Industry |
+|---------|------|-------------|---------|----------|
+| **10** | `10_regression_model_comparison.py` | Regression model comparison | California Housing | Real Estate |
+| **11** | `11_regression_finetuning.py` | Regression fine-tuning strategies | California Housing | Real Estate |
+| **12** | `12_tabpfnv3_classification_regression.py` | TabPFN v3 — inference + all fine-tuning modes (classification & regression) | OpenML 42178 / California Housing | Telecom / Real Estate |
+
+### Example 12: TabPFN v3 (`12_tabpfnv3_classification_regression.py`)
+
+**Main Contribution**: Demonstrates the TabPFN v3 integration (`model_name="TabPFNv3"`) across the full capability surface.
+
+**Key Learning Points**:
+- TabPFN v3 is a new model entry used exactly like any other TabTune model
+- Classification: inference, meta-learning, SFT, native (V3-pinned), and PEFT/LoRA
+- Regression: inference, native (bar-distribution), and turn-by-turn fine-tuning
+- Native fine-tuning updates the v3 weights (TabTune pins `ModelVersion.V3`)
+
+**Datasets**: Telco Customer Churn (classification) and California Housing (regression)
+
+---
+
 ## Quick Start
 
 ### Running an Example

@@ -12,7 +12,7 @@ from imblearn.under_sampling import RandomUnderSampler, TomekLinks, ClusterCentr
 
 logger = logging.getLogger(__name__)
 
-# --- Links to Custom Model-Specific Preprocessors ---
+
 from .tabpfn_preprocessor import TabPFNPreprocessor
 from .tabicl_preprocessor import TabICLPreprocessor
 from .orion_msp_preprocessor import OrionMSPPreprocessor
@@ -65,7 +65,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self.selector_ = None
         self.label_encoder_ = None
         self.regression_processor_ = None
-        self.feature_names_ = None # Added for tracking feature names
+        self.feature_names_ = None 
         self._correlation_cols_to_drop = []
         self.original_cols_ = None
         self.processing_summary_ = {}
@@ -85,7 +85,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'Limix': {'categorical_encoding': 'limix_special'},
                 'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
                 'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
-                'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
+                'TabPFNv3': {'categorical_encoding': 'tabpfn_special'},
                 
             }
             config = model_defaults.get(self.model_name)
@@ -168,6 +168,11 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return LimixRegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name in ('TabPFNv26', 'TabPFNv3'):
+            # TabPFN v2.6 / v3 handle target normalization internally -> default 'none'.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return TabPFNRegressionProcessor(target_scaling_strategy=target_scaling)
         
         # Fallback to generic processor (use 'standard' for unknown models)
         if target_scaling is None:

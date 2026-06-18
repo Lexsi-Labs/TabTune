@@ -116,6 +116,19 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
             "embeddings",
         ),
     ),
+
+    "TabPFNv3": LoraTargetConfig(
+        target_substrings=(
+            "q_projection",
+            "k_projection",
+            "v_projection",
+            "out_projection",
+            "x_embed",
+            "icl_blocks",
+            "feature_distribution_embedder",
+            "column_aggregator",
+        ),
+    ),
 }
 
 
@@ -228,6 +241,9 @@ def apply_tabular_lora(
     exclude_patterns = []
     if model_name in ["TabICL", "OrionMSP", "OrionBix"]:
         exclude_patterns = ["y_encoder"]
+    elif model_name == "TabPFNv3":
+        # y-encoders can be class-count dependent; keep them full-rank.
+        exclude_patterns = ["col_y_encoder", "icl_y_encoder", "y_encoder"]
     
     return inject_custom_lora_into_linear_layers(
         model,
