@@ -94,6 +94,9 @@
 <li>
 <a href="../../user-guide/distillation/">Distillation</a>
 </li>
+<li>
+<a href="../../user-guide/causal/">Causal Inference</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -104,6 +107,9 @@
 </li>
 <li>
 <a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
@@ -135,10 +141,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -246,7 +252,7 @@
                         </a>
 </li>
 <li>
-<a href="../../models/limix/" rel="prev">
+<a href="../../regression/regression_data_processing/" rel="prev">
 <i class="fas fa-arrow-left"></i> Previous
                         </a>
 </li>
@@ -336,44 +342,44 @@
 </ul>
 <h3 id="13-key-innovation">1.3 Key Innovation<a class="headerlink" href="#13-key-innovation" title="Permanent link">¶</a></h3>
 <p>Instead of updating all weights, LoRA learns a low-rank approximation of weight updates:</p>
-<p>[
+<div class="arithmatex">\[
 W' = W_0 + \Delta W = W_0 + BA
-]</p>
+\]</div>
 <p>Where:
-- (W_0): Original frozen weights (large)
-- (\Delta W = BA): Low-rank decomposition
-- (A): Input projection (small)
-- (B): Output projection (small)
-- (r): Rank (typically 4-16, much smaller than weight dimensions)</p>
+- <span class="arithmatex">\(W_0\)</span>: Original frozen weights (large)
+- <span class="arithmatex">\(\Delta W = BA\)</span>: Low-rank decomposition
+- <span class="arithmatex">\(A\)</span>: Input projection (small)
+- <span class="arithmatex">\(B\)</span>: Output projection (small)
+- <span class="arithmatex">\(r\)</span>: Rank (typically 4-16, much smaller than weight dimensions)</p>
 <hr/>
 <h2 id="2-mathematical-foundation">2. Mathematical Foundation<a class="headerlink" href="#2-mathematical-foundation" title="Permanent link">¶</a></h2>
 <h3 id="21-low-rank-decomposition">2.1 Low-Rank Decomposition<a class="headerlink" href="#21-low-rank-decomposition" title="Permanent link">¶</a></h3>
-<p>For a weight matrix (W \in \mathbb{R}^{d_{out} \times d_{in}}), LoRA represents updates as:</p>
-<p>[
+<p>For a weight matrix <span class="arithmatex">\(W \in \mathbb{R}^{d_{out} \times d_{in}}\)</span>, LoRA represents updates as:</p>
+<div class="arithmatex">\[
 \Delta W = BA, \quad B \in \mathbb{R}^{d_{out} \times r}, A \in \mathbb{R}^{r \times d_{in}}
-]</p>
+\]</div>
 <p><strong>Complexity Reduction</strong>:
-- Full weights: (d_{out} \times d_{in}) parameters
-- LoRA: (r(d_{out} + d_{in})) parameters
-- Compression ratio: (\frac{r(d_{out} + d_{in})}{d_{out} \times d_{in}})</p>
+- Full weights: <span class="arithmatex">\(d_{out} \times d_{in}\)</span> parameters
+- LoRA: <span class="arithmatex">\(r(d_{out} + d_{in})\)</span> parameters
+- Compression ratio: <span class="arithmatex">\(\frac{r(d_{out} + d_{in})}{d_{out} \times d_{in}}\)</span></p>
 <p><strong>Example</strong>: For a 768×768 weight matrix:
 - Full: 589,824 parameters
 - LoRA (r=8): 12,288 parameters
 - Compression: 98% reduction</p>
 <h3 id="22-scaling">2.2 Scaling<a class="headerlink" href="#22-scaling" title="Permanent link">¶</a></h3>
 <p>To balance adaptation magnitude, LoRA scales the output:</p>
-<p>[
+<div class="arithmatex">\[
 h = W_0 x + \alpha \frac{1}{r} B(Ax)
-]</p>
-<p>Where (\alpha) (lora_alpha) controls the scaling factor (\frac{\alpha}{r}).</p>
+\]</div>
+<p>Where <span class="arithmatex">\(\alpha\)</span> (lora_alpha) controls the scaling factor <span class="arithmatex">\(\frac{\alpha}{r}\)</span>.</p>
 <p><strong>Effect of Alpha</strong>:
 - Higher alpha: Larger adaptation magnitude
-- Default: (\alpha = 2r) (empirically optimal)</p>
+- Default: <span class="arithmatex">\(\alpha = 2r\)</span> (empirically optimal)</p>
 <h3 id="23-dropout">2.3 Dropout<a class="headerlink" href="#23-dropout" title="Permanent link">¶</a></h3>
 <p>Dropout is applied to the input before LoRA projection for regularization:</p>
-<p>[
+<div class="arithmatex">\[
 h = W_0 x + \alpha \frac{1}{r} B(\text{dropout}(Ax))
-]</p>
+\]</div>
 <hr/>
 <h2 id="3-lora-in-tabtune">3. LoRA in TabTune<a class="headerlink" href="#3-lora-in-tabtune" title="Permanent link">¶</a></h2>
 <h3 id="31-lora-configuration">3.1 LoRA Configuration<a class="headerlink" href="#31-lora-configuration" title="Permanent link">¶</a></h3>
@@ -1018,6 +1024,8 @@ Multiple task-specific LoRA adapters:
 <script>hljs.initHighlightingOnLoad();</script>
 <script>var base_url = "../.."</script>
 <script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="../../search/main.js"></script>
 <script>
         // Initialize Mermaid v9.x after DOM loads

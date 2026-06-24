@@ -94,6 +94,9 @@
 <li>
 <a href="user-guide/distillation/">Distillation</a>
 </li>
+<li>
+<a href="user-guide/causal/">Causal Inference</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -104,6 +107,9 @@
 </li>
 <li>
 <a href="models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="models/tabpfnv3/">TabPFN v3</a>
 </li>
 <li>
 <a href="models/tabicl/">TabICL</a>
@@ -135,10 +141,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="framework/regression/regression.md">Regression Overview</a>
+<a href="regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -257,15 +263,7 @@
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#welcome-to-tabtune">🚀 Welcome to TabTune</a></li>
 <li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
-<li class="first-level"><a href="#new-in-this-release">🆕 New in This Release</a></li>
-<li class="second-level"><a href="#ensembling-module-with-tabtune-with-6-strategies">✅ Ensembling Module with TabTune with 6 Strategies !</a></li>
-<li class="second-level"><a href="#ensemble-framework">Ensemble Framework</a></li>
-<li class="second-level"><a href="#strategy-capabilities">Strategy Capabilities</a></li>
-<li class="second-level"><a href="#advanced-features">Advanced Features</a></li>
-<li class="third-level"><a href="#distillation-module-with-tabtune-compress-tfms-into-lightweight-students">✅ Distillation Module with TabTune — Compress TFMs into Lightweight Students!</a></li>
-<li class="second-level"><a href="#distillation-framework">Distillation Framework</a></li>
-<li class="second-level"><a href="#distillation-capabilities">Distillation Capabilities</a></li>
-<li class="second-level"><a href="#advanced-features_1">Advanced Features</a></li>
+<li class="first-level"><a href="#whats-new-in-this-release">🚀 What's New in this release</a></li>
 <li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
 <li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
 <li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
@@ -323,37 +321,29 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <li><strong>Extensible Design:</strong> Modular codebase for easy integration of custom data processors and models.</li>
 </ul>
 <hr/>
-<h2 id="new-in-this-release">🆕 New in This Release<a class="headerlink" href="#new-in-this-release" title="Permanent link">¶</a></h2>
-<h4 id="ensembling-module-with-tabtune-with-6-strategies">✅ Ensembling Module with TabTune with 6 Strategies !<a class="headerlink" href="#ensembling-module-with-tabtune-with-6-strategies" title="Permanent link">¶</a></h4>
-<h3 id="ensemble-framework">Ensemble Framework<a class="headerlink" href="#ensemble-framework" title="Permanent link">¶</a></h3>
-<p>-   Unified API for combining multiple tabular foundation models (TFMs)
--   Supports six strategies: weighted averaging, greedy selection, stacking, temperature scaling, cascade stacking, and deep ensembles.</p>
-<h3 id="strategy-capabilities">Strategy Capabilities<a class="headerlink" href="#strategy-capabilities" title="Permanent link">¶</a></h3>
-<p>-   Performance-driven model weighting and selection
--   Meta-learning via stacking with multiple learners (LR, GBDT, MLP)
--   Calibration-aware blending using temperature scaling
--   Multi-level cascade stacking for state-of-the-art performance</p>
-<h3 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">¶</a></h3>
-<p>-   Hybrid TFM + GBDT ensembles (XGBoost, LightGBM, sklearn)
--   Epistemic uncertainty estimation via deep ensembles</p>
-<h4 id="distillation-module-with-tabtune-compress-tfms-into-lightweight-students">✅ Distillation Module with TabTune — Compress TFMs into Lightweight Students!<a class="headerlink" href="#distillation-module-with-tabtune-compress-tfms-into-lightweight-students" title="Permanent link">¶</a></h4>
-<h3 id="distillation-framework">Distillation Framework<a class="headerlink" href="#distillation-framework" title="Permanent link">¶</a></h3>
+<h2 id="whats-new-in-this-release">🚀 What's New in this release<a class="headerlink" href="#whats-new-in-this-release" title="Permanent link">¶</a></h2>
 <ul>
-<li>Unified <code>TabDistiller</code> API for compressing tabular foundation model teachers into lightweight student models</li>
-<li>Supports four student backends: MLP, LightGBM, XGBoost, and CatBoost</li>
-</ul>
-<h3 id="distillation-capabilities">Distillation Capabilities<a class="headerlink" href="#distillation-capabilities" title="Permanent link">¶</a></h3>
-<ul>
-<li>Hinton-style temperature-scaled KL + hard CE combined loss</li>
-<li>Adaptive per-sample temperature scaling based on teacher confidence</li>
-<li>Confidence weighting to upweight high-certainty teacher predictions</li>
-<li>K-fold cross-prediction to prevent identity leakage in ICL models</li>
-</ul>
-<h3 id="advanced-features_1">Advanced Features<a class="headerlink" href="#advanced-features_1" title="Permanent link">¶</a></h3>
-<ul>
-<li>Multi-teacher distillation with averaged soft labels (TabPFNv26, TabICLv2, Limix, OrionMSPv1.5)</li>
-<li>Soft-label caching to drastically reduce compute overhead across student configurations</li>
-<li>Deploy-ready exports: ONNX, INT8 quantization, and inference latency benchmarking</li>
+<li>
+<p>✅ <strong>TabPFN v3 Integration</strong> -- Full support for the latest PriorLabs Model : <code>TabPFNv3</code>, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.</p>
+</li>
+<li>
+<p>✅ <strong>Causal Inference Module Integration</strong> -- Full support for treatment effect estimation using tabular foundation models through a unified <code>CausalAnalysis</code> API, enabling identification, estimation, and refutation workflows.</p>
+</li>
+<li>
+<p>✅ <strong>Six Causal Estimators</strong> -- Includes Double Machine Learning (DML), S-Learner, T-Learner, X-Learner, R-Learner, and Causal Forests for robust average and heterogeneous treatment effect estimation.</p>
+</li>
+<li>
+<p>✅ <strong>Built-in Causal Validation</strong> -- Supports formal causal identification, placebo tests, random common cause checks, subset stability analysis, and sensitivity analysis through an integrated refutation framework.</p>
+</li>
+<li>
+<p>✅ <strong>Fairness &amp; Compliance Audits</strong> -- Includes proxy attribute detection and counterfactual fairness evaluation with automated reporting for fairness-critical deployments.</p>
+</li>
+<li>
+<p>✅ <strong>Counterfactual &amp; Heterogeneous Effect Analysis</strong> -- Supports per-row Conditional Average Treatment Effects (CATE), counterfactual prediction, and treatment effect exploration at the individual level.</p>
+</li>
+<li>
+<p>✅ <strong>CausalLeaderboard Benchmarking</strong> -- Compare multiple <code>(Estimator × TFM)</code> combinations using treatment effect stability, confidence intervals, and refutation pass rates.</p>
+</li>
 </ul>
 <hr/>
 <h2 id="supported-models">📊 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
@@ -368,7 +358,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN-v2.5</strong></td>
+<td><strong>TabPFN-v2</strong></td>
 <td>PFN / ICL</td>
 <td>Approximates Bayesian inference on synthetic data</td>
 <td>Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT</td>
@@ -426,6 +416,12 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <td>PFN / ICL</td>
 <td>Latest PriorLabs release with native finetuning API</td>
 <td>Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>TabPFN-v3</strong></td>
+<td>PFN / ICL</td>
+<td>Newest PriorLabs Prior-Fitted Network; updated architecture and checkpoints</td>
+<td>Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT</td>
 </tr>
 <tr>
 <td><strong>TabICLv2</strong></td>
@@ -492,7 +488,7 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 </ul>
 <hr/>
 <h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">¶</a></h2>
-<p>|Below are 15 Example Notebooks showcasing all the features of the Library in-depth!</p>
+<p>|Below are 16 Example Notebooks showcasing all the features of the Library in-depth!</p>
 <table>
 <thead>
 <tr>
@@ -590,8 +586,14 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 <tr>
 <td>15</td>
 <td>Distillation</td>
-<td>Using Single and Multi Teachers</td>
+<td>With Single and Multi Teachers</td>
 <td><a href="https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
+</tr>
+<tr>
+<td>16</td>
+<td>Causal Inference</td>
+<td>Estimate Treatment Effect using TFMs</td>
+<td><a href="https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
 </tr>
 </tbody>
 </table>
@@ -605,6 +607,8 @@ It provides a high-level, scikit-learn-compatible API that abstracts away the co
 ├── TabularLeaderboard/
 ├── benchmarking/
 ├── ensemble/
+├── distillation/
+├── causal/
 ├── data/
 ├── logger.py
 └── run.py
@@ -656,6 +660,8 @@ Please cite appropriately if used in academic or production projects.</p>
 <script>hljs.initHighlightingOnLoad();</script>
 <script>var base_url = "."</script>
 <script src="js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="search/main.js"></script>
 <script>
         // Initialize Mermaid v9.x after DOM loads
@@ -767,5 +773,5 @@ Please cite appropriately if used in academic or production projects.</p>
 </html>
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-04-28 13:34:17.119455+00:00
+Build Date UTC : 2026-06-24 18:21:04.982089+00:00
 -->

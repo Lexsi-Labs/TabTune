@@ -94,6 +94,9 @@
 <li>
 <a href="../../user-guide/distillation/">Distillation</a>
 </li>
+<li>
+<a href="../../user-guide/causal/">Causal Inference</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -104,6 +107,9 @@
 </li>
 <li>
 <a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
@@ -135,10 +141,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -279,7 +285,7 @@
 <div class="doc doc-contents first">
 <p>A leaderboard utility to benchmark multiple TabTune pipeline configurations
 on a single, pre-split dataset.</p>
-<details class="mkdocstrings-source">
+<details class="quote">
 <summary>Source code in <code>tabtune/TabularLeaderboard/leaderboard.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 11</span>
 <span class="normal"> 12</span>
@@ -566,7 +572,7 @@ on a single, pre-split dataset.</p>
 </tr>
 </tbody>
 </table>
-<details class="mkdocstrings-source">
+<details class="quote">
 <summary>Source code in <code>tabtune/TabularLeaderboard/leaderboard.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
@@ -617,7 +623,7 @@ on a single, pre-split dataset.</p>
 <a class="headerlink" href="#tabtune.TabularLeaderboard.leaderboard.TabularLeaderboard.add_model" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Adds a model configuration to the list of contestants for the leaderboard.</p>
-<details class="mkdocstrings-source">
+<details class="quote">
 <summary>Source code in <code>tabtune/TabularLeaderboard/leaderboard.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span>
@@ -654,7 +660,7 @@ on a single, pre-split dataset.</p>
 <a class="headerlink" href="#tabtune.TabularLeaderboard.leaderboard.TabularLeaderboard.run" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Runs all added model configurations, evaluates them, and displays a sorted leaderboard.</p>
-<details class="mkdocstrings-source">
+<details class="quote">
 <summary>Source code in <code>tabtune/TabularLeaderboard/leaderboard.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 52</span>
 <span class="normal"> 53</span>
@@ -795,6 +801,8 @@ on a single, pre-split dataset.</p>
 <script>hljs.initHighlightingOnLoad();</script>
 <script>var base_url = "../.."</script>
 <script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="../../search/main.js"></script>
 <script>
         // Initialize Mermaid v9.x after DOM loads

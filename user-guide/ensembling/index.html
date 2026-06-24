@@ -94,6 +94,9 @@
 <li>
 <a href="../distillation/">Distillation</a>
 </li>
+<li>
+<a href="../causal/">Causal Inference</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -104,6 +107,9 @@
 </li>
 <li>
 <a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
@@ -135,10 +141,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -501,8 +507,8 @@ tests/
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="formula">Formula<a class="headerlink" href="#formula" title="Permanent link">¶</a></h4>
-<p>$$\hat{p} = \sum_{k=1}^{K} w_k \cdot p_k \quad \text{where} \quad \sum_k w_k = 1$$</p>
-<p>The final prediction $\hat{p}$ is computed as the weighted sum of predictions $p_k$ from $K$ models, where $w_k$ is the weight assigned to the $k$-th model and all weights sum to 1.</p>
+<div class="arithmatex">\[\hat{p} = \sum_{k=1}^{K} w_k \cdot p_k \quad \text{where} \quad \sum_k w_k = 1\]</div>
+<p>The final prediction <span class="arithmatex">\(\hat{p}\)</span> is computed as the weighted sum of predictions <span class="arithmatex">\(p_k\)</span> from <span class="arithmatex">\(K\)</span> models, where <span class="arithmatex">\(w_k\)</span> is the weight assigned to the <span class="arithmatex">\(k\)</span>-th model and all weights sum to 1.</p>
 <hr/>
 <h3 id="52-greedy-ensemble-selection">5.2 Greedy Ensemble Selection<a class="headerlink" href="#52-greedy-ensemble-selection" title="Permanent link">¶</a></h3>
 <p><strong>Class:</strong> <code>GreedyEnsembleSelection</code><br/>
@@ -704,8 +710,8 @@ tests/
 </table>
 <h4 id="how-temperature-scaling-works">How Temperature Scaling Works<a class="headerlink" href="#how-temperature-scaling-works" title="Permanent link">¶</a></h4>
 <p>For each model, learn <code>T</code> by minimising NLL on the validation set:</p>
-<p>$$\hat{p} = \text{softmax}(\log(p) / T)$$</p>
-<p>Here, $p$ represents the original predicted probabilities, $\log(p)$ converts them to logits, $T$ is the temperature scaling parameter, and $\hat{p}$ is the calibrated probability after applying softmax. Dividing by $T$ adjusts the confidence of predictions without changing their relative ordering.</p>
+<div class="arithmatex">\[\hat{p} = \text{softmax}(\log(p) / T)\]</div>
+<p>Here, <span class="arithmatex">\(p\)</span> represents the original predicted probabilities, <span class="arithmatex">\(\log(p)\)</span> converts them to logits, <span class="arithmatex">\(T\)</span> is the temperature scaling parameter, and <span class="arithmatex">\(\hat{p}\)</span> is the calibrated probability after applying softmax. Dividing by <span class="arithmatex">\(T\)</span> adjusts the confidence of predictions without changing their relative ordering.</p>
 <ul>
 <li><strong>T &lt; 1</strong> — Model was overconfident → sharpen predictions.</li>
 <li><strong>T &gt; 1</strong> — Model was underconfident → soften predictions.</li>
@@ -898,8 +904,8 @@ Final Layer:
 </table>
 <h4 id="epistemic-uncertainty">Epistemic Uncertainty<a class="headerlink" href="#epistemic-uncertainty" title="Permanent link">¶</a></h4>
 <p>The variance across ensemble members provides a free epistemic uncertainty estimate per sample:</p>
-<p>$$\text{uncertainty}(x) = \frac{1}{M \cdot K} \sum_{m=1}^{M} \sum_{c=1}^{K} \left( p_{m,c}(x) - \bar{p}_c(x) \right)^2$$</p>
-<p>The uncertainty for input $x$ is computed as the average squared deviation between each model’s predicted probability $p_{m,c}(x)$ (for model $m$ and class $c$) and the mean prediction $\bar{p}_c(x)$ across all $M$ models, averaged over all $K$ classes—capturing how much the models disagree.</p>
+<div class="arithmatex">\[\text{uncertainty}(x) = \frac{1}{M \cdot K} \sum_{m=1}^{M} \sum_{c=1}^{K} \left( p_{m,c}(x) - \bar{p}_c(x) \right)^2\]</div>
+<p>The uncertainty for input <span class="arithmatex">\(x\)</span> is computed as the average squared deviation between each model’s predicted probability <span class="arithmatex">\(p_{m,c}(x)\)</span> (for model <span class="arithmatex">\(m\)</span> and class <span class="arithmatex">\(c\)</span>) and the mean prediction <span class="arithmatex">\(\bar{p}_c(x)\)</span> across all <span class="arithmatex">\(M\)</span> models, averaged over all <span class="arithmatex">\(K\)</span> classes—capturing how much the models disagree.</p>
 <p>Access via:</p>
 <div class="highlight"><pre><span></span><code><span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -1147,6 +1153,8 @@ This is useful when you already have pre-computed model outputs and want to expe
 <script>hljs.initHighlightingOnLoad();</script>
 <script>var base_url = "../.."</script>
 <script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="../../search/main.js"></script>
 <script>
         // Initialize Mermaid v9.x after DOM loads

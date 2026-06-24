@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Causal Inference - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+<li>
+<a href="../ensembling/">Ensembling Strategies</a>
+</li>
+<li>
+<a href="../distillation/">Distillation</a>
+</li>
+<li class="active">
+<a href="./">Causal Inference</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../distillation/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../models/overview/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/causal.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#tabtune-causal-module">TabTune Causal Module</a></li>
+<li class="second-level"><a href="#1-overview">1. Overview</a></li>
+<li class="third-level"><a href="#key-features">Key Features</a></li>
+<li class="third-level"><a href="#file-structure">File Structure</a></li>
+<li class="second-level"><a href="#2-quick-start">2. Quick Start</a></li>
+<li class="third-level"><a href="#estimating-a-treatment-effect-with-double-ml-recommended-default">Estimating a Treatment Effect with Double ML (Recommended Default)</a></li>
+<li class="third-level"><a href="#heterogeneous-effects-with-a-causal-forest">Heterogeneous Effects with a Causal Forest</a></li>
+<li class="third-level"><a href="#fairness-audit-html-report">Fairness Audit + HTML Report</a></li>
+<li class="second-level"><a href="#3-architecture">3. Architecture</a></li>
+<li class="third-level"><a href="#the-tfm-sklearn-bridge">The TFM → sklearn Bridge</a></li>
+<li class="second-level"><a href="#4-the-causal-discipline">4. The Causal Discipline</a></li>
+<li class="third-level"><a href="#step-1-identify">Step 1 — Identify</a></li>
+<li class="third-level"><a href="#step-2-estimate">Step 2 — Estimate</a></li>
+<li class="third-level"><a href="#step-3-refute">Step 3 — Refute</a></li>
+<li class="second-level"><a href="#5-estimator-reference">5. Estimator Reference</a></li>
+<li class="third-level"><a href="#51-double-machine-learning-default">5.1 Double Machine Learning (Default)</a></li>
+<li class="third-level"><a href="#52-s-learner">5.2 S-Learner</a></li>
+<li class="third-level"><a href="#53-t-learner">5.3 T-Learner</a></li>
+<li class="third-level"><a href="#54-x-learner">5.4 X-Learner</a></li>
+<li class="third-level"><a href="#55-r-learner">5.5 R-Learner</a></li>
+<li class="third-level"><a href="#56-causal-forest">5.6 Causal Forest</a></li>
+<li class="second-level"><a href="#6-refutation-reference">6. Refutation Reference</a></li>
+<li class="third-level"><a href="#refuter-run-parameters">Refuter run() Parameters</a></li>
+<li class="second-level"><a href="#7-sensitive-attribute-audits">7. Sensitive-Attribute Audits</a></li>
+<li class="third-level"><a href="#71-proxy-auditor">7.1 Proxy Auditor</a></li>
+<li class="third-level"><a href="#72-counterfactual-fairness">7.2 Counterfactual Fairness</a></li>
+<li class="second-level"><a href="#8-causalanalysis-api-reference">8. CausalAnalysis API Reference</a></li>
+<li class="third-level"><a href="#constructor">Constructor</a></li>
+<li class="third-level"><a href="#treatment-model-override">Treatment Model Override</a></li>
+<li class="third-level"><a href="#methods">Methods</a></li>
+<li class="third-level"><a href="#include-options-for-evaluate">include Options for evaluate()</a></li>
+<li class="third-level"><a href="#output-formats">Output Formats</a></li>
+<li class="second-level"><a href="#9-causalleaderboard-api-reference">9. CausalLeaderboard API Reference</a></li>
+<li class="third-level"><a href="#methods_1">Methods</a></li>
+<li class="third-level"><a href="#rank_by-options">rank_by Options</a></li>
+<li class="second-level"><a href="#10-estimator-selection-guide">10. Estimator Selection Guide</a></li>
+<li class="third-level"><a href="#decision-flowchart">Decision Flowchart</a></li>
+<li class="second-level"><a href="#11-references">11. References</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="tabtune-causal-module">TabTune Causal Module<a class="headerlink" href="#tabtune-causal-module" title="Permanent link">¶</a></h1>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">¶</a></h2>
+<p>The TabTune Causal module provides a unified, production-ready API for <strong>causal inference with tabular foundation models (TFMs)</strong>. Instead of asking <em>"what will happen?"</em> (prediction), it answers <em>"what happens if we intervene?"</em> (causation) — estimating the effect of a treatment on an outcome while adjusting for confounders.</p>
+<p>The module wraps any TabTune TFM as a nuisance learner inside best-in-class causal estimators (DoubleML, EconML, DoWhy), so the same models you use for prediction become the engine for <strong>double machine learning, meta-learners, and causal forests</strong>. It follows the disciplined three-step causal workflow — <strong>Identify → Estimate → Refute</strong> — and adds first-class <strong>sensitive-attribute audits</strong> for fairness-critical deployments.</p>
+<p>The module integrates seamlessly with TabTune's <code>TabularPipeline</code> and follows TabTune's conventions for configuration, fitting, evaluation, and rich logging.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Six estimators</strong> spanning the full spectrum: Double ML (default), S/T/X/R-Learners, and honest Causal Forests.</li>
+<li><strong>Unified API</strong> — the <code>CausalAnalysis</code> class handles every estimator with a consistent, <code>TabularPipeline</code>-style interface.</li>
+<li><strong>Any TFM as a nuisance learner</strong> — TabPFN, TabPFNv26, TabICLv2, Mitra, OrionMSP, TabDPT, and more drop straight in.</li>
+<li><strong>The full causal discipline</strong> — formal identification, effect estimation with confidence intervals, and a battery of refutation checks built in.</li>
+<li><strong>Fairness audits</strong> — proxy detection and counterfactual-fairness checks run alongside refutation, producing a compliance-ready HTML report.</li>
+<li><strong>Heterogeneous effects</strong> — per-row CATE estimation and single-row counterfactual prediction.</li>
+<li><strong>Multi-model ranking</strong> — <code>CausalLeaderboard</code> ranks <code>(estimator × TFM)</code> combinations by stability and refuter pass-rate.</li>
+<li><strong>Production-grade</strong> — comprehensive input validation, graceful degradation when optional backends are missing, verbose logging, and serialisable reports.</li>
+</ul>
+<hr/>
+<!-- ## 2. Installation & Setup
+
+The causal module lives under `tabtune/causal/` and is imported as:
+
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.causal</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalAnalysis</span><span class="p">,</span> <span class="n">CausalLeaderboard</span>
+</code></pre></div>
+
+### Dependencies
+
+| Package | Required | Notes |
+|---------|----------|-------|
+| `numpy` | Yes | Core array operations |
+| `pandas` | Yes | DataFrame handling |
+| `scikit-learn` | Yes | Adapter base, metrics, clone machinery |
+| `scipy` | Yes | Proxy-audit statistics, meta-learner CIs |
+| `networkx` | Yes | Causal-graph representation |
+| `doubleml` | Yes | Default DML estimator (`DoubleMLPLR` / `DoubleMLAPOS`) |
+| `econml` | Yes | Meta-learners and Causal Forest |
+| `jinja2` | Optional | Templated HTML report (pure-Python fallback if absent) |
+| `dowhy` | Optional | Formal identification + mediation (d-separation fallback if absent) |
+| `causal-learn` | Optional | PC-algorithm graph inference (`infer_graph=True`) |
+| `tabtune` | Yes (for integration) | Adapter/graph/audit unit tests run without it |
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Core causal dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>doubleml<span class="w"> </span>econml<span class="w"> </span>networkx<span class="w"> </span>jinja2
+
+<span class="c1"># Optional: formal identification + graph inference</span>
+pip<span class="w"> </span>install<span class="w"> </span>dowhy<span class="w"> </span>causal-learn
+</code></pre></div>
+
+> **Compatibility note.** Some older `econml` releases pin `scikit-learn<1.6`. If you hit a resolver conflict against TabTune's `scikit-learn>=1.6`, pin `econml==0.15.1` (sklearn-1.6-compatible) or relax sklearn to `>=1.5,<1.7`. -->
+<h3 id="file-structure">File Structure<a class="headerlink" href="#file-structure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>tabtune/causal/
+├── __init__.py              # Public API exports
+├── analysis.py              # CausalAnalysis orchestrator (user-facing)
+├── leaderboard.py           # CausalLeaderboard multi-model ranking
+├── adapters.py              # _TabTuneSklearnAdapter (TFM → sklearn)
+├── graph.py                 # GraphBuilder + Identifier (Step 1)
+├── estimators/              # Step 2
+│   ├── base.py              # BaseCausalEstimator
+│   ├── dml.py               # DMLEstimator (default)
+│   ├── meta_learners.py     # S/T/X/R-Learners
+│   └── causal_forest.py     # CausalForestEstimator
+├── refute.py                # Refuter (Step 3)
+├── audit/                   # Sensitive-attribute audits
+│   ├── proxy.py             # ProxyAuditor
+│   └── counterfactual.py    # CounterfactualFairness
+└── reporter.py              # HTML / rich-print artifact writer
+tests/
+└── test_causal.py           # Unit + integration tests
+</code></pre></div>
+<hr/>
+<h2 id="2-quick-start">2. Quick Start<a class="headerlink" href="#2-quick-start" title="Permanent link">¶</a></h2>
+<h3 id="estimating-a-treatment-effect-with-double-ml-recommended-default">Estimating a Treatment Effect with Double ML (Recommended Default)<a class="headerlink" href="#estimating-a-treatment-effect-with-double-ml-recommended-default" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.causal</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalAnalysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># X must contain the treatment column and every confounder.</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">ca</span> <span class="o">=</span> <span class="n">CausalAnalysis</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFNv26"</span><span class="p">,</span>          <span class="c1"># TFM used as the nuisance learner</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>          <span class="c1"># task type of the OUTCOME</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="s2">"treated"</span><span class="p">,</span>             <span class="c1"># treatment column T</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="s2">"outcome"</span><span class="p">,</span>               <span class="c1"># outcome column Y (= the y you pass to fit)</span>
+    <span class="n">confounders</span><span class="o">=</span><span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"income"</span><span class="p">,</span> <span class="s2">"score"</span><span class="p">],</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="s2">"dml"</span><span class="p">,</span>                 <span class="c1"># Double Machine Learning</span>
+    <span class="n">estimator_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_folds"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">"confidence_level"</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">},</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"effect"</span><span class="p">,</span> <span class="s2">"refutation"</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"effect"</span><span class="p">])</span>        <span class="c1"># ATE, std error, confidence interval</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"refutation"</span><span class="p">])</span>    <span class="c1"># placebo / RCC / subset / sensitivity checks</span>
+</code></pre></div>
+<h3 id="heterogeneous-effects-with-a-causal-forest">Heterogeneous Effects with a Causal Forest<a class="headerlink" href="#heterogeneous-effects-with-a-causal-forest" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">ca</span> <span class="o">=</span> <span class="n">CausalAnalysis</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFNv26"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="s2">"treated"</span><span class="p">,</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="s2">"outcome"</span><span class="p">,</span>
+    <span class="n">confounders</span><span class="o">=</span><span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"income"</span><span class="p">,</span> <span class="s2">"score"</span><span class="p">],</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="s2">"causal_forest"</span><span class="p">,</span>
+    <span class="n">estimator_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_estimators"</span><span class="p">:</span> <span class="mi">200</span><span class="p">},</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">ca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">cate</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">predict_cate</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>               <span class="c1"># per-row treatment effect</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Mean CATE:"</span><span class="p">,</span> <span class="n">cate</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="fairness-audit-html-report">Fairness Audit + HTML Report<a class="headerlink" href="#fairness-audit-html-report" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">ca</span> <span class="o">=</span> <span class="n">CausalAnalysis</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICLv2"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="s2">"loan_approved"</span><span class="p">,</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="s2">"default_12m"</span><span class="p">,</span>
+    <span class="n">confounders</span><span class="o">=</span><span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"income"</span><span class="p">,</span> <span class="s2">"credit_score"</span><span class="p">],</span>
+    <span class="n">sensitive</span><span class="o">=</span><span class="p">[</span><span class="s2">"gender"</span><span class="p">,</span> <span class="s2">"ethnicity"</span><span class="p">],</span>       <span class="c1"># enables the audits</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="s2">"dml"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">ca</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+    <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"effect"</span><span class="p">,</span> <span class="s2">"identification"</span><span class="p">,</span> <span class="s2">"refutation"</span><span class="p">,</span>
+             <span class="s2">"proxy"</span><span class="p">,</span> <span class="s2">"counterfactual_fairness"</span><span class="p">),</span>
+    <span class="n">output_format</span><span class="o">=</span><span class="s2">"rich"</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="s2">"credit_causal_audit.html"</span><span class="p">,</span>  <span class="c1"># writes a model card</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="3-architecture">3. Architecture<a class="headerlink" href="#3-architecture" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>CausalAnalysis (orchestrator)
+│
+├── fit(X, y)
+│   ├── Step 1 — Identify
+│   │   ├── GraphBuilder  → DAG (user-supplied / inferred / default)
+│   │   └── Identifier    → estimand + adjustment set (DoWhy or fallback)
+│   │
+│   └── Step 2 — Estimate
+│       ├── Build outcome + treatment nuisance learners (TFM → sklearn adapter)
+│       ├── Instantiate estimator via ESTIMATOR_REGISTRY[estimator]
+│       └── Cross-fit the estimator on the data
+│
+├── evaluate(X_test, y_test, include=(...))
+│   ├── effect                 → ATE / CI / per-level contrasts
+│   ├── identification          → estimand report
+│   ├── refutation (Step 3)     → Refuter battery
+│   ├── proxy                   → ProxyAuditor
+│   └── counterfactual_fairness → CounterfactualFairness
+│   └── Reporter → rich log + optional HTML model card
+│
+├── predict_cate(X_query)          → per-row CATE
+├── predict_counterfactual(row, …) → single-row what-if
+└── evaluate_* (refutation / proxy / counterfactual_fairness / identification)
+</code></pre></div>
+<p>Every estimator follows the same internal contract:
+- <code>fit(df)</code> — fit nuisance learners and compute the causal estimate.
+- <code>ate(confidence_level)</code> — return ATE, standard error, and confidence interval.
+- <code>cate(X_query)</code> — per-row treatment effects (X/R-Learner, Causal Forest).
+- <code>counterfactual(row, intervention)</code> — single-row counterfactual prediction.</p>
+<h3 id="the-tfm-sklearn-bridge">The TFM → sklearn Bridge<a class="headerlink" href="#the-tfm-sklearn-bridge" title="Permanent link">¶</a></h3>
+<p>Causal libraries expect scikit-learn-style estimators with <code>.fit / .predict / .predict_proba</code>. The <code>_TabTuneSklearnAdapter</code> wraps any <code>TabularPipeline</code> into that interface and is <strong>clone-safe</strong> — <code>sklearn.clone()</code> round-trips it correctly, which is mandatory because DoubleML and EconML clone nuisance learners internally during cross-fitting. The adapter reports the correct <code>_estimator_type</code> and <code>__sklearn_tags__()</code> so downstream libraries call <code>predict_proba</code> for the treatment model and <code>predict</code> for the outcome model.</p>
+<hr/>
+<h2 id="4-the-causal-discipline">4. The Causal Discipline<a class="headerlink" href="#4-the-causal-discipline" title="Permanent link">¶</a></h2>
+<p>A predictive model answers <em>"given these features, what is Y?"</em>. A causal model answers <em>"if we </em><em>set</em><em> T to this value, how does Y change?"</em> — a fundamentally harder question that requires assumptions data alone cannot verify. The module enforces the standard three-step discipline that keeps those assumptions explicit.</p>
+<h3 id="step-1-identify">Step 1 — Identify<a class="headerlink" href="#step-1-identify" title="Permanent link">¶</a></h3>
+<p>Before estimating anything, the module asks whether the effect is even <em>identifiable</em> from the observed data. <code>GraphBuilder</code> constructs a causal DAG (supplied by you, inferred via the PC algorithm, or the canonical "confounders cause T and Y; T causes Y" default). <code>Identifier</code> then derives the estimand — typically a <strong>backdoor adjustment</strong> set — using DoWhy when installed, or a d-separation fallback otherwise.</p>
+<p>If the effect is not identifiable, the module warns loudly and you should treat downstream numbers with caution.</p>
+<h3 id="step-2-estimate">Step 2 — Estimate<a class="headerlink" href="#step-2-estimate" title="Permanent link">¶</a></h3>
+<p>The chosen estimator fits two nuisance models — one for the outcome <code>E[Y | X]</code> and one for the treatment propensity <code>E[T | X]</code> — using your TFM, then combines them into a debiased estimate of the <strong>Average Treatment Effect (ATE)</strong> with a confidence interval. For multi-level treatments, per-level contrasts are reported.</p>
+<h3 id="step-3-refute">Step 3 — Refute<a class="headerlink" href="#step-3-refute" title="Permanent link">¶</a></h3>
+<p>A point estimate is meaningless without stress tests. The <code>Refuter</code> perturbs the problem and checks the estimate behaves sensibly — a placebo treatment should yield ≈ 0, an injected noise confounder should barely move the estimate, and so on. Refuters that pass don't <em>prove</em> correctness, but refuters that fail prove something is wrong.</p>
+<hr/>
+<h2 id="5-estimator-reference">5. Estimator Reference<a class="headerlink" href="#5-estimator-reference" title="Permanent link">¶</a></h2>
+<p>All estimators are selected via the <code>estimator="..."</code> argument of <code>CausalAnalysis</code> and registered in <code>ESTIMATOR_REGISTRY</code>.</p>
+<h3 id="51-double-machine-learning-default">5.1 Double Machine Learning (Default)<a class="headerlink" href="#51-double-machine-learning-default" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>DMLEstimator</code>
+<strong>Estimator key:</strong> <code>"dml"</code></p>
+<p>The default and most robust estimator. Fits an outcome model <code>g(X) = E[Y|X]</code> and a treatment model <code>m(X) = E[T|X]</code>, residualises both, and regresses the residuals to recover a Neyman-orthogonal ATE. Cross-fitting removes overfitting bias.</p>
+<ul>
+<li><strong>Binary / continuous treatment</strong> → <code>doubleml.DoubleMLPLR</code> (partially linear regression).</li>
+<li><strong>Multi-level discrete treatment</strong> → <code>doubleml.DoubleMLAPOS</code> (Average Potential Outcomes), reporting one contrast per treatment level.</li>
+</ul>
+<h4 id="parameters-estimator_params">Parameters (<code>estimator_params</code>)<a class="headerlink" href="#parameters-estimator_params" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Cross-fitting folds</td>
+</tr>
+<tr>
+<td><code>n_rep</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Repeated cross-fitting rounds</td>
+</tr>
+<tr>
+<td><code>confidence_level</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>CI level</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>str</td>
+<td><code>"partialling out"</code></td>
+<td>PLR score (binary/continuous T)</td>
+</tr>
+<tr>
+<td><code>reference_level</code></td>
+<td>numeric</td>
+<td>smallest level</td>
+<td>Reference for multi-level contrasts</td>
+</tr>
+</tbody>
+</table>
+<h4 id="returns-from-ate">Returns (from <code>ate()</code>)<a class="headerlink" href="#returns-from-ate" title="Permanent link">¶</a></h4>
+<p><code>ate</code>, <code>std_error</code>, <code>ci_lower</code>, <code>ci_upper</code>, <code>p_value</code>, <code>confidence_level</code>, <code>n_samples</code>, plus <code>per_level</code> and <code>treatment_levels</code> for multi-level treatments.</p>
+<h4 id="when-to-use">When To Use<a class="headerlink" href="#when-to-use" title="Permanent link">¶</a></h4>
+<p>The reliable default. Strongest theoretical guarantees, works for binary, continuous, and multi-level treatments, and is what you should reach for unless you specifically need per-row heterogeneous effects.</p>
+<hr/>
+<h3 id="52-s-learner">5.2 S-Learner<a class="headerlink" href="#52-s-learner" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>SLearner</code>
+<strong>Estimator key:</strong> <code>"s_learner"</code></p>
+<p>A <strong>single</strong> model trained on <code>[X, T]</code> with treatment as an extra feature. CATE is the difference between predictions at <code>T=1</code> and <code>T=0</code>. Simplest meta-learner; can underestimate effects when the treatment signal is weak relative to outcome variance.</p>
+<blockquote>
+<p>Meta-learners (S/T/X/R) currently require a <strong>binary <code>{0, 1}</code> treatment</strong>. For multi-level treatments use <code>"dml"</code> or <code>"causal_forest"</code>.</p>
+</blockquote>
+<h4 id="when-to-use_1">When To Use<a class="headerlink" href="#when-to-use_1" title="Permanent link">¶</a></h4>
+<p>Quick baseline, or when the treatment effect is large and the dataset is small.</p>
+<hr/>
+<h3 id="53-t-learner">5.3 T-Learner<a class="headerlink" href="#53-t-learner" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>TLearner</code>
+<strong>Estimator key:</strong> <code>"t_learner"</code></p>
+<p><strong>Two</strong> models, one per treatment arm. CATE is the difference between the two arms' predictions. Robust when both arms have ample data; degrades on heavily imbalanced treatments.</p>
+<h4 id="when-to-use_2">When To Use<a class="headerlink" href="#when-to-use_2" title="Permanent link">¶</a></h4>
+<p>Balanced treatment assignment with enough data in each arm.</p>
+<hr/>
+<h3 id="54-x-learner">5.4 X-Learner<a class="headerlink" href="#54-x-learner" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>XLearner</code>
+<strong>Estimator key:</strong> <code>"x_learner"</code></p>
+<p>Propensity-weighted combination of T-Learner residuals, designed specifically for <strong>imbalanced treatments</strong>. Imputes treatment effects on each arm, then blends them using the propensity score.</p>
+<h4 id="when-to-use_3">When To Use<a class="headerlink" href="#when-to-use_3" title="Permanent link">¶</a></h4>
+<p>When one treatment arm is much smaller than the other.</p>
+<hr/>
+<h3 id="55-r-learner">5.5 R-Learner<a class="headerlink" href="#55-r-learner" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>RLearner</code>
+<strong>Estimator key:</strong> <code>"r_learner"</code></p>
+<p>Residualises both T and Y against X (DML-style), then fits a single CATE model on the residuals via <code>econml.dml.NonParamDML</code>. Strong empirical performance on heterogeneous-effect benchmarks.</p>
+<h4 id="parameters-estimator_params_1">Parameters (<code>estimator_params</code>)<a class="headerlink" href="#parameters-estimator_params_1" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_folds</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Cross-fitting folds</td>
+</tr>
+<tr>
+<td><code>final_model</code></td>
+<td>estimator</td>
+<td><code>GradientBoostingRegressor</code></td>
+<td>Final CATE regressor on residuals</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-to-use_4">When To Use<a class="headerlink" href="#when-to-use_4" title="Permanent link">¶</a></h4>
+<p>When you want a state-of-the-art CATE estimator and have a moderately sized dataset.</p>
+<hr/>
+<h3 id="56-causal-forest">5.6 Causal Forest<a class="headerlink" href="#56-causal-forest" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>CausalForestEstimator</code>
+<strong>Estimator key:</strong> <code>"causal_forest"</code></p>
+<p>An ensemble of honest causal trees (<code>econml.grf.CausalForest</code>) where splits maximise treatment-effect heterogeneity. <em>Honesty</em> (separate samples for splitting and estimation) yields asymptotically unbiased CATE with valid confidence intervals.</p>
+<h4 id="parameters-estimator_params_2">Parameters (<code>estimator_params</code>)<a class="headerlink" href="#parameters-estimator_params_2" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_estimators</code></td>
+<td>int</td>
+<td><code>200</code></td>
+<td>Number of trees (must be divisible by EconML's <code>subforest_size=4</code>)</td>
+</tr>
+<tr>
+<td><code>max_depth</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Max tree depth</td>
+</tr>
+<tr>
+<td><code>min_samples_leaf</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Minimum leaf size</td>
+</tr>
+<tr>
+<td><code>honest</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Honest splitting</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Seed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="returns">Returns<a class="headerlink" href="#returns" title="Permanent link">¶</a></h4>
+<p><code>cate(X_query, return_ci=True)</code> returns a dict with <code>point</code>, <code>ci_lower</code>, and <code>ci_upper</code> arrays.</p>
+<h4 id="when-to-use_5">When To Use<a class="headerlink" href="#when-to-use_5" title="Permanent link">¶</a></h4>
+<p>Non-parametric heterogeneous effects, especially when you want per-row confidence intervals and don't want to assume a functional form.</p>
+<hr/>
+<h2 id="6-refutation-reference">6. Refutation Reference<a class="headerlink" href="#6-refutation-reference" title="Permanent link">¶</a></h2>
+<p>Run via <code>evaluate(include=("refutation", ...))</code> or <code>evaluate_refutation()</code>. The default battery runs four checks; each returns a <code>pass</code> flag and the rule it was judged against.</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Key</th>
+<th>What it does</th>
+<th>Pass rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Placebo treatment</strong></td>
+<td><code>placebo</code></td>
+<td>Shuffles T so it carries no signal; re-fits</td>
+<td><code>\|placebo_ate\| &lt; 0.5 × \|ate\|</code></td>
+</tr>
+<tr>
+<td><strong>Random common cause</strong></td>
+<td><code>random_common_cause</code></td>
+<td>Injects a synthetic noise confounder; re-fits</td>
+<td>relative ATE shift <code>&lt; 0.2</code></td>
+</tr>
+<tr>
+<td><strong>Data subset</strong></td>
+<td><code>subset</code></td>
+<td>Re-fits on random subsamples; checks stability</td>
+<td>coefficient-of-variation <code>&lt; 0.25</code></td>
+</tr>
+<tr>
+<td><strong>Sensitivity</strong></td>
+<td><code>sensitivity</code></td>
+<td>E-value (VanderWeele &amp; Ding) + Manski bounds</td>
+<td>E-value <code>≥ 1.25</code></td>
+</tr>
+</tbody>
+</table>
+<p>The placebo and random-common-cause checks each trigger one estimator refit; the subset check triggers <code>n_subset_iters</code> refits (default <strong>2</strong>); the sensitivity check is analytical and triggers <strong>zero</strong> refits.</p>
+<blockquote>
+<p><strong>Cost note.</strong> Each refit re-runs the full cross-fitted estimator, which fits nuisance TFMs <code>n_folds × 2</code> times (× number of treatment levels for multi-level DML). On a 5-level treatment with <code>n_folds=5</code>, the default battery is roughly 200 TFM fits. Reduce <code>n_folds</code> or pass a smaller <code>checks</code> tuple to speed it up.</p>
+</blockquote>
+<h4 id="refuter-run-parameters">Refuter <code>run()</code> Parameters<a class="headerlink" href="#refuter-run-parameters" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>checks</code></td>
+<td>tuple</td>
+<td><code>("placebo", "random_common_cause", "subset", "sensitivity")</code></td>
+<td>Which checks to run</td>
+</tr>
+<tr>
+<td><code>subset_fraction</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td>Fraction sampled per subset refit</td>
+</tr>
+<tr>
+<td><code>n_subset_iters</code></td>
+<td>int</td>
+<td><code>2</code></td>
+<td>Number of subset refits</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>RNG seed</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-sensitive-attribute-audits">7. Sensitive-Attribute Audits<a class="headerlink" href="#7-sensitive-attribute-audits" title="Permanent link">¶</a></h2>
+<p>Supply <code>sensitive=[...]</code> at construction to enable two fairness audits that run alongside refutation.</p>
+<h3 id="71-proxy-auditor">7.1 Proxy Auditor<a class="headerlink" href="#71-proxy-auditor" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>ProxyAuditor</code></p>
+<p>Detects confounders that act as <strong>proxies</strong> for a sensitive attribute — features that leak protected information even when the sensitive attribute itself is excluded. Each confounder is scored against each sensitive attribute (Spearman for numeric–numeric, eta² for numeric–categorical, Cramér's V for categorical–categorical), and features above <code>threshold</code> (default <code>0.5</code>) are flagged.</p>
+<div class="highlight"><pre><span></span><code><span class="n">report</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">evaluate_proxy</span><span class="p">()</span>
+<span class="c1"># report["per_attribute"]["gender"]["flagged"] → [{"feature": "zip_code", "score": 0.71}, ...]</span>
+</code></pre></div>
+<h3 id="72-counterfactual-fairness">7.2 Counterfactual Fairness<a class="headerlink" href="#72-counterfactual-fairness" title="Permanent link">¶</a></h3>
+<p><strong>Class:</strong> <code>CounterfactualFairness</code></p>
+<p>For each row, flips every sensitive attribute to its other observed values (holding everything else fixed) and re-predicts. Reports the <strong>flip rate</strong> (fraction of rows whose prediction changes) and <strong>mean delta</strong> (average prediction change). A counterfactually-fair model has a flip rate near zero.</p>
+<div class="highlight"><pre><span></span><code><span class="n">report</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">evaluate_counterfactual_fairness</span><span class="p">()</span>
+<span class="c1"># report["per_attribute"]["gender"] → {"flip_rate": 0.03, "mean_delta": 0.004, ...}</span>
+</code></pre></div>
+<p>Both audits feed the HTML report when <code>output_path</code> is supplied to <code>evaluate()</code>.</p>
+<hr/>
+<h2 id="8-causalanalysis-api-reference">8. CausalAnalysis API Reference<a class="headerlink" href="#8-causalanalysis-api-reference" title="Permanent link">¶</a></h2>
+<h3 id="constructor">Constructor<a class="headerlink" href="#constructor" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">CausalAnalysis</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>                  <span class="c1"># TFM for the nuisance learner(s)</span>
+    <span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>                   <span class="c1"># "classification" | "regression" (outcome)</span>
+    <span class="n">treatment</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>                   <span class="c1"># treatment column T</span>
+    <span class="n">outcome</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>                     <span class="c1"># outcome column Y</span>
+    <span class="n">confounders</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>           <span class="c1"># confounder columns X</span>
+    <span class="n">tuning_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"inference"</span><span class="p">,</span>
+    <span class="n">sensitive</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>      <span class="c1"># enables fairness audits</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"dml"</span><span class="p">,</span>           <span class="c1"># ESTIMATOR_REGISTRY key</span>
+    <span class="n">treatment_model</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># override the treatment nuisance learner</span>
+    <span class="n">estimator_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>    <span class="c1"># estimator-specific knobs</span>
+    <span class="n">tuning_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>       <span class="c1"># forwarded to TabularPipeline (e.g. device)</span>
+    <span class="n">processor_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                       <span class="c1"># optional networkx.DiGraph</span>
+    <span class="n">infer_graph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>        <span class="c1"># PC-algorithm graph discovery</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="treatment-model-override">Treatment Model Override<a class="headerlink" href="#treatment-model-override" title="Permanent link">¶</a></h3>
+<p><code>treatment_model</code> accepts a sub-dict mirroring <code>TabularPipeline</code>, letting the treatment propensity model differ from the outcome model:</p>
+<div class="highlight"><pre><span></span><code><span class="n">treatment_model</span><span class="o">=</span><span class="p">{</span><span class="s2">"model_name"</span><span class="p">:</span> <span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="s2">"tuning_strategy"</span><span class="p">:</span> <span class="s2">"inference"</span><span class="p">}</span>
+</code></pre></div>
+<p>When omitted, the treatment model uses the same TFM as the outcome model.</p>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fit(X, y)</code></td>
+<td><code>self</code></td>
+<td>Identify, then fit nuisance learners + estimator</td>
+</tr>
+<tr>
+<td><code>evaluate(X_test=None, y_test=None, include=("effect",), output_format="rich", output_path=None)</code></td>
+<td><code>dict</code></td>
+<td>Compose the requested report blocks</td>
+</tr>
+<tr>
+<td><code>evaluate_identification(output_format="rich")</code></td>
+<td><code>dict</code></td>
+<td>Step-1 identification result</td>
+</tr>
+<tr>
+<td><code>evaluate_refutation(output_format="rich")</code></td>
+<td><code>dict</code></td>
+<td>Refuter battery only</td>
+</tr>
+<tr>
+<td><code>evaluate_proxy(output_format="rich")</code></td>
+<td><code>dict</code></td>
+<td>Proxy audit only (needs <code>sensitive</code>)</td>
+</tr>
+<tr>
+<td><code>evaluate_counterfactual_fairness(output_format="rich")</code></td>
+<td><code>dict</code></td>
+<td>Counterfactual-fairness audit only (needs <code>sensitive</code>)</td>
+</tr>
+<tr>
+<td><code>predict_cate(X_query, return_ci=False)</code></td>
+<td><code>ndarray</code> or <code>dict</code></td>
+<td>Per-row conditional treatment effects</td>
+</tr>
+<tr>
+<td><code>predict_counterfactual(row, intervention)</code></td>
+<td><code>dict</code></td>
+<td>Single-row counterfactual prediction</td>
+</tr>
+<tr>
+<td><code>get_params(deep=True)</code></td>
+<td><code>dict</code></td>
+<td>sklearn-style parameter dict</td>
+</tr>
+</tbody>
+</table>
+<h3 id="include-options-for-evaluate"><code>include</code> Options for <code>evaluate()</code><a class="headerlink" href="#include-options-for-evaluate" title="Permanent link">¶</a></h3>
+<p><code>"effect"</code> (always included), <code>"identification"</code>, <code>"refutation"</code>, <code>"proxy"</code>, <code>"counterfactual_fairness"</code>. The audits are silently skipped if <code>sensitive</code> was not provided.</p>
+<h3 id="output-formats">Output Formats<a class="headerlink" href="#output-formats" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>"rich"</code> — pretty-prints through the TabTune logger <strong>and</strong> returns the dict.</li>
+<li><code>"json"</code> — prints a JSON dump and returns the dict.</li>
+<li><code>"silent"</code> — returns the dict with no side effects.</li>
+</ul>
+<hr/>
+<h2 id="9-causalleaderboard-api-reference">9. CausalLeaderboard API Reference<a class="headerlink" href="#9-causalleaderboard-api-reference" title="Permanent link">¶</a></h2>
+<p>Rank multiple <code>(estimator × TFM)</code> configurations on the same data.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.causal</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalLeaderboard</span>
+
+<span class="n">lb</span> <span class="o">=</span> <span class="n">CausalLeaderboard</span><span class="p">(</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="s2">"treated"</span><span class="p">,</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="s2">"outcome"</span><span class="p">,</span>
+    <span class="n">confounders</span><span class="o">=</span><span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"income"</span><span class="p">,</span> <span class="s2">"score"</span><span class="p">],</span>
+    <span class="n">sensitive</span><span class="o">=</span><span class="p">[</span><span class="s2">"gender"</span><span class="p">],</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"TabPFNv26"</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span> <span class="n">estimator</span><span class="o">=</span><span class="s2">"dml"</span><span class="p">)</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"TabICLv2"</span><span class="p">,</span>  <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span> <span class="n">estimator</span><span class="o">=</span><span class="s2">"dml"</span><span class="p">)</span>
+<span class="n">lb</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"TabPFNv26"</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span> <span class="n">estimator</span><span class="o">=</span><span class="s2">"causal_forest"</span><span class="p">,</span>
+             <span class="n">estimator_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_estimators"</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
+
+<span class="n">ranked</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">rank_by</span><span class="o">=</span><span class="s2">"refuter_pass_rate"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ranked</span><span class="p">)</span>   <span class="c1"># DataFrame: label, model_name, estimator, ate, ci_*, refuter_pass_rate, ...</span>
+</code></pre></div>
+<h3 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>add_model(model_name, task_type, estimator="dml", tuning_strategy="inference", treatment_model=None, estimator_params=None, label=None)</code></td>
+<td><code>self</code></td>
+<td>Register one configuration (chainable)</td>
+</tr>
+<tr>
+<td><code>run(X, y, rank_by="refuter_pass_rate", include_refutation=True, include_proxy=False, include_counterfactual_fairness=False, verbose=True)</code></td>
+<td><code>DataFrame</code></td>
+<td>Fit every entry; return a ranked table</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rank_by-options"><code>rank_by</code> Options<a class="headerlink" href="#rank_by-options" title="Permanent link">¶</a></h3>
+<p><code>"refuter_pass_rate"</code> (descending), <code>"ate_stability"</code> (ascending bootstrap-CI width), <code>"ci_width"</code> (ascending).</p>
+<hr/>
+<h2 id="10-estimator-selection-guide">10. Estimator Selection Guide<a class="headerlink" href="#10-estimator-selection-guide" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Estimator</th>
+<th>Best For</th>
+<th>Treatment</th>
+<th>Heterogeneous effects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Double ML</strong></td>
+<td>General-purpose default; robust ATE</td>
+<td>binary / continuous / multi-level</td>
+<td>Approximate (binary)</td>
+</tr>
+<tr>
+<td><strong>S-Learner</strong></td>
+<td>Quick baseline; large effects</td>
+<td>binary</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>T-Learner</strong></td>
+<td>Balanced arms with ample data</td>
+<td>binary</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>X-Learner</strong></td>
+<td>Imbalanced treatment assignment</td>
+<td>binary</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>R-Learner</strong></td>
+<td>State-of-the-art CATE</td>
+<td>binary</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Causal Forest</strong></td>
+<td>Non-parametric CATE with CIs</td>
+<td>binary</td>
+<td>Yes (with intervals)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision-flowchart">Decision Flowchart<a class="headerlink" href="#decision-flowchart" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart LR
+    A([Start]) --&gt; B{Multi-level or continuous T?}
+    B --&gt;|Yes| C[dml]
+    B --&gt;|No| D{Need per-row CATE?}
+    D --&gt;|No| C
+    D --&gt;|Yes| E{Imbalanced treatment?}
+    E --&gt;|Yes| F[x_learner]
+    E --&gt;|No| G{Want CIs on each row?}
+    G --&gt;|Yes| H[causal_forest]
+    G --&gt;|No| I{State-of-the-art CATE?}
+    I --&gt;|Yes| J[r_learner]
+    I --&gt;|No| K[t_learner]
+</div>
+<hr/>
+<h2 id="11-references">11. References<a class="headerlink" href="#11-references" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Paper</th>
+<th>Component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Tanna, A. et al. (2025). <em>TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models.</em> arXiv:2511.02802.</td>
+<td>TabTune framework</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Chernozhukov, V. et al. (2018). <em>Double/Debiased Machine Learning for Treatment and Structural Parameters.</em> The Econometrics Journal.</td>
+<td>Double ML</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Künzel, S. et al. (2019). <em>Metalearners for Estimating Heterogeneous Treatment Effects using Machine Learning.</em> PNAS.</td>
+<td>S/T/X-Learners</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Nie, X. &amp; Wager, S. (2021). <em>Quasi-Oracle Estimation of Heterogeneous Treatment Effects.</em> Biometrika.</td>
+<td>R-Learner</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Wager, S. &amp; Athey, S. (2018). <em>Estimation and Inference of Heterogeneous Treatment Effects using Random Forests.</em> JASA.</td>
+<td>Causal Forest</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Pearl, J. (2009). <em>Causality: Models, Reasoning, and Inference.</em> Cambridge University Press.</td>
+<td>Identification</td>
+</tr>
+<tr>
+<td>7</td>
+<td>VanderWeele, T. &amp; Ding, P. (2017). <em>Sensitivity Analysis in Observational Research: Introducing the E-Value.</em> Annals of Internal Medicine.</td>
+<td>Sensitivity refuter</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Kusner, M. et al. (2017). <em>Counterfactual Fairness.</em> NeurIPS.</td>
+<td>Counterfactual-fairness audit</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

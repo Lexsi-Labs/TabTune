@@ -94,6 +94,9 @@
 <li>
 <a href="../../user-guide/distillation/">Distillation</a>
 </li>
+<li>
+<a href="../../user-guide/causal/">Causal Inference</a>
+</li>
 </ul>
 </li>
 <li class="dropdown active">
@@ -104,6 +107,9 @@
 </li>
 <li>
 <a href="../tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../tabpfnv3/">TabPFN v3</a>
 </li>
 <li>
 <a href="../tabicl/">TabICL</a>
@@ -135,10 +141,10 @@
 <a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
 <ul class="dropdown-menu">
 <li>
-<a href="../../framework/regression/regression.md">Regression Overview</a>
+<a href="../../regression/regression/">Regression Overview</a>
 </li>
 <li>
-<a href="../../framework/regression/regression_data_processing.md">Regression Data Processing</a>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
 </li>
 </ul>
 </li>
@@ -246,7 +252,7 @@
                         </a>
 </li>
 <li>
-<a href="../../user-guide/distillation/" rel="prev">
+<a href="../../user-guide/causal/" rel="prev">
 <i class="fas fa-arrow-left"></i> Previous
                         </a>
 </li>
@@ -269,10 +275,12 @@
 <li class="second-level"><a href="#1-model-ecosystem">1. Model Ecosystem</a></li>
 <li class="second-level"><a href="#2-model-comparison-matrix">2. Model Comparison Matrix</a></li>
 <li class="second-level"><a href="#3-selection-quick-tips">3. Selection Quick Tips</a></li>
+<li class="second-level"><a href="#4-feature-support-matrix">4. Feature Support Matrix</a></li>
 <li class="second-level"><a href="#5-performance-benchmarks">5. Performance Benchmarks</a></li>
-<li class="third-level"><a href="#51-memory-usage-estimates">5.1 Memory Usage Estimates</a></li>
-<li class="third-level"><a href="#52-inference-latency">5.2 Inference Latency</a></li>
-<li class="third-level"><a href="#55-benchmark-methodology">5.5 Benchmark Methodology</a></li>
+<li class="third-level"><a href="#51-accuracy-benchmarks">5.1 Accuracy Benchmarks</a></li>
+<li class="third-level"><a href="#52-memory-usage-estimates">5.2 Memory Usage Estimates</a></li>
+<li class="third-level"><a href="#53-inference-latency">5.3 Inference Latency</a></li>
+<li class="third-level"><a href="#54-benchmark-methodology">5.4 Benchmark Methodology</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
@@ -284,21 +292,17 @@
     A[Tabular Foundation Models] --&gt; B[ICL-Based Models]
     A --&gt; C[Transformer-Based Models]
     A --&gt; D[PFN-Based Models]
-    A --&gt; E[Probabilistic Models]
 
-    B --&gt; F[TabICL]
-    B --&gt; G[TabICLv2]
-    B --&gt; H[OrionMSP]
-    B --&gt; I[Orion BIX]
-    B --&gt; J[Mitra]
-    B --&gt; K[ContextTab]
+    B --&gt; E[TabICL]
+    B --&gt; F[OrionMSP]
+    B --&gt; G[Orion BIX]
+    B --&gt; H[Mitra]
+    B --&gt; I[ContextTab]
 
-    C --&gt; L[TabDPT]
+    C --&gt; J[TabDPT]
 
-    D --&gt; M[TabPFN-v2.5]
-    D --&gt; N[TabPFN-v2.6]
-
-    E --&gt; O[LimiX]
+    D --&gt; K[TabPFN]
+    D --&gt; L[TabPFN v3]
 </div>
 <hr/>
 <h2 id="2-model-comparison-matrix">2. Model Comparison Matrix<a class="headerlink" href="#2-model-comparison-matrix" title="Permanent link">¶</a></h2>
@@ -325,6 +329,16 @@
 <td>⭐⭐⭐⭐⭐</td>
 <td>⭐⭐</td>
 <td>⚠️</td>
+</tr>
+<tr>
+<td><strong>TabPFN v3</strong></td>
+<td>PFN/ICL</td>
+<td>Latest PriorLabs PFN, full FT</td>
+<td>Small-medium datasets</td>
+<td>&lt;50K</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>✅</td>
 </tr>
 <tr>
 <td><strong>TabICL</strong></td>
@@ -387,16 +401,6 @@
 <td>⚠️</td>
 </tr>
 <tr>
-<td><strong>TabPFN-v2.6</strong></td>
-<td>PFN/ICL</td>
-<td>Approximate Bayesian + Native FT</td>
-<td>Small datasets</td>
-<td>&lt;10K</td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>⭐⭐</td>
-<td>⚠️</td>
-</tr>
-<tr>
 <td><strong>TabICLv2</strong></td>
 <td>Scalable ICL</td>
 <td>Improved Column-Row Attention</td>
@@ -411,7 +415,8 @@
 <hr/>
 <h2 id="3-selection-quick-tips">3. Selection Quick Tips<a class="headerlink" href="#3-selection-quick-tips" title="Permanent link">¶</a></h2>
 <ul>
-<li>&lt;10K rows: TabPFN (inference) or TabICL (base‑ft)</li>
+<li>&lt;10K rows: TabPFN / TabPFN v3 (inference) or TabICL (base‑ft)</li>
+<li>Small-medium rows + fine-tuning: TabPFN v3 (native / meta-learning / SFT / PEFT, plus regression)</li>
 <li>50K–2M rows: OrionMSP (balanced) or Orion BIX (accuracy‑oriented)</li>
 <li>
 <blockquote>
@@ -421,6 +426,7 @@
 <li>Text‑heavy features: ContextTab</li>
 </ul>
 <hr/>
+<h2 id="4-feature-support-matrix">4. Feature Support Matrix<a class="headerlink" href="#4-feature-support-matrix" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -570,6 +576,7 @@
 </tr>
 </tbody>
 </table>
+<hr/>
 <h2 id="5-performance-benchmarks">5. Performance Benchmarks<a class="headerlink" href="#5-performance-benchmarks" title="Permanent link">¶</a></h2>
 <p>Performance characteristics vary significantly based on dataset size, hardware, and hyperparameters. The following benchmarks provide rough estimates based on typical configurations.</p>
 <div class="admonition note">
@@ -581,29 +588,23 @@
 - Software versions</p>
 <p>Use these as rough guidelines for relative comparisons.</p>
 </div>
-<h3 id="51-memory-usage-estimates">5.1 Memory Usage Estimates<a class="headerlink" href="#51-memory-usage-estimates" title="Permanent link">¶</a></h3>
-<p>Peak memory usage during training (approximate, GPU memory):</p>
+<h3 id="51-accuracy-benchmarks">5.1 Accuracy Benchmarks<a class="headerlink" href="#51-accuracy-benchmarks" title="Permanent link">¶</a></h3>
+<p>Typical accuracy ranges on standard OpenML datasets (medium-sized, ~10K-50K samples):</p>
 <table>
 <thead>
 <tr>
 <th>Model</th>
 <th>Strategy</th>
-<th>Memory Range</th>
+<th>Accuracy Range</th>
 <th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN-v2.5/v2.6</strong></td>
+<td><strong>TabPFN</strong></td>
 <td>inference</td>
-<td>2-4 GB</td>
-<td>Small datasets</td>
-</tr>
-<tr>
-<td><strong>TabPFN-v2.6</strong></td>
-<td>finetune (native)</td>
-<td>6-10 GB</td>
-<td>AMP helps</td>
+<td>0.75-0.85</td>
+<td>Best on small, clean datasets</td>
 </tr>
 <tr>
 <td><strong>TabICL / TabICLv2</strong></td>
@@ -618,6 +619,72 @@
 <td></td>
 </tr>
 <tr>
+<td><strong>OrionMSP</strong></td>
+<td>finetune</td>
+<td>0.82-0.93</td>
+<td>Strong generalization</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
+<td>finetune</td>
+<td>0.85-0.94</td>
+<td>Highest accuracy potential</td>
+</tr>
+<tr>
+<td><strong>TabDPT</strong></td>
+<td>finetune</td>
+<td>0.83-0.92</td>
+<td>Excellent on large datasets</td>
+</tr>
+<tr>
+<td><strong>Mitra</strong></td>
+<td>finetune</td>
+<td>0.84-0.93</td>
+<td>Complex pattern handling</td>
+</tr>
+<tr>
+<td><strong>ContextTab</strong></td>
+<td>finetune</td>
+<td>0.75-0.88</td>
+<td>Best with text features</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong>
+- Ranges represent typical performance on diverse datasets
+- Your results may vary significantly based on dataset characteristics
+- Fine-tuning (finetune/peft) generally outperforms inference by 5-15%</p>
+<h3 id="52-memory-usage-estimates">5.2 Memory Usage Estimates<a class="headerlink" href="#52-memory-usage-estimates" title="Permanent link">¶</a></h3>
+<p>Peak memory usage during training (approximate, GPU memory):</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Strategy</th>
+<th>Memory Range</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TabPFN</strong></td>
+<td>inference</td>
+<td>2-4 GB</td>
+<td>Small datasets</td>
+</tr>
+<tr>
+<td><strong>TabICL</strong></td>
+<td>inference</td>
+<td>3-6 GB</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td><strong>TabICL</strong></td>
+<td>finetune</td>
+<td>8-16 GB</td>
+<td>Full model</td>
+</tr>
+<tr>
 <td><strong>TabICL</strong></td>
 <td>peft</td>
 <td>4-8 GB</td>
@@ -627,31 +694,31 @@
 <td><strong>OrionMSP</strong></td>
 <td>finetune</td>
 <td>10-20 GB</td>
-<td></td>
+<td>Large context</td>
 </tr>
 <tr>
 <td><strong>OrionBix</strong></td>
 <td>finetune</td>
 <td>12-24 GB</td>
-<td></td>
+<td>Biaxial layers</td>
 </tr>
 <tr>
 <td><strong>TabDPT</strong></td>
 <td>finetune</td>
 <td>12-28 GB</td>
-<td></td>
+<td>Large transformer</td>
 </tr>
 <tr>
 <td><strong>Mitra</strong></td>
 <td>finetune</td>
 <td>16-32 GB</td>
-<td></td>
+<td>2D attention</td>
 </tr>
 <tr>
 <td><strong>ContextTab</strong></td>
 <td>finetune</td>
 <td>8-16 GB</td>
-<td></td>
+<td>Embedding overhead</td>
 </tr>
 </tbody>
 </table>
@@ -660,7 +727,7 @@
 - Reduce batch size
 - Use gradient accumulation
 - Process large datasets in chunks</p>
-<h3 id="52-inference-latency">5.2 Inference Latency<a class="headerlink" href="#52-inference-latency" title="Permanent link">¶</a></h3>
+<h3 id="53-inference-latency">5.3 Inference Latency<a class="headerlink" href="#53-inference-latency" title="Permanent link">¶</a></h3>
 <p>Average inference time per batch (batch_size=32, GPU):</p>
 <table>
 <thead>
@@ -672,12 +739,12 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN-v2.5/v2.6</strong></td>
+<td><strong>TabPFN</strong></td>
 <td>10-50</td>
 <td>640-3200</td>
 </tr>
 <tr>
-<td><strong>TabICL / TabICLv2</strong></td>
+<td><strong>TabICL</strong></td>
 <td>20-80</td>
 <td>400-1600</td>
 </tr>
@@ -706,15 +773,10 @@
 <td>100-300</td>
 <td>107-320</td>
 </tr>
-<tr>
-<td><strong>LimiX</strong></td>
-<td>40-120</td>
-<td>267-800</td>
-</tr>
 </tbody>
 </table>
 <p><strong>Note:</strong> Latency increases with dataset size (for ICL models that use training data as context).</p>
-<h3 id="55-benchmark-methodology">5.5 Benchmark Methodology<a class="headerlink" href="#55-benchmark-methodology" title="Permanent link">¶</a></h3>
+<h3 id="54-benchmark-methodology">5.4 Benchmark Methodology<a class="headerlink" href="#54-benchmark-methodology" title="Permanent link">¶</a></h3>
 <p>When comparing models:</p>
 <ol>
 <li><strong>Use same dataset splits</strong>: Ensure train/test consistency</li>
@@ -744,6 +806,8 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <script>var base_url = "../.."</script>
 <script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="../../search/main.js"></script>
 <script>
         // Initialize Mermaid v9.x after DOM loads
