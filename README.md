@@ -63,21 +63,6 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 -   ✅ **TabFM Integration (Google Research)** -- Full end-to-end support for Google's new zero-shot tabular foundation model `TabFM`, integrated exactly like the other TFMs: unified `.fit()/.predict()/.evaluate()`, model-aware preprocessing, inference, episodic meta-learning fine-tuning, SFT, and **PEFT/LoRA** for both classification and regression. TabFM also plugs into ensembling, distillation, calibration and fairness workflows out of the box.
 
-
--   ✅ **TabPFN v3 Integration** -- Full support for the latest PriorLabs Model : `TabPFNv3`, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.
-
--   ✅ **Causal Inference Module Integration** -- Full support for treatment effect estimation using tabular foundation models through a unified `CausalAnalysis` API, enabling identification, estimation, and refutation workflows.
-
--   ✅ **Six Causal Estimators** -- Includes Double Machine Learning (DML), S-Learner, T-Learner, X-Learner, R-Learner, and Causal Forests for robust average and heterogeneous treatment effect estimation.
-
--   ✅ **Built-in Causal Validation** -- Supports formal causal identification, placebo tests, random common cause checks, subset stability analysis, and sensitivity analysis through an integrated refutation framework.
-
--   ✅ **Fairness & Compliance Audits** -- Includes proxy attribute detection and counterfactual fairness evaluation with automated reporting for fairness-critical deployments.
-
--   ✅ **Counterfactual & Heterogeneous Effect Analysis** -- Supports per-row Conditional Average Treatment Effects (CATE), counterfactual prediction, and treatment effect exploration at the individual level.
-
--   ✅ **CausalLeaderboard Benchmarking** -- Compare multiple `(Estimator × TFM)` combinations using treatment effect stability, confidence intervals, and refutation pass rates.
-
 ---
 
 ## 📊 Supported Models
@@ -738,6 +723,8 @@ pipeline = TabularPipeline(
 | 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
 | 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
 | 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
+| 17 | TabFM - Model Usage | Showcase TabFM model support |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KlsPxvwngA8e8cqJL0m8GWI2X7NqxEv3?usp=sharing)|
+
 
 ## 🚀 Advanced Usage
 
