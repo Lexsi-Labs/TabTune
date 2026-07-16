@@ -11,6 +11,14 @@ joblib>=1.0.0
 openml>=0.12.0
 tqdm>=4.60.0
 
+# Causal inference (tabtune.causal)
+doubleml>=0.7.0
+econml>=0.15.0
+networkx>=3.0
+jinja2>=3.0.0
+dowhy>=0.11
+causal-learn>=0.1.3.0
+
 # Data processing
 category_encoders>=2.0.0
 imbalanced-learn>=0.8.0
@@ -18,6 +26,14 @@ imbalanced-learn>=0.8.0
 # NLP and embeddings
 sentence-transformers>=2.0.0,<3.0.0
 huggingface_hub>=0.10.0
+
+# Google TabFM: the model is VENDORED into tabtune/models/tabfm (real architecture
+# + HF loader + preprocessing engine, ported from google-research/tabfm, Apache-2.0).
+# No `tabfm` pip package is required. Pretrained weights (google/tabfm-1.0.0-pytorch)
+# auto-download via huggingface_hub (above). The vendored engine needs these two
+# lightweight, JAX-free typing helpers:
+jaxtyping>=0.2,<0.3
+typeguard>=2.13,<3
 
 # Utilities
 einops>=0.6.0

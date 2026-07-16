@@ -886,11 +886,34 @@ if sklearn_version < parse_version("1.8"):
             return isinstance(X, pl.DataFrame)
 
     else:
-        from sklearn.utils.validation import _is_pandas_df as is_pandas_df  # noqa: F401
-        from sklearn.utils.validation import (
-            _is_pandas_df_or_series as is_pandas_df_or_series,
-        )  # noqa: F401
-        from sklearn.utils.validation import _is_polars_df as is_polars_df  # noqa: F401
+        try:
+            from sklearn.utils.validation import _is_pandas_df as is_pandas_df  # noqa: F401
+            from sklearn.utils.validation import (
+                _is_pandas_df_or_series as is_pandas_df_or_series,
+            )  # noqa: F401
+            from sklearn.utils.validation import _is_polars_df as is_polars_df  # noqa: F401
+        except ImportError:
+            # sklearn >= 1.7 removed these private helpers; define fallbacks.
+            def is_pandas_df(X):
+                try:
+                    pd = sys.modules["pandas"]
+                except KeyError:
+                    return False
+                return isinstance(X, pd.DataFrame)
+
+            def is_pandas_df_or_series(X):
+                try:
+                    pd = sys.modules["pandas"]
+                except KeyError:
+                    return False
+                return isinstance(X, (pd.DataFrame, pd.Series))
+
+            def is_polars_df(X):
+                try:
+                    pl = sys.modules["polars"]
+                except KeyError:
+                    return False
+                return isinstance(X, pl.DataFrame)
 
     if sklearn_version < parse_version("1.5"):
 

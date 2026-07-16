@@ -262,12 +262,20 @@ else:
     from sklearn.utils.validation import (
         _is_fitted,  # noqa: F401
     )
-    # Handle sklearn version compatibility: _is_pandas_df was renamed to is_pandas_df in newer versions
+    # Handle sklearn version compatibility: _is_pandas_df was renamed/removed across versions.
     try:
         from sklearn.utils.validation import _is_pandas_df  # noqa: F401
     except ImportError:
-        # For sklearn >= 1.6, use the public API
-        from sklearn.utils.validation import is_pandas_df as _is_pandas_df  # noqa: F401
+        try:
+            from sklearn.utils.validation import is_pandas_df as _is_pandas_df  # noqa: F401
+        except ImportError:
+            # sklearn >= 1.7 removed this private helper; define a fallback.
+            def _is_pandas_df(X):  # noqa: F811
+                try:
+                    import pandas as pd
+                except ImportError:
+                    return False
+                return isinstance(X, pd.DataFrame)
 
 
 ########################################################################################

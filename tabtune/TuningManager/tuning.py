@@ -40,6 +40,7 @@ from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.tabdpt.utils import pad_x
 from ..models.tabdpt.model import TabDPTModel
 from ..models.limix.classifier import LimixClassifier
+from ..models.tabfm.classifier import TabFMClassifier
 
 from ..models.regression.tabpfn.regressor import TabPFNRegressorWrapper
 from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
@@ -47,6 +48,7 @@ from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
 from ..models.regression.mitra.regressor import MitraRegressorWrapper
 from ..models.regression.limix.regressor_wrapper import LimixRegressorWrapper
 from ..models.tabiclv2.sklearn.regressor import TabICLRegressor as TabICLv2Regressor
+from ..models.regression.tabfm.regressor import TabFMRegressorWrapper
 
 from ..models.tabpfnv26 import TabPFNv26Classifier
 from ..models.tabpfnv3 import TabPFNv3Classifier
@@ -74,7 +76,7 @@ class TuningManager:
 
         # --- Regression wrappers: allow ContextTab finetune (turn-by-turn) ---
         if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
-                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor)):
+                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper)):
             if strategy == 'inference':
                 logger.info("[TuningManager] Regression model - inference path")
                 model.fit(X_train, y_train)
@@ -135,6 +137,15 @@ class TuningManager:
             if isinstance(model, TabICLv2Regressor) and strategy == "finetune":
                 logger.info("[TuningManager] Fine-tuning TabICLv2 regressor")
                 return self._finetune_tabiclv2_regression(model, X_train, y_train, params_copy)
+
+            # TabFM regression finetune (episodic turn-by-turn)
+            if isinstance(model, TabFMRegressorWrapper) and strategy == "finetune":
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    logger.warning(
+                        f"[TuningManager] TabFM regression finetune supports finetune_mode "
+                        f"'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'. Auto-correcting."
+                    )
+                return self._finetune_tabfm_regression_turn_by_turn(model, X_train, y_train, params_copy)
 
 
             raise NotImplementedError(
@@ -238,6 +249,15 @@ class TuningManager:
             is_finetuned = True
 
 
+        elif isinstance(model, TabFMClassifier) and selected_strategy in ('finetune', 'peft'):
+            if finetune_mode == 'sft':
+                logger.info("[TuningManager] Using Pure SFT for TabFM (task-optimized)")
+                self._finetune_tabfm(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='sft')
+            else:  # default: 'meta-learning' (matches TabFM's in-context paradigm)
+                logger.info("[TuningManager] Using Episodic Meta-Learning for TabFM (default)")
+                self._finetune_tabfm(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='meta-learning')
+            is_finetuned = True
+
         elif isinstance(model, LimixClassifier) and selected_strategy in ('finetune', 'peft'):
             msg = "[TuningManager] Limix fine-tuning not supported; falling back to inference-mode fit (.fit) only."
             print(msg)
@@ -262,6 +282,9 @@ class TuningManager:
             model.fit(X_train, y_train)
         elif isinstance(model, TabPFNv3Classifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabPFNv3 (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, TabFMClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for TabFM (zero-shot inference mode)")
             model.fit(X_train, y_train)
         else:
             logger.info("[TuningManager] Applying standard model fitting (.fit)")
@@ -845,6 +868,210 @@ class TuningManager:
                     iterable.set_postfix(loss=f"{loss.item():.4f}")
         logger.info("[TuningManager] Fine-tuning complete")
 
+
+    @staticmethod
+    def _tabfm_episode_tensors(X_np, y_np, s_idx, q_idx, cat_mask, device, is_reg=False):
+        """Build one episode for the REAL TabFM forward.
+
+        Support rows are concatenated before query rows along the sequence (T)
+        axis; ``train_size`` marks the boundary. The model consumes ``y`` only
+        for rows < train_size (context), so query targets are placeholders here
+        and are compared against the sliced query logits by the caller.
+
+        Returns (x[1,T,H], y[1,T], train_size[1], d[1], cat_mask[1,H]|None,
+        query_targets_tensor).
+        """
+        s, q = len(s_idx), len(q_idx)
+        H = X_np.shape[1]
+        x_ep = np.concatenate([X_np[s_idx], X_np[q_idx]], axis=0).astype(np.float32)  # [T,H]
+        if is_reg:
+            y_ctx = y_np[s_idx].astype(np.float32)
+            y_ep = np.concatenate([y_ctx, np.zeros(q, dtype=np.float32)])            # [T]
+            yq = torch.from_numpy(y_np[q_idx].astype(np.float32)).to(device)
+            y_t = torch.from_numpy(y_ep).float().unsqueeze(0).to(device)
+        else:
+            y_ctx = y_np[s_idx].astype(np.int64)
+            y_ep = np.concatenate([y_ctx, np.zeros(q, dtype=np.int64)])              # [T]
+            yq = torch.from_numpy(y_np[q_idx].astype(np.int64)).to(device)
+            y_t = torch.from_numpy(y_ep).long().unsqueeze(0).to(device)
+        x_t = torch.from_numpy(x_ep).float().unsqueeze(0).to(device)                 # [1,T,H]
+        ts = torch.full((1,), s, dtype=torch.long, device=device)                   # train_size
+        d_t = torch.full((1,), H, dtype=torch.long, device=device)
+        cm = None
+        if cat_mask is not None:
+            cm = torch.from_numpy(np.asarray(cat_mask, dtype=bool)).unsqueeze(0).to(device)
+        return x_t, y_t, ts, d_t, cm, yq
+
+    def _finetune_tabfm(self, model: TabFMClassifier, X_train, y_train, params=None, peft_config=None, mode='meta-learning'):
+        """Episodic fine-tuning of the REAL vendored TabFM backbone (classification).
+
+        TabFM is an in-context learner, so -- like TabICL / Mitra -- the default
+        adaptation is *episodic meta-learning*: repeatedly sample a labelled
+        support set + a query set, run the model's **real** forward
+        ``model_(x, y, train_size, cat_mask, d)`` (support+query concatenated
+        along T; ``train_size`` marks the context boundary), and minimise
+        cross-entropy on the query logits (sliced at ``[:, train_size:, :]``).
+        ``mode='sft'`` fixes one large episode and trains it for many steps.
+
+        ``X_train`` is the RAW frame: fine-tuning fits the vendored estimator
+        (preprocessing + context) and then episode features come from the
+        vendored normalisation (:meth:`prepare_episode_features`). LoRA/PEFT is
+        injected into the real ``model_`` via :func:`apply_tabular_lora`.
+        """
+        logger.info("[TuningManager] Starting %s fine-tuning for TabFM (real backbone)", mode)
+
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 5, "learning_rate": 2e-6, "show_progress": True,
+            "support_size": 64, "query_size": 32, "steps_per_epoch": 200,
+            "weight_decay": 0.0, "grad_clip": 1.0,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)  # vendored preprocessing/context + y_encoder_/classes_
+        if model.model_ is None:
+            logger.warning("[TuningManager] TabFM backbone unavailable; skipping fine-tuning.")
+            return model
+
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("TabFM", model.model_, peft_config)
+                logger.info("[TuningManager] PEFT SUCCESS: LoRA adapters applied to TabFM")
+            except Exception as e:
+                logger.warning(f"[TuningManager] PEFT FAILED for TabFM: {e}. Base fine-tuning instead.")
+
+        model.model_.to(device).train()
+        for p in model.model_.parameters():
+            p.data = p.data.to(device)
+
+        X_np, cat_mask = model.prepare_episode_features(X_train)
+        y_np = np.clip(model.y_encoder_.transform(np.asarray(y_train).ravel()).astype(np.int64), 0, model.max_classes - 1)
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(1, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = Adam([p for p in model.model_.parameters() if p.requires_grad],
+                         lr=config["learning_rate"], weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.CrossEntropyLoss()
+
+        # Fixed split for SFT; fresh random split each step for meta-learning.
+        fixed = np.random.permutation(n_samples) if mode == 'sft' else None
+
+        def _step():
+            if fixed is not None:
+                s_idx, q_idx = fixed[:s_sz], fixed[s_sz:s_sz + q_sz]
+            else:
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+            x_t, y_t, ts, d_t, cm, yq = self._tabfm_episode_tensors(
+                X_np, y_np, s_idx, q_idx, cat_mask, device, is_reg=False)
+            logits = model.icl_logits(x_t, y_t, ts, cat_mask=cm, d=d_t)  # [1,T,K]
+            ql = logits[:, len(s_idx):, :].reshape(-1, logits.size(-1)).float()
+            return loss_fn(ql, yq)
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"TabFM {mode} Epoch {epoch}") if config["show_progress"] else range(steps)
+            for _ in iterable:
+                optimizer.zero_grad()
+                try:
+                    loss = _step()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] TabFM episode skipped: {e}")
+                    continue
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)  # refresh in-context context with fine-tuned weights
+        logger.info("[TuningManager] TabFM fine-tuning complete")
+        return model
+
+    def _finetune_tabfm_regression_turn_by_turn(self, model, X_train, y_train, params=None):
+        """Episodic turn-by-turn fine-tuning of the REAL TabFM regression backbone.
+
+        Minimises MSE between the query predictions (real forward, sliced at the
+        context boundary) and the standardised targets, mirroring the TabDPT /
+        Mitra regression fine-tuners.
+        """
+        logger.info("[TuningManager] Starting TabFM regression fine-tuning (turn-by-turn, real backbone)")
+
+        config = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "epochs": 5, "learning_rate": 2e-6, "support_size": 64, "query_size": 32,
+            "steps_per_epoch": 200, "show_progress": True, "grad_clip": 1.0, "peft_config": None,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)
+        if model.model_ is None:
+            logger.warning("[TuningManager] TabFM regression backbone unavailable; skipping.")
+            return model
+
+        peft_config = config.get("peft_config")
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("TabFM", model.model_, peft_config)
+                logger.info("[TuningManager] LoRA adapters applied to TabFM regressor")
+            except Exception as e:
+                logger.warning(f"[TuningManager] TabFM regression PEFT failed: {e}")
+
+        model.model_.to(device).train()
+
+        X_np, cat_mask = model.prepare_episode_features(X_train)
+        y_np = np.asarray(y_train, dtype=float).ravel()
+        y_mean, y_std = float(np.mean(y_np)), float(np.std(y_np) + 1e-8)
+        y_scaled = ((y_np - y_mean) / y_std).astype(np.float32)
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(1, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = Adam([p for p in model.model_.parameters() if p.requires_grad], lr=config["learning_rate"])
+        loss_fn = torch.nn.MSELoss()
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"TabFM Reg Epoch {epoch}") if config["show_progress"] else range(steps)
+            for _ in iterable:
+                optimizer.zero_grad()
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+                x_t, y_t, ts, d_t, cm, yq = self._tabfm_episode_tensors(
+                    X_np, y_scaled, s_idx, q_idx, cat_mask, device, is_reg=True)
+                try:
+                    out = model.icl_predict(x_t, y_t, ts, cat_mask=cm, d=d_t)  # [1,T]
+                    preds = out[:, len(s_idx):].reshape(-1).float()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] TabFM reg episode skipped: {e}")
+                    continue
+                if preds.shape[0] != yq.shape[0]:
+                    continue
+                loss = loss_fn(preds, yq)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)
+        logger.info("[TuningManager] TabFM regression fine-tuning complete")
+        return model
 
     def _finetune_tabicl_pure_sft(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier) , X_train_processed, y_train_processed, params=None, peft_config=None):
         """

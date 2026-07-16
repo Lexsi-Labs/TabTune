@@ -129,6 +129,34 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
             "column_aggregator",
         ),
     ),
+    # TabFM (Google): the VENDORED architecture (tabtune/models/tabfm/model/model.py).
+    # Real nn.Linear leaf names -> target the attention projections (q/k/v/out),
+    # the swiglu FFN linears (linear1/linear1_gate/linear2), the Fourier cell
+    # embedders (in_linear/in_linear_cat), and the column/row/ICL transformer
+    # stacks (tf_col/tf_row/tf_icl) + col out_w + the ICL decoder MLP. TabFM's
+    # y-encoder/decoder head widths depend on the FIXED model hyperparam
+    # `max_classes` (not the dataset's class count), so no exclusions are needed.
+    "TabFM": LoraTargetConfig(
+        target_substrings=(
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "out_proj",
+            "linear1",
+            "linear1_gate",
+            "linear2",
+            "in_linear",
+            "in_linear_cat",
+            "out_w",
+            "tf_col",
+            "tf_row",
+            "tf_icl",
+            "cell_embedder",
+            "col_embedder",
+            "row_interactor",
+            "icl_predictor.decoder",
+        ),
+    ),
 }
 
 
@@ -244,6 +272,9 @@ def apply_tabular_lora(
     elif model_name == "TabPFNv3":
         # y-encoders can be class-count dependent; keep them full-rank.
         exclude_patterns = ["col_y_encoder", "icl_y_encoder", "y_encoder"]
+    # TabFM needs no exclusions: its y-encoder / decoder head widths depend on the
+    # fixed `max_classes` model hyperparam (not the dataset class count), so they
+    # are safe to adapt with LoRA.
     
     return inject_custom_lora_into_linear_layers(
         model,

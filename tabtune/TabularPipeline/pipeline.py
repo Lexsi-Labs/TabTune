@@ -21,6 +21,7 @@ from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
 from ..models.orionmsp_v15.sklearn.classifier import OrionMSPv15Classifier
 from ..models.limix.classifier import LimixClassifier
+from ..models.tabfm.classifier import TabFMClassifier
 
 from ..models.tabiclv2.sklearn.classifier import TabICLClassifier as TabICLv2Classifier
 from ..models.tabiclv2.sklearn.regressor import TabICLRegressor as TabICLv2Regressor
@@ -32,6 +33,7 @@ from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
 from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
 from ..models.regression.mitra.regressor import MitraRegressorWrapper
 from ..models.regression.limix.regressor_wrapper import LimixRegressorWrapper
+from ..models.regression.tabfm.regressor import TabFMRegressorWrapper
 from ..Dataprocess.regression.base_processor import RegressionDataProcessor
 
 from ..resampling.context_sampling import sample_context, normalize_sampling_strategy_name
@@ -159,7 +161,7 @@ class TabularPipeline:
         # Validate regression mode: only inference is supported
         # Allow regression finetune for ContextTab (others still inference-only for now)
         if self.task_type == 'regression' and self.tuning_strategy != 'inference':
-            allowed = {"ContextTab", "Limix", "TabDPT","Mitra","TabPFN","TabPFNv26","TabPFNv3","TabICLv2"}
+            allowed = {"ContextTab", "Limix", "TabDPT","Mitra","TabPFN","TabPFNv26","TabPFNv3","TabICLv2","TabFM"}
             if not (self.model_name in allowed and self.tuning_strategy == "finetune"):
                 raise ValueError(
                     f"Regression finetuning is not enabled for model '{self.model_name}'. "
@@ -246,8 +248,16 @@ class TabularPipeline:
                 config = {'device': device, 'n_jobs': 1}
                 config.update(self.model_params)
                 self.model = TabICLv2Regressor(**config)
+            elif self.model_name == 'TabFM':
+                device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+                config = {'device': device, 'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                logger.info(f"[Pipeline] TabFM (regression) Config: {config}")
+                self.model = TabFMRegressorWrapper(**config)
+                if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+                    self.model._initialize_model_variables()
             else:
-                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, ContextTab, TabDPT, Mitra, Limix, TabICLv2")
+                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, ContextTab, TabDPT, Mitra, Limix, TabICLv2, TabFM")
         else:
             
             if self.model_name in ['TabPFN']:
@@ -337,9 +347,18 @@ class TabularPipeline:
                 if self.tuning_strategy in ('finetune', 'peft'):
                     self.model._load_model()
 
+            elif self.model_name == 'TabFM':
+                device = self.tuning_params.get('device', self.model_params.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+                config = {'device': device}
+                config.update(self.model_params)
+                logger.info(f"[Pipeline] TabFM Config: {config}")
+                self.model = TabFMClassifier(**config)
+                if self.tuning_strategy in ('finetune', 'peft'):
+                    self.model._load_model()
+
             # Handle models that require late initialization (processor needs to be fit first)
             elif self.model_name == 'Mitra':
-                pass                
+                pass
             else:
                 raise ValueError(f"Model '{self.model_name}' not supported for classification.")
 
@@ -508,6 +527,31 @@ class TabularPipeline:
 
                 raise ValueError(f"Unsupported tuning_strategy for TabICLv2 regression: {self.tuning_strategy}")
 
+            # TabFM handles all preprocessing internally (raw mixed-type frames in)
+            if isinstance(self.model, TabFMRegressorWrapper):
+                if self.tuning_strategy == "inference":
+                    logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
+                    self.model.fit(X_fit, y_fit)
+                    self._is_fitted = True
+                    logger.info("[Pipeline] Fit process complete")
+                    return self
+
+                if self.tuning_strategy == "finetune":
+                    logger.info(f"[Pipeline] Fine-tuning {self.model_name} regressor (raw data -> TuningManager)")
+                    self.model = self.tuner.tune(
+                        self.model,
+                        X_fit,
+                        y_fit,
+                        strategy="finetune",
+                        params=self.tuning_params,
+                        processor=None,
+                    )
+                    self._is_fitted = True
+                    logger.info("[Pipeline] Fit process complete")
+                    return self
+
+                raise ValueError(f"Unsupported tuning_strategy for TabFM regression: {self.tuning_strategy}")
+
             logger.info("[Pipeline] Fitting regression processor...")
             self.processor.fit(X_fit, y_fit)
 
@@ -640,7 +684,7 @@ class TabularPipeline:
 
 
         
-        if self.tuning_strategy == 'inference' and isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
+        if self.tuning_strategy == 'inference' and isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier, TabFMClassifier)):
             logger.info("[Pipeline] Handing off to TuningManager for inference setup.")
             self.processor.fit(X_fit, y_fit)
             self.model = self.tuner.tune(self.model, X_fit, y_fit, strategy=self.tuning_strategy)
@@ -691,8 +735,12 @@ class TabularPipeline:
                 self.model.device = device
 
 
-        if isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']:
-            logger.info("[Pipeline] Preparing raw data for ConTextTab fine-tuning")
+        if (isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']) or \
+           (isinstance(self.model, TabFMClassifier) and self.tuning_strategy in ['finetune', 'peft']):
+            # TabFM (like ContextTab) fine-tunes on RAW frames: the vendored engine
+            # runs its own preprocessing, and episode features come from the
+            # vendored normalisation inside the TuningManager.
+            logger.info(f"[Pipeline] Preparing raw data for {self.model_name} fine-tuning")
             if not isinstance(X_fit, pd.DataFrame):
                 X_to_tune = pd.DataFrame(X_fit)
             else:
@@ -761,7 +809,7 @@ class TabularPipeline:
         
         # Handle regression models
         if self.task_type == 'regression':
-            if isinstance(self.model, (ConTextTabRegressorWrapper, LimixRegressorWrapper, TabICLv2Regressor)):
+            if isinstance(self.model, (ConTextTabRegressorWrapper, LimixRegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper)):
                 predictions = self.model.predict(X)
                 return predictions
             else:
@@ -794,14 +842,16 @@ class TabularPipeline:
             return predictions
             
 
-        if isinstance(self.model, (ConTextTabClassifier)):
+        if isinstance(self.model, (ConTextTabClassifier, TabFMClassifier)):
+            # TabFM / ConTextTab run their own preprocessing on RAW frames and
+            # return labels in the original space (inference AND after fine-tuning).
             logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
             predictions = self.model.predict(X)
-            
+
         elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
-            logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")  
+            logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
             X_processed = self.processor.transform(X)
-            
+
             if self.tuning_strategy == 'inference':
                 predictions = self.model.predict(X)
             else:
@@ -979,11 +1029,12 @@ class TabularPipeline:
             return self.model.predict_proba(X_processed)
             
         
-        if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, ConTextTabClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
+        if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, ConTextTabClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier, TabFMClassifier)):
             logger.debug("[Pipeline] Using model's native predict_proba method")
-            
+
             X_processed = self.processor.transform(X)
-            if isinstance(self.model, (ConTextTabClassifier)):
+            if isinstance(self.model, (ConTextTabClassifier, TabFMClassifier)):
+                 # TabFM / ConTextTab: raw-frame native predict_proba (both modes).
                  return self.model.predict_proba(X)
 
             if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
