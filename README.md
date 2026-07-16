@@ -63,7 +63,6 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 -   ✅ **TabFM Integration (Google Research)** -- Full end-to-end support for Google's new zero-shot tabular foundation model `TabFM`, integrated exactly like the other TFMs: unified `.fit()/.predict()/.evaluate()`, model-aware preprocessing, inference, episodic meta-learning fine-tuning, SFT, and **PEFT/LoRA** for both classification and regression. TabFM also plugs into ensembling, distillation, calibration and fairness workflows out of the box.
 
--   🔬 **"Beyond Accuracy" TabFM Study** -- A reproducible A100-ready study suite (`experiments/tabfm_study/`) auditing TabFM on **calibration** (the *calibration tax of adaptation*), **fairness** (the *synthetic-prior fairness* hypothesis), **ensembling diversity**, and **1000× distillation** — all driven through TabTune's unified harness.
 
 -   ✅ **TabPFN v3 Integration** -- Full support for the latest PriorLabs Model : `TabPFNv3`, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.
 
@@ -111,10 +110,6 @@ cd TabTune
 pip install -r requirements.txt
 pip install -e .
 ```
-
-> **TabFM (Google):** the `TabFM` model requires the optional `tabfm` package with the
-> PyTorch backend. Install it alongside TabTune with `pip install "tabfm[pytorch]"`.
-> Pretrained weights (`google/tabfm-1.0.0-pytorch`) are auto-downloaded from the Hugging Face Hub on first use.
 
 ---
 
