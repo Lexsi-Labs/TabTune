@@ -61,6 +61,10 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
+-   ✅ **TabFM Integration (Google Research)** -- Full end-to-end support for Google's new zero-shot tabular foundation model `TabFM`, integrated exactly like the other TFMs: unified `.fit()/.predict()/.evaluate()`, model-aware preprocessing, inference, episodic meta-learning fine-tuning, SFT, and **PEFT/LoRA** for both classification and regression. TabFM also plugs into ensembling, distillation, calibration and fairness workflows out of the box.
+
+-   🔬 **"Beyond Accuracy" TabFM Study** -- A reproducible A100-ready study suite (`experiments/tabfm_study/`) auditing TabFM on **calibration** (the *calibration tax of adaptation*), **fairness** (the *synthetic-prior fairness* hypothesis), **ensembling diversity**, and **1000× distillation** — all driven through TabTune's unified harness.
+
 -   ✅ **TabPFN v3 Integration** -- Full support for the latest PriorLabs Model : `TabPFNv3`, with end-to-end inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for both classification and regression. Added as a new model entry alongside the existing TabPFNv2.6 integration.
 
 -   ✅ **Causal Inference Module Integration** -- Full support for treatment effect estimation using tabular foundation models through a unified `CausalAnalysis` API, enabling identification, estimation, and refutation workflows.
@@ -93,6 +97,7 @@ Using diverse tabular foundation models often requires writing model-specific bo
 | **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
 | **TabPFN-v3** | PFN / ICL | Newest PriorLabs Prior-Fitted Network; updated architecture and checkpoints | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
 | **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
+| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → row compression → 24-block causal ICL Transformer; pretrained purely on synthetic SCM data | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
  
 *Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
 
@@ -105,6 +110,44 @@ git clone https://github.com/Lexsi-Labs/TabTune.git
 cd TabTune
 pip install -r requirements.txt
 pip install -e .
+```
+
+> **TabFM (Google):** the `TabFM` model requires the optional `tabfm` package with the
+> PyTorch backend. Install it alongside TabTune with `pip install "tabfm[pytorch]"`.
+> Pretrained weights (`google/tabfm-1.0.0-pytorch`) are auto-downloaded from the Hugging Face Hub on first use.
+
+---
+
+## 🟦 TabFM (Google) — Quick Start
+
+TabFM is used through the same unified API as every other model:
+
+```python
+from tabtune import TabularPipeline
+
+# Zero-shot in-context classification (no training)
+pipe = TabularPipeline(model_name="TabFM", task_type="classification", tuning_strategy="inference")
+pipe.fit(X_train, y_train)
+print(pipe.evaluate(X_test, y_test))
+
+# Parameter-efficient fine-tuning (LoRA on TabFM's attention + ICL blocks)
+pipe = TabularPipeline(
+    model_name="TabFM",
+    task_type="classification",
+    tuning_strategy="peft",
+    tuning_params={
+        "epochs": 5,
+        "learning_rate": 2e-6,
+        "finetune_mode": "meta-learning",   # or "sft"
+        "peft_config": {"r": 8, "lora_alpha": 16, "lora_dropout": 0.05},
+    },
+)
+pipe.fit(X_train, y_train)
+
+# Regression (episodic turn-by-turn fine-tuning also supported)
+reg = TabularPipeline(model_name="TabFM", task_type="regression", tuning_strategy="inference")
+reg.fit(X_train, y_train)
+print(reg.evaluate(X_test, y_test))
 ```
 
 ---
@@ -254,7 +297,7 @@ pipeline.fit(X_train, y_train)
 ```
 
 **PEFT Support by Model**:
-- ✅ **Full Support**: TabICL, OrionMSP, OrionBix, TabDPT, Mitra
+- ✅ **Full Support**: TabICL, OrionMSP, OrionBix, TabDPT, Mitra, TabFM
 - ⚠️ **Experimental**: ContextTab and TabPFN (may cause prediction issues; use 'base-ft' instead)
 
 ---
@@ -577,15 +620,15 @@ TabularPipeline(
 
 #### Key Parameters:
 
-- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabPFNv3'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`.
+- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabPFNv3'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`, `'TabFM'`.
 
 - **`task_type`** (str): The type of task — `'classification'` or `'regression'`.
 
 - **`tuning_strategy`** (str): The strategy for model adaptation: `'inference'`, `'finetune'`, or `'peft'`.
 
 - **`finetune_mode`** (str, optional): Controls the fine-tuning algorithm. If `None`, a smart default is chosen per task type (`'turn_by_turn'` for regression, `'meta-learning'` for classification). Supported values per model:
-  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3)
-  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT)
+  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3, TabFM)
+  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM)
   - `'native'` — PriorLabs native finetuner with bar distribution loss, AMP, early stopping (**TabPFNv2.6 and TabPFNv3**, classification and regression)
   - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn (TabPFN regression, TabPFNv3 regression, Mitra regression, TabDPT regression, ContextTab regression)
 
@@ -765,6 +808,7 @@ TabTune is built upon the excellent work of the following projects and research 
 - **[TabDPT](https://github.com/layer6ai-labs/TabDPT-inference)** - Denoising Pre-training Transformer for Tabular Data
 - **[AutoGluon](https://github.com/autogluon/autogluon)** - AutoML framework that inspired our unified API design
 - **[LimiX](https://github.com/limix-ldm-ai/LimiX)** – Likelihood-based mixture modeling and probabilistic inference framework for structured tabular learning  
+- **[TabFM](https://github.com/google-research/tabfm)** – Google Research's zero-shot, hybrid-attention tabular foundation model pretrained on synthetic structural causal models  
 
 ---
 
