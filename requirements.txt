@@ -27,11 +27,7 @@ imbalanced-learn>=0.8.0
 sentence-transformers>=2.0.0,<3.0.0
 huggingface_hub>=0.10.0
 
-# Google TabFM: the model is VENDORED into tabtune/models/tabfm (real architecture
-# + HF loader + preprocessing engine, ported from google-research/tabfm, Apache-2.0).
-# No `tabfm` pip package is required. Pretrained weights (google/tabfm-1.0.0-pytorch)
-# auto-download via huggingface_hub (above). The vendored engine needs these two
-# lightweight, JAX-free typing helpers:
+
 jaxtyping>=0.2,<0.3
 typeguard>=2.13,<3
 
