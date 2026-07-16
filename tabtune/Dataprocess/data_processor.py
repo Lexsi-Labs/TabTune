@@ -22,12 +22,14 @@ from .orion_bix_preprocessor import OrionBixPreprocessor
 from .tabdpt_preprocessor import TabDPTPreprocessor
 from .limix_preprocessor import LimixPreprocessor
 from .tabiclv2_preprocessor import TabICLv2Preprocessor
+from .tabfm_preprocessor import TabFMPreprocessor
 from .regression.base_processor import RegressionDataProcessor
 from .regression.tabpfn_processor import TabPFNRegressionProcessor
 from .regression.contexttab_processor import ContextTabRegressionProcessor
 from .regression.tabdpt_processor import TabDPTRegressionProcessor
 from .regression.mitra_processor import MitraRegressionProcessor
 from .regression.limix_processor import LimixRegressionProcessor
+from .regression.tabfm_processor import TabFMRegressionProcessor
 
 class DataProcessor(BaseEstimator, TransformerMixin):
     """
@@ -86,7 +88,8 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
                 'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
                 'TabPFNv3': {'categorical_encoding': 'tabpfn_special'},
-                
+                'TabFM': {'categorical_encoding': 'tabfm_special'},
+
             }
             config = model_defaults.get(self.model_name)
             if config:
@@ -106,10 +109,14 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'tabdpt_special': TabDPTPreprocessor,
             'limix_special': LimixPreprocessor,
             'tabiclv2_special': TabICLv2Preprocessor,
+            'tabfm_special': TabFMPreprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
             PreprocessorClass = special_encoders[self.categorical_encoding]
+            if self.categorical_encoding == 'tabfm_special':
+                # TabFM preprocessor needs task_type (label-encode target for classification).
+                return PreprocessorClass(task_type=self.task_type)
             if self.categorical_encoding == 'contexttab_special':
                 # Extract regression parameters from model_params
                 regression_type = self.model_params.get('regression_type', 'l2')
@@ -173,7 +180,12 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return TabPFNRegressionProcessor(target_scaling_strategy=target_scaling)
-        
+        elif self.model_name == 'TabFM':
+            # TabFM handles feature encoding + target internally, default to 'none'.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return TabFMRegressionProcessor(target_scaling_strategy=target_scaling)
+
         # Fallback to generic processor (use 'standard' for unknown models)
         if target_scaling is None:
             target_scaling = 'standard'
@@ -283,8 +295,14 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 # --- NEW: Detailed loop for rich summary ---
                 for i, (step_name, step_info) in enumerate(steps.items()):
                     summary_lines.append(f"    {i+1}. {step_name}:")
-                    summary_lines.append(f"       - {step_info['description']}")
-                    for detail_line in step_info.get('details', []):
+                    # Some entries (e.g. a per-column breakdown) are structured
+                    # data rather than a description/details pair, so read the
+                    # optional keys defensively instead of indexing directly.
+                    description = step_info.get('description') if isinstance(step_info, dict) else None
+                    if description:
+                        summary_lines.append(f"       - {description}")
+                    details = step_info.get('details', []) if isinstance(step_info, dict) else []
+                    for detail_line in details:
                         summary_lines.append(f"       - {detail_line}")
                 
         elif self.processing_summary_.get('strategy') == 'standard':
