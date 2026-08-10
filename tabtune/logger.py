@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
-import sys
 import os
+import sys
 
 # Import handlers from the new libraries
 from colorlog import ColoredFormatter
@@ -44,7 +44,7 @@ def setup_logger(
         '%(asctime)s - [%(levelname)-8s] - %(name)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
-    
+
     color_formatter = ColoredFormatter(
         '%(log_color)s%(asctime)s - [%(levelname)-8s] - %(name)s:%(reset)s %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
@@ -56,7 +56,7 @@ def setup_logger(
             'CRITICAL': 'bold_red',
         }
     )
-    
+
     json_formatter = jsonlogger.JsonFormatter(
         '%(asctime)s %(name)s %(levelname)s %(message)s'
     )
@@ -74,7 +74,7 @@ def setup_logger(
             console_handler.setFormatter(color_formatter)
         else:
             console_handler.setFormatter(plain_formatter)
-    
+
     logger.addHandler(console_handler)
 
     # --- Configure File Handler (with rotation) ---
@@ -82,19 +82,19 @@ def setup_logger(
         log_dir = os.path.dirname(log_file)
         if log_dir:
             os.makedirs(log_dir, exist_ok=True)
-            
+
         # Use RotatingFileHandler for automatic log file management
         file_handler = logging.handlers.RotatingFileHandler(
-            log_file, 
-            maxBytes=max_bytes, 
+            log_file,
+            maxBytes=max_bytes,
             backupCount=backup_count
         )
-        
+
         if json_format:
             file_handler.setFormatter(json_formatter)
         else:
             file_handler.setFormatter(plain_formatter)
-            
+
         logger.addHandler(file_handler)
 
     return logger

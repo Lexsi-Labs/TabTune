@@ -252,6 +252,28 @@ After running these examples:
 3. **Production**: Use patterns from Example 5 for deployment
 4. **Research**: Use Example 9 for systematic evaluations
 
+## New in 0.2.0
+
+| Example | What it shows |
+|---|---|
+| `14_registry_and_licensing.py` | Model discovery, capability envelopes, and weight-licence checks — including xRFM and iLTM — without downloading a checkpoint |
+| `15_shift_aware_evaluation.py` | Temporal and grouped splits, and the IID-to-shifted performance gap |
+
+Both run in seconds and need no GPU and no model weights.
+
+```bash
+python examples/14_registry_and_licensing.py
+python examples/15_shift_aware_evaluation.py
+```
+
+`xRFM` is the one model you can also run end to end with no downloads at all,
+since it trains from scratch:
+
+```python
+from tabtune import TabularPipeline
+TabularPipeline("xRFM").fit(X_train, y_train).evaluate(X_test, y_test)
+```
+
 ## Additional Resources
 
 - **Main Documentation**: See `/docs` directory

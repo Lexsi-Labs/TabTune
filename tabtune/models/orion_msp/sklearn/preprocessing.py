@@ -20,7 +20,11 @@ from sklearn.preprocessing import (
     QuantileTransformer,
     RobustScaler,
 )
-from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
+from sklearn.utils.validation import check_is_fitted, check_X_y
+
+# scikit-learn removed check_array(force_all_finite=...) in 1.8; the shim
+# accepts either spelling so this file works across the supported range.
+from ...._internal.sklearn_compat import check_array
 
 import torch
 from torch.utils.data import Dataset, DataLoader
