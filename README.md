@@ -63,19 +63,16 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 ## 🚀 What's New in this release
 
--   ✅ **EXAONE Tabular (LG AI Research)** — Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for >10 classes, the attention-based feature selector and the CUDA execution planner. Three upstream bugs are fixed in the vendored copy; notably, support-set gradients are now exact, so support-set attribution on EXAONE is only correct here. See `docs/models/exaone.md`.
+-   ✅ **EXAONE Tabular (LG AI Research)** - Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for >10 classes, the attention-based feature selector and the CUDA execution planner. 
 
--   ✅ **xRFM and iLTM** — Two non-transformer models. **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
+-   ✅ **xRFM and iLTM** - Two non-transformer models. **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
 
--   ✅ **Model Registry** — A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load.
+-   ✅ **Model Registry** - A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load.
 
--   ✅ **Uncertainty Quantification** — Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage.
+-   ✅ **Uncertainty Quantification** - Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage.
 
--   ✅ **Shift-Aware Evaluation** — `TemporalSplit`, `GroupedSplit` and `StratifiedGroupedSplit`, plus a `ShiftEvaluator` that reports the **IID-to-shift gap** — the number that predicts production behaviour, rather than the IID score that does not.
+-   ✅ **Shift-Aware Evaluation** - `TemporalSplit`, `GroupedSplit` and `StratifiedGroupedSplit`, plus a `ShiftEvaluator` that reports the **IID-to-shift gap** — the number that predicts production behaviour, rather than the IID score that does not.
 
--   ✅ **Typed Configuration** — Pydantic schemas for every knob, with YAML/JSON round-tripping. Plain dicts still work; the difference is that a typo now warns instead of vanishing.
-
--   ✅ **Prediction Caching** — Keyed on a fingerprint of the fitted model and the input data. Collapses `evaluate()`'s three redundant forward passes into one.
 
 
 ---
@@ -109,7 +106,6 @@ Using diverse tabular foundation models often requires writing model-specific bo
 \* PEFT is experimental for ContextTab, TabPFN and TabPFN-v2.6; `inference` is fully supported.
 † xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
 ‡ EXAONE's projections are raw `nn.Parameter` tensors applied through `F.linear`, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
-‡‡ EXAONE's regression code path is complete and tested, but LG AI Research publishes no regression checkpoint — supply one via `model_params={'checkpoint_path': ...}`.
 
 
 ---
