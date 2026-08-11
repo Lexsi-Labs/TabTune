@@ -67,7 +67,7 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 -   ✅ **xRFM and iLTM** — Two non-transformer models. **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
 
--   ✅ **Model Registry** — A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load. `envelope_mode` and `license_mode` on the pipeline turn these into warnings or hard stops.
+-   ✅ **Model Registry** — A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load.
 
 -   ✅ **Uncertainty Quantification** — Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage.
 
@@ -77,13 +77,6 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 -   ✅ **Prediction Caching** — Keyed on a fingerprint of the fitted model and the input data. Collapses `evaluate()`'s three redundant forward passes into one.
 
--   ✅ **TabFM Integration (Google Research)** — Full end-to-end support for Google's zero-shot tabular foundation model: unified API, model-aware preprocessing, inference, episodic meta-learning, SFT and **PEFT/LoRA** for both classification and regression.
-
--   🔬 **"Beyond Accuracy" TabFM Study** — A reproducible A100-ready study suite (`experiments/tabfm_study/`) auditing TabFM on **calibration** (the *calibration tax of adaptation*), **fairness** (the *synthetic-prior fairness* hypothesis), **ensembling diversity** and **1000× distillation**.
-
--   ✅ **TabPFN v3 Integration** — The re-architected PriorLabs model, lifting the envelope to 160 classes, 20,000 features and a 200M-cell budget. Full inference and fine-tuning (native, meta-learning, SFT, PEFT/LoRA) for classification and regression.
-
--   ✅ **Causal Inference Module** — Treatment effect estimation through a unified `CausalAnalysis` API, with six estimators (DML, S/T/X/R-Learners, Causal Forests), formal identification, a refutation framework (placebo, random common cause, subset stability, sensitivity analysis), proxy detection, counterfactual fairness auditing, and a `CausalLeaderboard` ranking `(estimator × TFM)` combinations by stability and refuter pass rate.
 
 ---
 
@@ -92,47 +85,32 @@ Using diverse tabular foundation models often requires writing model-specific bo
 **16 models across seven architectural families.** The `Commercial` column reflects the
 **weight** license, which is what decides whether you can ship.
 
-| Model | Family / Paradigm | Key Innovation | Supported Strategies | Commercial |
-|-------|------------------|----------------|----------------------|:----------:|
-| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT | ❓ |
-| **TabPFN-v2.6** | PFN / ICL | PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT | ❓ |
-| **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT | ❌ |
-| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT | ✅ |
-| **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT | ✅ |
-| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT | ✅ |
-| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT | ✅ |
-| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT | ✅ |
-| **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT | ✅ |
-| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings; first-class text and datetime | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT | ❌ |
-| **TabDPT** | Denoising Transformer | Denoising pre-training + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression-FT | ❓ |
-| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT | ❌ |
-| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → CLS row compression → causal ICL Transformer | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | ❌ |
-| **xRFM** | Kernel / Feature Learning | Recursive Feature Machine: AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights — trains from scratch** | Inference, Refit, Refine, PEFT†, Regression | ✅ |
-| **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings; GBDT tree embeddings + retrieval | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | ✅ |
-| **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | Cross-axis Summary Transformer (CAST); ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ | ❌ |
+| Model | Family / Paradigm | Key Innovation | Supported Strategies |
+|-------|------------------|----------------|----------------------|
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
+| **TabPFN-v2.6** | PFN / ICL | PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT | 
+| **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT | 
+| **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT | 
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT | 
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT | 
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT | 
+| **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT | 
+| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings; first-class text and datetime | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT | 
+| **TabDPT** | Denoising Transformer | Denoising pre-training + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression-FT | 
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT | 
+| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → CLS row compression → causal ICL Transformer | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | 
+| **xRFM** | Kernel / Feature Learning | Recursive Feature Machine: AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights — trains from scratch** | Inference, Refit, Refine, PEFT†, Regression | 
+| **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings; GBDT tree embeddings + retrieval | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | 
+| **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | Cross-axis Summary Transformer (CAST); ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ | 
 
-**Legend** — ✅ permitted · ❌ prohibited · ❓ unverified (TabTune warns rather than blocks)
+
 
 \* PEFT is experimental for ContextTab, TabPFN and TabPFN-v2.6; `inference` is fully supported.
 † xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
 ‡ EXAONE's projections are raw `nn.Parameter` tensors applied through `F.linear`, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
 ‡‡ EXAONE's regression code path is complete and tested, but LG AI Research publishes no regression checkpoint — supply one via `model_params={'checkpoint_path': ...}`.
 
-> **`❓` is not permission.** It means TabTune has not verified the terms and will warn
-> rather than block. Inventing a restriction is as wrong as ignoring one. Verify upstream
-> before deploying.
->
-> **Neither fine-tuning nor distillation launders a license.** A student distilled from a
-> research-only teacher is a derivative of that teacher.
-
-Rather than reading this table, query the registry — it cannot go stale:
-
-```python
-from tabtune.registry import list_models, models_dataframe
-
-models_dataframe()                                          # the whole catalog
-[s.name for s in list_models(commercial_ok=True, task="regression")]
-```
 
 ---
 
@@ -150,23 +128,9 @@ pipeline = TabularPipeline(
     envelope_mode="error",        # 'error' | 'warn' (default) | 'ignore'
     license_mode="commercial",    # 'research' (default) | 'commercial' | 'ignore'
 )
-# LicenseError: TabFM weights are non-commercial.
-#   Commercial alternatives: Mitra, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix
+
 ```
 
-Capability envelopes distinguish **hard** limits from **soft** ones. `max_classes` and
-`min_rows` are architectural — they raise even under the default `envelope_mode='warn'`,
-because no amount of memory widens a ten-slot output head. Feature and row limits warn.
-
-```python
-from tabtune.registry import check_envelope
-
-for v in check_envelope("TabPFNv3", n_rows=1_000_000, n_features=500, mode="warn"):
-    print(f"[{v.severity}] {v.message}")
-```
-
-> **Use `envelope_mode='error'` in CI.** `'warn'` is right for exploration, but a
-> benchmark suite that silently subsamples reports the wrong number.
 
 ---
 
@@ -286,30 +250,7 @@ for v in check_envelope("EXAONE", n_rows=250_000, n_features=120, n_classes=14):
 print(get_model_spec("EXAONE").envelope.max_classes)   # None
 ```
 
-### Licensing: code and weights are separate
 
-| Artifact | License | Commercial use |
-|---|---|---|
-| Code | BSD-3-Clause-LG AI Research | Permitted |
-| Weights | EXAONE AI Model License Agreement 1.1 - NC | **Prohibited** |
-
-A fine-tuned checkpoint is a **Derivative** under that agreement: still research-only, and
-its name must begin with `EXAONE`. Distilling does not change this. For commercial
-deployment, start from Mitra or TabICLv2.
-
-### Regression needs a checkpoint you supply
-
-The regression code path is complete and tested, but LG AI Research publishes only the
-classification checkpoint, so nothing downloads:
-
-```bash
-export EXAONETABULAR_REGRESSOR_WEIGHTS=/path/to/exaone-tabular-regressor.safetensors
-```
-
-**Runnable examples:** `examples/17_exaone_tabular.py` and
-`examples/19_exaone_tabular.ipynb`. Both run end to end without weights — the
-weight-dependent sections print their own source instead of executing, so the printed code
-cannot drift from what would run.
 
 ---
 
@@ -1078,7 +1019,6 @@ Example notebooks showcasing the library's features in depth. Runnable scripts f
 | 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
 | 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
 | 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
-| 17 | EXAONE Tabular | Registry, soft limits, licensing, all four strategies, distillation | [`examples/19_exaone_tabular.ipynb`](examples/19_exaone_tabular.ipynb) |
 
 > **Notebook 17 runs without weights.** The sections that need a pretrained checkpoint
 > print their own source instead of executing, so the printed code cannot drift from what
