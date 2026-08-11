@@ -1,60 +1,45 @@
---extra-index-url https://download.pytorch.org/whl/cu126
 torch>=2.7.0
 transformers>=4.56.0,<5.0.0
 scikit-learn>=1.6.0
-pyzmq>=25.0.0,<28.0.0
 pandas>=2.2.0,<2.4.0
-
-# Core ML dependencies (rest)
 numpy>=1.26.0,<3.0.0
 joblib>=1.0.0
-openml>=0.12.0
 tqdm>=4.60.0
+pyzmq>=25.0.0,<28.0.0
 
-# Causal inference (tabtune.causal)
-doubleml>=0.7.0
-econml>=0.15.0
-networkx>=3.0
-jinja2>=3.0.0
-dowhy>=0.11
-causal-learn>=0.1.3.0
-
-# Data processing
+openml>=0.12.0
 category_encoders>=2.0.0
 imbalanced-learn>=0.8.0
-
-# NLP and embeddings
 sentence-transformers>=2.0.0,<3.0.0
 huggingface_hub>=0.10.0
+safetensors>=0.3.0
 
-
-jaxtyping>=0.2,<0.3
-typeguard>=2.13,<3
-
-# Utilities
 einops>=0.6.0
+einx>=0.3.0
+omegaconf>=2.1.0
 pydantic>=1.8.0,<3.0.0
 pydantic_settings>=2.0.0
-safetensors>=0.3.0
-omegaconf>=2.1.0
-psutil>=5.8.0
 torcheval>=0.0.6
 faiss-cpu>=1.7.0
-
-# Logging & utilities
-colorlog>=6.0.0
-einx>=0.3.0
 fairlearn>=0.13.0
 gdown>=5.0.0
+psutil>=5.8.0
+
+# Imported at module scope by TabularPipeline, the ensemble weight optimiser
+# and tabtune.uncertainty. Previously present only transitively via
+# scikit-learn, which a resolver change could have taken away.
+scipy>=1.10.0
+
+# Required by the vendored iLTM tree-embedding stage.
+xgboost>=2.0.0
+catboost>=1.2
+lightgbm>=4.0.0          # GBDT student for tabtune.distillation
+onnx>=1.14.0             # ONNX export of distilled students
+onnxruntime>=1.16.0
+
+matplotlib>=3.5.0
+pyyaml>=6.0
+tabulate>=0.9.0
+colorlog>=6.0.0
 python-json-logger>=2.0.0
 rich>=13.0.0
-
-# Dev / testing parity with pyproject optional deps
-pytest>=7.0.0
-pytest-cov>=4.0.0
-pytest-mock>=3.10.0
-pytest-xdist>=3.0.0
-black>=23.0.0
-isort>=5.12.0
-flake8>=6.0.0
-pre-commit>=3.0.0

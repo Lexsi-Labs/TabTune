@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import math
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
+
+logger = logging.getLogger(__name__)
 
 
 def _find_linear_module_names(model: torch.nn.Module) -> List[str]:
@@ -157,6 +160,56 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
             "icl_predictor.decoder",
         ),
     ),
+    # iLTM (AI-sandbox): the VENDORED hypernetwork (tabtune/models/iltm/iltm_model.py).
+    # ALL trainable nn.Linear leaves live inside the HypernetworkBlock:
+    # `hypernetwork_block.hypernetworks.<i>.<j>` (the per-layer hypernetwork MLPs,
+    # including the last weight-generating layer) and
+    # `hypernetwork_block.hn_emb_to_weights.<i>` (embedding -> main-network-weight
+    # projections / optional bottleneck). The generated main network itself is
+    # functional (weights are hypernetwork OUTPUTS, not parameters), and the
+    # InitialTransformationBlock (random features / PCA / norm) is data-dependent
+    # and non-trainable, so there is nothing else to adapt. All widths are fixed
+    # model hyperparams (`n_dims`, `hn_hidden_size`, `n_classes_limit`), never the
+    # dataset's class count, so no exclusions are needed.
+    "ILTM": LoraTargetConfig(
+        target_substrings=(
+            "hypernetworks",
+            "hn_emb_to_weights",
+        ),
+    ),
+    # EXAONE Tabular (LG AI Research): the VENDORED Cross-axis Summary
+    # Transformer (tabtune/models/exaone/model/).
+    #
+    # READ THIS BEFORE TRUSTING THE ENTRY. The names below are the model's real
+    # projections, but they are raw `nn.Parameter`s applied through `F.linear`
+    # (see model/attention.py: `self.query_weight = nn.Parameter(...)`, then
+    # `F.linear(query, self.query_weight)`; and model/mlp.py:
+    # `expansion_weight` / `projection_weight`), NOT `nn.Linear` submodules.
+    # `inject_custom_lora_into_linear_layers` walks `named_children()` and wraps
+    # only `nn.Linear` leaves, so it CANNOT reach any of them. The only
+    # `nn.Linear` leaves in the whole model are the two inside
+    # `transformer.classification_heads.standard`, and those are excluded below
+    # (their output width is the fixed class capacity / quantile count, i.e. the
+    # task head, which is the one place LoRA should not be the whole story).
+    #
+    # The entry is kept -- rather than omitted -- for three reasons: it documents
+    # the correct target set for whoever teaches the injector to wrap raw
+    # parameters (a `LoRAParameter` shim doing `F.linear(x, W + BA*s)` is the
+    # natural fix); it keeps `resolve_lora_targets` from falling through to
+    # "adapt every linear layer", which for EXAONE would silently mean "adapt
+    # only the task head"; and `TuningManager._warn_if_no_lora_adapters` logs a
+    # loud warning when a PEFT run ends up wrapping zero layers, so 'peft' on
+    # EXAONE reports honestly that it is currently a full fine-tune.
+    "EXAONETabular": LoraTargetConfig(
+        target_substrings=(
+            "query_weight",
+            "key_weight",
+            "value_weight",
+            "output_weight",
+            "expansion_weight",
+            "projection_weight",
+        ),
+    ),
 }
 
 
@@ -242,6 +295,32 @@ def resolve_lora_targets(
         return override
     config = MODEL_LORA_TARGETS.get(model_name)
     if config is None:
+        # Resolve through the registry's aliases so a canonical name still finds
+        # a table entry written under a different spelling. "ContextTab" missed
+        # the "ConTextTab" key here, so it silently fell back to adapting every
+        # linear layer in the model instead of its curated target set.
+        try:
+            from ..registry import get_model_spec
+
+            spec = get_model_spec(model_name)
+            for candidate in (spec.name, *spec.aliases):
+                config = MODEL_LORA_TARGETS.get(candidate)
+                if config is not None:
+                    logger.debug(
+                        "[PEFT] Resolved LoRA targets for %r via alias %r",
+                        model_name,
+                        candidate,
+                    )
+                    break
+        except Exception:  # unregistered model, or registry unavailable
+            config = None
+
+    if config is None:
+        logger.info(
+            "[PEFT] No LoRA target table for %r; adapting all linear layers. "
+            "Add a MODEL_LORA_TARGETS entry to target specific modules.",
+            model_name,
+        )
         return _find_linear_module_names(model)
     # Only keep leaves that actually exist
     leaf_names = _find_linear_module_names(model)
@@ -275,7 +354,17 @@ def apply_tabular_lora(
     # TabFM needs no exclusions: its y-encoder / decoder head widths depend on the
     # fixed `max_classes` model hyperparam (not the dataset class count), so they
     # are safe to adapt with LoRA.
-    
+    elif model_name == "EXAONETabular":
+        # Exclude the task head. Its output width is the architectural class
+        # capacity (classification) / quantile count (regression), and it is the
+        # only nn.Linear pair in the model -- without this exclusion the
+        # "no target matched -> adapt every linear layer" fallback in
+        # resolve_lora_targets would quietly turn EXAONE PEFT into
+        # "LoRA on the output head and nothing else". See the MODEL_LORA_TARGETS
+        # comment above.
+        exclude_patterns = ["classification_heads"]
+
+
     return inject_custom_lora_into_linear_layers(
         model,
         target_names=target_modules,

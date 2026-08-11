@@ -102,7 +102,7 @@ def openml_data(random_seed):
         
         return X_train, X_test, y_train, y_test
         
-    except Exception as e:
+    except Exception:
         # Fallback to synthetic multiclass data if OpenML fails
         np.random.seed(random_seed)
         n_samples = 300
@@ -308,13 +308,27 @@ def _looks_like_resource_failure(text):
     return any(sig in low for sig in _RESOURCE_UNAVAILABLE_SIGNATURES)
 
 
+
+def _strict_tests_enabled() -> bool:
+    """Whether TABTUNE_STRICT_TESTS asks for real failures rather than skips.
+
+    Accepts the usual truthy spellings; anything else - including "0", "false"
+    and the empty string - means "convert environmental failures to skips".
+    """
+    raw = _os.environ.get("TABTUNE_STRICT_TESTS", "")
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """Reclassify environmental weight/network failures as skips."""
     outcome = yield
     report = outcome.get_result()
 
-    if _os.environ.get("TABTUNE_STRICT_TESTS"):
+    # Presence alone used to enable strict mode, so the natural
+    # `TABTUNE_STRICT_TESTS=0` (and any CI job that set it to "0" to mean "off")
+    # silently turned it *on* and reported download failures as test failures.
+    if _strict_tests_enabled():
         return
     if report.when not in ("setup", "call") or not report.failed:
         return

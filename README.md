@@ -42,7 +42,7 @@ The library is built on **four main components** that work together seamlessly:
 
 Using diverse tabular foundation models often requires writing model-specific boilerplate for data preparation, training, and inference. TabTune solves this by providing:
 
-- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) for multiple models such as TabPFN, TabPFNv2.6, TabPFNv3, TabICL, TabICLv2, Mitra, ContextTab, TabDPT, OrionMSP, and OrionBix.
+- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) across **16 models** — TabPFN, TabPFNv2.6, TabPFNv3, TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, Mitra, ContextTab, TabDPT, LimiX, TabFM, xRFM, iLTM and EXAONE Tabular.
 
 - **Automated Preprocessing**: The DataProcessor is model-aware, automatically applying the correct transformations without manual configuration.
 
@@ -56,34 +56,77 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 - **Checkpoint Management**: Automatic saving and loading of fine-tuned model weights with support for resuming training.
 
+- **Deployment Awareness**: A torch-free model registry records each checkpoint's capability envelope and weight license, so a class-count mismatch or a research-only license fails in milliseconds instead of after a multi-gigabyte download.
+
 ---
 
 
 ## 🚀 What's New in this release
 
--   ✅ **TabFM Integration (Google Research)** -- Full end-to-end support for Google's new zero-shot tabular foundation model `TabFM`, integrated exactly like the other TFMs: unified `.fit()/.predict()/.evaluate()`, model-aware preprocessing, inference, episodic meta-learning fine-tuning, SFT, and **PEFT/LoRA** for both classification and regression. TabFM also plugs into ensembling, distillation, calibration and fairness workflows out of the box.
+-   ✅ **EXAONE Tabular (LG AI Research)** - Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for >10 classes, the attention-based feature selector and the CUDA execution planner. 
+
+-   ✅ **xRFM and iLTM** - Two non-transformer models. **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
+
+-   ✅ **Model Registry** - A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load.
+
+-   ✅ **Uncertainty Quantification** - Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage.
+
+-   ✅ **Shift-Aware Evaluation** - `TemporalSplit`, `GroupedSplit` and `StratifiedGroupedSplit`, plus a `ShiftEvaluator` that reports the **IID-to-shift gap** — the number that predicts production behaviour, rather than the IID score that does not.
+
+
 
 ---
 
 ## 📊 Supported Models
 
+**16 models across seven architectural families.** The `Commercial` column reflects the
+**weight** license, which is what decides whether you can ship.
+
 | Model | Family / Paradigm | Key Innovation | Supported Strategies |
 |-------|------------------|----------------|----------------------|
 | **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
-| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
-| **Mitra** | Scalable ICL | 2D attention (row & column) | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT |
-| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT |
-| **TabDPT** | Denoising Transformer | Denoising pre-training | Inference, Meta-Learning FT, SFT, Regression, Regression-FT |
-| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT |
-| **TabPFN-v2.6** | PFN / ICL | Latest PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT |
-| **TabPFN-v3** | PFN / ICL | Newest PriorLabs Prior-Fitted Network; updated architecture and checkpoints | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
-| **TabICLv2** | Scalable ICL | Improved column-then-row attention | Inference, FT, Regression, Regression FT |
-| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → row compression → 24-block causal ICL Transformer; pretrained purely on synthetic SCM data | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
- 
-*Note: PEFT for ContextTab and TabPFN is experimental; `inference` strategy is fully supported.*
+| **TabPFN-v2.6** | PFN / ICL | PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT | 
+| **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT | 
+| **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT | 
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT | 
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT | 
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT | 
+| **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT | 
+| **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings; first-class text and datetime | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT | 
+| **TabDPT** | Denoising Transformer | Denoising pre-training + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression-FT | 
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT | 
+| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → CLS row compression → causal ICL Transformer | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | 
+| **xRFM** | Kernel / Feature Learning | Recursive Feature Machine: AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights — trains from scratch** | Inference, Refit, Refine, PEFT†, Regression | 
+| **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings; GBDT tree embeddings + retrieval | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | 
+| **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | Cross-axis Summary Transformer (CAST); ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ | 
+
+
+
+\* PEFT is experimental for ContextTab, TabPFN and TabPFN-v2.6; `inference` is fully supported.
+† xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
+‡ EXAONE's projections are raw `nn.Parameter` tensors applied through `F.linear`, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
+
+
+---
+
+## 🧭 Model Registry: Envelopes and Licensing
+
+The registry answers two questions without downloading a multi-gigabyte checkpoint:
+*will this model accept my data*, and *can I actually deploy this*.
+
+```python
+from tabtune import TabularPipeline
+
+pipeline = TabularPipeline(
+    model_name="TabFM",
+    task_type="classification",
+    envelope_mode="error",        # 'error' | 'warn' (default) | 'ignore'
+    license_mode="commercial",    # 'research' (default) | 'commercial' | 'ignore'
+)
+
+```
+
 
 ---
 
@@ -95,6 +138,24 @@ cd TabTune
 pip install -r requirements.txt
 pip install -e .
 ```
+
+**Optional extras**
+
+```bash
+pip install "tabtune[distillation]"   # LightGBM students for tabtune.distillation
+pip install "tabtune[serving]"        # ONNX export of distilled students
+pip install "tabtune[interactive]"    # rich notebook display helpers
+pip install "tabtune[colab]"          # pin core packages to Colab's versions
+pip install "tabtune[docs]"           # mkdocs toolchain
+pip install "tabtune[dev]"            # pytest, ruff, black, pre-commit
+```
+
+> **TabFM (Google):** the `TabFM` model requires the optional `tabfm` package with the
+> PyTorch backend. Install it alongside TabTune with `pip install "tabfm[pytorch]"`.
+> Pretrained weights (`google/tabfm-1.0.0-pytorch`) are auto-downloaded from the Hugging Face Hub on first use.
+
+> **xRFM** needs no weights at all — it trains from scratch, which makes it the only
+> bundled model that works in an air-gapped environment out of the box.
 
 ---
 
@@ -129,6 +190,63 @@ reg = TabularPipeline(model_name="TabFM", task_type="regression", tuning_strateg
 reg.fit(X_train, y_train)
 print(reg.evaluate(X_test, y_test))
 ```
+
+---
+
+## 🟪 EXAONE Tabular (LG AI Research) — Quick Start
+
+EXAONE Tabular is an in-context learner built on the **Cross-axis Summary Transformer
+(CAST)**: 3 summary tokens per row pool that row's columns, 32 summary tokens per feature
+group pool that column across rows, and the two axes alternate for 12 blocks under
+SSMax-normalised attention. At ~21M parameters it is the smallest bundled foundation
+model, which is why the released default is an 8-member ensemble.
+
+```python
+from tabtune import TabularPipeline
+
+# Zero-shot in-context classification
+pipeline = TabularPipeline(
+    model_name="EXAONE",                # aliases: EXAONETabular, exaone-tabular, ...
+    task_type="classification",
+    tuning_strategy="inference",
+    model_params={"n_ensemble": 8},
+)
+pipeline.fit(X_train, y_train)
+print(pipeline.evaluate(X_test, y_test))
+
+# Episodic meta-learning fine-tuning (the default finetune mode)
+pipeline = TabularPipeline(
+    model_name="EXAONE",
+    task_type="classification",
+    tuning_strategy="finetune",
+    finetune_mode="meta-learning",
+    tuning_params={"epochs": 2, "learning_rate": 1e-5},
+)
+pipeline.fit(X_train, y_train)
+```
+
+### Three limits, and not one of them is an error
+
+| Limit | Value | What happens when you exceed it |
+|---|---:|---|
+| Support rows | `100,000` | Random subsample down to the limit |
+| Features | `100` | Attention-based selection of the top 100 |
+| Classes | `10` | ECOC decomposition, one full ensemble forward per codebook row |
+
+`max_classes` is deliberately left `None` in the registry. It is a **hard** constraint that
+raises even under `envelope_mode='warn'`, so declaring the 10-class head capacity would
+reject datasets this model handles by design via ECOC.
+
+```python
+from tabtune.registry import check_envelope, get_model_spec
+
+for v in check_envelope("EXAONE", n_rows=250_000, n_features=120, n_classes=14):
+    print(f"[{v.severity}] {v.message}")     # rows and features warn; 14 classes is fine
+
+print(get_model_spec("EXAONE").envelope.max_classes)   # None
+```
+
+
 
 ---
 
@@ -188,7 +306,7 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-### Base Fine-Tuning (`base-ft`)
+### Fine-Tuning (`finetune`)
 Full parameter fine-tuning. Updates all model weights using task data.
 
 - **Meta-Learning (default for ICL models)**: Episodic training that mimics the in-context learning paradigm
@@ -197,7 +315,7 @@ Full parameter fine-tuning. Updates all model weights using task data.
 ```python
 pipeline = TabularPipeline(
     model_name="TabICL",
-    tuning_strategy="finetune",  # Defaults to 'base-ft'
+    tuning_strategy="finetune",  # finetune_mode defaults to 'meta-learning'
     tuning_params={
         "epochs": 5,
         "learning_rate": 1e-5,
@@ -278,7 +396,7 @@ pipeline.fit(X_train, y_train)
 
 **PEFT Support by Model**:
 - ✅ **Full Support**: TabICL, OrionMSP, OrionBix, TabDPT, Mitra, TabFM
-- ⚠️ **Experimental**: ContextTab and TabPFN (may cause prediction issues; use 'base-ft' instead)
+- ⚠️ **Experimental**: ContextTab and TabPFN (may cause prediction issues; use 'finetune' instead)
 
 ---
 
@@ -594,23 +712,31 @@ TabularPipeline(
     processor_params: dict | None = None,
     model_params: dict | None = None,
     model_checkpoint_path: str | None = None,
-    finetune_mode: str = 'meta-learning'
+    finetune_mode: str | None = None,
+    *,
+    cache: str | bool | None = None,        # new in 0.2.0
+    envelope_mode: str = 'warn',            # new in 0.2.0
+    license_mode: str = 'research',         # new in 0.2.0
+    validate: bool = True,                  # new in 0.2.0
 )
 ```
 
 #### Key Parameters:
 
-- **`model_name`** (str): The name of the model to use. Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabPFNv3'`, `'TabICL'`, `'TabICLv2'`, `'ContextTab'`, `'Mitra'`, `'TabDPT'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Limix'`, `'TabFM'`.
+- **`model_name`** (str): Model name or alias. Resolution ignores case, hyphens, underscores and whitespace, so `'TabPFN-v2.6'` and `'tabpfnv26'` are equivalent. 16 models are registered — call `tabtune.registry.list_model_names()` rather than hardcoding a list.
 
 - **`task_type`** (str): The type of task — `'classification'` or `'regression'`.
 
 - **`tuning_strategy`** (str): The strategy for model adaptation: `'inference'`, `'finetune'`, or `'peft'`.
 
 - **`finetune_mode`** (str, optional): Controls the fine-tuning algorithm. If `None`, a smart default is chosen per task type (`'turn_by_turn'` for regression, `'meta-learning'` for classification). Supported values per model:
-  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3, TabFM)
-  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM)
+  - `'meta-learning'` — episodic meta-learning (TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3, TabFM, iLTM, EXAONE)
+  - `'sft'` — supervised fine-tuning (TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM, ContextTab, iLTM, EXAONE)
   - `'native'` — PriorLabs native finetuner with bar distribution loss, AMP, early stopping (**TabPFNv2.6 and TabPFNv3**, classification and regression)
-  - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn (TabPFN regression, TabPFNv3 regression, Mitra regression, TabDPT regression, ContextTab regression)
+  - `'turn_by_turn'` / `'tbt'` — episodic turn-by-turn; the default for regression (TabPFN, TabPFNv26, TabPFNv3, TabICLv2, Mitra, TabDPT, ContextTab, LimiX, TabFM, iLTM, EXAONE)
+  - `'refit'` / `'refine'` — **xRFM only**, which has no gradient-descent fine-tuning. `refit` fits the RFM from scratch; `refine` warm-starts from the learned **M** matrix
+
+  Not every model implements every mode. Check `get_model_spec(name).finetune_modes`.
 
 - **`tuning_params`** (dict, optional): Parameters for the `TuningManager`:
   - `epochs` (int): Number of training epochs
@@ -635,6 +761,27 @@ TabularPipeline(
 - **`model_params`** (dict, optional): Model-specific parameters.
 
 - **`model_checkpoint_path`** (str, optional): Path to a `.pt` file containing pre-trained model weights.
+
+#### Keyword-only parameters (new in 0.2.0)
+
+- **`cache`** (str | bool | None): Prediction cache — `'memory'`, `'disk'`, `None`, or a `PredictionCache`. Enabling it collapses `evaluate()`'s three redundant forward passes into one.
+
+- **`envelope_mode`** (str): How to treat data outside the model's documented limits — `'error'`, `'warn'` (default) or `'ignore'`. Architectural limits such as the class-count ceiling always raise unless this is `'ignore'`.
+
+- **`license_mode`** (str): `'research'` (default), `'commercial'` to fail fast on weights that forbid commercial use, or `'ignore'`.
+
+- **`validate`** (bool): Check model / task / strategy against the registry before loading weights. Set `False` to use a model TabTune does not know about.
+
+```python
+pipeline = TabularPipeline(
+    model_name="TabICLv2",
+    tuning_strategy="finetune",
+    cache="disk",
+    envelope_mode="error",
+    license_mode="commercial",
+)
+print(pipeline.cache.stats)   # hits / misses / stores / hit_rate
+```
 
 ---
 
@@ -699,11 +846,156 @@ pipeline = TabularPipeline(
 
 **Memory Savings**: PEFT typically reduces memory usage by 60-80% compared to full fine-tuning.
 
+> **Two models where `peft` does not mean what you expect.**
+>
+> - **xRFM** has no gradient-descent fine-tuning at all. Its `peft` performs low-rank
+>   adaptation of the learned **M** matrix, not LoRA over linear layers, so
+>   `target_modules` does not apply.
+> - **EXAONE Tabular** applies its projections as raw `nn.Parameter` tensors through
+>   `F.linear` rather than `nn.Linear` submodules. The injector finds nothing to wrap,
+>   logs a warning, and the run proceeds as a **full fine-tune** — so do not attribute
+>   a memory number to LoRA here.
+
+---
+
+## 🎯 Uncertainty You Can Actually Deploy
+
+Tabular foundation models win benchmarks on accuracy and lose them on
+uncertainty: their probabilities come out of an in-context softmax that was
+never calibrated to your dataset. TabTune could already *measure* that
+(`evaluate_calibration` reports ECE/MCE/Brier); `tabtune.uncertainty` adds the
+two standard fixes. Both consume only `predict_proba`/`predict`, so they work
+for every bundled model, for distilled students, for ensembles, and for plain
+scikit-learn estimators.
+
+```python
+from tabtune.uncertainty import ConformalClassifier, Recalibrator
+
+# Prediction sets with a distribution-free 90% coverage guarantee
+cp = ConformalClassifier(pipe, method="lac", alpha=0.1).calibrate(X_cal, y_cal)
+sets = cp.predict_set(X_test)         # which labels you cannot rule out
+
+# Post-hoc recalibration - same API, better probabilities
+pipe = Recalibrator(pipe, method="temperature").fit(X_cal, y_cal)
+
+# One-call diagnostic: ECE/MCE/Brier + coverage + set sizes + SSCS
+pipe.uncertainty_report(X_test, y_test, X_cal=X_cal, y_cal=y_cal)
+```
+
+The guarantee is stated precisely: **marginal** coverage under exchangeability,
+not per-subgroup, and it degrades under distribution shift. The report's
+size-stratified coverage score (SSCS) is there to show how far conditional
+coverage falls short of the marginal number. The calibration split must be
+disjoint from training — passing the pipeline's own training frame raises
+rather than silently voiding the guarantee. Regression gets
+`ConformalRegressor` (absolute-residual for any model, CQR where native
+quantiles exist).
+
+See [Uncertainty & Conformal Prediction](docs/user-guide/uncertainty.md) and
+[`examples/18_uncertainty.py`](examples/18_uncertainty.py).
+
+---
+
+## 📉 Shift-Aware Evaluation
+
+An IID cross-validation score is the wrong question for a model that will be deployed
+against future or out-of-cohort data. `ShiftEvaluator` reports the **gap** between the
+two, which is the number that predicts production behaviour.
+
+```python
+from tabtune import TabularPipeline
+from tabtune.evaluation import TemporalSplit, GroupedSplit, ShiftEvaluator
+
+def factory():
+    return TabularPipeline("TabICLv2", task_type="classification")
+
+evaluator = ShiftEvaluator(splits={
+    "temporal": TemporalSplit(4, time_col="date"),
+    "grouped":  GroupedSplit(5),
+})
+
+report = evaluator.run(factory, X, y, groups=site_ids, drop_split_columns=True)
+print(report)
+```
+
+```
+ShiftReport(TabICLv2, task=classification, metric=roc_auc_score)
+  iid                  roc_auc_score=0.9124 (baseline)
+  temporal             roc_auc_score=0.8689  gap -0.0435
+```
+
+A model scoring 0.87 with a 0.004 gap is a better production bet than one scoring 0.89
+with a 0.06 gap. Splits available: `TemporalSplit` (forward chaining, never trains on the
+future), `GroupedSplit` (leave-groups-out), `StratifiedGroupedSplit` (grouped + class
+balance).
+
+> `drop_split_columns=True` removes split-defining columns from the features. Without it,
+> the model can read the very column that defines the split and learn the cut point
+> instead of the signal.
+>
+> Check `report.failures()` before quoting any aggregate — a fold can fail for ordinary
+> reasons, and the report keeps going.
+
+---
+
+## 🗂️ Typed Configuration
+
+Every knob is described by a pydantic schema, which makes an experiment a file you can
+commit. Plain dicts still work; the difference is that a typo now warns instead of
+vanishing.
+
+```python
+from tabtune.config import load_config
+
+cfg = load_config("experiments/tabiclv2_finetune.yaml", strict=True)
+cfg.validate_against_registry()          # fails before any weights load
+cfg.resolved_finetune_mode()             # 'meta-learning'
+```
+
+```yaml
+model_name: TabICLv2
+task_type: classification
+tuning_strategy: finetune
+envelope_mode: error
+license_mode: commercial
+
+tuning:
+  epochs: 10
+  learning_rate: 1.0e-5
+  seed: 0
+  early_stopping: true
+  validation_split: 0.15
+
+processor:
+  scaling_strategy: standard
+  imputation_strategy: none
+```
+
+Use `strict=True` in CI so a stale config fails the job rather than quietly running
+something else.
+
+---
+
+## ⚡ Prediction Caching
+
+```python
+pipeline = TabularPipeline("TabICLv2", cache="memory")   # or "disk"
+pipeline.fit(X_train, y_train)
+pipeline.evaluate(X_test, y_test)
+
+print(pipeline.cache.stats)
+# hits=2 misses=1 stores=1 hit_rate=67%
+```
+
+Entries are keyed on a fingerprint covering the fitted model **and** the input data, so
+refitting or changing the data invalidates automatically. Disk caching pays off most in
+leaderboard runs and shift-evaluation sweeps, which query the same test rows repeatedly.
+
 ---
 
 ## 🏆 Example Notebooks
 
-|Below are 17 Example Notebooks showcasing all the features of the Library in-depth!
+Example notebooks showcasing the library's features in depth. Runnable scripts for every feature also live in `examples/`.
 
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
@@ -723,8 +1015,10 @@ pipeline = TabularPipeline(
 | 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
 | 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
 | 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
-| 17 | TabFM - Model Usage | Showcase TabFM model support |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KlsPxvwngA8e8cqJL0m8GWI2X7NqxEv3?usp=sharing)|
+| 17 | EXAONE Model | End-to-end usecase of the EXAONE Model |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1RR-mhJkGW0xpAU0si76ru-1NuggPKDNH#scrollTo=89s93vNcnSk0)| 
 
+
+---
 
 ## 🚀 Advanced Usage
 
@@ -772,7 +1066,29 @@ pipeline = TabularPipeline(
 
 ## 📖 Documentation
 
-For detailed documentation, API reference, model configurations, and usage examples, please visit: **[Documentation](https://tabtune.lexsi.ai/)**
+Full documentation: **[tabtune.lexsi.ai](https://tabtune.lexsi.ai/)**
+
+| Topic | Page |
+|---|---|
+| Model registry, envelopes, licensing | `docs/user-guide/registry.md` |
+| Typed configuration and YAML | `docs/user-guide/configuration.md` |
+| Prediction caching | `docs/user-guide/caching.md` |
+| Shift-aware evaluation | `docs/user-guide/shift-evaluation.md` |
+| Conformal prediction and recalibration | `docs/user-guide/uncertainty.md` |
+| Ensembling (six strategies) | `docs/user-guide/ensembling.md` |
+| Distillation | `docs/user-guide/distillation.md` |
+| Causal inference | `docs/user-guide/causal.md` |
+| All 16 models compared | `docs/models/overview.md` |
+| EXAONE Tabular | `docs/models/exaone.md` |
+| xRFM / iLTM | `docs/models/xrfm.md`, `docs/models/iltm.md` |
+| TabPFN v2.6 / v3, TabICL v2, TabFM | `docs/models/tabpfnv26.md`, `tabpfnv3.md`, `tabiclv2.md`, `tabfm.md` |
+
+Build the docs locally:
+
+```bash
+pip install "tabtune[docs]"
+mkdocs serve
+```
 
 ---
 
@@ -802,7 +1118,7 @@ TabTune is built upon the excellent work of the following projects and research 
 - Decrease `n_ensembles` or `context_size` for inference
 
 ### PEFT Compatibility Issues
-- Some models have experimental PEFT support; use 'base-ft' strategy instead
+- Some models have experimental PEFT support; use the 'finetune' strategy instead
 - Check logs for model-specific warnings
 
 ### Device Mismatch

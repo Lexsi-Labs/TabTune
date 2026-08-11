@@ -5,10 +5,9 @@ from __future__ import annotations
 import functools
 import os
 from types import ModuleType
-from typing import Optional
 
 
-def _try_import(module_name: str) -> Optional[ModuleType]:
+def _try_import(module_name: str) -> ModuleType | None:
     try:
         module = __import__(module_name)  # pylint: disable=import-outside-toplevel
     except ImportError:

@@ -41,6 +41,9 @@ from ..models.tabdpt.utils import pad_x
 from ..models.tabdpt.model import TabDPTModel
 from ..models.limix.classifier import LimixClassifier
 from ..models.tabfm.classifier import TabFMClassifier
+from ..models.xrfm.classifier import XRFMClassifier
+from ..models.iltm.classifier import ILTMClassifier
+from ..models.exaone.classifier import EXAONETabularClassifier
 
 from ..models.regression.tabpfn.regressor import TabPFNRegressorWrapper
 from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
@@ -49,6 +52,9 @@ from ..models.regression.mitra.regressor import MitraRegressorWrapper
 from ..models.regression.limix.regressor_wrapper import LimixRegressorWrapper
 from ..models.tabiclv2.sklearn.regressor import TabICLRegressor as TabICLv2Regressor
 from ..models.regression.tabfm.regressor import TabFMRegressorWrapper
+from ..models.regression.xrfm.regressor import XRFMRegressorWrapper
+from ..models.regression.iltm.regressor import ILTMRegressorWrapper
+from ..models.regression.exaone.regressor import EXAONETabularRegressorWrapper
 
 from ..models.tabpfnv26 import TabPFNv26Classifier
 from ..models.tabpfnv3 import TabPFNv3Classifier
@@ -61,8 +67,34 @@ from ..models.contexttab.contexttab import to_device
 
 from .peft_utils import apply_tabular_lora
 
+from .._internal.device import resolve_device
+
 logger = logging.getLogger(__name__)
 
+
+
+
+def _normalise_device_param(params: dict) -> dict:
+    """Resolve ``params['device']`` to a concrete device string, in place.
+
+    Every ``_finetune_*`` method does ``torch.device(config["device"])``, and
+    ``config`` is the method's own defaults updated with the caller's params.
+    The defaults come from ``resolve_device('auto')`` and are therefore already
+    concrete -- but a caller-supplied value went straight through.
+
+    That mattered because ``'auto'`` is the library-wide spelling for "pick a
+    backend" and is the default of :class:`~tabtune.config.schemas.TuningConfig`,
+    so it is exactly what arrives when someone does not name a device. Every
+    fine-tune, for every model, then died on
+    ``torch.device("auto")``. Normalising once here fixes all of them without
+    touching the twenty-odd call sites, and additionally clamps an out-of-range
+    CUDA index and falls back to CPU with a warning rather than failing later
+    inside ``.to()``.
+    """
+    requested = params.get("device")
+    if requested is not None:
+        params["device"] = resolve_device(requested)
+    return params
 
 
 class TuningManager:
@@ -72,11 +104,12 @@ class TuningManager:
     def tune(self, model, X_train, y_train, strategy='inference', params=None, processor=None):
         
         params_copy = dict(params) if isinstance(params, dict) else {}
+        _normalise_device_param(params_copy)
         finetune_mode = params_copy.get('finetune_mode', 'turn_by_turn')
 
         # --- Regression wrappers: allow ContextTab finetune (turn-by-turn) ---
         if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
-                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper)):
+                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper, XRFMRegressorWrapper, ILTMRegressorWrapper, EXAONETabularRegressorWrapper)):
             if strategy == 'inference':
                 logger.info("[TuningManager] Regression model - inference path")
                 model.fit(X_train, y_train)
@@ -97,6 +130,7 @@ class TuningManager:
 
             if isinstance(model, TabDPTRegressorWrapper) and strategy == "finetune":
                 params_copy = dict(params) if isinstance(params, dict) else {}
+                _normalise_device_param(params_copy)
                 return self._finetune_tabdpt_regression_turn_by_turn(model, X_train, y_train, params_copy)
 
             # Mitra regression finetune (turn-by-turn)
@@ -147,6 +181,36 @@ class TuningManager:
                     )
                 return self._finetune_tabfm_regression_turn_by_turn(model, X_train, y_train, params_copy)
 
+            # XRFM regression finetune (full RFM training / warm-started refinement)
+            if isinstance(model, XRFMRegressorWrapper) and strategy == "finetune":
+                # xRFM is a kernel/RFM method: there are no gradient episodes, so
+                # `finetune_mode` ('turn_by_turn', ...) does not apply and is ignored.
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    logger.info(
+                        f"[TuningManager] XRFM regression finetune ignores finetune_mode "
+                        f"('{finetune_mode}'): xRFM refits/refines its Mahalanobis matrix M directly."
+                    )
+                return self._finetune_xrfm_regression(model, X_train, y_train, params_copy)
+
+            # ILTM regression finetune (episodic turn-by-turn on the real hypernetwork)
+            if isinstance(model, ILTMRegressorWrapper) and strategy == "finetune":
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    logger.warning(
+                        f"[TuningManager] ILTM regression finetune supports finetune_mode "
+                        f"'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'. Auto-correcting."
+                    )
+                return self._finetune_iltm_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
+            # EXAONE Tabular regression finetune (episodic turn-by-turn on the
+            # real Cross-axis Summary Transformer + quantile head)
+            if isinstance(model, EXAONETabularRegressorWrapper) and strategy == "finetune":
+                if finetune_mode not in ("turn_by_turn", "tbt"):
+                    logger.warning(
+                        f"[TuningManager] EXAONETabular regression finetune supports finetune_mode "
+                        f"'turn_by_turn' (or 'tbt'). Got '{finetune_mode}'. Auto-correcting."
+                    )
+                return self._finetune_exaone_regression_turn_by_turn(model, X_train, y_train, params_copy)
+
 
             raise NotImplementedError(
                 f"Regression fine-tuning not implemented yet for model={type(model).__name__}. "
@@ -154,13 +218,26 @@ class TuningManager:
             )
         
         params_copy = dict(params) if isinstance(params, dict) else {}
+        _normalise_device_param(params_copy)
         finetune_mode = params_copy.pop('finetune_mode', 'meta-learning')
         save_checkpoint_path = params_copy.pop('save_checkpoint_path', None)
         if save_checkpoint_path is None:
-            default_dir = params_copy.get("checkpoint_dir", "./checkpoints")
-            if not os.path.exists(default_dir):
-                os.makedirs(default_dir)
-            save_checkpoint_path = os.path.join(default_dir, f"{type(model).__name__}_latest.pt")
+            # Only create a checkpoint directory when the caller asked for one.
+            # This block used to run unconditionally, so every fine-tune created
+            # ./checkpoints in the caller's working directory and wrote a
+            # weights file there - surprising in notebooks, and a stray artefact
+            # in CI. Opt-in now.
+            default_dir = params_copy.get("checkpoint_dir")
+            if default_dir:
+                os.makedirs(default_dir, exist_ok=True)
+                save_checkpoint_path = os.path.join(
+                    default_dir, f"{type(model).__name__}_latest.pt"
+                )
+            else:
+                logger.debug(
+                    "[TuningManager] Neither save_checkpoint_path nor checkpoint_dir "
+                    "was given; fine-tuned weights stay in memory."
+                )
 
         # Strategy selection: accept either explicit 'peft' strategy or finetune_method='peft'
         finetune_method = params_copy.pop('finetune_method', None)
@@ -258,6 +335,41 @@ class TuningManager:
                 self._finetune_tabfm(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='meta-learning')
             is_finetuned = True
 
+        elif isinstance(model, XRFMClassifier) and selected_strategy in ('finetune', 'peft'):
+            # xRFM is a kernel/RFM method (no gradient-trained nn.Module, no
+            # pretrained checkpoint): 'finetune' = full RFM (re)training with
+            # user-controlled hyperparameters (+ warm-started refinement when
+            # already fitted); 'peft' = frozen-base low-rank update of the
+            # AGOP-learned Mahalanobis matrix M. Checkpoints are saved via
+            # joblib inside the methods (xRFM is not state_dict-compatible).
+            if selected_strategy == 'peft' or peft_config is not None:
+                logger.info("[TuningManager] Using low-rank M-matrix adaptation (kernel PEFT) for XRFM")
+                model = self._peft_xrfm(model, X_train, y_train, params=params_copy,
+                                        peft_config=peft_config, save_path=save_checkpoint_path)
+            else:
+                logger.info("[TuningManager] Using full RFM refit/refinement fine-tuning for XRFM")
+                model = self._finetune_xrfm(model, X_train, y_train, params=params_copy,
+                                            save_path=save_checkpoint_path)
+            is_finetuned = False  # joblib checkpointing handled inside; skip torch state_dict round-trip
+
+        elif isinstance(model, ILTMClassifier) and selected_strategy in ('finetune', 'peft'):
+            if finetune_mode == 'sft':
+                logger.info("[TuningManager] Using Pure SFT for ILTM (task-optimized)")
+                self._finetune_iltm(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='sft')
+            else:  # default: 'meta-learning' (matches the hypernetwork's meta-trained paradigm)
+                logger.info("[TuningManager] Using Episodic Meta-Learning for ILTM (default)")
+                self._finetune_iltm(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='meta-learning')
+            is_finetuned = True
+
+        elif isinstance(model, EXAONETabularClassifier) and selected_strategy in ('finetune', 'peft'):
+            if finetune_mode == 'sft':
+                logger.info("[TuningManager] Using Pure SFT for EXAONETabular (task-optimized)")
+                self._finetune_exaone(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='sft')
+            else:  # default: 'meta-learning' (matches EXAONE's in-context paradigm)
+                logger.info("[TuningManager] Using Episodic Meta-Learning for EXAONETabular (default)")
+                self._finetune_exaone(model, X_train, y_train, params=params_copy, peft_config=peft_config, mode='meta-learning')
+            is_finetuned = True
+
         elif isinstance(model, LimixClassifier) and selected_strategy in ('finetune', 'peft'):
             msg = "[TuningManager] Limix fine-tuning not supported; falling back to inference-mode fit (.fit) only."
             print(msg)
@@ -286,6 +398,15 @@ class TuningManager:
         elif isinstance(model, TabFMClassifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabFM (zero-shot inference mode)")
             model.fit(X_train, y_train)
+        elif isinstance(model, XRFMClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for XRFM (kernel training with default hyperparameters)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, ILTMClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for ILTM (hypernetwork-generated ensemble, no gradient training)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, EXAONETabularClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for EXAONETabular (in-context inference mode)")
+            model.fit(X_train, y_train)
         else:
             logger.info("[TuningManager] Applying standard model fitting (.fit)")
             model.fit(X_train, y_train)
@@ -294,21 +415,22 @@ class TuningManager:
         if is_finetuned and save_checkpoint_path:
             self._save_checkpoint(model, save_checkpoint_path)
             logger.info(f"[TuningManager] Saved fine-tuned checkpoint to {save_checkpoint_path}")
-            
-            model = self.load_checkpoint(model, save_checkpoint_path, map_location="cuda" if torch.cuda.is_available() else "cpu")
-            logger.info("[TuningManager] Reloaded fine-tuned weights into model for inference")
-            
 
+            # The save/reload round-trip exists to guarantee the in-memory model
+            # matches what was written. It is skipped when nothing was written.
+            model = self.load_checkpoint(
+                model, save_checkpoint_path, map_location=resolve_device('auto')
+            )
+            logger.info("[TuningManager] Reloaded fine-tuned weights into model for inference")
+
+        if is_finetuned:
             if isinstance(model, torch.nn.Module):
                 model.eval()
             elif hasattr(model, 'model'):
                 model.model.eval()
             elif hasattr(model, 'model_'):
                 model.model_.eval()
-            
-        
-            logger.info("[TuningManager] Reloaded fine-tuned weights and set model to eval mode")
-            
+            logger.info("[TuningManager] Fine-tuning complete; model set to eval mode")
 
         return model
         
@@ -351,7 +473,7 @@ class TuningManager:
             logger.warning(f"[TuningManager] Checkpoint path {ckpt_path} not found")
             return model
 
-        state = torch.load(ckpt_path, map_location=map_location)
+        state = torch.load(ckpt_path, map_location=map_location, weights_only=True)
         state_dict = state.get('model_state_dict', state)
         candidates = [getattr(model, 'model_', None), getattr(model, 'model', None), model]
 
@@ -375,7 +497,7 @@ class TuningManager:
         logger.info(f"[TuningManager] Starting full fine-tuning for {type(model).__name__}")
         
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-4,
             "batch_size": 128,
@@ -467,7 +589,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting advanced TabPFN fine-tuning")
         
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 3, "learning_rate": 1e-5, "batch_size": 256, "show_progress": True 
         }
         if params:
@@ -611,7 +733,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFN SFT fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 25,  # More epochs needed as we only have one "batch"
             "learning_rate": 1e-5,
             "show_progress": True,
@@ -741,7 +863,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting advanced TabICL/OrionMSP/OrionBix fine-tuning")
         
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5, "learning_rate": 2e-6, "show_progress": True,
             "support_size": 48, "query_size": 32, "n_episodes": 1000
         }
@@ -921,7 +1043,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting %s fine-tuning for TabFM (real backbone)", mode)
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5, "learning_rate": 2e-6, "show_progress": True,
             "support_size": 64, "query_size": 32, "steps_per_epoch": 200,
             "weight_decay": 0.0, "grad_clip": 1.0,
@@ -1006,7 +1128,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabFM regression fine-tuning (turn-by-turn, real backbone)")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5, "learning_rate": 2e-6, "support_size": 64, "query_size": 32,
             "steps_per_epoch": 200, "show_progress": True, "grad_clip": 1.0, "peft_config": None,
         }
@@ -1073,6 +1195,763 @@ class TuningManager:
         logger.info("[TuningManager] TabFM regression fine-tuning complete")
         return model
 
+    # ------------------------------------------------------------------ ILTM
+    # iLTM (Integrated Large Tabular Model) is a meta-trained HYPERNETWORK: its
+    # forward pass consumes a labelled support set and GENERATES the weights of
+    # an MLP predictor, which is then applied to query rows. Fine-tuning is
+    # therefore episodic, exactly like TabFM/TabICL: sample support+query,
+    # generate the network from the support set, score the query rows and
+    # backprop the query loss into the hypernetwork parameters (or their LoRA
+    # adapters under PEFT -- see MODEL_LORA_TARGETS["ILTM"] in peft_utils).
+
+    @staticmethod
+    def _iltm_episode_tensors(X_np, y_np, s_idx, q_idx, device, is_reg=False):
+        """Build one episode for the REAL iLTM forward.
+
+        Unlike TabFM's concatenated sequence, iLTM takes the support set and
+        query set as SEPARATE tensors: the hypernetwork generates the main
+        network from ``(x_support, y_support)`` and the query rows are pushed
+        through the generated network.
+
+        Returns ``(x_support[S,H], y_support[S], x_query[Q,H], y_query[Q])``.
+        """
+        xs = torch.from_numpy(X_np[s_idx]).float().to(device)
+        xq = torch.from_numpy(X_np[q_idx]).float().to(device)
+        if is_reg:
+            ys = torch.from_numpy(y_np[s_idx].astype(np.float32)).to(device)
+            yq = torch.from_numpy(y_np[q_idx].astype(np.float32)).to(device)
+        else:
+            ys = torch.from_numpy(y_np[s_idx].astype(np.int64)).to(device)
+            yq = torch.from_numpy(y_np[q_idx].astype(np.int64)).to(device)
+        return xs, ys, xq, yq
+
+    def _finetune_iltm(self, model: ILTMClassifier, X_train, y_train, params=None, peft_config=None, mode='meta-learning'):
+        """Episodic fine-tuning of the REAL vendored iLTM hypernetwork (classification).
+
+        iLTM's hypernetwork was meta-trained across datasets, so -- like TabFM /
+        TabICL / Mitra -- the default adaptation is *episodic meta-learning*:
+        repeatedly sample a labelled support set + a query set, run the model's
+        **real** forward (``model_(x_support, y_support, n_classes)`` generates
+        the MLP; the query rows go through the same data-dependent transforms +
+        the generated network) and minimise cross-entropy on the query logits.
+        ``mode='sft'`` fixes one support/query split and trains it repeatedly.
+
+        ``X_train`` is the RAW frame: fine-tuning first fits the vendored engine
+        (internal preprocessing + ensemble + ``y_encoder_``) and episode
+        features come from :meth:`prepare_episode_features`. LoRA/PEFT is
+        injected into the real ``model_`` via :func:`apply_tabular_lora`. After
+        the gradient loop the engine is re-fitted so the ensemble predictors
+        are regenerated from the fine-tuned hypernetwork weights.
+        """
+        logger.info("[TuningManager] Starting %s fine-tuning for ILTM (real hypernetwork)", mode)
+
+        config = {
+            "device": resolve_device('auto'),
+            "epochs": 3, "learning_rate": 1e-4, "show_progress": True,
+            "support_size": 64, "query_size": 32, "steps_per_epoch": 100,
+            "weight_decay": 0.0, "grad_clip": 1.0, "finetuning_dropout": 0.0,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)  # vendored preprocessing/ensemble + y_encoder_/classes_
+        if model.model_ is None:
+            logger.warning("[TuningManager] ILTM backbone unavailable; skipping fine-tuning.")
+            return model
+
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("ILTM", model.model_, peft_config)
+                model.estimator_._model = model.model_  # keep the engine on the adapted module
+                logger.info("[TuningManager] PEFT SUCCESS: LoRA adapters applied to ILTM")
+            except Exception as e:
+                logger.warning(f"[TuningManager] PEFT FAILED for ILTM: {e}. Base fine-tuning instead.")
+
+        model.model_.to(device).train()
+        for p in model.model_.parameters():
+            p.data = p.data.to(device)
+
+        X_np, _ = model.prepare_episode_features(X_train)
+        y_np = np.clip(model.y_encoder_.transform(np.asarray(y_train).ravel()).astype(np.int64), 0, model.max_classes - 1)
+        n_classes = int(min(model.n_classes_, model.max_classes))
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(2, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = torch.optim.AdamW([p for p in model.model_.parameters() if p.requires_grad],
+                                      lr=config["learning_rate"], weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.CrossEntropyLoss()
+
+        # Fixed split for SFT; fresh random split each step for meta-learning.
+        fixed = np.random.permutation(n_samples) if mode == 'sft' else None
+
+        def _step():
+            if fixed is not None:
+                s_idx, q_idx = fixed[:s_sz], fixed[s_sz:s_sz + q_sz]
+            else:
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+            xs, ys, xq, yq = self._iltm_episode_tensors(X_np, y_np, s_idx, q_idx, device, is_reg=False)
+            logits = model.episode_logits(xs, ys, xq, n_classes, training=True,
+                                          dropout=config["finetuning_dropout"])  # [Q, K]
+            return loss_fn(logits.reshape(-1, logits.size(-1)).float(), yq)
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"ILTM {mode} Epoch {epoch}") if config["show_progress"] else range(steps)
+            for _ in iterable:
+                optimizer.zero_grad()
+                try:
+                    loss = _step()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] ILTM episode skipped: {e}")
+                    continue
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)  # regenerate the ensemble from the fine-tuned hypernetwork
+        logger.info("[TuningManager] ILTM fine-tuning complete")
+        return model
+
+    def _finetune_iltm_regression_turn_by_turn(self, model, X_train, y_train, params=None):
+        """Episodic turn-by-turn fine-tuning of the REAL iLTM regression hypernetwork.
+
+        Minimises MSE between the query predictions (generated-network forward
+        with ``n_classes=1``) and the standardised targets, mirroring the
+        TabFM / TabDPT / Mitra regression fine-tuners. Reads ``peft_config``
+        from the tuning config (regression PEFT routes through here).
+        """
+        logger.info("[TuningManager] Starting ILTM regression fine-tuning (turn-by-turn, real hypernetwork)")
+
+        config = {
+            "device": resolve_device('auto'),
+            "epochs": 3, "learning_rate": 1e-4, "support_size": 64, "query_size": 32,
+            "steps_per_epoch": 100, "show_progress": True, "grad_clip": 1.0,
+            "weight_decay": 0.0, "finetuning_dropout": 0.0, "peft_config": None,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)
+        if model.model_ is None:
+            logger.warning("[TuningManager] ILTM regression backbone unavailable; skipping.")
+            return model
+
+        peft_config = config.get("peft_config")
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("ILTM", model.model_, peft_config)
+                model.estimator_._model = model.model_
+                logger.info("[TuningManager] LoRA adapters applied to ILTM regressor")
+            except Exception as e:
+                logger.warning(f"[TuningManager] ILTM regression PEFT failed: {e}")
+
+        model.model_.to(device).train()
+        for p in model.model_.parameters():
+            p.data = p.data.to(device)
+
+        X_np, _ = model.prepare_episode_features(X_train)
+        y_np = np.asarray(y_train, dtype=float).ravel()
+        y_mean, y_std = float(np.mean(y_np)), float(np.std(y_np) + 1e-8)
+        y_scaled = ((y_np - y_mean) / y_std).astype(np.float32)
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(2, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = torch.optim.AdamW([p for p in model.model_.parameters() if p.requires_grad],
+                                      lr=config["learning_rate"], weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.MSELoss()
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"ILTM Reg Epoch {epoch}") if config["show_progress"] else range(steps)
+            for _ in iterable:
+                optimizer.zero_grad()
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+                xs, ys, xq, yq = self._iltm_episode_tensors(X_np, y_scaled, s_idx, q_idx, device, is_reg=True)
+                try:
+                    preds = model.episode_predict(xs, ys, xq, training=True,
+                                                  dropout=config["finetuning_dropout"]).reshape(-1).float()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] ILTM reg episode skipped: {e}")
+                    continue
+                if preds.shape[0] != yq.shape[0]:
+                    continue
+                loss = loss_fn(preds, yq)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)
+        logger.info("[TuningManager] ILTM regression fine-tuning complete")
+        return model
+
+    # ---- EXAONE TABULAR ----
+    # EXAONE Tabular (LG AI Research) is an in-context learner built on the
+    # Cross-axis Summary Transformer: one forward consumes a labelled support
+    # set plus a query set and scores the query rows directly. Adaptation is
+    # therefore episodic, exactly like TabFM / iLTM / TabICL -- sample a support
+    # set and a query set, run the model's REAL differentiable forward
+    # (``episode_logits`` / ``episode_predictions``, which deliberately bypass
+    # the vendored predict path because that runs under ``inference_mode`` and
+    # yields tensors autograd can never accept) and backprop the query loss.
+    #
+    # Three model facts shape the loops below:
+    #
+    # 1. The forward carries an ENSEMBLE axis: ``x_support`` is (E, S, K),
+    #    ``y_support`` is (E, S) and ``x_query`` is (E, Q, K). Fine-tuning uses
+    #    E=1 -- the ensemble members differ only in preprocessing draws, which
+    #    are an inference-time device, and one member per step keeps the
+    #    gradient estimate cheap.
+    # 2. Classification logits come back over the ARCHITECTURAL class capacity
+    #    (ten), not the dataset's class count, so they are sliced to
+    #    ``n_classes`` before cross-entropy. Without the slice the loss would
+    #    spend gradient pushing down padding columns that can never be labels.
+    # 3. ``y_support`` is NOT differentiable and must not be optimised: the
+    #    model's label encoder turns labels into ordinal ranks with a
+    #    comparison-and-count, which has zero gradient almost everywhere. Only
+    #    parameters (and, in principle, support FEATURES) carry gradient.
+    #
+    # The vendored ``_validate_inputs`` additionally requires float support
+    # labels that are finite, integral and non-negative for classification, so
+    # the class codes are carried as float32 rather than int64.
+
+    @staticmethod
+    def _exaone_episode_tensors(X_np, y_np, s_idx, q_idx, device, is_reg=False):
+        """Build one episode for the REAL EXAONE forward.
+
+        EXAONE takes the support set and the query set as SEPARATE tensors, each
+        with a leading ensemble axis. Fine-tuning uses a single member (E=1).
+
+        Returns ``(x_support[1,S,K], y_support[1,S], x_query[1,Q,K], y_query[Q])``.
+        ``y_support`` is float32 in both tasks -- the vendored input validator
+        rejects integer label tensors -- while ``y_query`` is int64 for
+        classification (cross-entropy targets) and float32 for regression.
+        """
+        xs = torch.from_numpy(np.ascontiguousarray(X_np[s_idx])).float().unsqueeze(0).to(device)
+        xq = torch.from_numpy(np.ascontiguousarray(X_np[q_idx])).float().unsqueeze(0).to(device)
+        ys = torch.from_numpy(np.ascontiguousarray(y_np[s_idx])).float().unsqueeze(0).to(device)
+        if is_reg:
+            yq = torch.from_numpy(np.ascontiguousarray(y_np[q_idx])).float().to(device)
+        else:
+            yq = torch.from_numpy(np.ascontiguousarray(y_np[q_idx])).long().to(device)
+        return xs, ys, xq, yq
+
+    def _finetune_exaone(self, model: EXAONETabularClassifier, X_train, y_train, params=None,
+                         peft_config=None, mode='meta-learning'):
+        """Episodic fine-tuning of the REAL vendored EXAONE backbone (classification).
+
+        EXAONE is an in-context learner, so -- like TabFM / iLTM / TabICL -- the
+        default adaptation is *episodic meta-learning*: repeatedly sample a
+        labelled support set + a query set, run the model's **real** forward
+        ``model.episode_logits(x_support, y_support, x_query)`` and minimise
+        cross-entropy on the query logits, sliced to the dataset's class count
+        (the head is as wide as the architectural class capacity).
+        ``mode='sft'`` fixes one support/query split and trains it repeatedly.
+
+        ``X_train`` is the RAW frame: fine-tuning first fits the vendored engine
+        (its own preprocessing + ensemble + ``y_encoder_``/``classes_``) and
+        episode features then come from :meth:`prepare_episode_features`, i.e.
+        the model's own fitted encoder. LoRA/PEFT is injected into the real
+        ``model_`` via :func:`apply_tabular_lora`. After the gradient loop the
+        engine is re-fitted so the in-context support state is rebuilt from the
+        fine-tuned weights.
+        """
+        logger.info("[TuningManager] Starting %s fine-tuning for EXAONETabular (real backbone)", mode)
+
+        config = {
+            "device": resolve_device('auto'),
+            "epochs": 3, "learning_rate": 1e-5, "show_progress": True,
+            "support_size": 64, "query_size": 32, "steps_per_epoch": 50,
+            "weight_decay": 0.0, "grad_clip": 1.0,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)  # vendored preprocessing/ensemble + y_encoder_/classes_
+        if model.model_ is None:
+            logger.warning("[TuningManager] EXAONETabular backbone unavailable; skipping fine-tuning.")
+            return model
+
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("EXAONETabular", model.model_, peft_config)
+                if model.estimator_ is not None:
+                    model.estimator_.model = model.model_  # keep the engine on the adapted module
+                logger.info("[TuningManager] PEFT SUCCESS: LoRA adapters applied to EXAONETabular")
+                self._warn_if_no_lora_adapters("EXAONETabular", model.model_)
+            except Exception as e:
+                logger.warning(f"[TuningManager] PEFT FAILED for EXAONETabular: {e}. Base fine-tuning instead.")
+
+        model.model_.to(device).train()
+        for p in model.model_.parameters():
+            p.data = p.data.to(device)
+
+        X_np, _ = model.prepare_episode_features(X_train)
+        # Support labels ride into the model as floats (see _exaone_episode_tensors);
+        # the query targets are cast back to int64 there for cross-entropy.
+        y_np = np.clip(model.y_encoder_.transform(np.asarray(y_train).ravel()).astype(np.int64),
+                       0, model.max_classes - 1)
+        n_classes = int(min(model.n_classes_, model.max_classes))
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(2, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = torch.optim.AdamW([p for p in model.model_.parameters() if p.requires_grad],
+                                      lr=config["learning_rate"], weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.CrossEntropyLoss()
+
+        # Fixed split for SFT; fresh random split each step for meta-learning.
+        fixed = np.random.permutation(n_samples) if mode == 'sft' else None
+
+        def _step():
+            if fixed is not None:
+                s_idx, q_idx = fixed[:s_sz], fixed[s_sz:s_sz + q_sz]
+            else:
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+            xs, ys, xq, yq = self._exaone_episode_tensors(X_np, y_np, s_idx, q_idx, device, is_reg=False)
+            logits = model.episode_logits(xs, ys, xq)  # [E=1, Q, class_capacity]
+            # Slice the architectural class capacity down to the dataset's real
+            # class count before the loss -- the extra columns are never labels.
+            ql = logits[..., :n_classes].reshape(-1, n_classes).float()
+            return loss_fn(ql, yq)
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"EXAONE {mode} Epoch {epoch}") if config["show_progress"] else range(steps)
+            for step_index in iterable:
+                optimizer.zero_grad()
+                try:
+                    loss = _step()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] EXAONETabular episode skipped: {e}")
+                    continue
+                # Refuse to write a non-finite update. Half precision without loss
+                # scaling can send this loss to NaN, and an optimizer step on a NaN
+                # gradient poisons every weight it touches. The failure then shows
+                # up much later and somewhere unrelated -- most confusingly inside
+                # the support-cache validity check, which compares tensors with
+                # torch.equal and gets False for NaN even when they are
+                # bit-identical, surfacing as "inputs are incompatible with the
+                # support cache". Stopping here keeps the backbone usable and
+                # names the real cause.
+                if not torch.isfinite(loss):
+                    raise RuntimeError(
+                        f"[TuningManager] EXAONETabular fine-tuning produced a "
+                        f"non-finite loss ({loss.item()}) at epoch {epoch}, step "
+                        f"{step_index + 1}; stopped before the optimizer could "
+                        f"write NaN weights. This is almost always half precision: "
+                        f"the released manifest asks for float16, which is right "
+                        f"for inference and unsafe for a backward pass without loss "
+                        f"scaling. Fine-tuning defaults to float32 as of 0.2.0 -- if "
+                        f"you overrode dtype, drop the override, or lower the "
+                        f"learning rate (currently {config['learning_rate']})."
+                    )
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)  # rebuild the in-context support state with fine-tuned weights
+        logger.info("[TuningManager] EXAONETabular fine-tuning complete")
+        return model
+
+    def _finetune_exaone_regression_turn_by_turn(self, model, X_train, y_train, params=None):
+        """Episodic turn-by-turn fine-tuning of the REAL EXAONE regression backbone.
+
+        The regression head emits ``quantile_count`` levels per query row; the
+        median level (``model.median_quantile_index``) is what ``predict``
+        reports, so that is the column the loss is taken on. Targets are
+        standardised for the duration of the loop because the vendored engine
+        centres and scales the support targets itself before its own forward --
+        the episodes must speak the same normalised space. Nothing is written
+        back: ``predict`` still un-scales internally and still returns the
+        original target space, which is exactly why the EXAONE regression data
+        processor pins ``target_scaling_strategy='none'``.
+
+        Mirrors the TabFM / iLTM / Mitra regression fine-tuners and reads
+        ``peft_config`` from the tuning config (regression PEFT routes here).
+        """
+        logger.info("[TuningManager] Starting EXAONETabular regression fine-tuning (turn-by-turn, real backbone)")
+
+        config = {
+            "device": resolve_device('auto'),
+            "epochs": 3, "learning_rate": 1e-5, "support_size": 64, "query_size": 32,
+            "steps_per_epoch": 50, "show_progress": True, "grad_clip": 1.0,
+            "weight_decay": 0.0, "peft_config": None,
+        }
+        if params:
+            config.update(params)
+        device = torch.device(config["device"])
+
+        model._load_model()
+        model.fit(X_train, y_train)
+        if model.model_ is None:
+            logger.warning("[TuningManager] EXAONETabular regression backbone unavailable; skipping.")
+            return model
+
+        peft_config = config.get("peft_config")
+        if peft_config:
+            try:
+                model.model_ = apply_tabular_lora("EXAONETabular", model.model_, peft_config)
+                if model.estimator_ is not None:
+                    model.estimator_.model = model.model_
+                logger.info("[TuningManager] LoRA adapters applied to EXAONETabular regressor")
+                self._warn_if_no_lora_adapters("EXAONETabular", model.model_)
+            except Exception as e:
+                logger.warning(f"[TuningManager] EXAONETabular regression PEFT failed: {e}")
+
+        model.model_.to(device).train()
+        for p in model.model_.parameters():
+            p.data = p.data.to(device)
+
+        X_np, _ = model.prepare_episode_features(X_train)
+        y_np = np.asarray(y_train, dtype=float).ravel()
+        y_mean, y_std = float(np.mean(y_np)), float(np.std(y_np) + 1e-8)
+        y_scaled = ((y_np - y_mean) / y_std).astype(np.float32)
+        median_index = int(model.median_quantile_index)
+        n_samples = X_np.shape[0]
+
+        s_sz, q_sz = int(config["support_size"]), int(config["query_size"])
+        if s_sz + q_sz > n_samples:
+            scale = n_samples / float(s_sz + q_sz)
+            s_sz, q_sz = max(2, int(s_sz * scale)), max(1, int(q_sz * scale))
+
+        optimizer = torch.optim.AdamW([p for p in model.model_.parameters() if p.requires_grad],
+                                      lr=config["learning_rate"], weight_decay=config["weight_decay"])
+        loss_fn = torch.nn.MSELoss()
+
+        steps = int(config["steps_per_epoch"])
+        for epoch in range(1, config["epochs"] + 1):
+            iterable = tqdm(range(steps), desc=f"EXAONE Reg Epoch {epoch}") if config["show_progress"] else range(steps)
+            for _ in iterable:
+                optimizer.zero_grad()
+                idx = np.random.choice(n_samples, s_sz + q_sz, replace=(s_sz + q_sz > n_samples))
+                s_idx, q_idx = idx[:s_sz], idx[s_sz:]
+                xs, ys, xq, yq = self._exaone_episode_tensors(X_np, y_scaled, s_idx, q_idx, device, is_reg=True)
+                try:
+                    quantiles = model.episode_predictions(xs, ys, xq)  # [E=1, Q, quantile_count]
+                    preds = quantiles[..., median_index].reshape(-1).float()
+                except Exception as e:
+                    logger.debug(f"[TuningManager] EXAONETabular reg episode skipped: {e}")
+                    continue
+                if preds.shape[0] != yq.shape[0]:
+                    continue
+                loss = loss_fn(preds, yq)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.model_.parameters(), config["grad_clip"])
+                optimizer.step()
+                if config["show_progress"] and hasattr(iterable, "set_postfix"):
+                    iterable.set_postfix(loss=f"{loss.item():.4f}")
+
+        model.model_.eval()
+        model.fit(X_train, y_train)
+        logger.info("[TuningManager] EXAONETabular regression fine-tuning complete")
+        return model
+
+    @staticmethod
+    def _warn_if_no_lora_adapters(model_name: str, torch_model) -> None:
+        """Say so loudly when a LoRA request wrapped nothing.
+
+        ``apply_tabular_lora`` only wraps ``nn.Linear`` leaves. A model whose
+        projections are raw ``nn.Parameter``s applied through ``F.linear`` --
+        EXAONE's attention and feed-forward blocks are exactly that -- has no
+        such leaves to wrap outside its task head, so injection succeeds while
+        adapting nothing. Without this the log would claim "PEFT SUCCESS" over a
+        run that is really a full fine-tune.
+        """
+        from .peft_utils import LoRALinear
+
+        if not any(isinstance(module, LoRALinear) for module in torch_model.modules()):
+            logger.warning(
+                "[TuningManager] PEFT for %s wrapped ZERO layers: its projections are raw "
+                "nn.Parameters used through F.linear, which the nn.Linear-based LoRA "
+                "injector cannot reach. Proceeding as a FULL fine-tune (every parameter "
+                "trainable), not a parameter-efficient one.",
+                model_name,
+            )
+
+    # ------------------------------------------------------------------ XRFM
+    # xRFM (Recursive Feature Machines) is a kernel method: its learned state
+    # is the per-leaf Mahalanobis matrix M (from AGOP iterations) plus kernel
+    # ridge weights -- NOT a gradient-trained nn.Module with a pretrained
+    # checkpoint. TabTune therefore maps the tuning strategies as follows:
+    #
+    # * 'finetune'  -> full RFM (re)training on the training split with
+    #   user-controllable hyperparameters (iters, bandwidth, kernel, tree
+    #   params, ...). If the wrapper was already fitted, warm-start instead:
+    #   run additional RFM iterations (AGOP -> M update -> kernel refit) from
+    #   the existing fitted M ("continued refinement").
+    # * 'peft'      -> parameter-efficient adaptation of M: freeze the base
+    #   fitted M and add a rank-r truncated update from the AGOP of the
+    #   adaptation data, M_adapted = M_base + alpha * U_r diag(s_r) U_r^T
+    #   (rank via tuning_params['lora_rank']/'rank' or peft_config['r'],
+    #   blend via 'peft_alpha'). No LoRA nn.Linear machinery is involved.
+    #
+    # Checkpoints are saved via joblib (the fitted xRFM estimator is a plain
+    # picklable object, not a torch state_dict).
+
+    _XRFM_HYPERPARAM_KEYS = (
+        "rfm_params", "kernel", "bandwidth", "exponent", "diag", "bandwidth_mode",
+        "reg", "iters", "n_trees", "tuning_metric", "categorical_encoding",
+        "val_size", "random_state", "verbose",
+    )
+
+    @staticmethod
+    def _xrfm_apply_hyperparams(model, config):
+        """Push user-controllable xRFM hyperparameters from the FT config onto the wrapper."""
+        applied = {}
+        for key in TuningManager._XRFM_HYPERPARAM_KEYS:
+            if key in config:
+                setattr(model, key, config[key])
+                applied[key] = config[key]
+        if applied:
+            logger.info(f"[TuningManager] XRFM hyperparameters overridden: {applied}")
+
+    @staticmethod
+    def _xrfm_save_checkpoint(model, save_path):
+        """Persist the fitted xRFM estimator via joblib (not a torch state_dict)."""
+        if not save_path:
+            return
+        import joblib
+
+        root, ext = os.path.splitext(str(save_path))
+        path = root + ".joblib" if ext != ".joblib" else str(save_path)
+        try:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+            joblib.dump(model.model_, path)
+            logger.info(f"[TuningManager] Saved fitted xRFM checkpoint to {path} (joblib)")
+        except Exception as e:
+            logger.warning(f"[TuningManager] Failed to save xRFM checkpoint: {e}")
+
+    @staticmethod
+    def _xrfm_low_rank_M_update(M_base, agop, rank, alpha):
+        """Rank-r truncated additive update of the Mahalanobis matrix M.
+
+        The AGOP of the adaptation data is eigendecomposed and only the top-r
+        components are kept: delta = U_r diag(s_r) U_r^T (top-r entries for a
+        diagonal M). Both terms are max-normalised (the engine's own M
+        normalisation) and blended: M_adapted = norm(M_base + alpha * delta).
+        """
+        eps = 1e-30
+        if agop.dim() == 1:  # diagonal M: keep the top-r entries
+            r = min(int(rank), agop.numel())
+            delta = torch.zeros_like(agop)
+            top_vals, top_idx = torch.topk(agop, r)
+            delta[top_idx] = torch.clamp(top_vals, min=0.0)
+        else:
+            agop_sym = 0.5 * (agop + agop.T)
+            S, U = torch.linalg.eigh(agop_sym)
+            S = torch.clamp(S, min=0.0)
+            r = min(int(rank), S.numel())
+            idx = torch.argsort(S, descending=True)[:r]
+            U_r, S_r = U[:, idx], S[idx]
+            delta = U_r @ torch.diag(S_r) @ U_r.T
+        delta = delta / (delta.max() + eps)
+        M_new = M_base + float(alpha) * delta
+        return M_new / (M_new.max() + eps)
+
+    def _xrfm_refit_leaf_predictor(self, leaf, X_leaf, y_leaf):
+        """Re-solve the leaf's kernel predictor (centers/weights) under its current M."""
+        from ..models.xrfm.rfm_src.utils import matrix_power
+
+        if getattr(leaf, "use_sqrtM", False):
+            leaf.sqrtM = matrix_power(leaf.M, leaf.agop_power, verbose=False)
+        leaf.fit_predictor(X_leaf, y_leaf, X_val=X_leaf, y_val=y_leaf)
+
+    def _xrfm_refine_leaves(self, model, X_train, y_train, iters):
+        """Continued RFM refinement of already-fitted leaves on new data.
+
+        Per leaf and per iteration: AGOP of the adaptation data under the
+        current predictor -> max-normalised M update -> kernel refit on the
+        adaptation data (the standard RFM iteration, warm-started from the
+        fitted M instead of the identity).
+        """
+        leaves = model.leaf_models()
+        if not leaves:
+            logger.warning("[TuningManager] XRFM has no fitted leaves to refine; skipping.")
+            return
+        X_num = model.transform_features(X_train)
+        y_num = model.numeric_targets(y_train)
+        for li, leaf in enumerate(leaves):
+            X_leaf = torch.as_tensor(X_num).to(leaf.device)
+            y_leaf = y_num.to(device=leaf.device, dtype=X_leaf.dtype)
+            for it in range(int(iters)):
+                try:
+                    agop = leaf.update_M(X_leaf)
+                    leaf.M = agop / (agop.max() + 1e-30)
+                    self._xrfm_refit_leaf_predictor(leaf, X_leaf, y_leaf)
+                except Exception as e:
+                    logger.warning(f"[TuningManager] XRFM leaf {li} refinement stopped at iter {it}: {e}")
+                    break
+
+    def _finetune_xrfm(self, model, X_train, y_train, params=None, save_path=None):
+        """Full-model fine-tuning for XRFM (classification): RFM (re)training.
+
+        xRFM has no pretrained checkpoint, so 'finetune' means training the
+        kernel machine on this task with user-controllable hyperparameters
+        (``iters``, ``bandwidth``, ``kernel``, ``reg``, tree params, ...). When
+        the wrapper is already fitted, the fitted M is warm-started instead:
+        ``refine_iters`` additional RFM iterations are run on the new data
+        (set ``warm_start=False`` to force a from-scratch refit).
+        """
+        logger.info("[TuningManager] Starting XRFM fine-tuning (full RFM training)")
+
+        config = {
+            "device": resolve_device('auto'),
+            "warm_start": True,
+            "refine_iters": 2,
+        }
+        if params:
+            config.update(params)
+        config.pop("peft_config", None)
+        model.device = model.device or config["device"]
+        self._xrfm_apply_hyperparams(model, config)
+
+        already_fitted = bool(getattr(model, "_is_fitted", False))
+        if already_fitted and config["warm_start"]:
+            logger.info(
+                f"[TuningManager] XRFM already fitted -> warm start: "
+                f"{config['refine_iters']} continued RFM iterations from the existing M"
+            )
+            self._xrfm_refine_leaves(model, X_train, y_train, config["refine_iters"])
+        else:
+            model.fit(X_train, y_train)
+
+        self._xrfm_save_checkpoint(model, save_path or config.get("save_checkpoint_path"))
+        logger.info("[TuningManager] XRFM fine-tuning complete")
+        return model
+
+    def _peft_xrfm(self, model, X_train, y_train, params=None, peft_config=None, save_path=None):
+        """Parameter-efficient adaptation for XRFM: low-rank M-matrix update.
+
+        The base fitted Mahalanobis matrix M is frozen and a rank-r truncated
+        correction from the AGOP of the adaptation data is added per leaf:
+        ``M_adapted = norm(M_base + alpha * U_r diag(s_r) U_r^T)``. Only the
+        r x d low-rank factors are learned from the new data (the kernel ridge
+        weights are re-solved, as they must be for any M change). This is the
+        kernel-method analogue of LoRA -- no nn.Linear adapters are injected
+        (xRFM has no Linear layers), so ``apply_tabular_lora`` is NOT used.
+
+        Rank comes from ``peft_config['r']`` / ``tuning_params['lora_rank']`` /
+        ``'rank'`` (default 8); the blend strength from ``'peft_alpha'`` /
+        ``peft_config['alpha']`` (default 0.5). If the model has not been
+        fitted yet, a base fit on the training split provides the frozen M.
+        """
+        logger.info("[TuningManager] Starting XRFM PEFT (low-rank M-matrix adaptation)")
+
+        config = {
+            "device": resolve_device('auto'),
+            "lora_rank": 8,
+            "peft_alpha": 0.5,
+        }
+        if params:
+            config.update(params)
+        peft_config = dict(peft_config or config.pop("peft_config", None) or {})
+        rank = int(peft_config.get("r", config.get("rank", config["lora_rank"])))
+        alpha = float(peft_config.get("alpha", config["peft_alpha"]))
+        model.device = model.device or config["device"]
+        self._xrfm_apply_hyperparams(model, config)
+
+        if not getattr(model, "_is_fitted", False):
+            logger.info("[TuningManager] XRFM not fitted yet; fitting the frozen base model first")
+            model.fit(X_train, y_train)
+
+        leaves = model.leaf_models()
+        if not leaves:
+            logger.warning("[TuningManager] XRFM has no fitted leaves; PEFT adaptation skipped.")
+            return model
+
+        X_num = model.transform_features(X_train)
+        y_num = model.numeric_targets(y_train)
+        logger.info(f"[TuningManager] Adapting {len(leaves)} leaf M matrices (rank={rank}, alpha={alpha})")
+        for li, leaf in enumerate(leaves):
+            X_leaf = torch.as_tensor(X_num).to(leaf.device)
+            y_leaf = y_num.to(device=leaf.device, dtype=X_leaf.dtype)
+            try:
+                if leaf.M is None:  # kernel never built an M (e.g. iters=0): identity base
+                    d = X_leaf.shape[1]
+                    leaf.M = (torch.ones(d, device=X_leaf.device, dtype=X_leaf.dtype) if leaf.diag
+                              else torch.eye(d, device=X_leaf.device, dtype=X_leaf.dtype))
+                M_base = leaf.M.clone()  # frozen base
+                agop = leaf.update_M(X_leaf)  # AGOP of the adaptation data under the base model
+                leaf.M = self._xrfm_low_rank_M_update(M_base, agop, rank, alpha)
+                self._xrfm_refit_leaf_predictor(leaf, X_leaf, y_leaf)
+            except Exception as e:
+                logger.warning(f"[TuningManager] XRFM PEFT failed on leaf {li}: {e}. Leaf left at base state.")
+
+        self._xrfm_save_checkpoint(model, save_path or config.get("save_checkpoint_path"))
+        logger.info("[TuningManager] XRFM PEFT adaptation complete")
+        return model
+
+    def _finetune_xrfm_regression(self, model, X_train, y_train, params=None):
+        """Full-model fine-tuning for XRFM regression (same mapping as classification).
+
+        'finetune' = full RFM training with user-controllable hyperparameters;
+        warm-started continued refinement of the fitted M when the wrapper was
+        already fitted. Supports the same low-rank PEFT path when a
+        ``peft_config`` is supplied in the tuning params.
+        """
+        logger.info("[TuningManager] Starting XRFM regression fine-tuning (full RFM training)")
+
+        config = {
+            "device": resolve_device('auto'),
+            "warm_start": True,
+            "refine_iters": 2,
+        }
+        if params:
+            config.update(params)
+        config.pop("finetune_mode", None)  # not applicable to a kernel method
+        save_path = config.pop("save_checkpoint_path", None)
+
+        peft_config = config.pop("peft_config", None)
+        if peft_config:
+            return self._peft_xrfm(model, X_train, y_train, params=config,
+                                   peft_config=peft_config, save_path=save_path)
+
+        model.device = model.device or config["device"]
+        self._xrfm_apply_hyperparams(model, config)
+
+        already_fitted = bool(getattr(model, "_is_fitted", False))
+        if already_fitted and config["warm_start"]:
+            logger.info(
+                f"[TuningManager] XRFM regressor already fitted -> warm start: "
+                f"{config['refine_iters']} continued RFM iterations from the existing M"
+            )
+            self._xrfm_refine_leaves(model, X_train, y_train, config["refine_iters"])
+        else:
+            model.fit(X_train, y_train)
+
+        self._xrfm_save_checkpoint(model, save_path)
+        logger.info("[TuningManager] XRFM regression fine-tuning complete")
+        return model
+
     def _finetune_tabicl_pure_sft(self, model: (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier) , X_train_processed, y_train_processed, params=None, peft_config=None):
         """
         PURE SFT FINE-TUNING (Not Recommended for TabICL)
@@ -1095,7 +1974,7 @@ class TuningManager:
         logger.info("[TuningManager] PROCEED: Using pure SFT (use only for comparisons)")
     
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 10,
             "learning_rate": 1e-5,
             "batch_size": 32,
@@ -1252,7 +2131,7 @@ class TuningManager:
         logger.info(f"[TuningManager] Starting episodic fine-tuning for {type(model).__name__}")
         
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 3,
             "learning_rate": 1e-5,
             "batch_size": 4,
@@ -1345,7 +2224,7 @@ class TuningManager:
         logger.info(f"[TuningManager] Detected {num_classes} classes in training data")
         
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-5,
             "batch_size": 8, 
@@ -1502,7 +2381,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting Mitra Pure SFT Fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-5,
             "batch_size": 128,
@@ -1618,7 +2497,7 @@ class TuningManager:
 
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 2e-5,
             "batch_size": 32,
@@ -1769,7 +2648,7 @@ class TuningManager:
         """
 
         config = {
-            'device': 'cuda' if torch.cuda.is_available() else 'cpu',
+            'device': resolve_device('auto'),
             'epochs': 5,
             'learning_rate': 1e-5,
             'batch_size': 16,
@@ -1935,7 +2814,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv26 meta-learning fine-tuning")
      
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -2175,7 +3054,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv26 SFT fine-tuning")
      
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 25,
             "learning_rate": 1e-5,
             "weight_decay": 1e-4,
@@ -2381,7 +3260,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv26 native FinetunedTabPFNClassifier")
      
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 30,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -2505,7 +3384,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv26 native FinetunedTabPFNRegressor")
      
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 30,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -2688,7 +3567,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv3 native FinetunedTabPFNClassifier")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 30,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -2775,7 +3654,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv3 native FinetunedTabPFNRegressor")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 30,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -2870,7 +3749,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv3 meta-learning fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -3060,7 +3939,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv3 SFT fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 25,
             "learning_rate": 1e-5,
             "weight_decay": 1e-4,
@@ -3239,7 +4118,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFNv3 regression turn-by-turn fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 1e-5,
             "weight_decay": 0.01,
@@ -3437,7 +4316,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabICLv2 regression fine-tuning")
 
         config = {
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
+            "device": resolve_device('auto'),
             "epochs": 5,
             "learning_rate": 2e-6,
             "weight_decay": 0.01,
@@ -3578,7 +4457,7 @@ class TuningManager:
         Return the default config that would be used for this model/strategy/mode.
         This must match the dicts defined inside the _finetune_* methods.
         """
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = resolve_device('auto')
 
         # TabICL / Orion MSP / Orion Bix
         if isinstance(model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
@@ -3833,7 +4712,7 @@ class TuningManager:
         """
         logger = logging.getLogger(__name__)
 
-        device = params.get('device', getattr(model, 'device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+        device = params.get('device', getattr(model, 'device', resolve_device('auto')))
 
         # loop params
         epochs = int(params.get('epochs', 1))
@@ -3982,7 +4861,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting Limix regression fine-tuning")
 
         config = {
-            "device": params.get("device", "cuda" if torch.cuda.is_available() else "cpu"),
+            "device": params.get("device", resolve_device('auto')),
             "epochs": int(params.get("epochs", 3)),
             "steps_per_epoch": int(params.get("steps_per_epoch", 100)),
             "support_size": int(params.get("support_size", params.get("context_size", 256))),
@@ -4150,7 +5029,7 @@ class TuningManager:
         # ---------------------------
         # Device / reproducibility
         # ---------------------------
-        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device_str = params.get("device", resolve_device('auto'))
         device = torch.device(device_str)
     
         epochs = int(params.get("epochs", 5))
@@ -4423,7 +5302,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting Mitra regression fine-tuning (turn-by-turn)")
     
         params = params or {}
-        device_str = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device_str = params.get("device", resolve_device('auto'))
         device = torch.device(device_str)
     
         epochs = int(params.get("epochs", 5))
@@ -4598,7 +5477,7 @@ class TuningManager:
         logger.info("[TuningManager] Starting TabPFN regression fine-tuning (turn-by-turn)")
     
         params          = params or {}
-        device_str      = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        device_str      = params.get("device", resolve_device('auto'))
         device          = torch.device(device_str)
         epochs          = int(params.get("epochs", 5))
         steps_per_epoch = int(params.get("steps_per_epoch", 100))
