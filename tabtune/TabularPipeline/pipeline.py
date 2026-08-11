@@ -18,6 +18,7 @@ from ..models.tabpfnv3 import TabPFNv3Classifier
 from ..models.tabicl.sklearn.classifier import TabICLClassifier
 from ..models.contexttab.contexttab import ConTextTabClassifier
 from ..models.mitra.tab2d import Tab2D
+from ..models.mitra.model_loading import MITRA_CLASSIFIER_REPO
 from ..models.orion_bix.sklearn.classifier import OrionBixClassifier
 from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
@@ -1046,9 +1047,70 @@ class TabularPipeline:
             if self.model_name == 'Mitra':
                 n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
                 device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
-                config = {'dim': 256, 'n_layers': 6, 'n_heads': 8, 'task': 'CLASSIFICATION', 'dim_output': n_classes, 'use_pretrained_weights': False, 'path_to_weights': '', 'device': device}
-                config.update(self.model_params)
-                self.model = Tab2D(**config)
+                self._mitra_n_classes = n_classes
+
+                # Mitra classification used to build a Tab2D here with
+                # use_pretrained_weights=False and no path_to_weights, i.e. a
+                # RANDOMLY INITIALISED network. It never loaded the checkpoint the
+                # registry declares (ModelSpec(name="Mitra").weights ==
+                # "autogluon/mitra-classifier"), so zero-shot Mitra scored at or
+                # below chance -- ROC-AUC under 0.5 -- while looking healthy,
+                # because nothing raised. The regression path never had this bug:
+                # MitraRegressorWrapper calls Tab2D.from_pretrained.
+                #
+                # Load the released classifier by default, and honour explicit
+                # overrides so a local checkpoint or a deliberate random init are
+                # still reachable.
+                user_params = dict(self.model_params or {})
+                explicit_weights = user_params.pop('path_to_weights', None)
+                use_pretrained = user_params.pop('use_pretrained_weights', 'auto')
+                repo_id = user_params.pop('pretrained_repo_id', MITRA_CLASSIFIER_REPO)
+                user_params.pop('device', None)
+
+                self.model = None
+                if use_pretrained is not False:
+                    source = explicit_weights or repo_id
+                    try:
+                        if explicit_weights:
+                            # A local file or directory the caller supplied.
+                            if os.path.isdir(explicit_weights):
+                                self.model = Tab2D.from_pretrained(explicit_weights, device=device)
+                            else:
+                                cfg = {'dim': 256, 'n_layers': 6, 'n_heads': 8,
+                                       'task': 'CLASSIFICATION', 'dim_output': n_classes,
+                                       'use_pretrained_weights': True,
+                                       'path_to_weights': explicit_weights, 'device': device}
+                                cfg.update(user_params)
+                                self.model = Tab2D(**cfg)
+                        else:
+                            self.model = Tab2D.from_pretrained(source, device=device)
+                        logger.info(
+                            "[Pipeline] Loaded pretrained Mitra classifier from '%s' "
+                            "(head width %s, task classes %s)",
+                            source, getattr(self.model, 'dim_output', '?'), n_classes,
+                        )
+                    except Exception as e:
+                        if use_pretrained is True or explicit_weights:
+                            # The caller explicitly asked for these weights; failing
+                            # silently is how the original bug stayed invisible.
+                            raise RuntimeError(
+                                f"[Pipeline] Could not load Mitra classifier weights from "
+                                f"'{source}': {e}"
+                            ) from e
+                        logger.error(
+                            "[Pipeline] Could not load pretrained Mitra classifier from '%s' (%s). "
+                            "FALLING BACK TO RANDOM INITIALISATION - predictions will be no better "
+                            "than chance. Fix network/HF access, or pass "
+                            "model_params={'path_to_weights': '/local/model'}.",
+                            source, e,
+                        )
+
+                if self.model is None:
+                    config = {'dim': 256, 'n_layers': 6, 'n_heads': 8, 'task': 'CLASSIFICATION',
+                              'dim_output': n_classes, 'use_pretrained_weights': False,
+                              'path_to_weights': '', 'device': device}
+                    config.update(user_params)
+                    self.model = Tab2D(**config)
 
                 if self.model_checkpoint_path:
                     logger.info(f"[Pipeline] Attempting to load model state from checkpoint for late-initialized model: {self.model_checkpoint_path}")
@@ -1373,6 +1435,12 @@ class TabularPipeline:
                     padding_obs_query__=padding_obs_query
                 )
             
+            # The released Mitra checkpoint has a fixed-width classification head
+            # (dim_output from the checkpoint), which is >= the number of classes in
+            # this task. Trim to the task's classes before argmax, otherwise the
+            # argmax can land on a column the label encoder knows nothing about and
+            # inverse_transform either raises or silently mislabels.
+            logits = self._trim_mitra_logits(logits)
             predictions_raw = logits.squeeze(0).cpu().numpy().argmax(axis=-1)
             predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions_raw)
             
@@ -1383,6 +1451,37 @@ class TabularPipeline:
             predictions = self.model.predict(X_processed)
         return predictions
 
+
+    def _trim_mitra_logits(self, logits):
+        """Trim Mitra's fixed-width classification head to this task's classes.
+
+        The released ``autogluon/mitra-classifier`` checkpoint ships a classification
+        head whose width comes from the checkpoint config, not from your dataset. A
+        binary task therefore gets a logit vector wider than 2. Everything downstream
+        (argmax, softmax, ``label_encoder_.inverse_transform``) assumes exactly one
+        column per known class, so the extra columns have to go before, not after,
+        those operations.
+
+        Returns the logits unchanged when the head already matches, when the class
+        count is unknown, or when the head is somehow narrower than the task needs
+        (which would be a checkpoint/task mismatch worth surfacing elsewhere).
+        """
+        n_classes = getattr(self, '_mitra_n_classes', None)
+        if n_classes is None:
+            try:
+                n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
+            except Exception:
+                return logits
+        try:
+            head_width = logits.shape[-1]
+        except Exception:
+            return logits
+        if head_width <= n_classes:
+            return logits
+        logger.debug(
+            "[Pipeline] Trimming Mitra head from %s to %s classes", head_width, n_classes
+        )
+        return logits[..., :n_classes]
 
     def predict_quantiles(self, X: pd.DataFrame, quantiles: list[float] = None) -> dict:
         """
@@ -1562,6 +1661,10 @@ class TabularPipeline:
                     padding_features=padding_features, padding_obs_support=padding_obs_support,
                     padding_obs_query__=padding_obs_query
                 )
+                # Trim the fixed-width pretrained head to this task's classes BEFORE
+                # the softmax, so the returned columns line up 1:1 with
+                # label_encoder_.classes_ and the probabilities still sum to 1.
+                logits = self._trim_mitra_logits(logits)
                 probabilities = torch.softmax(logits.squeeze(0), dim=-1).cpu().numpy()
             else:
                  if self.model_name == 'Mitra':

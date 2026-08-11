@@ -107,7 +107,7 @@ logger.info("   with three completely different models:\n")
 
 # List of models to demonstrate
 models_to_test = [
-    ('TabPFN', 'inference'),
+    ('Mitra', 'inference'),
     ('TabICL', 'inference'),
     ('OrionMSP', 'inference')
 ]

@@ -21,6 +21,14 @@ logger = logging.getLogger(__name__)
 MITRA_REGRESSOR_REPO = "autogluon/mitra-regressor"
 MITRA_REGRESSOR_FILES = ["model.safetensors", "config.json"]
 
+# HuggingFace repository for the Mitra *classifier*. This mirrors the regressor
+# constant above and matches ``ModelSpec(name="Mitra").weights`` in the registry.
+# Before this existed, nothing in the codebase ever consumed that declared
+# weights string, so the classification path silently ran on randomly
+# initialised weights.
+MITRA_CLASSIFIER_REPO = "autogluon/mitra-classifier"
+MITRA_CLASSIFIER_FILES = ["model.safetensors", "config.json"]
+
 
 def _try_hf_hub_download(
     base_path: Path,
@@ -173,4 +181,40 @@ def load_mitra_regressor_from_hf(
     model = Tab2D.from_pretrained(str(model_dir), device=device)
 
     logger.info(f"[MitraModelLoader] Successfully loaded Mitra regressor from {model_dir}")
+    return model
+
+
+def load_mitra_classifier_from_hf(
+    device: str = "cuda",
+    repo_id: str = MITRA_CLASSIFIER_REPO,
+):
+    """Download and load the pretrained Mitra **classifier** from HuggingFace.
+
+    The counterpart of :func:`load_mitra_regressor_from_hf`. ``Tab2D.from_pretrained``
+    already resolves a HuggingFace repo id, downloads ``config.json`` +
+    ``model.safetensors``, builds the module from the *checkpoint's own* config and
+    then loads the state dict -- so the architecture always matches the weights.
+
+    Note the returned model's ``dim_output`` comes from the checkpoint, not from the
+    number of classes in your dataset. Mitra is trained with a fixed-width
+    classification head and the head is sliced to the task's class count at
+    prediction time; rebuilding the head to fit the dataset would throw the
+    pretrained weights away, which is the bug this function exists to prevent.
+
+    Args:
+        device: Device to load the model on ('cuda' or 'cpu').
+        repo_id: HuggingFace repo id. Defaults to ``autogluon/mitra-classifier``.
+
+    Returns:
+        A :class:`~tabtune.models.mitra.tab2d.Tab2D` configured for classification
+        with pretrained weights loaded.
+    """
+    from tabtune.models.mitra.tab2d import Tab2D
+
+    logger.info(f"[MitraModelLoader] Loading pretrained Mitra classifier from {repo_id}")
+    model = Tab2D.from_pretrained(repo_id, device=device)
+    logger.info(
+        "[MitraModelLoader] Loaded Mitra classifier (dim_output=%s) from %s",
+        getattr(model, "dim_output", "?"), repo_id,
+    )
     return model
