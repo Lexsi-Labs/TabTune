@@ -435,7 +435,7 @@ X, y = fetch_california_housing(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 pipeline = TabularPipeline(
-    model_name="OrionMSP",
+    model_name="TabICLv2",
     task_type="regression",
     tuning_strategy="inference",
     tuning_params={
