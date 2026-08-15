@@ -363,7 +363,7 @@ class GreedyEnsembleSelection:
         self,
         ensemble_size: int = 50,
         task_type: str = "classification",
-        metric: Optional[str] = None,          # FIXED: now optional, task-aware
+        metric: Optional[str] = None,
         with_replacement: bool = True,
     ) -> None:
         if ensemble_size < 1:
@@ -373,10 +373,9 @@ class GreedyEnsembleSelection:
                 f"task_type must be 'classification' or 'regression', "
                 f"got '{task_type}'."
             )
-        # --- FIX: task-aware default metric ---
+        # task-aware default metric
         if metric is None:
             metric = "r2" if task_type == "regression" else "accuracy"
-        # --- end fix ---
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
