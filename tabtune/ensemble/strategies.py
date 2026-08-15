@@ -919,6 +919,11 @@ class CascadeStackingEnsemble:
         For classification each block is ``(n, n_classes)`` probabilities.
         For regression each block is ``(n,)`` or ``(n, 1)`` point estimates.
 
+        For classification, `y_val` may be in the original label space; it is
+        encoded internally via `np.unique` to match the probability column
+        order (0..n_classes-1). This makes the method safe to call directly
+        without requiring pre‑encoded labels.
+
         Returns
         -------
         val_blend : ndarray
@@ -935,6 +940,13 @@ class CascadeStackingEnsemble:
         if is_reg:
             val_blocks = [b.ravel() if b.ndim > 1 else b for b in val_blocks]
             test_blocks = [b.ravel() if b.ndim > 1 else b for b in test_blocks]
+        else:
+            # Encode y_val to column indices matching probability blocks,
+            # instead of assuming the caller already did this. np.unique's
+            # sorted order matches sklearn's LabelEncoder / TabularEnsemble's
+            # own encoder, so this is safe to compose with the wrapped path too
+            # (encoding an already-0..n-1 array is a no-op).
+            _, y_val = np.unique(y_val, return_inverse=True)
 
         counts = np.zeros(n_cands, dtype=int)
         running_sum = np.zeros_like(val_blocks[0], dtype=float)
@@ -981,6 +993,8 @@ class CascadeStackingEnsemble:
             One dict per level.  Each dict maps stacker names to their
             ``(n_val, n_classes)`` probability arrays on the validation set.
         y_val : array-like
+            True labels for the validation set.  May be in original label space;
+            it will be internally encoded to match the probability columns.
         model_names : list[str] or None
             Base model names (used for labelling).
 
