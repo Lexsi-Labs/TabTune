@@ -152,6 +152,15 @@ markers = [
     "weights: tests that download model weights",
     "integration: end-to-end tests across modules",
     "unit: fast, dependency-free unit tests",
+    "calibration: tests for calibration functionality",
+    "fairness: tests for fairness evaluation functionality",
+    "finetuning: tests for model fine-tuning",
+    "leaderboard: tests for leaderboard functionality",
+    "model_exaone: tests for EXAONE model functionality",
+    "model_iltm: tests for ILTM model functionality",
+    "model_tabfm: tests for TabFM model functionality",
+    "model_xrfm: tests for XRFM model functionality",
+    "requires_gpu: tests that require a GPU",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:pythonjsonlogger.*",
