@@ -1,161 +1,246 @@
 # Supported Models Overview
 
-TabTune integrates state-of-the-art tabular foundation models, each with unique architectural properties, strengths, and use cases. This document provides a comprehensive overview of all supported models.
+TabTune integrates **16 tabular foundation models across seven architectural families**
+behind one scikit-learn-style API. This page compares them on the axes that actually decide
+a choice: what they can do, what they refuse to do, and whether you are allowed to ship them.
+
+!!! tip "Do not hardcode this list"
+    The registry is the source of truth and is queryable at runtime:
+    ```python
+    from tabtune.registry import list_model_names, list_models, models_dataframe
+    list_model_names()
+    models_dataframe()
+    ```
+    See [Model Registry](../user-guide/registry.md).
 
 ---
 
-## 1. Model Ecosystem
+## 1. Model ecosystem
 
 ```mermaid
 flowchart TD
-    A[Tabular Foundation Models] --> B[ICL-Based Models]
-    A --> C[Transformer-Based Models]
-    A --> D[PFN-Based Models]
-    
-    B --> E[TabICL]
-    B --> F[OrionMSP]
-    B --> G[Orion BIX]
-    B --> H[Mitra]
-    B --> I[ContextTab]
-    
-    C --> J[TabDPT]
-    
-    D --> K[TabPFN]
-    D --> L[TabPFN v3]
+    A[Tabular Foundation Models] --> B[PFN]
+    A --> C[Scalable ICL]
+    A --> D[Semantic ICL]
+    A --> E[Denoising]
+    A --> F[Probabilistic ICL]
+    A --> G[Non-transformer]
+
+    B --> B1[TabPFN v2]
+    B --> B2[TabPFN v2.6]
+    B --> B3[TabPFN v3]
+
+    C --> C1[TabICL]
+    C --> C2[TabICLv2]
+    C --> C3[OrionMSP v1.0]
+    C --> C4[OrionMSP v1.5]
+    C --> C5[OrionBix]
+    C --> C6[Mitra]
+    C --> C7[TabFM]
+    C --> C8[EXAONE Tabular]
+
+    D --> D1[ContextTab]
+    E --> E1[TabDPT]
+    F --> F1[LimiX]
+
+    G --> G1[xRFM - kernel/AGOP]
+    G --> G2[iLTM - hypernetwork]
 ```
 
 ---
 
-## 2. Model Comparison Matrix
+## 2. Capability matrix
 
-| Model | Paradigm | Architecture | Best For | Scaling | Speed | Memory | PEFT |
-|-------|----------|--------------|----------|---------|-------|--------|------|
-| **TabPFN** | PFN/ICL | Approximate Bayesian | Small datasets | <10K | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⚠️ |
-| **TabPFN v3** | PFN/ICL | Latest PriorLabs PFN, full FT | Small-medium datasets | <50K | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ |
-| **TabICL** | Scalable ICL | Column-Row Attention | Balanced | 10K-1M | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ |
-| **OrionMSP** | Scalable ICL | Multi‑scale priors | Generalization | 50K-2M+ | ⭐⭐⭐ | ⭐⭐⭐ | ✅ |
-| **Orion BIX** | Scalable ICL | Biaxial interactions | Accuracy | 50K-2M+ | ⭐⭐ | ⭐⭐⭐⭐ | ✅ |
-| **TabDPT** | Denoising | Transformer | Large Datasets | 100K-5M | ⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ |
-| **Mitra** | 2D Attention | Cross‑Attention | Complex Patterns | 10K-500K | ⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ |
-| **ContextTab** | Semantic ICL | Text + Embeddings | Text-Heavy | 10K-500K | ⭐⭐ | ⭐⭐⭐ | ⚠️ |
-| **TabICLv2** | Scalable ICL | Improved Column-Row Attention | Balanced + Regression | 10K-1M | ⭐⭐⭐⭐ | ⭐⭐⭐ | ❌ |
+| Model | Family / Paradigm | Key Innovation | Supported Strategies |
+|-------|------------------|----------------|----------------------|
+| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT\*, Regression, Regression FT |
+| **TabPFN-v2.6** | PFN / ICL | Prior Labs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT\*, Regression, Regression FT |
+| **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
+| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT |
+| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
+| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
+| **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
+| **ContextTab** | Semantics-Aware ICL | Modality-specific embeddings; first-class text and datetime | Inference, Full FT, PEFT\*, Regression, Regression FT |
+| **TabDPT** | Denoising Transformer | Denoising pretraining + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression FT |
+| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modelling; uncertainty-aware | Inference, Regression, Regression FT |
+| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → CLS compression → causal ICL | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
+| **xRFM** | Kernel / Feature Learning | AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights** | Inference, Refit, Refine, PEFT†, Regression |
+| **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
+| **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | CAST; ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ |
 
----
-
-## 3. Selection Quick Tips
-
-- <10K rows: TabPFN / TabPFN v3 (inference) or TabICL (base‑ft)
-- Small-medium rows + fine-tuning: TabPFN v3 (native / meta-learning / SFT / PEFT, plus regression)
-- 50K–2M rows: OrionMSP (balanced) or Orion BIX (accuracy‑oriented)
-- >2M rows: TabDPT (base‑ft/PEFT)
-- Text‑heavy features: ContextTab
-
----
-
-## 4. Feature Support Matrix
-
-| Feature | TabPFN | TabPFNv2.6 | TabICL | TabICLv2 | OrionMSP | OrionBix | TabDPT | Mitra | ContextTab | LimiX |
-|---------|--------|------------|--------|----------|-----------|-----------|--------|-------|------------|-------|
-| Numerical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Categorical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Missing Values | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Text Features | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Large Datasets (>1M) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ❌ |
-| Small Datasets (<10K) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
-| Classification | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Regression | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| PEFT Support | ⚠️ | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ |
-| Multi-GPU Training | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+\* PEFT is **experimental**; `inference` is fully supported.
+† xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
+‡ EXAONE's projections are raw `nn.Parameter` tensors applied through `F.linear`, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
+‡‡ EXAONE regression is implemented and tested, but LG AI Research publishes no regression checkpoint — supply a local weights file.
 
 ---
 
-## 5. Performance Benchmarks
+## 3. Envelopes: what each checkpoint will refuse
 
-Performance characteristics vary significantly based on dataset size, hardware, and hyperparameters. The following benchmarks provide rough estimates based on typical configurations.
+Envelope violations are checked **before any weights download**. Hard limits raise; soft
+limits warn.
 
-!!! note "Benchmark Disclaimer"
-    All benchmarks are approximate and depend on:
-    - Hardware (GPU model, CPU, memory)
-    - Dataset characteristics (size, features, class distribution)
-    - Hyperparameter settings
-    - Software versions
-    
-    Use these as rough guidelines for relative comparisons.
+| Model | Max classes | Max features | Max rows | Native NaN / text / categorical |
+|---|---:|---:|---:|---|
+| TabPFN | 10 **(hard)** | 500 | 10,000 | NaN |
+| TabPFNv2.6 | 10 **(hard)** | 500 | 10,000 | NaN |
+| TabPFNv3 | 160 **(hard)** | 20,000 | 1,000,000 (≈200M cell budget) | NaN |
+| TabICL | — | — | — | NaN |
+| TabICLv2 | — | 2,000 | 500,000 | NaN |
+| OrionMSP / v1.5 / OrionBix | — | — | — | NaN |
+| Mitra | — | — | 10,000 | — |
+| ContextTab | — | — | — | text + categorical |
+| TabDPT | — | — | — | — |
+| LimiX | — | — | — | NaN |
+| TabFM | 10 **(hard)** | 500 | — | — |
+| xRFM | — | — | — | categorical |
+| iLTM | 100 **(hard)** | dimensionality-agnostic | retrieval capped at 8,192 | categorical |
+| EXAONE Tabular | soft — ECOC above 10 | 100 (soft, top-100 selection) | 100,000 (soft, subsampled) | NaN |
 
-### 5.1 Accuracy Benchmarks
+```python
+from tabtune.registry import check_envelope
+check_envelope("TabFM", n_rows=1_000, n_features=20, n_classes=14)
+# EnvelopeError: TabFM supports at most 10 classes (found 14)
+```
 
-Typical accuracy ranges on standard OpenML datasets (medium-sized, ~10K-50K samples):
-
-| Model | Strategy | Accuracy Range | Notes |
-|-------|----------|----------------|-------|
-| **TabPFN** | inference | 0.75-0.85 | Best on small, clean datasets |
-| **TabICL / TabICLv2** | inference | 3-6 GB | |
-| **TabICL / TabICLv2** | finetune | 8-16 GB | |
-| **OrionMSP** | finetune | 0.82-0.93 | Strong generalization |
-| **OrionBix** | finetune | 0.85-0.94 | Highest accuracy potential |
-| **TabDPT** | finetune | 0.83-0.92 | Excellent on large datasets |
-| **Mitra** | finetune | 0.84-0.93 | Complex pattern handling |
-| **ContextTab** | finetune | 0.75-0.88 | Best with text features |
-
-**Notes:**
-- Ranges represent typical performance on diverse datasets
-- Your results may vary significantly based on dataset characteristics
-- Fine-tuning (finetune/peft) generally outperforms inference by 5-15%
-
-
-### 5.2 Memory Usage Estimates
-
-Peak memory usage during training (approximate, GPU memory):
-
-| Model | Strategy | Memory Range | Notes |
-|-------|----------|--------------|-------|
-| **TabPFN** | inference | 2-4 GB | Small datasets |
-| **TabICL** | inference | 3-6 GB | Moderate |
-| **TabICL** | finetune | 8-16 GB | Full model |
-| **TabICL** | peft | 4-8 GB | 40-50% reduction |
-| **OrionMSP** | finetune | 10-20 GB | Large context |
-| **OrionBix** | finetune | 12-24 GB | Biaxial layers |
-| **TabDPT** | finetune | 12-28 GB | Large transformer |
-| **Mitra** | finetune | 16-32 GB | 2D attention |
-| **ContextTab** | finetune | 8-16 GB | Embedding overhead |
-
-**Memory optimization tips:**
-- Use PEFT strategy (reduces memory by 40-60%)
-- Reduce batch size
-- Use gradient accumulation
-- Process large datasets in chunks
-
-### 5.3 Inference Latency
-
-Average inference time per batch (batch_size=32, GPU):
-
-| Model | Latency (ms/batch) | Throughput (samples/s) |
-|-------|-------------------|------------------------|
-| **TabPFN** | 10-50 | 640-3200 |
-| **TabICL** | 20-80 | 400-1600 |
-| **OrionMSP** | 40-120 | 267-800 |
-| **OrionBix** | 60-150 | 213-533 |
-| **TabDPT** | 30-100 | 320-1067 |
-| **Mitra** | 80-200 | 160-400 |
-| **ContextTab** | 100-300 | 107-320 |
-
-**Note:** Latency increases with dataset size (for ICL models that use training data as context).
-
-### 5.4 Benchmark Methodology
-
-When comparing models:
-
-1. **Use same dataset splits**: Ensure train/test consistency
-2. **Same preprocessing**: Use identical DataProcessor settings
-3. **Multiple runs**: Average over 3-5 runs with different seeds
-4. **Hardware consistency**: Same GPU/CPU for fair comparison
-5. **Hyperparameter tuning**: Optimize each model fairly
-
-**Recommended benchmark datasets:**
-- OpenML datasets (42178, 1489, etc.)
-- Your domain-specific datasets
-- Standard UCI ML datasets
+!!! note "TabPFN-v3 has a *cell budget*, not a row cap"
+    Roughly 1M × 200, 100k × 2,000 or 1k × 20,000. An 8-estimator ensemble needs on the
+    order of 56 GB of KV cache at 1M rows.
 
 ---
 
-Each model excels in different scenarios. Use this overview to pick the best fit for your task.
+## 4. Licensing: what you can actually ship
+
+The `Commercial` column reflects the **weight** licence, which is what decides deployment.
+`unverified` means TabTune has not confirmed the terms — it warns rather than blocking.
+
+| Model | Weight licence | Commercial |
+|---|---|---|
+| TabICL, TabICLv2 | BSD-3-Clause | ✅ |
+| OrionMSP, OrionMSPv1.5, OrionBix | MIT | ✅ |
+| xRFM | MIT (no weights to license) | ✅ |
+| iLTM | Apache-2.0 | ✅ (attribution) |
+| Mitra | CC-BY-4.0 | ✅ (attribution) |
+| TabPFN, TabPFNv2.6 | Prior Labs License | ⚠️ unverified |
+| TabDPT | see upstream | ⚠️ unverified |
+| TabPFNv3 | TABPFN-3.0 License v1.0 | ❌ research only |
+| ContextTab | SAP-RPT-1-OSS | ❌ research only |
+| LimiX | LimiX (academic use free) | ❌ without authorization |
+| TabFM | TabFM Non-Commercial v1.0 | ❌ |
+| EXAONE Tabular | EXAONE AI Model License 1.1 - NC | ❌ |
+
+```python
+TabularPipeline("TabPFNv3", license_mode="commercial")   # raises LicenseError
+```
+
+See [Model Registry](../user-guide/registry.md) for the full mechanics.
+
+---
+
+## 5. Choosing a model
+
+### 5.1 By dataset size
+
+| Rows | First choice | Alternatives |
+|---|---|---|
+| < 10K | TabPFN / TabPFNv2.6 / TabPFNv3 (inference) | Mitra, EXAONE |
+| 10K – 100K | TabICLv2, TabICL | OrionMSP, iLTM, TabFM |
+| 100K – 500K | TabICLv2 (KV offloading), TabDPT | OrionMSP, OrionBix |
+| 500K – 2M+ | TabDPT, OrionMSP, OrionBix | TabPFNv3 (cell budget permitting) |
+| ≥ 60K, kernel-friendly | **xRFM** | — |
+
+### 5.2 By constraint
+
+| Constraint | Pick |
+|---|---|
+| **Must ship commercially** | TabICLv2, OrionMSP/v1.5, OrionBix, Mitra, iLTM, xRFM |
+| **Air-gapped / no downloads** | **xRFM** — trains from scratch |
+| **Text-heavy features** | ContextTab |
+| **> 10 classes** | TabPFNv3 (160), iLTM (100), EXAONE (ECOC) |
+| **> 100 classes** | TabPFNv3 |
+| **> 2,000 features** | TabPFNv3 (20,000), iLTM |
+| **Native quantile regression** | TabICLv2, TabPFN family |
+| **Native fine-tuning pipeline** | TabPFNv2.6, TabPFNv3 |
+| **Production PEFT** | TabICL, OrionMSP, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3, iLTM |
+
+### 5.3 By task
+
+- **Classification only**: TabICL, OrionMSP, OrionMSPv1.5, OrionBix
+- **Both tasks**: TabPFN family, TabICLv2, Mitra, ContextTab, TabDPT, TabFM, xRFM, iLTM, EXAONE
+- **Regression emphasis**: LimiX, TabICLv2, TabPFNv2.6/v3
+
+```python
+from tabtune.registry import list_models
+[s.name for s in list_models(task="regression", commercial_ok=True)]
+```
+
+---
+
+## 6. Feature support matrix
+
+| Feature | TabPFN | v2.6 | v3 | TabICL | TabICLv2 | OrionMSP | OrionBix | TabDPT | Mitra | ContextTab | LimiX | TabFM | xRFM | iLTM | EXAONE |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Numerical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Categorical | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Missing values | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Text features | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Large data (>1M) | ❌ | ❌ | ✅ | ✅ | ⚠️ 500K | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ⚠️ | ❌ |
+| Small data (<10K) | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Classification | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Regression | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| PEFT | ⚠️ | ⚠️ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ✅ | † | ✅ | ‡ |
+| No download needed | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+
+---
+
+## 7. Performance characteristics
+
+!!! note "Benchmark disclaimer"
+    All figures below are **rough guidelines**, not measurements you should quote. They
+    depend on hardware, dataset characteristics, hyperparameters and software versions. Run
+    [`TabularLeaderboard`](../user-guide/leaderboard.md) on *your* data before choosing.
+
+### 7.1 Memory during training (approximate, GPU)
+
+| Model | Strategy | Memory range |
+|---|---|---|
+| TabPFN family | inference | 2-4 GB |
+| TabICL / TabICLv2 | inference | 3-6 GB |
+| TabICL / TabICLv2 | finetune | 8-16 GB |
+| TabICL | peft | 4-8 GB |
+| OrionMSP | finetune | 10-20 GB |
+| OrionBix | finetune | 12-24 GB |
+| TabDPT | finetune | 12-28 GB |
+| Mitra | finetune | 16-32 GB |
+| ContextTab | finetune | 8-16 GB |
+| EXAONE | inference | 1-3 GB (~21M params) |
+| xRFM | fit | GPU memory per tree leaf; `max_leaf_size` auto-rescales |
+
+PEFT typically reduces memory by **40-60%** versus full fine-tuning — except on xRFM and
+EXAONE, where `peft` does not mean LoRA (see the footnotes above).
+
+### 7.2 Benchmarking methodology
+
+1. **Same splits** across models
+2. **Same preprocessing** — identical `DataProcessor` settings
+3. **Multiple seeds** — average over 3-5 runs
+4. **Same hardware**
+5. **Fair tuning budget** per model
+6. **Measure the shift gap**, not just the IID score — see
+   [Shift-Aware Evaluation](../user-guide/shift-evaluation.md)
+
+---
+
+## 8. Per-model pages
+
+| PFN | Scalable ICL | Other |
+|---|---|---|
+| [TabPFN](tabpfn.md) | [TabICL](tabicl.md) | [ContextTab](contexttab.md) |
+| [TabPFN v2.6](tabpfnv26.md) | [TabICL v2](tabiclv2.md) | [TabDPT](tabdpt.md) |
+| [TabPFN v3](tabpfnv3.md) | [OrionMSP](orion-msp.md) | [LimiX](limix.md) |
+| | [OrionMSP v1.5](orionmsp1.5.md) | [xRFM](xrfm.md) |
+| | [OrionBix](orion-bix.md) | [iLTM](iltm.md) |
+| | [Mitra](mitra.md) | [EXAONE Tabular](exaone.md) |
+| | [TabFM](tabfm.md) | |

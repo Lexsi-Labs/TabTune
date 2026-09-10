@@ -9,8 +9,18 @@ TabTune provides three distinct tuning strategies to accommodate different use c
 | Strategy | Training | Use Case | Memory | Speed | Accuracy |
 |----------|----------|----------|--------|-------|----------|
 | **inference** | None | Baseline, zero-shot | Minimal | Fast | Baseline |
-| **base-ft** | Full params | High accuracy, ample resources | High | Slow | Highest |
+| **finetune** | Full params | High accuracy, ample resources | High | Slow | Highest |
 | **peft** | LoRA adapters | Memory-constrained, iteration | Low | Medium | High |
+
+!!! note "`tuning_strategy` vs `finetune_mode`"
+    `tuning_strategy` chooses **whether and how much** to train (`'inference'`,
+    `'finetune'`, `'peft'`). `finetune_mode` chooses the **algorithm** used when training
+    happens — `'meta-learning'`, `'sft'`, `'native'`, `'turn_by_turn'`, or xRFM's
+    `'refit'` / `'refine'`. It applies to both `finetune` and `peft`. See
+    [section 3.5](#35-fine-tuning-modes-finetune_mode).
+
+    Older docs and examples refer to the `finetune` strategy as `base-ft`; `'finetune'` is
+    the current spelling.
 
 ---
 
@@ -232,7 +242,83 @@ pipeline.save('fintuned_pipeline.joblib')
 
 ---
 
+### 3.5 Fine-Tuning Modes (`finetune_mode`)
+
+`finetune_mode` selects the training algorithm. Pass it directly or inside `tuning_params`.
+
+```python
+pipeline = TabularPipeline(
+    model_name="TabICL",
+    tuning_strategy="finetune",
+    finetune_mode="meta-learning",      # or tuning_params={'finetune_mode': ...}
+)
+```
+
+If left as `None`, TabTune picks a per-task default: **`turn_by_turn` for regression**,
+**`meta-learning` for classification**.
+
+| Mode | What it does | Models |
+|---|---|---|
+| `meta-learning` | Episodic training that mimics the in-context learning paradigm: sample a support set and a query set each step | TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3, TabFM, iLTM, EXAONE |
+| `sft` | Standard supervised fine-tuning on minibatches | TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM, ContextTab, iLTM, EXAONE |
+| `native` | Prior Labs' own finetuner: bar-distribution loss, cosine LR with warmup, AMP, early stopping, validation-based model selection | **TabPFNv2.6 and TabPFNv3 only**, both tasks |
+| `turn_by_turn` (alias `tbt`) | Episodic turn-by-turn training; the default for regression | TabPFN, TabPFNv26, TabPFNv3, TabICLv2, Mitra, TabDPT, ContextTab, LimiX, TabFM, iLTM, EXAONE |
+| `refit` / `refine` | **xRFM only** — it has no gradient-descent fine-tuning. `refit` fits the RFM from scratch; `refine` warm-starts from the learned **M** matrix | xRFM |
+
+Not every model implements every mode. Ask the registry rather than guessing:
+
+```python
+from tabtune.registry import get_model_spec
+get_model_spec("TabICLv2").finetune_modes
+# frozenset({'meta-learning', 'sft', 'turn_by_turn'})
+```
+
+An unsupported combination raises `UnsupportedStrategyError` **before** any weights load.
+
+#### Native mode parameters
+
+These `tuning_params` apply to TabPFNv2.6 / TabPFNv3 native mode only and are ignored
+elsewhere:
+
+| Parameter | Meaning |
+|---|---|
+| `early_stopping` | Enable early stopping |
+| `early_stopping_patience` | Epochs without improvement before stopping |
+| `n_estimators_finetune` | Ensemble size during fine-tuning |
+| `validation_split` | Fraction held out for model selection |
+
+```python
+pipeline = TabularPipeline(
+    model_name="TabPFNv26",
+    task_type="classification",
+    tuning_strategy="finetune",
+    finetune_mode="native",
+    tuning_params={
+        "epochs": 30,
+        "learning_rate": 1e-5,
+        "early_stopping": True,
+        "early_stopping_patience": 8,
+    },
+)
+```
+
+---
+
 ## 4. PEFT Fine-Tuning Strategy (`peft`)
+
+!!! warning "Two models where `peft` does not mean LoRA"
+    - **xRFM** has no gradient-descent fine-tuning at all. Its `peft` performs low-rank
+      adaptation of the learned **M** matrix, not LoRA over linear layers, so
+      `target_modules` does not apply.
+    - **EXAONE Tabular** applies its projections as raw `nn.Parameter` tensors through
+      `F.linear` rather than `nn.Linear` submodules. The injector finds nothing to wrap,
+      logs a warning, and the run proceeds as a **full fine-tune** — do not attribute a
+      memory saving to LoRA here.
+
+    **TabICLv2 does not support `peft` at all.** Use `finetune`.
+
+    PEFT is **experimental** on TabPFN, TabPFNv2.6 and ContextTab, and **fully supported**
+    on TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM.
 
 ### Definition
 **Parameter-Efficient Fine-Tuning using LoRA (Low-Rank Adaptation)** where only small adapter weights are trained while base model is frozen.

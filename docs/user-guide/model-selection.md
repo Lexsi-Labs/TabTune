@@ -17,6 +17,16 @@ Choosing the right model for your tabular task is crucial for achieving optimal 
 | **Mitra** | 2D Attention | Complex patterns, mixed data types | 10K–500K rows | ✅ Full | ⭐⭐ |
 | **ContextTab** | Semantic ICL | Text-heavy features, semantic enrichment | 10K–500K rows | ⚠️ Experimental | ⭐⭐ |
 | **LimiX** | Probabilistic / Likelihood-based | Uncertainty-aware inference, regression tasks | 10K–1M+ rows | ❌ Not Applicable | ⭐⭐⭐⭐ |
+| **TabPFN v2.6** | PFN / ICL | Small data with a native fine-tuning pipeline | <10K rows | ⚠️ Experimental | ⭐⭐⭐⭐⭐ |
+| **TabPFN v3** | PFN / ICL | Wide, many-class or very large tables | up to ~200M cells | ✅ Full | ⭐⭐⭐⭐ |
+| **TabICLv2** | Scalable ICL | General default; native quantile regression | 10K–500K rows | ❌ Not supported | ⭐⭐⭐⭐ |
+| **TabFM** | Hybrid-Attention ICL | Zero-shot baselines, PEFT experiments | ≤500 features, ≤10 classes | ✅ Full | ⭐⭐⭐⭐ |
+| **xRFM** | Kernel / AGOP | Air-gapped environments; no weights at all | ≥60K rows | † M-matrix LoRA | ⭐⭐⭐ |
+| **iLTM** | Hypernetwork | Commercial deployment; wide tables | ≤100 classes | ✅ Full | ⭐⭐⭐ |
+| **EXAONE Tabular** | Cross-Axis ICL | Small model, many-class via ECOC | ≤100K rows | ‡ runs as full FT | ⭐⭐⭐⭐ |
+
+† xRFM's `peft` adapts the learned **M** matrix, not linear layers.
+‡ EXAONE's LoRA injector finds nothing to wrap; the run proceeds as a full fine-tune.
 
 ---
 
@@ -477,6 +487,68 @@ pipeline = TabularPipeline(
 ---
 
 
+### 3.10 TabPFN v2.6 / v3
+
+`TabPFNv26` keeps v2's envelope (10 classes, 500 features, 10k rows) and adds Prior Labs'
+**native** fine-tuning loop. `TabPFNv3` re-architects the model: **160 classes, 20,000
+features, ~200M cell budget**, and full PEFT support — but its weights are **research-only**.
+
+Full pages: [TabPFN v2.6](../models/tabpfnv26.md) · [TabPFN v3](../models/tabpfnv3.md)
+
+---
+
+### 3.11 TabICLv2
+
+The best general-purpose default in 0.2.0: BSD-3-Clause weights, both tasks, a native
+quantile regression head, and KV-cache offloading to reach 500k rows. **No PEFT** — use
+`finetune`.
+
+Full page: [TabICL v2](../models/tabiclv2.md)
+
+---
+
+### 3.12 TabFM (Google)
+
+Hybrid attention with full PEFT support, but a hard **ten-class** head and a
+**non-commercial** weight licence. Needs `pip install "tabfm[pytorch]"`.
+
+Full page: [TabFM](../models/tabfm.md)
+
+---
+
+### 3.13 xRFM
+
+A kernel method, not a transformer. **No pretrained weights** — it trains from scratch, so
+it is the only bundled model that runs air-gapped out of the box, and MIT-licensed with no
+weights to license. Upstream reports it becomes competitive from roughly 60k rows. Its
+strategies are `refit` and `refine`, not gradient-descent fine-tuning.
+
+Full page: [xRFM](../models/xrfm.md)
+
+---
+
+### 3.14 iLTM
+
+A hypernetwork generates MLP ensembles from dataset embeddings. **Apache-2.0 weights,
+ungated** — one of the easiest models to ship commercially. Dimensionality-agnostic, but
+capped at **100 classes** (architectural, enforced by the registry) and an 8,192-row
+retrieval context. Pretrained on classification; regression needs light fine-tuning.
+
+Full page: [iLTM](../models/iltm.md)
+
+---
+
+### 3.15 EXAONE Tabular
+
+At ~21M parameters the smallest bundled foundation model. All three of its ceilings are
+**soft**: >100k rows subsample, >100 features get attention-based selection, >10 classes go
+through ECOC. Weights are **research-only** even though the code is BSD-3-Clause, and only
+the classification checkpoint is published.
+
+Full page: [EXAONE Tabular](../models/exaone.md)
+
+---
+
 ## 4. Model Selection Checklist
 
 Use this checklist to guide your decision:
@@ -504,10 +576,42 @@ If dataset 10K-100K rows AND high accuracy needed → OrionBix
 If dataset > 100K rows → TabDPT
 If text features present → ContextTab
 If complex patterns + mixed types → Mitra
-If GPU < 8GB → TabPFN or TabICL with PEFT
-If speed critical → TabPFN (inference)
+If GPU < 8GB → TabPFN, EXAONE, or TabICL with PEFT
+If speed critical → TabPFN or EXAONE (inference)
 If accuracy critical → OrionBix or TabDPT (inference)
 ```
+
+**Deployment constraints (new in 0.2.0)**
+
+```
+If you must ship commercially  → TabICLv2, OrionMSP/v1.5, OrionBix, Mitra, iLTM, xRFM
+If the environment is air-gapped → xRFM (no weights to download)
+If > 10 classes                 → TabPFNv3 (160), iLTM (100), EXAONE (ECOC)
+If > 100 classes                → TabPFNv3
+If > 2,000 features             → TabPFNv3, iLTM
+If you need native quantiles    → TabICLv2, TabPFN family
+If you need a native FT loop    → TabPFNv2.6, TabPFNv3
+```
+
+Let TabTune enforce these rather than checking them by hand:
+
+```python
+from tabtune import TabularPipeline
+
+pipeline = TabularPipeline(
+    model_name="TabICLv2",
+    task_type="classification",
+    envelope_mode="error",       # reject data outside the checkpoint's limits
+    license_mode="commercial",   # reject weights you cannot ship
+)
+```
+
+Both checks run **before** any weights download. See
+[Model Registry](registry.md).
+
+**Do not select on the IID score alone.** A model scoring 0.87 with a 0.004 shift gap is a
+better production bet than one scoring 0.89 with a 0.06 gap — measure it with
+[`ShiftEvaluator`](shift-evaluation.md).
 
 ---
 

@@ -27,21 +27,30 @@ TabularPipeline(
     processor_params: dict | None = None,
     model_params: dict | None = None,
     model_checkpoint_path: str | None = None,
-    finetune_mode: str | None = None
+    finetune_mode: str | None = None,
+    *,
+    cache: str | bool | None = None,        # new in 0.2.0
+    envelope_mode: str = 'warn',            # new in 0.2.0
+    license_mode: str = 'research',         # new in 0.2.0
+    validate: bool = True,                  # new in 0.2.0
 )
 ```
 
 #### Parameters
 
 **`model_name`** (str, required)
-- Name of the model to use.
-- Supported values: `'TabPFN'`, `'TabPFNv26'`, `'TabICL'`, `'TabICLv2'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'TabDPT'`, `'Mitra'`, `'ContextTab'`, `'Limix'`
+- Model name or alias. **16 models** are registered.
+- Resolution ignores case, hyphens, underscores, dots and whitespace, so `'TabPFN-v2.6'` and `'tabpfnv26'` are equivalent.
+- Canonical names: `'TabPFN'`, `'TabPFNv26'`, `'TabPFNv3'`, `'TabICL'`, `'TabICLv2'`, `'OrionMSP'`, `'OrionMSPv1.5'`, `'OrionBix'`, `'Mitra'`, `'ContextTab'`, `'TabDPT'`, `'Limix'`, `'TabFM'`, `'XRFM'`, `'ILTM'`, `'EXAONETabular'`
+- Do not hardcode this list — call `tabtune.registry.list_model_names()`.
 - Example: `model_name="TabICLv2"`
 
 **`task_type`** (str, default: `'classification'`)
 - Type of machine learning task.
 - Supported: `'classification'`, `'regression'`
-- Regression is supported for: `TabPFN`, `TabPFNv26`, `TabICLv2`, `Mitra`, `ContextTab`, `TabDPT`, `Limix`
+- Regression is supported for: `TabPFN`, `TabPFNv26`, `TabPFNv3`, `TabICLv2`, `Mitra`, `ContextTab`, `TabDPT`, `Limix`, `TabFM`, `XRFM`, `ILTM`, `EXAONETabular`
+- Classification-only: `TabICL`, `OrionMSP`, `OrionMSPv1.5`, `OrionBix`
+- Query it instead of memorising it: `[s.name for s in list_models(task="regression")]`
 - Example: `task_type="regression"`
 
 **`tuning_strategy`** (str, default: `'inference'`)
@@ -117,6 +126,55 @@ TabularPipeline(
   - `'meta-learning'`: Episodic meta-learning (default)
   - `'sft'`: Standard supervised fine-tuning
 - Example: `finetune_mode="sft"`
+
+#### Keyword-only parameters (new in 0.2.0)
+
+**`cache`** (str | bool | None, default: `None`)
+- Prediction cache: `'memory'`, `'disk'`, `None`, or a `PredictionCache` instance.
+- Enabling it collapses `evaluate()`'s three redundant forward passes into one.
+- Entries are keyed on a fingerprint covering the fitted model *and* the input data, so refitting or changing the data invalidates automatically.
+- Inspect with `pipeline.cache.stats`; clear with `pipeline.clear_cache()`.
+- See [Prediction Caching](../user-guide/caching.md).
+
+**`envelope_mode`** (str, default: `'warn'`)
+- How to treat data outside the model's documented limits: `'error'`, `'warn'`, `'ignore'`.
+- Architectural limits (`max_classes`, `min_rows`) always raise unless this is `'ignore'`.
+- Resource limits (`max_rows`, `max_features`, `max_cells`) warn under `'warn'`.
+
+**`license_mode`** (str, default: `'research'`)
+- `'research'` — no licence enforcement.
+- `'commercial'` — raise `LicenseError` on weights that forbid commercial use.
+- `'ignore'` — skip the check entirely.
+- Unverified licences warn under `'commercial'` rather than blocking.
+
+**`validate`** (bool, default: `True`)
+- Check model / task / strategy against the registry **before** loading weights.
+- Set `False` to use a model TabTune does not know about.
+
+```python
+pipeline = TabularPipeline(
+    model_name="TabICLv2",
+    tuning_strategy="finetune",
+    cache="disk",
+    envelope_mode="error",
+    license_mode="commercial",
+)
+print(pipeline.cache.stats)   # hits / misses / stores / hit_rate
+```
+
+See [Model Registry](../user-guide/registry.md).
+
+#### Raises
+
+| Exception | When |
+|---|---|
+| `ModelNotFoundError` | `model_name` does not resolve to a registered model |
+| `UnsupportedTaskError` | Model has no head for `task_type` |
+| `UnsupportedStrategyError` | Model does not implement `tuning_strategy` |
+| `EnvelopeError` | Data violates a hard architectural limit |
+| `LicenseError` | Weight licence forbids the intended use under `license_mode` |
+
+All derive from `tabtune.registry.TabTuneError`.
 
 #### Returns
 
@@ -325,6 +383,108 @@ predictions = loaded_pipeline.predict(X_new)
 
 ## Additional Methods
 
+### `.uncertainty_report(X_test, y_test, *, X_cal=None, y_cal=None, alpha=0.1, n_bins=15, method='lac')`
+
+*New in 0.2.0.* One call for calibration **and** conformal coverage diagnostics.
+
+```python
+report = pipeline.uncertainty_report(
+    X_test, y_test,
+    X_cal=X_cal, y_cal=y_cal,
+    alpha=0.1,          # 90% target coverage
+    n_bins=15,          # calibration bins
+    method='lac',       # 'lac' | 'aps'
+) -> dict
+```
+
+Returns `ece`, `mce`, `brier`, `coverage`, `avg_set_size` and `sscs` (size-stratified
+coverage — the worst-covered stratum). Omitting `X_cal` / `y_cal` gives the calibration
+metrics only.
+
+!!! danger "The calibration split must be disjoint from training"
+    For an in-context model the training data *is* the support set. A re-used training frame
+    is detected by fingerprint and **raises** rather than silently voiding the guarantee.
+
+See [Uncertainty Quantification](../user-guide/uncertainty.md).
+
+---
+
+### `.predict_quantiles(X, quantiles=None)`
+
+Regression only. Returns a dict of predicted quantiles. Available where the model has a
+native quantile head — the TabPFN family and TabICLv2.
+
+```python
+pipeline.predict_quantiles(X_test, quantiles=[0.1, 0.5, 0.9])
+```
+
+---
+
+### `.predict_intervals(X, confidence=0.95)`
+
+Regression only. Returns prediction intervals at the requested confidence level.
+
+For a *distribution-free* guarantee, use
+[`ConformalRegressor`](../user-guide/uncertainty.md) instead.
+
+---
+
+### `.clear_cache()`
+
+*New in 0.2.0.* Drops this pipeline's cached predictions and returns the number of entries
+removed. No-op when `cache=None`.
+
+---
+
+### `.evaluate_interval_calibration(X, y, ...)`
+
+Regression counterpart to `evaluate_calibration`: checks whether predicted intervals achieve
+their nominal coverage.
+
+---
+
+### `.get_residuals(X, y)` / `.analyze_residuals(X, y)` / `.plot_residuals(...)`
+
+Regression diagnostics: raw residuals, a summary dict (bias, heteroscedasticity, normality),
+and diagnostic plots.
+
+---
+
+### `.cross_validate(X, y, cv=5, ...)`
+
+IID k-fold cross-validation. For **shift-aware** validation — temporal or grouped splits and
+the IID-to-shift gap — use
+[`ShiftEvaluator`](../user-guide/shift-evaluation.md) instead.
+
+---
+
+### `.distill(X_train, y_train, ...)`
+
+Compress this fitted pipeline into a lightweight student model. See
+[Distillation](../user-guide/distillation.md).
+
+---
+
+### `.get_feature_importance(X, y=None, ...)`
+
+Permutation-based feature importance over the fitted pipeline.
+
+---
+
+### `.evaluate_checkpoints(X_test, y_test, checkpoint_dir, epochs, map_location=None)`
+
+Evaluate every saved epoch checkpoint in a directory and return per-epoch metrics — useful
+for picking the best epoch after a fine-tuning run.
+
+---
+
+### `.get_params(deep=True)`
+
+scikit-learn-compatible parameter dict for the pipeline.
+
+---
+
+
 ### `.evaluate_calibration(X, y, n_bins=15, output_format='rich')`
 
 Evaluate model calibration (how well probabilities match actual outcomes).
@@ -472,9 +632,17 @@ pipeline.fit(X_train, y_train)
 - **Cause**: Calling predict/evaluate before fitting
 - **Solution**: Call `.fit()` first
 
-**`ValueError`**: "Model 'X' not supported"
-- **Cause**: Invalid model name
-- **Solution**: Check supported models list
+**`ModelNotFoundError`**: "Unknown model 'X'"
+- **Cause**: The name does not resolve to a registered model
+- **Solution**: Check `tabtune.registry.list_model_names()`; the error suggests the closest match
+
+**`UnsupportedTaskError`** / **`UnsupportedStrategyError`**
+- **Cause**: The model has no head for that task, or does not implement that strategy
+- **Solution**: `get_model_spec(name).tasks` and `.strategies_for(task)`
+
+**`EnvelopeError`**: "X supports at most N classes (found M)"
+- **Cause**: Data violates a hard architectural limit of the checkpoint
+- **Solution**: Pick a model with a larger envelope, or `envelope_mode='ignore'` if you know what you are doing
 
 **`RuntimeError`**: "CUDA out of memory"
 - **Cause**: Insufficient GPU memory
@@ -487,4 +655,8 @@ pipeline.fit(X_train, y_train)
 - [Pipeline Overview](../user-guide/pipeline-overview.md): Detailed usage guide
 - [Tuning Strategies](../user-guide/tuning-strategies.md): Strategy comparisons
 - [Model Selection](../user-guide/model-selection.md): Choosing the right model
+- [Model Registry](../user-guide/registry.md): Envelopes, licensing and `validate`
+- [Typed Configuration](../user-guide/configuration.md): YAML configs and CI validation
+- [Prediction Caching](../user-guide/caching.md): the `cache` parameter
+- [Uncertainty Quantification](../user-guide/uncertainty.md): `uncertainty_report` and conformal wrappers
 - [Troubleshooting](../user-guide/troubleshooting.md): Common issues and solutions

@@ -42,6 +42,65 @@ This guide will walk you through installing TabTune and its dependencies for opt
    conda activate tabtune
    ```
 
+### **Method 2: Optional extras**
+
+TabTune's core install is deliberately lean. Feature subsystems are opt-in:
+
+```bash
+pip install "tabtune[causal]"         # CausalAnalysis: doubleml, econml, dowhy, causal-learn
+pip install "tabtune[distillation]"   # LightGBM students for tabtune.distillation
+pip install "tabtune[serving]"        # ONNX export of distilled students
+pip install "tabtune[interactive]"    # rich notebook display helpers
+pip install "tabtune[colab]"          # pin core packages to Colab's versions
+pip install "tabtune[docs]"           # mkdocs toolchain
+pip install "tabtune[dev]"            # pytest, ruff, black, pre-commit
+pip install "tabtune[strict]"         # pinned torch/transformers/scikit-learn
+pip install "tabtune[all]"            # interactive + causal + distillation + serving + docs
+```
+
+---
+
+## Model-Specific Setup
+
+Most models auto-download their weights from the Hugging Face Hub on first use. Three need
+something extra:
+
+### TabFM (Google)
+
+Requires the optional upstream package with the PyTorch backend:
+
+```bash
+pip install "tabfm[pytorch]"
+```
+
+Weights (`google/tabfm-1.0.0-pytorch`) download automatically on first use.
+
+### EXAONE Tabular
+
+Only the **classification** checkpoint is published. For regression, supply a local weights
+file:
+
+```bash
+export EXAONETABULAR_REGRESSOR_WEIGHTS=/path/to/exaone-tabular-regressor.safetensors
+export EXAONETABULAR_CLASSIFIER_WEIGHTS=/path/to/classifier.safetensors   # optional override
+```
+
+### xRFM
+
+Nothing to install and nothing to download — xRFM trains from scratch, which makes it the
+only bundled model that works in an **air-gapped** environment out of the box.
+
+!!! tip "Verify what a model needs before you download it"
+    ```python
+    from tabtune.registry import get_model_spec
+    spec = get_model_spec("TabFM")
+    spec.weights          # 'google/tabfm-1.0.0-pytorch'
+    spec.envelope.describe()
+    spec.license.badge
+    ```
+    The registry is torch-free, so this costs milliseconds and downloads nothing. See
+    [Model Registry](../user-guide/registry.md).
+
 ---
 
 
@@ -97,7 +156,7 @@ import torch
 print(f"PyTorch version: {torch.__version__}")
 print(f"CUDA available: {torch.cuda.is_available()}")
 
-# Test TabTune import
+# Test TabTune import (lazy: this pulls in neither torch nor transformers)
 from tabtune import TabularPipeline
 print("✅ TabTune successfully installed!")
 ```

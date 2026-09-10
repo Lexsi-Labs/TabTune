@@ -36,6 +36,11 @@ nav:
       - Ensembling Strategies: user-guide/ensembling.md
       - Distillation: user-guide/distillation.md
       - Causal Inference: user-guide/causal.md
+      - Model Registry & Licensing: user-guide/registry.md
+      - Uncertainty & Conformal Prediction: user-guide/uncertainty.md
+      - Shift-Aware Evaluation: user-guide/shift-evaluation.md
+      - Typed Configuration: user-guide/configuration.md
+      - Prediction Caching: user-guide/caching.md
 
 
   - Models:
@@ -43,6 +48,7 @@ nav:
       - TabPFN: models/tabpfn.md
       - TabPFN v3: models/tabpfnv3.md
       - TabICL: models/tabicl.md
+      - TabICL v2: models/tabiclv2.md
       - Orion MSP: models/orion-msp.md
       - Orion MSP V1.5: models/orionmsp1.5.md
       - Orion BIX: models/orion-bix.md
@@ -50,6 +56,10 @@ nav:
       - Mitra: models/mitra.md
       - ConTextTab: models/contexttab.md
       - Limix: models/limix.md
+      - TabFM: models/tabfm.md
+      - xRFM: models/xrfm.md
+      - iLTM: models/iltm.md
+      - EXAONE Tabular: models/exaone.md
 
   - Regression:
       - Regression Overview: regression/regression.md
@@ -69,6 +79,14 @@ nav:
       - TuningManager: api/tuning-manager.md
       - TabularLeaderboard: api/leaderboard.md
       - PEFT Utils: api/peft-utils.md
+      - Model Registry: api/registry.md
+      - Configuration: api/config.md
+      - Uncertainty: api/uncertainty.md
+      - Evaluation: api/evaluation.md
+      - Prediction Cache: api/caching.md
+      - TabularEnsemble: api/ensemble.md
+      - TabDistiller: api/distillation.md
+      - CausalAnalysis: api/causal.md
   
   - Examples:
       - Classification Tasks: examples/classification.md
