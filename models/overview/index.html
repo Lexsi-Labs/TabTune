@@ -97,6 +97,21 @@
 <li>
 <a href="../../user-guide/causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown active">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../limix/">Limix</a>
+</li>
+<li>
+<a href="../tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../iltm/">iLTM</a>
+</li>
+<li>
+<a href="../exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li>
 <a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -252,7 +306,7 @@
                         </a>
 </li>
 <li>
-<a href="../../user-guide/causal/" rel="prev">
+<a href="../../user-guide/caching/" rel="prev">
 <i class="fas fa-arrow-left"></i> Previous
                         </a>
 </li>
@@ -272,167 +326,485 @@
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#supported-models-overview">Supported Models Overview</a></li>
-<li class="second-level"><a href="#1-model-ecosystem">1. Model Ecosystem</a></li>
-<li class="second-level"><a href="#2-model-comparison-matrix">2. Model Comparison Matrix</a></li>
-<li class="second-level"><a href="#3-selection-quick-tips">3. Selection Quick Tips</a></li>
-<li class="second-level"><a href="#4-feature-support-matrix">4. Feature Support Matrix</a></li>
-<li class="second-level"><a href="#5-performance-benchmarks">5. Performance Benchmarks</a></li>
-<li class="third-level"><a href="#51-accuracy-benchmarks">5.1 Accuracy Benchmarks</a></li>
-<li class="third-level"><a href="#52-memory-usage-estimates">5.2 Memory Usage Estimates</a></li>
-<li class="third-level"><a href="#53-inference-latency">5.3 Inference Latency</a></li>
-<li class="third-level"><a href="#54-benchmark-methodology">5.4 Benchmark Methodology</a></li>
+<li class="second-level"><a href="#1-model-ecosystem">1. Model ecosystem</a></li>
+<li class="second-level"><a href="#2-capability-matrix">2. Capability matrix</a></li>
+<li class="second-level"><a href="#3-envelopes-what-each-checkpoint-will-refuse">3. Envelopes: what each checkpoint will refuse</a></li>
+<li class="second-level"><a href="#4-licensing-what-you-can-actually-ship">4. Licensing: what you can actually ship</a></li>
+<li class="second-level"><a href="#5-choosing-a-model">5. Choosing a model</a></li>
+<li class="third-level"><a href="#51-by-dataset-size">5.1 By dataset size</a></li>
+<li class="third-level"><a href="#52-by-constraint">5.2 By constraint</a></li>
+<li class="third-level"><a href="#53-by-task">5.3 By task</a></li>
+<li class="second-level"><a href="#6-feature-support-matrix">6. Feature support matrix</a></li>
+<li class="second-level"><a href="#7-performance-characteristics">7. Performance characteristics</a></li>
+<li class="third-level"><a href="#71-memory-during-training-approximate-gpu">7.1 Memory during training (approximate, GPU)</a></li>
+<li class="third-level"><a href="#72-benchmarking-methodology">7.2 Benchmarking methodology</a></li>
+<li class="second-level"><a href="#8-per-model-pages">8. Per-model pages</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="supported-models-overview">Supported Models Overview<a class="headerlink" href="#supported-models-overview" title="Permanent link">¶</a></h1>
-<p>TabTune integrates state-of-the-art tabular foundation models, each with unique architectural properties, strengths, and use cases. This document provides a comprehensive overview of all supported models.</p>
-<hr/>
-<h2 id="1-model-ecosystem">1. Model Ecosystem<a class="headerlink" href="#1-model-ecosystem" title="Permanent link">¶</a></h2>
-<div class="mermaid">flowchart TD
-    A[Tabular Foundation Models] --&gt; B[ICL-Based Models]
-    A --&gt; C[Transformer-Based Models]
-    A --&gt; D[PFN-Based Models]
-
-    B --&gt; E[TabICL]
-    B --&gt; F[OrionMSP]
-    B --&gt; G[Orion BIX]
-    B --&gt; H[Mitra]
-    B --&gt; I[ContextTab]
-
-    C --&gt; J[TabDPT]
-
-    D --&gt; K[TabPFN]
-    D --&gt; L[TabPFN v3]
+<p>TabTune integrates <strong>16 tabular foundation models across seven architectural families</strong>
+behind one scikit-learn-style API. This page compares them on the axes that actually decide
+a choice: what they can do, what they refuse to do, and whether you are allowed to ship them.</p>
+<div class="admonition tip">
+<p class="admonition-title">Do not hardcode this list</p>
+<p>The registry is the source of truth and is queryable at runtime:
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_model_names</span><span class="p">,</span> <span class="n">list_models</span><span class="p">,</span> <span class="n">models_dataframe</span>
+<span class="n">list_model_names</span><span class="p">()</span>
+<span class="n">models_dataframe</span><span class="p">()</span>
+</code></pre></div>
+See <a href="../../user-guide/registry/">Model Registry</a>.</p>
 </div>
 <hr/>
-<h2 id="2-model-comparison-matrix">2. Model Comparison Matrix<a class="headerlink" href="#2-model-comparison-matrix" title="Permanent link">¶</a></h2>
+<h2 id="1-model-ecosystem">1. Model ecosystem<a class="headerlink" href="#1-model-ecosystem" title="Permanent link">¶</a></h2>
+<div class="mermaid">flowchart TD
+    A[Tabular Foundation Models] --&gt; B[PFN]
+    A --&gt; C[Scalable ICL]
+    A --&gt; D[Semantic ICL]
+    A --&gt; E[Denoising]
+    A --&gt; F[Probabilistic ICL]
+    A --&gt; G[Non-transformer]
+
+    B --&gt; B1[TabPFN v2]
+    B --&gt; B2[TabPFN v2.6]
+    B --&gt; B3[TabPFN v3]
+
+    C --&gt; C1[TabICL]
+    C --&gt; C2[TabICLv2]
+    C --&gt; C3[OrionMSP v1.0]
+    C --&gt; C4[OrionMSP v1.5]
+    C --&gt; C5[OrionBix]
+    C --&gt; C6[Mitra]
+    C --&gt; C7[TabFM]
+    C --&gt; C8[EXAONE Tabular]
+
+    D --&gt; D1[ContextTab]
+    E --&gt; E1[TabDPT]
+    F --&gt; F1[LimiX]
+
+    G --&gt; G1[xRFM - kernel/AGOP]
+    G --&gt; G2[iLTM - hypernetwork]
+</div>
+<hr/>
+<h2 id="2-capability-matrix">2. Capability matrix<a class="headerlink" href="#2-capability-matrix" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
 <th>Model</th>
-<th>Paradigm</th>
-<th>Architecture</th>
-<th>Best For</th>
-<th>Scaling</th>
-<th>Speed</th>
-<th>Memory</th>
-<th>PEFT</th>
+<th>Family / Paradigm</th>
+<th>Key Innovation</th>
+<th>Supported Strategies</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN</strong></td>
-<td>PFN/ICL</td>
-<td>Approximate Bayesian</td>
-<td>Small datasets</td>
-<td>&lt;10K</td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>⭐⭐</td>
-<td>⚠️</td>
+<td><strong>TabPFN-v2</strong></td>
+<td>PFN / ICL</td>
+<td>Approximates Bayesian inference on synthetic data</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT</td>
 </tr>
 <tr>
-<td><strong>TabPFN v3</strong></td>
-<td>PFN/ICL</td>
-<td>Latest PriorLabs PFN, full FT</td>
-<td>Small-medium datasets</td>
-<td>&lt;50K</td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>⭐⭐⭐</td>
-<td>✅</td>
+<td><strong>TabPFN-v2.6</strong></td>
+<td>PFN / ICL</td>
+<td>Prior Labs release with native finetuning API</td>
+<td>Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>TabPFN-v3</strong></td>
+<td>PFN / ICL</td>
+<td>Column embedding → row aggregation → ICL over compressed rows</td>
+<td>Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT</td>
 </tr>
 <tr>
 <td><strong>TabICL</strong></td>
 <td>Scalable ICL</td>
-<td>Column-Row Attention</td>
-<td>Balanced</td>
-<td>10K-1M</td>
-<td>⭐⭐⭐⭐</td>
-<td>⭐⭐⭐</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>OrionMSP</strong></td>
-<td>Scalable ICL</td>
-<td>Multi‑scale priors</td>
-<td>Generalization</td>
-<td>50K-2M+</td>
-<td>⭐⭐⭐</td>
-<td>⭐⭐⭐</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>Orion BIX</strong></td>
-<td>Scalable ICL</td>
-<td>Biaxial interactions</td>
-<td>Accuracy</td>
-<td>50K-2M+</td>
-<td>⭐⭐</td>
-<td>⭐⭐⭐⭐</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>TabDPT</strong></td>
-<td>Denoising</td>
-<td>Transformer</td>
-<td>Large Datasets</td>
-<td>100K-5M</td>
-<td>⭐⭐⭐</td>
-<td>⭐⭐⭐⭐</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>Mitra</strong></td>
-<td>2D Attention</td>
-<td>Cross‑Attention</td>
-<td>Complex Patterns</td>
-<td>10K-500K</td>
-<td>⭐⭐</td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>ContextTab</strong></td>
-<td>Semantic ICL</td>
-<td>Text + Embeddings</td>
-<td>Text-Heavy</td>
-<td>10K-500K</td>
-<td>⭐⭐</td>
-<td>⭐⭐⭐</td>
-<td>⚠️</td>
+<td>Two-stage column-then-row attention</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
 </tr>
 <tr>
 <td><strong>TabICLv2</strong></td>
 <td>Scalable ICL</td>
-<td>Improved Column-Row Attention</td>
-<td>Balanced + Regression</td>
-<td>10K-1M</td>
-<td>⭐⭐⭐⭐</td>
-<td>⭐⭐⭐</td>
+<td>QASSMax normalisation + native quantile regression head</td>
+<td>Inference, FT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>OrionMSP v1.0</strong></td>
+<td>Scalable ICL</td>
+<td>Multi-Scale Sparse Attention</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
+</tr>
+<tr>
+<td><strong>OrionMSP v1.5</strong></td>
+<td>Scalable ICL</td>
+<td>Stabilized prototype refinement</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
+</tr>
+<tr>
+<td><strong>OrionBix</strong></td>
+<td>Scalable ICL</td>
+<td>Tabular Bi-Axial In-Context Learning</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT</td>
+</tr>
+<tr>
+<td><strong>Mitra</strong></td>
+<td>Scalable ICL</td>
+<td>2D attention (row &amp; column), mixed synthetic priors</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>ContextTab</strong></td>
+<td>Semantics-Aware ICL</td>
+<td>Modality-specific embeddings; first-class text and datetime</td>
+<td>Inference, Full FT, PEFT*, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>TabDPT</strong></td>
+<td>Denoising Transformer</td>
+<td>Denoising pretraining + retrieval-based context</td>
+<td>Inference, Meta-Learning FT, SFT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>LimiX</strong></td>
+<td>Probabilistic / ICL</td>
+<td>Likelihood-based mixture modelling; uncertainty-aware</td>
+<td>Inference, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>TabFM</strong></td>
+<td>Hybrid-Attention ICL (Google)</td>
+<td>Alternating row/column attention → CLS compression → causal ICL</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>xRFM</strong></td>
+<td>Kernel / Feature Learning</td>
+<td>AGOP feature learning, tree-partitioned EigenPro. <strong>No pretrained weights</strong></td>
+<td>Inference, Refit, Refine, PEFT†, Regression</td>
+</tr>
+<tr>
+<td><strong>iLTM</strong></td>
+<td>Hypernetwork</td>
+<td>Hypernetwork generates MLP ensembles from dataset embeddings</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
+</tr>
+<tr>
+<td><strong>EXAONE Tabular</strong></td>
+<td>Cross-Axis ICL (LG AI Research)</td>
+<td>CAST; ~21M params, 8-member ensemble, ECOC for &gt;10 classes</td>
+<td>Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡</td>
+</tr>
+</tbody>
+</table>
+<p>* PEFT is <strong>experimental</strong>; <code>inference</code> is fully supported.
+† xRFM's <code>peft</code> is low-rank adaptation of the learned <strong>M</strong> matrix, not LoRA over linear layers.
+‡ EXAONE's projections are raw <code>nn.Parameter</code> tensors applied through <code>F.linear</code>, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
+‡‡ EXAONE regression is implemented and tested, but LG AI Research publishes no regression checkpoint — supply a local weights file.</p>
+<hr/>
+<h2 id="3-envelopes-what-each-checkpoint-will-refuse">3. Envelopes: what each checkpoint will refuse<a class="headerlink" href="#3-envelopes-what-each-checkpoint-will-refuse" title="Permanent link">¶</a></h2>
+<p>Envelope violations are checked <strong>before any weights download</strong>. Hard limits raise; soft
+limits warn.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align: right;">Max classes</th>
+<th style="text-align: right;">Max features</th>
+<th style="text-align: right;">Max rows</th>
+<th>Native NaN / text / categorical</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TabPFN</td>
+<td style="text-align: right;">10 <strong>(hard)</strong></td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">10,000</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>TabPFNv2.6</td>
+<td style="text-align: right;">10 <strong>(hard)</strong></td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">10,000</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>TabPFNv3</td>
+<td style="text-align: right;">160 <strong>(hard)</strong></td>
+<td style="text-align: right;">20,000</td>
+<td style="text-align: right;">1,000,000 (≈200M cell budget)</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>TabICL</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>TabICLv2</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">2,000</td>
+<td style="text-align: right;">500,000</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>OrionMSP / v1.5 / OrionBix</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>Mitra</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">10,000</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ContextTab</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>text + categorical</td>
+</tr>
+<tr>
+<td>TabDPT</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>LimiX</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>NaN</td>
+</tr>
+<tr>
+<td>TabFM</td>
+<td style="text-align: right;">10 <strong>(hard)</strong></td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>xRFM</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>categorical</td>
+</tr>
+<tr>
+<td>iLTM</td>
+<td style="text-align: right;">100 <strong>(hard)</strong></td>
+<td style="text-align: right;">dimensionality-agnostic</td>
+<td style="text-align: right;">retrieval capped at 8,192</td>
+<td>categorical</td>
+</tr>
+<tr>
+<td>EXAONE Tabular</td>
+<td style="text-align: right;">soft — ECOC above 10</td>
+<td style="text-align: right;">100 (soft, top-100 selection)</td>
+<td style="text-align: right;">100,000 (soft, subsampled)</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_envelope</span>
+<span class="n">check_envelope</span><span class="p">(</span><span class="s2">"TabFM"</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">1_000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="c1"># EnvelopeError: TabFM supports at most 10 classes (found 14)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">TabPFN-v3 has a <em>cell budget</em>, not a row cap</p>
+<p>Roughly 1M × 200, 100k × 2,000 or 1k × 20,000. An 8-estimator ensemble needs on the
+order of 56 GB of KV cache at 1M rows.</p>
+</div>
+<hr/>
+<h2 id="4-licensing-what-you-can-actually-ship">4. Licensing: what you can actually ship<a class="headerlink" href="#4-licensing-what-you-can-actually-ship" title="Permanent link">¶</a></h2>
+<p>The <code>Commercial</code> column reflects the <strong>weight</strong> licence, which is what decides deployment.
+<code>unverified</code> means TabTune has not confirmed the terms — it warns rather than blocking.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Weight licence</th>
+<th>Commercial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TabICL, TabICLv2</td>
+<td>BSD-3-Clause</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>OrionMSP, OrionMSPv1.5, OrionBix</td>
+<td>MIT</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>xRFM</td>
+<td>MIT (no weights to license)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>iLTM</td>
+<td>Apache-2.0</td>
+<td>✅ (attribution)</td>
+</tr>
+<tr>
+<td>Mitra</td>
+<td>CC-BY-4.0</td>
+<td>✅ (attribution)</td>
+</tr>
+<tr>
+<td>TabPFN, TabPFNv2.6</td>
+<td>Prior Labs License</td>
+<td>⚠️ unverified</td>
+</tr>
+<tr>
+<td>TabDPT</td>
+<td>see upstream</td>
+<td>⚠️ unverified</td>
+</tr>
+<tr>
+<td>TabPFNv3</td>
+<td>TABPFN-3.0 License v1.0</td>
+<td>❌ research only</td>
+</tr>
+<tr>
+<td>ContextTab</td>
+<td>SAP-RPT-1-OSS</td>
+<td>❌ research only</td>
+</tr>
+<tr>
+<td>LimiX</td>
+<td>LimiX (academic use free)</td>
+<td>❌ without authorization</td>
+</tr>
+<tr>
+<td>TabFM</td>
+<td>TabFM Non-Commercial v1.0</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>EXAONE Tabular</td>
+<td>EXAONE AI Model License 1.1 - NC</td>
 <td>❌</td>
 </tr>
 </tbody>
 </table>
+<div class="highlight"><pre><span></span><code><span class="n">TabularPipeline</span><span class="p">(</span><span class="s2">"TabPFNv3"</span><span class="p">,</span> <span class="n">license_mode</span><span class="o">=</span><span class="s2">"commercial"</span><span class="p">)</span>   <span class="c1"># raises LicenseError</span>
+</code></pre></div>
+<p>See <a href="../../user-guide/registry/">Model Registry</a> for the full mechanics.</p>
 <hr/>
-<h2 id="3-selection-quick-tips">3. Selection Quick Tips<a class="headerlink" href="#3-selection-quick-tips" title="Permanent link">¶</a></h2>
+<h2 id="5-choosing-a-model">5. Choosing a model<a class="headerlink" href="#5-choosing-a-model" title="Permanent link">¶</a></h2>
+<h3 id="51-by-dataset-size">5.1 By dataset size<a class="headerlink" href="#51-by-dataset-size" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Rows</th>
+<th>First choice</th>
+<th>Alternatives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 10K</td>
+<td>TabPFN / TabPFNv2.6 / TabPFNv3 (inference)</td>
+<td>Mitra, EXAONE</td>
+</tr>
+<tr>
+<td>10K – 100K</td>
+<td>TabICLv2, TabICL</td>
+<td>OrionMSP, iLTM, TabFM</td>
+</tr>
+<tr>
+<td>100K – 500K</td>
+<td>TabICLv2 (KV offloading), TabDPT</td>
+<td>OrionMSP, OrionBix</td>
+</tr>
+<tr>
+<td>500K – 2M+</td>
+<td>TabDPT, OrionMSP, OrionBix</td>
+<td>TabPFNv3 (cell budget permitting)</td>
+</tr>
+<tr>
+<td>≥ 60K, kernel-friendly</td>
+<td><strong>xRFM</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-by-constraint">5.2 By constraint<a class="headerlink" href="#52-by-constraint" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Pick</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Must ship commercially</strong></td>
+<td>TabICLv2, OrionMSP/v1.5, OrionBix, Mitra, iLTM, xRFM</td>
+</tr>
+<tr>
+<td><strong>Air-gapped / no downloads</strong></td>
+<td><strong>xRFM</strong> — trains from scratch</td>
+</tr>
+<tr>
+<td><strong>Text-heavy features</strong></td>
+<td>ContextTab</td>
+</tr>
+<tr>
+<td><strong>&gt; 10 classes</strong></td>
+<td>TabPFNv3 (160), iLTM (100), EXAONE (ECOC)</td>
+</tr>
+<tr>
+<td><strong>&gt; 100 classes</strong></td>
+<td>TabPFNv3</td>
+</tr>
+<tr>
+<td><strong>&gt; 2,000 features</strong></td>
+<td>TabPFNv3 (20,000), iLTM</td>
+</tr>
+<tr>
+<td><strong>Native quantile regression</strong></td>
+<td>TabICLv2, TabPFN family</td>
+</tr>
+<tr>
+<td><strong>Native fine-tuning pipeline</strong></td>
+<td>TabPFNv2.6, TabPFNv3</td>
+</tr>
+<tr>
+<td><strong>Production PEFT</strong></td>
+<td>TabICL, OrionMSP, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3, iLTM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-by-task">5.3 By task<a class="headerlink" href="#53-by-task" title="Permanent link">¶</a></h3>
 <ul>
-<li>&lt;10K rows: TabPFN / TabPFN v3 (inference) or TabICL (base‑ft)</li>
-<li>Small-medium rows + fine-tuning: TabPFN v3 (native / meta-learning / SFT / PEFT, plus regression)</li>
-<li>50K–2M rows: OrionMSP (balanced) or Orion BIX (accuracy‑oriented)</li>
-<li>
-<blockquote>
-<p>2M rows: TabDPT (base‑ft/PEFT)</p>
-</blockquote>
-</li>
-<li>Text‑heavy features: ContextTab</li>
+<li><strong>Classification only</strong>: TabICL, OrionMSP, OrionMSPv1.5, OrionBix</li>
+<li><strong>Both tasks</strong>: TabPFN family, TabICLv2, Mitra, ContextTab, TabDPT, TabFM, xRFM, iLTM, EXAONE</li>
+<li><strong>Regression emphasis</strong>: LimiX, TabICLv2, TabPFNv2.6/v3</li>
 </ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_models</span>
+<span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">list_models</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span> <span class="n">commercial_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+</code></pre></div>
 <hr/>
-<h2 id="4-feature-support-matrix">4. Feature Support Matrix<a class="headerlink" href="#4-feature-support-matrix" title="Permanent link">¶</a></h2>
+<h2 id="6-feature-support-matrix">6. Feature support matrix<a class="headerlink" href="#6-feature-support-matrix" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
 <th>Feature</th>
 <th>TabPFN</th>
-<th>TabPFNv2.6</th>
+<th>v2.6</th>
+<th>v3</th>
 <th>TabICL</th>
 <th>TabICLv2</th>
 <th>OrionMSP</th>
@@ -441,11 +813,20 @@
 <th>Mitra</th>
 <th>ContextTab</th>
 <th>LimiX</th>
+<th>TabFM</th>
+<th>xRFM</th>
+<th>iLTM</th>
+<th>EXAONE</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Numerical</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
@@ -469,14 +850,6 @@
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
-</tr>
-<tr>
-<td>Missing Values</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
@@ -484,7 +857,26 @@
 <td>✅</td>
 </tr>
 <tr>
-<td>Text Features</td>
+<td>Missing values</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Text features</td>
+<td>❌</td>
 <td>❌</td>
 <td>❌</td>
 <td>❌</td>
@@ -494,23 +886,33 @@
 <td>❌</td>
 <td>❌</td>
 <td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
 <td>❌</td>
 </tr>
 <tr>
-<td>Large Datasets (&gt;1M)</td>
+<td>Large data (&gt;1M)</td>
 <td>❌</td>
 <td>❌</td>
 <td>✅</td>
 <td>✅</td>
+<td>⚠️ 500K</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
 <td>⚠️</td>
-<td>❌</td>
+<td>⚠️</td>
 <td>❌</td>
 </tr>
 <tr>
-<td>Small Datasets (&lt;10K)</td>
+<td>Small data (&lt;10K)</td>
+<td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
@@ -519,6 +921,10 @@
 <td>⚠️</td>
 <td>⚠️</td>
 <td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
@@ -533,25 +939,36 @@
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
-<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
 </tr>
 <tr>
 <td>Regression</td>
 <td>✅</td>
 <td>✅</td>
-<td>❌</td>
 <td>✅</td>
 <td>❌</td>
+<td>✅</td>
+<td>❌</td>
 <td>❌</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️</td>
 </tr>
 <tr>
-<td>PEFT Support</td>
+<td>PEFT</td>
 <td>⚠️</td>
 <td>⚠️</td>
+<td>✅</td>
 <td>✅</td>
 <td>❌</td>
 <td>✅</td>
@@ -560,237 +977,166 @@
 <td>✅</td>
 <td>⚠️</td>
 <td>❌</td>
+<td>✅</td>
+<td>†</td>
+<td>✅</td>
+<td>‡</td>
 </tr>
 <tr>
-<td>Multi-GPU Training</td>
+<td>No download needed</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
 <td>❌</td>
 <td>❌</td>
 <td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
+<td>❌</td>
 <td>❌</td>
 </tr>
 </tbody>
 </table>
 <hr/>
-<h2 id="5-performance-benchmarks">5. Performance Benchmarks<a class="headerlink" href="#5-performance-benchmarks" title="Permanent link">¶</a></h2>
-<p>Performance characteristics vary significantly based on dataset size, hardware, and hyperparameters. The following benchmarks provide rough estimates based on typical configurations.</p>
+<h2 id="7-performance-characteristics">7. Performance characteristics<a class="headerlink" href="#7-performance-characteristics" title="Permanent link">¶</a></h2>
 <div class="admonition note">
-<p class="admonition-title">Benchmark Disclaimer</p>
-<p>All benchmarks are approximate and depend on:
-- Hardware (GPU model, CPU, memory)
-- Dataset characteristics (size, features, class distribution)
-- Hyperparameter settings
-- Software versions</p>
-<p>Use these as rough guidelines for relative comparisons.</p>
+<p class="admonition-title">Benchmark disclaimer</p>
+<p>All figures below are <strong>rough guidelines</strong>, not measurements you should quote. They
+depend on hardware, dataset characteristics, hyperparameters and software versions. Run
+<a href="../../user-guide/leaderboard/"><code>TabularLeaderboard</code></a> on <em>your</em> data before choosing.</p>
 </div>
-<h3 id="51-accuracy-benchmarks">5.1 Accuracy Benchmarks<a class="headerlink" href="#51-accuracy-benchmarks" title="Permanent link">¶</a></h3>
-<p>Typical accuracy ranges on standard OpenML datasets (medium-sized, ~10K-50K samples):</p>
+<h3 id="71-memory-during-training-approximate-gpu">7.1 Memory during training (approximate, GPU)<a class="headerlink" href="#71-memory-during-training-approximate-gpu" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
 <th>Model</th>
 <th>Strategy</th>
-<th>Accuracy Range</th>
-<th>Notes</th>
+<th>Memory range</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN</strong></td>
-<td>inference</td>
-<td>0.75-0.85</td>
-<td>Best on small, clean datasets</td>
-</tr>
-<tr>
-<td><strong>TabICL / TabICLv2</strong></td>
-<td>inference</td>
-<td>3-6 GB</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>TabICL / TabICLv2</strong></td>
-<td>finetune</td>
-<td>8-16 GB</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>OrionMSP</strong></td>
-<td>finetune</td>
-<td>0.82-0.93</td>
-<td>Strong generalization</td>
-</tr>
-<tr>
-<td><strong>OrionBix</strong></td>
-<td>finetune</td>
-<td>0.85-0.94</td>
-<td>Highest accuracy potential</td>
-</tr>
-<tr>
-<td><strong>TabDPT</strong></td>
-<td>finetune</td>
-<td>0.83-0.92</td>
-<td>Excellent on large datasets</td>
-</tr>
-<tr>
-<td><strong>Mitra</strong></td>
-<td>finetune</td>
-<td>0.84-0.93</td>
-<td>Complex pattern handling</td>
-</tr>
-<tr>
-<td><strong>ContextTab</strong></td>
-<td>finetune</td>
-<td>0.75-0.88</td>
-<td>Best with text features</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Notes:</strong>
-- Ranges represent typical performance on diverse datasets
-- Your results may vary significantly based on dataset characteristics
-- Fine-tuning (finetune/peft) generally outperforms inference by 5-15%</p>
-<h3 id="52-memory-usage-estimates">5.2 Memory Usage Estimates<a class="headerlink" href="#52-memory-usage-estimates" title="Permanent link">¶</a></h3>
-<p>Peak memory usage during training (approximate, GPU memory):</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
-<th>Strategy</th>
-<th>Memory Range</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>TabPFN</strong></td>
+<td>TabPFN family</td>
 <td>inference</td>
 <td>2-4 GB</td>
-<td>Small datasets</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
+<td>TabICL / TabICLv2</td>
 <td>inference</td>
 <td>3-6 GB</td>
-<td>Moderate</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
+<td>TabICL / TabICLv2</td>
 <td>finetune</td>
 <td>8-16 GB</td>
-<td>Full model</td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
+<td>TabICL</td>
 <td>peft</td>
 <td>4-8 GB</td>
-<td>40-50% reduction</td>
 </tr>
 <tr>
-<td><strong>OrionMSP</strong></td>
+<td>OrionMSP</td>
 <td>finetune</td>
 <td>10-20 GB</td>
-<td>Large context</td>
 </tr>
 <tr>
-<td><strong>OrionBix</strong></td>
+<td>OrionBix</td>
 <td>finetune</td>
 <td>12-24 GB</td>
-<td>Biaxial layers</td>
 </tr>
 <tr>
-<td><strong>TabDPT</strong></td>
+<td>TabDPT</td>
 <td>finetune</td>
 <td>12-28 GB</td>
-<td>Large transformer</td>
 </tr>
 <tr>
-<td><strong>Mitra</strong></td>
+<td>Mitra</td>
 <td>finetune</td>
 <td>16-32 GB</td>
-<td>2D attention</td>
 </tr>
 <tr>
-<td><strong>ContextTab</strong></td>
+<td>ContextTab</td>
 <td>finetune</td>
 <td>8-16 GB</td>
-<td>Embedding overhead</td>
+</tr>
+<tr>
+<td>EXAONE</td>
+<td>inference</td>
+<td>1-3 GB (~21M params)</td>
+</tr>
+<tr>
+<td>xRFM</td>
+<td>fit</td>
+<td>GPU memory per tree leaf; <code>max_leaf_size</code> auto-rescales</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Memory optimization tips:</strong>
-- Use PEFT strategy (reduces memory by 40-60%)
-- Reduce batch size
-- Use gradient accumulation
-- Process large datasets in chunks</p>
-<h3 id="53-inference-latency">5.3 Inference Latency<a class="headerlink" href="#53-inference-latency" title="Permanent link">¶</a></h3>
-<p>Average inference time per batch (batch_size=32, GPU):</p>
+<p>PEFT typically reduces memory by <strong>40-60%</strong> versus full fine-tuning — except on xRFM and
+EXAONE, where <code>peft</code> does not mean LoRA (see the footnotes above).</p>
+<h3 id="72-benchmarking-methodology">7.2 Benchmarking methodology<a class="headerlink" href="#72-benchmarking-methodology" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Same splits</strong> across models</li>
+<li><strong>Same preprocessing</strong> — identical <code>DataProcessor</code> settings</li>
+<li><strong>Multiple seeds</strong> — average over 3-5 runs</li>
+<li><strong>Same hardware</strong></li>
+<li><strong>Fair tuning budget</strong> per model</li>
+<li><strong>Measure the shift gap</strong>, not just the IID score — see
+   <a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a></li>
+</ol>
+<hr/>
+<h2 id="8-per-model-pages">8. Per-model pages<a class="headerlink" href="#8-per-model-pages" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
-<th>Model</th>
-<th>Latency (ms/batch)</th>
-<th>Throughput (samples/s)</th>
+<th>PFN</th>
+<th>Scalable ICL</th>
+<th>Other</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>TabPFN</strong></td>
-<td>10-50</td>
-<td>640-3200</td>
+<td><a href="../tabpfn/">TabPFN</a></td>
+<td><a href="../tabicl/">TabICL</a></td>
+<td><a href="../contexttab/">ContextTab</a></td>
 </tr>
 <tr>
-<td><strong>TabICL</strong></td>
-<td>20-80</td>
-<td>400-1600</td>
+<td><a href="tabpfnv26.md">TabPFN v2.6</a></td>
+<td><a href="../tabiclv2/">TabICL v2</a></td>
+<td><a href="../tabdpt/">TabDPT</a></td>
 </tr>
 <tr>
-<td><strong>OrionMSP</strong></td>
-<td>40-120</td>
-<td>267-800</td>
+<td><a href="../tabpfnv3/">TabPFN v3</a></td>
+<td><a href="../orion-msp/">OrionMSP</a></td>
+<td><a href="../limix/">LimiX</a></td>
 </tr>
 <tr>
-<td><strong>OrionBix</strong></td>
-<td>60-150</td>
-<td>213-533</td>
+<td></td>
+<td><a href="../orionmsp1.5/">OrionMSP v1.5</a></td>
+<td><a href="../xrfm/">xRFM</a></td>
 </tr>
 <tr>
-<td><strong>TabDPT</strong></td>
-<td>30-100</td>
-<td>320-1067</td>
+<td></td>
+<td><a href="../orion-bix/">OrionBix</a></td>
+<td><a href="../iltm/">iLTM</a></td>
 </tr>
 <tr>
-<td><strong>Mitra</strong></td>
-<td>80-200</td>
-<td>160-400</td>
+<td></td>
+<td><a href="../mitra/">Mitra</a></td>
+<td><a href="../exaone/">EXAONE Tabular</a></td>
 </tr>
 <tr>
-<td><strong>ContextTab</strong></td>
-<td>100-300</td>
-<td>107-320</td>
+<td></td>
+<td><a href="../tabfm/">TabFM</a></td>
+<td></td>
 </tr>
 </tbody>
-</table>
-<p><strong>Note:</strong> Latency increases with dataset size (for ICL models that use training data as context).</p>
-<h3 id="54-benchmark-methodology">5.4 Benchmark Methodology<a class="headerlink" href="#54-benchmark-methodology" title="Permanent link">¶</a></h3>
-<p>When comparing models:</p>
-<ol>
-<li><strong>Use same dataset splits</strong>: Ensure train/test consistency</li>
-<li><strong>Same preprocessing</strong>: Use identical DataProcessor settings</li>
-<li><strong>Multiple runs</strong>: Average over 3-5 runs with different seeds</li>
-<li><strong>Hardware consistency</strong>: Same GPU/CPU for fair comparison</li>
-<li><strong>Hyperparameter tuning</strong>: Optimize each model fairly</li>
-</ol>
-<p><strong>Recommended benchmark datasets:</strong>
-- OpenML datasets (42178, 1489, etc.)
-- Your domain-specific datasets
-- Standard UCI ML datasets</p>
-<hr/>
-<p>Each model excels in different scenarios. Use this overview to pick the best fit for your task.</p></div>
+</table></div>
 </div>
 <footer class="col-md-12 text-center">
 <hr/>

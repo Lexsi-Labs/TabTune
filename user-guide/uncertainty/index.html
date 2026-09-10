@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Uncertainty &amp; Conformal Prediction - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+<li>
+<a href="../ensembling/">Ensembling Strategies</a>
+</li>
+<li>
+<a href="../distillation/">Distillation</a>
+</li>
+<li>
+<a href="../causal/">Causal Inference</a>
+</li>
+<li>
+<a href="../registry/">Model Registry &amp; Licensing</a>
+</li>
+<li class="active">
+<a href="./">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../caching/">Prediction Caching</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../registry/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../shift-evaluation/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/uncertainty.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#uncertainty-quantification-conformal-prediction-recalibration">Uncertainty Quantification: Conformal Prediction &amp; Recalibration</a></li>
+<li class="second-level"><a href="#1-the-three-way-split">1. The three-way split</a></li>
+<li class="second-level"><a href="#2-prediction-sets-classification">2. Prediction sets (classification)</a></li>
+<li class="third-level"><a href="#21-constructor">2.1 Constructor</a></li>
+<li class="second-level"><a href="#3-what-the-guarantee-actually-is">3. What the guarantee actually is</a></li>
+<li class="second-level"><a href="#4-recalibration">4. Recalibration</a></li>
+<li class="second-level"><a href="#5-regression-intervals">5. Regression intervals</a></li>
+<li class="second-level"><a href="#6-the-one-call-report">6. The one-call report</a></li>
+<li class="second-level"><a href="#7-end-to-end">7. End-to-end</a></li>
+<li class="second-level"><a href="#see-also">See Also</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="uncertainty-quantification-conformal-prediction-recalibration">Uncertainty Quantification: Conformal Prediction &amp; Recalibration<a class="headerlink" href="#uncertainty-quantification-conformal-prediction-recalibration" title="Permanent link">¶</a></h1>
+<p><em>New in TabTune 0.2.0.</em></p>
+<p>Tabular foundation models win benchmarks on accuracy and lose them on uncertainty: their
+probabilities come out of an in-context softmax that was never calibrated to <em>your</em> dataset.
+TabTune could already <strong>measure</strong> that (<code>evaluate_calibration</code> reports ECE/MCE/Brier);
+<code>tabtune.uncertainty</code> adds the two standard <strong>fixes</strong>.</p>
+<p>Both wrappers consume only <code>predict_proba</code> / <code>predict</code>, so they work for every bundled
+model, for distilled students, for ensembles, and for plain scikit-learn estimators. They
+<strong>compose around</strong> the pipeline rather than mutating it, so <code>save()</code> / <code>load()</code> and
+picklability are untouched.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConformalClassifier</span><span class="p">,</span>
+    <span class="n">ConformalRegressor</span><span class="p">,</span>
+    <span class="n">Recalibrator</span><span class="p">,</span>
+    <span class="n">uncertainty_report</span><span class="p">,</span>
+    <span class="n">size_stratified_coverage</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="1-the-three-way-split">1. The three-way split<a class="headerlink" href="#1-the-three-way-split" title="Permanent link">¶</a></h2>
+<p>Conformal prediction needs a calibration set the model has <strong>never trained on</strong>. A two-way
+train/test split is not enough.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">X_fit</span><span class="p">,</span> <span class="n">X_rest</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">y_rest</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">X_cal</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_cal</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_rest</span><span class="p">,</span> <span class="n">y_rest</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">In-context models: the training data <em>is</em> the support set</p>
+<p>For an ICL model, passing the pipeline's own training frame as <code>X_cal</code> would void the
+guarantee silently. TabTune detects a re-used training frame by fingerprint and
+<strong>raises</strong> instead.</p>
+</div>
+<hr/>
+<h2 id="2-prediction-sets-classification">2. Prediction sets (classification)<a class="headerlink" href="#2-prediction-sets-classification" title="Permanent link">¶</a></h2>
+<p>Split conformal prediction is the engine. Score how <em>nonconforming</em> each calibration example
+is, take the <span class="arithmatex">\(\lceil (n+1)(1-\alpha) \rceil\)</span>-th smallest score as a threshold, and a test
+point's prediction set is every label whose score clears that threshold.</p>
+<div class="highlight"><pre><span></span><code><span class="n">cp</span> <span class="o">=</span> <span class="n">ConformalClassifier</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"lac"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="p">)</span>
+
+<span class="n">sets</span>  <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">predict_set</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>     <span class="c1"># (n_test, n_classes) boolean matrix</span>
+<span class="n">sizes</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">set_sizes</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>       <span class="c1"># (n_test,) integer set sizes</span>
+<span class="n">cp</span><span class="o">.</span><span class="n">coverage</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>        <span class="c1"># {'coverage': ..., 'avg_set_size': ...}</span>
+
+<span class="n">cp</span><span class="o">.</span><span class="n">q_hat_</span>    <span class="c1"># the calibrated threshold</span>
+<span class="n">cp</span><span class="o">.</span><span class="n">n_cal_</span>    <span class="c1"># calibration set size</span>
+<span class="n">cp</span><span class="o">.</span><span class="n">classes_</span>  <span class="c1"># class order matching the columns of `sets`</span>
+</code></pre></div>
+<h3 id="21-constructor">2.1 Constructor<a class="headerlink" href="#21-constructor" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">ConformalClassifier</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span>                 <span class="c1"># anything with predict_proba</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">"lac"</span><span class="p">,</span>             <span class="c1"># 'lac' | 'aps'</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>                <span class="c1"># miscoverage rate -&gt; 90% target coverage</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">randomized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>         <span class="c1"># randomized tie-breaking (APS)</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th><code>method</code></th>
+<th>Score</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'lac'</code></td>
+<td>Least ambiguous set-valued classifier</td>
+<td>Smallest average sets; can emit <strong>empty</strong> sets on confident rows</td>
+</tr>
+<tr>
+<td><code>'aps'</code></td>
+<td>Adaptive prediction sets</td>
+<td>Sets grow on ambiguous rows, shrink on easy ones; never empty</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">aps</span> <span class="o">=</span> <span class="n">ConformalClassifier</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"aps"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="p">)</span>
+<span class="n">sizes</span> <span class="o">=</span> <span class="n">aps</span><span class="o">.</span><span class="n">set_sizes</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="c1"># mean set size on confident rows (p_max &gt; 0.9): 1.02</span>
+<span class="c1"># mean set size on ambiguous rows (p_max &lt; 0.6): 2.41</span>
+</code></pre></div>
+<hr/>
+<h2 id="3-what-the-guarantee-actually-is">3. What the guarantee actually is<a class="headerlink" href="#3-what-the-guarantee-actually-is" title="Permanent link">¶</a></h2>
+<p><strong>Marginal</strong> coverage under exchangeability:</p>
+<div class="arithmatex">\[P\big(y \in C(x)\big) \ge 1 - \alpha\]</div>
+<p>on average over exchangeable draws of the calibration and test data. It is <strong>not</strong>:</p>
+<ul>
+<li><strong>conditional</strong> coverage — no distribution-free method can promise 90% on every slice of
+  the input space;</li>
+<li><strong>robust to distribution shift</strong> — coverage degrades when the test distribution moves.</li>
+</ul>
+<p>The report's <strong>size-stratified coverage score (SSCS)</strong> exists precisely to show how far
+conditional coverage falls short of the marginal number: it is the <em>worst</em> coverage over
+groups of equal set size.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">size_stratified_coverage</span>
+
+<span class="n">size_stratified_coverage</span><span class="p">(</span><span class="n">set_sizes</span><span class="p">,</span> <span class="n">covered</span><span class="p">,</span> <span class="n">min_stratum</span><span class="o">=...</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">An SSCS of 0.000 is not a bug</p>
+<p>LAC produces <strong>empty</strong> sets for points the model is very confident about, and an empty
+set covers nothing by definition. The marginal guarantee still holds — those rows are
+paid for by the rest — but a whole stratum sits at zero coverage, and no marginal number
+can show you that. Use <code>'aps'</code> if you need non-empty sets.</p>
+</div>
+<hr/>
+<h2 id="4-recalibration">4. Recalibration<a class="headerlink" href="#4-recalibration" title="Permanent link">¶</a></h2>
+<p><code>Recalibrator</code> reshapes the probabilities and exposes the same <code>predict</code> / <code>predict_proba</code> /
+<code>classes_</code> surface, so it can be dropped anywhere the pipeline was used — including as the
+input to a <code>ConformalClassifier</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">recal</span> <span class="o">=</span> <span class="n">Recalibrator</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"temperature"</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_cal1</span><span class="p">,</span> <span class="n">y_cal1</span><span class="p">)</span>
+<span class="n">recal</span><span class="o">.</span><span class="n">temperature_</span>          <span class="c1"># the fitted scalar</span>
+<span class="n">recal</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<p>Recalibrate on one split, conformalize on a <strong>second</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">X_cal1</span><span class="p">,</span> <span class="n">X_cal2</span><span class="p">,</span> <span class="n">y_cal1</span><span class="p">,</span> <span class="n">y_cal2</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">recal</span>   <span class="o">=</span> <span class="n">Recalibrator</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"temperature"</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_cal1</span><span class="p">,</span> <span class="n">y_cal1</span><span class="p">)</span>
+<span class="n">stacked</span> <span class="o">=</span> <span class="n">ConformalClassifier</span><span class="p">(</span><span class="n">recal</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">X_cal2</span><span class="p">,</span> <span class="n">y_cal2</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="5-regression-intervals">5. Regression intervals<a class="headerlink" href="#5-regression-intervals" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">cr</span> <span class="o">=</span> <span class="n">ConformalRegressor</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"absolute"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="p">)</span>
+<span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">coverage</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th><code>method</code></th>
+<th>Requires</th>
+<th>Interval width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'absolute'</code></td>
+<td><code>predict</code> only — works for <strong>every</strong> model</td>
+<td>Constant across rows</td>
+</tr>
+<tr>
+<td><code>'cqr'</code></td>
+<td><code>predict_quantiles</code> — in TabTune, the TabPFN regressor family</td>
+<td>Adapts per row</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="6-the-one-call-report">6. The one-call report<a class="headerlink" href="#6-the-one-call-report" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">report</span> <span class="o">=</span> <span class="n">uncertainty_report</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+    <span class="n">X_cal</span><span class="o">=</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="o">=</span><span class="n">y_cal</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"lac"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Also available as a pipeline method:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">uncertainty_report</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">X_cal</span><span class="o">=</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="o">=</span><span class="n">y_cal</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ece</code></td>
+<td>Expected calibration error</td>
+</tr>
+<tr>
+<td><code>mce</code></td>
+<td>Maximum calibration error</td>
+</tr>
+<tr>
+<td><code>brier</code></td>
+<td>Brier score</td>
+</tr>
+<tr>
+<td><code>coverage</code></td>
+<td>Empirical marginal coverage of the prediction sets</td>
+</tr>
+<tr>
+<td><code>avg_set_size</code></td>
+<td>Mean set size (classification) / mean width (regression)</td>
+</tr>
+<tr>
+<td><code>sscs</code></td>
+<td>Size-stratified coverage score — the worst stratum</td>
+</tr>
+</tbody>
+</table>
+<p>Omitting <code>X_cal</code> / <code>y_cal</code> gives the calibration metrics only, with no conformal section.</p>
+<hr/>
+<h2 id="7-end-to-end">7. End-to-end<a class="headerlink" href="#7-end-to-end" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConformalClassifier</span><span class="p">,</span> <span class="n">Recalibrator</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="s2">"TabICLv2"</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="s2">"memory"</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">)</span>
+
+<span class="c1"># 1. Diagnose</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pipe</span><span class="o">.</span><span class="n">uncertainty_report</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">X_cal</span><span class="o">=</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="o">=</span><span class="n">y_cal</span><span class="p">))</span>
+
+<span class="c1"># 2. Fix the probabilities</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">Recalibrator</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"temperature"</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_cal1</span><span class="p">,</span> <span class="n">y_cal1</span><span class="p">)</span>
+
+<span class="c1"># 3. Wrap in a guarantee</span>
+<span class="n">cp</span> <span class="o">=</span> <span class="n">ConformalClassifier</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"aps"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">X_cal2</span><span class="p">,</span> <span class="n">y_cal2</span><span class="p">)</span>
+<span class="n">sets</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">predict_set</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../shift-evaluation/">Shift-Aware Evaluation</a> — coverage degrades under shift; measure the gap</li>
+<li><a href="../ensembling/">Ensembling</a> — <code>random_init</code> gives epistemic uncertainty</li>
+<li>Runnable example: <code>examples/18_uncertainty.py</code></li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

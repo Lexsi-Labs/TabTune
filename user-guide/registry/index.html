@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Model Registry &amp; Licensing - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+<li>
+<a href="../ensembling/">Ensembling Strategies</a>
+</li>
+<li>
+<a href="../distillation/">Distillation</a>
+</li>
+<li>
+<a href="../causal/">Causal Inference</a>
+</li>
+<li class="active">
+<a href="./">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../caching/">Prediction Caching</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../causal/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../uncertainty/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/registry.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#model-registry-envelopes-and-licensing">Model Registry: Envelopes and Licensing</a></li>
+<li class="second-level"><a href="#1-discovery">1. Discovery</a></li>
+<li class="second-level"><a href="#2-name-resolution-is-forgiving">2. Name resolution is forgiving</a></li>
+<li class="second-level"><a href="#3-capability-envelopes">3. Capability envelopes</a></li>
+<li class="third-level"><a href="#31-fields">3.1 Fields</a></li>
+<li class="third-level"><a href="#32-checking-a-dataset">3.2 Checking a dataset</a></li>
+<li class="second-level"><a href="#4-weight-licensing">4. Weight licensing</a></li>
+<li class="third-level"><a href="#41-licence-summary">4.1 Licence summary</a></li>
+<li class="second-level"><a href="#5-enforcement-inside-the-pipeline">5. Enforcement inside the pipeline</a></li>
+<li class="second-level"><a href="#6-exceptions">6. Exceptions</a></li>
+<li class="second-level"><a href="#7-registering-your-own-model">7. Registering your own model</a></li>
+<li class="second-level"><a href="#see-also">See Also</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="model-registry-envelopes-and-licensing">Model Registry: Envelopes and Licensing<a class="headerlink" href="#model-registry-envelopes-and-licensing" title="Permanent link">¶</a></h1>
+<p><em>New in TabTune 0.2.0.</em></p>
+<p>The registry is a <strong>torch-free</strong> description of every model TabTune ships. It exists to answer
+two questions that previously required downloading a multi-gigabyte checkpoint first:</p>
+<ol>
+<li><strong>Will this model accept my data?</strong> — capability envelopes encode the architectural limits
+   of each pretrained checkpoint (TabFM's ten-class output head, TabPFN-v3's cell budget,
+   Mitra's practical row ceiling), so a mismatch raises a clear message in milliseconds
+   instead of an out-of-memory error after a long download.</li>
+<li><strong>Can I actually deploy this?</strong> — weight licenses vary sharply, from MIT through CC-BY to
+   research-only. The registry records them and can fail fast when the intended use is
+   commercial.</li>
+</ol>
+<p>Because it pulls in nothing beyond the standard library, <code>import tabtune</code> and
+<code>from tabtune.registry import list_models</code> cost milliseconds and never load torch.</p>
+<hr/>
+<h2 id="1-discovery">1. Discovery<a class="headerlink" href="#1-discovery" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_models</span><span class="p">,</span> <span class="n">list_model_names</span><span class="p">,</span> <span class="n">models_dataframe</span>
+
+<span class="n">list_model_names</span><span class="p">()</span>
+<span class="c1"># ['TabPFN', 'TabPFNv26', 'TabPFNv3', 'TabICL', 'TabICLv2', 'OrionMSP',</span>
+<span class="c1">#  'OrionMSPv1.5', 'OrionBix', 'Mitra', 'ContextTab', 'TabDPT', 'Limix',</span>
+<span class="c1">#  'TabFM', 'XRFM', 'ILTM', 'EXAONETabular']</span>
+
+<span class="c1"># Filter by task, strategy, family or licence</span>
+<span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">list_models</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span> <span class="n">commercial_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">license</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="c1"># A tidy pandas table for reports and model cards</span>
+<span class="n">models_dataframe</span><span class="p">()[[</span><span class="s2">"Model"</span><span class="p">,</span> <span class="s2">"Tasks"</span><span class="p">,</span> <span class="s2">"Max classes"</span><span class="p">,</span> <span class="s2">"License"</span><span class="p">,</span> <span class="s2">"Commercial"</span><span class="p">]]</span>
+</code></pre></div>
+<p><code>list_models()</code> accepts:</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task</code></td>
+<td><code>'classification'</code> / <code>'regression'</code></td>
+<td>Model has a head for this task</td>
+</tr>
+<tr>
+<td><code>strategy</code></td>
+<td><code>'inference'</code> / <code>'finetune'</code> / <code>'peft'</code></td>
+<td>Model implements this strategy</td>
+</tr>
+<tr>
+<td><code>commercial_ok</code></td>
+<td><code>bool</code></td>
+<td>Filter on the <strong>weight</strong> licence</td>
+</tr>
+<tr>
+<td><code>family</code></td>
+<td><code>str</code></td>
+<td>e.g. <code>'pfn'</code>, <code>'icl'</code>, <code>'hypernetwork'</code></td>
+</tr>
+<tr>
+<td><code>include_unverified_licenses</code></td>
+<td><code>bool</code></td>
+<td>Include tri-state <code>None</code> licences when filtering on <code>commercial_ok=True</code></td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="2-name-resolution-is-forgiving">2. Name resolution is forgiving<a class="headerlink" href="#2-name-resolution-is-forgiving" title="Permanent link">¶</a></h2>
+<p>Lookup ignores case, hyphens, underscores, dots and whitespace, because people copy model
+names out of papers, READMEs and Slack messages.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_model_name</span>
+
+<span class="n">resolve_model_name</span><span class="p">(</span><span class="s2">"tabpfn-v2.6"</span><span class="p">)</span>    <span class="c1"># 'TabPFNv26'</span>
+<span class="n">resolve_model_name</span><span class="p">(</span><span class="s2">"TABPFN_V26"</span><span class="p">)</span>     <span class="c1"># 'TabPFNv26'</span>
+<span class="n">resolve_model_name</span><span class="p">(</span><span class="s2">"SAP-RPT-1-OSS"</span><span class="p">)</span>  <span class="c1"># 'ContextTab'   (upstream rename)</span>
+<span class="n">resolve_model_name</span><span class="p">(</span><span class="s2">"Orion-MSP"</span><span class="p">)</span>      <span class="c1"># 'OrionMSP'</span>
+<span class="n">resolve_model_name</span><span class="p">(</span><span class="s2">"Tab2D"</span><span class="p">)</span>          <span class="c1"># 'Mitra'</span>
+</code></pre></div>
+<p>An unknown name raises <code>ModelNotFoundError</code> with a suggested match rather than a bare
+<code>KeyError</code>.</p>
+<hr/>
+<h2 id="3-capability-envelopes">3. Capability envelopes<a class="headerlink" href="#3-capability-envelopes" title="Permanent link">¶</a></h2>
+<p>A <code>CapabilityEnvelope</code> records the limits of a <strong>pretrained checkpoint</strong>. <code>None</code> means "no
+declared limit" and is deliberately distinct from a large number — TabTune does not invent
+limits it has not verified.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_envelope</span><span class="p">,</span> <span class="n">get_model_spec</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"TabFM"</span><span class="p">)</span>
+<span class="n">spec</span><span class="o">.</span><span class="n">envelope</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="c1"># '&lt;=10 classes; &lt;=500 features'</span>
+</code></pre></div>
+<h3 id="31-fields">3.1 Fields<a class="headerlink" href="#31-fields" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+<th>Severity when exceeded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_classes</code></td>
+<td>Output-head capacity</td>
+<td><strong>error</strong> (architectural)</td>
+</tr>
+<tr>
+<td><code>min_rows</code></td>
+<td>Minimum training rows</td>
+<td><strong>error</strong> (architectural)</td>
+</tr>
+<tr>
+<td><code>max_features</code></td>
+<td>Documented feature ceiling</td>
+<td>warn</td>
+</tr>
+<tr>
+<td><code>max_rows</code></td>
+<td>Documented row ceiling</td>
+<td>warn</td>
+</tr>
+<tr>
+<td><code>max_cells</code></td>
+<td><code>rows × features</code> budget</td>
+<td>warn</td>
+</tr>
+<tr>
+<td><code>native_nan</code> / <code>native_text</code> / <code>native_categorical</code></td>
+<td>First-class handling, no encoding needed</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>notes</code></td>
+<td>Free-text caveats</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><code>max_cells</code> is checked <em>in addition to</em> <code>max_rows</code> and <code>max_features</code>, not instead of them:
+several recent checkpoints (TabPFN-v3 in particular) advertise a budget that trades rows
+against features, so a single scalar row cap would misrepresent them.</p>
+<h3 id="32-checking-a-dataset">3.2 Checking a dataset<a class="headerlink" href="#32-checking-a-dataset" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Hard limit — raises EnvelopeError in microseconds, before any weights are fetched</span>
+<span class="n">check_envelope</span><span class="p">(</span><span class="s2">"TabFM"</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">1_000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="c1"># EnvelopeError: TabFM supports at most 10 classes (found 14)</span>
+
+<span class="c1"># Soft limit — warns, run still meaningful</span>
+<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">check_envelope</span><span class="p">(</span><span class="s2">"Mitra"</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">50_000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"warn"</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">severity</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># [warn] is documented up to 10,000 rows (found 50,000); consider context sampling ...</span>
+</code></pre></div>
+<p>Each violation is an <code>EnvelopeViolation</code> with <code>constraint</code>, <code>limit</code>, <code>actual</code>, <code>severity</code>
+and a human-readable <code>message</code>. Hard violations are sorted first.</p>
+<div class="admonition warning">
+<p class="admonition-title">Hard constraints raise even under <code>mode='warn'</code></p>
+<p><code>max_classes</code> and <code>min_rows</code> are architectural: no amount of extra memory fixes them.
+They raise unless <code>envelope_mode='ignore'</code>.</p>
+</div>
+<hr/>
+<h2 id="4-weight-licensing">4. Weight licensing<a class="headerlink" href="#4-weight-licensing" title="Permanent link">¶</a></h2>
+<p><code>LicenseSpec.commercial_use_ok</code> is <strong>tri-state</strong> on purpose:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+<th><code>license_mode='commercial'</code> behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>True</code></td>
+<td>Upstream explicitly permits commercial use</td>
+<td>passes</td>
+</tr>
+<tr>
+<td><code>False</code></td>
+<td>Upstream forbids it, or requires a separate grant</td>
+<td>raises <code>LicenseError</code></td>
+</tr>
+<tr>
+<td><code>None</code></td>
+<td>TabTune has not verified it</td>
+<td>warns, does not block</td>
+</tr>
+</tbody>
+</table>
+<p>Inventing a restriction is as wrong as ignoring one, so unverified terms warn and point you
+upstream rather than blocking your work.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_license</span><span class="p">,</span> <span class="n">get_model_spec</span>
+
+<span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"Mitra"</span><span class="p">)</span><span class="o">.</span><span class="n">license</span><span class="o">.</span><span class="n">badge</span>      <span class="c1"># 'yes (attribution)'</span>
+<span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"TabPFNv3"</span><span class="p">)</span><span class="o">.</span><span class="n">license</span><span class="o">.</span><span class="n">badge</span>   <span class="c1"># 'no'</span>
+<span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"TabPFN"</span><span class="p">)</span><span class="o">.</span><span class="n">license</span><span class="o">.</span><span class="n">badge</span>     <span class="c1"># 'unverified'</span>
+
+<span class="n">check_license</span><span class="p">(</span><span class="s2">"TabPFNv3"</span><span class="p">,</span> <span class="s2">"commercial"</span><span class="p">)</span>    <span class="c1"># raises LicenseError, suggests alternatives</span>
+</code></pre></div>
+<h3 id="41-licence-summary">4.1 Licence summary<a class="headerlink" href="#41-licence-summary" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Weight licence</th>
+<th>Commercial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TabPFN, TabPFNv2.6</td>
+<td>Prior Labs License</td>
+<td>unverified</td>
+</tr>
+<tr>
+<td>TabPFNv3</td>
+<td>TABPFN-3.0 License v1.0</td>
+<td><strong>no</strong> (research / internal evaluation only)</td>
+</tr>
+<tr>
+<td>TabICL, TabICLv2</td>
+<td>BSD-3-Clause</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>OrionMSP, OrionMSPv1.5, OrionBix</td>
+<td>MIT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Mitra</td>
+<td>CC-BY-4.0</td>
+<td>yes (attribution required)</td>
+</tr>
+<tr>
+<td>ContextTab (SAP-RPT-1-OSS)</td>
+<td>SAP-RPT-1-OSS</td>
+<td><strong>no</strong> (research use)</td>
+</tr>
+<tr>
+<td>TabDPT</td>
+<td>see upstream</td>
+<td>unverified</td>
+</tr>
+<tr>
+<td>LimiX</td>
+<td>LimiX (academic use free)</td>
+<td><strong>no</strong> without authorization</td>
+</tr>
+<tr>
+<td>TabFM</td>
+<td>TabFM Non-Commercial License v1.0</td>
+<td><strong>no</strong> (code is Apache-2.0, weights are not)</td>
+</tr>
+<tr>
+<td>xRFM</td>
+<td>MIT</td>
+<td>yes (no weights to license)</td>
+</tr>
+<tr>
+<td>iLTM</td>
+<td>Apache-2.0</td>
+<td>yes (attribution)</td>
+</tr>
+<tr>
+<td>EXAONE Tabular</td>
+<td>EXAONE AI Model License 1.1 - NC</td>
+<td><strong>no</strong> (code is BSD-3-Clause-LG, weights are not)</td>
+</tr>
+</tbody>
+</table>
+<p>When a check fails, <code>commercial_alternatives</code> on the spec names models you can ship instead
+— by default Mitra, TabICLv2, OrionMSP, OrionMSPv1.5 and OrionBix.</p>
+<hr/>
+<h2 id="5-enforcement-inside-the-pipeline">5. Enforcement inside the pipeline<a class="headerlink" href="#5-enforcement-inside-the-pipeline" title="Permanent link">¶</a></h2>
+<p><code>TabularPipeline</code> runs all three checks — task/strategy validity, envelope, licence — before
+loading any weights.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabFM"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">envelope_mode</span><span class="o">=</span><span class="s2">"error"</span><span class="p">,</span>        <span class="c1"># 'error' | 'warn' (default) | 'ignore'</span>
+    <span class="n">license_mode</span><span class="o">=</span><span class="s2">"commercial"</span><span class="p">,</span>    <span class="c1"># 'research' (default) | 'commercial' | 'ignore'</span>
+    <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                <span class="c1"># default; set False for an unregistered model</span>
+<span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Values</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>envelope_mode</code></td>
+<td><code>'error'</code>, <code>'warn'</code>, <code>'ignore'</code></td>
+<td>How soft limit violations are reported. Hard limits raise unless <code>'ignore'</code>.</td>
+</tr>
+<tr>
+<td><code>license_mode</code></td>
+<td><code>'research'</code>, <code>'commercial'</code>, <code>'ignore'</code></td>
+<td><code>'commercial'</code> fails fast on weights that forbid commercial use.</td>
+</tr>
+<tr>
+<td><code>validate</code></td>
+<td><code>bool</code></td>
+<td>Check model / task / strategy against the registry before loading weights.</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="6-exceptions">6. Exceptions<a class="headerlink" href="#6-exceptions" title="Permanent link">¶</a></h2>
+<p>All registry errors derive from <code>TabTuneError</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TabTuneError</span><span class="p">,</span>
+    <span class="n">ConfigError</span><span class="p">,</span>
+    <span class="n">ModelNotFoundError</span><span class="p">,</span>
+    <span class="n">UnsupportedTaskError</span><span class="p">,</span>
+    <span class="n">UnsupportedStrategyError</span><span class="p">,</span>
+    <span class="n">EnvelopeError</span><span class="p">,</span>
+    <span class="n">LicenseError</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Raised when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ModelNotFoundError</code></td>
+<td>Name does not resolve to any registered model</td>
+</tr>
+<tr>
+<td><code>UnsupportedTaskError</code></td>
+<td>Model has no head for <code>task_type</code></td>
+</tr>
+<tr>
+<td><code>UnsupportedStrategyError</code></td>
+<td>Model does not implement <code>tuning_strategy</code></td>
+</tr>
+<tr>
+<td><code>EnvelopeError</code></td>
+<td>Data violates a hard architectural limit</td>
+</tr>
+<tr>
+<td><code>LicenseError</code></td>
+<td>Weight licence forbids the intended use under <code>license_mode</code></td>
+</tr>
+<tr>
+<td><code>ConfigError</code></td>
+<td>Invalid configuration</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-registering-your-own-model">7. Registering your own model<a class="headerlink" href="#7-registering-your-own-model" title="Permanent link">¶</a></h2>
+<p>Adding a model to TabTune starts with a <code>ModelSpec</code> — the registry, validation, error
+messages, model cards and generated documentation tables all pick it up automatically.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_model</span><span class="p">,</span> <span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="n">LicenseSpec</span><span class="p">,</span> <span class="n">ModelSpec</span>
+
+<span class="n">register_model</span><span class="p">(</span><span class="n">ModelSpec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"MyModel"</span><span class="p">,</span>
+    <span class="n">family</span><span class="o">=</span><span class="s2">"icl"</span><span class="p">,</span>
+    <span class="n">aliases</span><span class="o">=</span><span class="p">(</span><span class="s2">"my-model"</span><span class="p">,),</span>
+    <span class="n">classification_strategies</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">({</span><span class="s2">"inference"</span><span class="p">,</span> <span class="s2">"finetune"</span><span class="p">}),</span>
+    <span class="n">finetune_modes</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">({</span><span class="s2">"sft"</span><span class="p">}),</span>
+    <span class="n">preprocessor_key</span><span class="o">=</span><span class="s2">"tabicl_special"</span><span class="p">,</span>
+    <span class="n">envelope</span><span class="o">=</span><span class="n">CapabilityEnvelope</span><span class="p">(</span><span class="n">max_classes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">native_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">license</span><span class="o">=</span><span class="n">LicenseSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"MIT"</span><span class="p">,</span> <span class="n">commercial_use_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">))</span>
+</code></pre></div>
+<p>Or skip the registry entirely for a one-off:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TabularPipeline</span><span class="p">(</span><span class="s2">"MyModel"</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../configuration/">Typed Configuration</a> — <code>validate_against_registry()</code> in CI</li>
+<li><a href="../../models/overview/">Model Overview</a> — all 16 models compared</li>
+<li>Runnable example: <code>examples/14_registry_and_licensing.py</code></li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

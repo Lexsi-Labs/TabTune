@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Typed Configuration - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../troubleshooting/">Troubleshooting</a>
+</li>
+<li>
+<a href="../ensembling/">Ensembling Strategies</a>
+</li>
+<li>
+<a href="../distillation/">Distillation</a>
+</li>
+<li>
+<a href="../causal/">Causal Inference</a>
+</li>
+<li>
+<a href="../registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li class="active">
+<a href="./">Typed Configuration</a>
+</li>
+<li>
+<a href="../caching/">Prediction Caching</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../models/overview/">Overview</a>
+</li>
+<li>
+<a href="../../models/tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../../models/tabpfnv3/">TabPFN v3</a>
+</li>
+<li>
+<a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
+</li>
+<li>
+<a href="../../models/orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../../models/orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../../models/tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../../models/mitra/">Mitra</a>
+</li>
+<li>
+<a href="../../models/contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../shift-evaluation/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../caching/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/configuration.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#typed-configuration">Typed Configuration</a></li>
+<li class="second-level"><a href="#1-from-yaml">1. From YAML</a></li>
+<li class="second-level"><a href="#2-loader-functions">2. Loader functions</a></li>
+<li class="second-level"><a href="#3-pipelineconfig">3. PipelineConfig</a></li>
+<li class="third-level"><a href="#methods">Methods</a></li>
+<li class="second-level"><a href="#4-tuningconfig">4. TuningConfig</a></li>
+<li class="second-level"><a href="#5-peftconfig">5. PeftConfig</a></li>
+<li class="second-level"><a href="#6-processorconfig">6. ProcessorConfig</a></li>
+<li class="second-level"><a href="#7-contextsamplingconfig">7. ContextSamplingConfig</a></li>
+<li class="second-level"><a href="#8-building-configs-in-python">8. Building configs in Python</a></li>
+<li class="second-level"><a href="#see-also">See Also</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="typed-configuration">Typed Configuration<a class="headerlink" href="#typed-configuration" title="Permanent link">¶</a></h1>
+<p><em>New in TabTune 0.2.0.</em></p>
+<p>Every knob TabTune exposes is described by a <strong>pydantic</strong> schema. That gives validation,
+IDE completion, YAML/JSON round-tripping, and a single home for defaults that were
+previously duplicated across fine-tuning loops, <code>get_params()</code> and the docs.</p>
+<p>An experiment becomes a file you can commit.</p>
+<div class="admonition success">
+<p class="admonition-title">Fully backward compatible</p>
+<p><code>TabularPipeline</code> still accepts plain dicts for <code>tuning_params</code>, <code>processor_params</code> and
+<code>model_params</code>, and unrecognised keys are still forwarded to the model rather than
+dropped. The difference is that a typo now <strong>warns</strong> instead of vanishing.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PipelineConfig</span><span class="p">,</span> <span class="n">TuningConfig</span><span class="p">,</span> <span class="n">PeftConfig</span><span class="p">,</span> <span class="n">ProcessorConfig</span><span class="p">,</span> <span class="n">ContextSamplingConfig</span><span class="p">,</span>
+    <span class="n">load_config</span><span class="p">,</span> <span class="n">save_config</span><span class="p">,</span> <span class="n">dump_config</span><span class="p">,</span> <span class="n">config_from_mapping</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="1-from-yaml">1. From YAML<a class="headerlink" href="#1-from-yaml" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># experiments/tabiclv2_finetune.yaml</span>
+<span class="nt">model_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TabICLv2</span>
+<span class="nt">task_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">classification</span>
+<span class="nt">tuning_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">finetune</span>
+<span class="nt">envelope_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span>
+<span class="nt">license_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commercial</span>
+<span class="nt">cache</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">memory</span>
+<span class="nt">random_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="nt">tuning</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-5</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">  </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto</span>
+<span class="w">  </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">early_stopping</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">early_stopping_patience</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">  </span><span class="nt">validation_split</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.15</span>
+<span class="w">  </span><span class="nt">gradient_clip_norm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">show_progress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">scaling_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span>
+<span class="w">  </span><span class="nt">imputation_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span>
+<span class="w">  </span><span class="nt">resampling_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">smote</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="s2">"experiments/tabiclv2_finetune.yaml"</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">validate_against_registry</span><span class="p">()</span>     <span class="c1"># fails before any weights load</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">resolved_finetune_mode</span><span class="p">()</span>        <span class="c1"># 'meta-learning'</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Use <code>strict=True</code> in CI</p>
+<p>In strict mode an unknown key is an error, so a stale config fails the job rather than
+quietly running something else. Outside CI, <code>strict=False</code> (the default) warns.</p>
+</div>
+<hr/>
+<h2 id="2-loader-functions">2. Loader functions<a class="headerlink" href="#2-loader-functions" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>load_config(path, *, strict=False)</code></td>
+<td>Read YAML/JSON into a <code>PipelineConfig</code></td>
+</tr>
+<tr>
+<td><code>config_from_mapping(data, *, strict=False)</code></td>
+<td>Same, from an in-memory dict</td>
+</tr>
+<tr>
+<td><code>dump_config(config)</code></td>
+<td>Back to a plain <code>dict</code></td>
+</tr>
+<tr>
+<td><code>save_config(config, path)</code></td>
+<td>Write YAML/JSON; returns the <code>Path</code></td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="3-pipelineconfig">3. <code>PipelineConfig</code><a class="headerlink" href="#3-pipelineconfig" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model_name</code></td>
+<td><code>str</code></td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td><code>'classification'</code> / <code>'regression'</code></td>
+<td><code>'classification'</code></td>
+</tr>
+<tr>
+<td><code>tuning_strategy</code></td>
+<td><code>'inference'</code> / <code>'finetune'</code> / <code>'peft'</code></td>
+<td><code>'inference'</code></td>
+</tr>
+<tr>
+<td><code>finetune_mode</code></td>
+<td><code>str | None</code></td>
+<td><code>None</code> (per-task default)</td>
+</tr>
+<tr>
+<td><code>model_checkpoint_path</code></td>
+<td><code>str | None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>tuning</code></td>
+<td><code>TuningConfig</code></td>
+<td>defaults</td>
+</tr>
+<tr>
+<td><code>processor</code></td>
+<td><code>ProcessorConfig</code></td>
+<td>defaults</td>
+</tr>
+<tr>
+<td><code>model_params</code></td>
+<td><code>dict</code></td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>envelope_mode</code></td>
+<td><code>'error'</code> / <code>'warn'</code> / <code>'ignore'</code></td>
+<td><code>'warn'</code></td>
+</tr>
+<tr>
+<td><code>license_mode</code></td>
+<td><code>'research'</code> / <code>'commercial'</code> / <code>'ignore'</code></td>
+<td><code>'research'</code></td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td><code>'memory'</code> / <code>'disk'</code> / <code>'none'</code> / <code>None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">cfg</span><span class="o">.</span><span class="n">validate_against_registry</span><span class="p">(</span><span class="n">strict_finetune_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># Checks model / task / strategy (and optionally finetune_mode) against the registry.</span>
+<span class="c1"># Raises ModelNotFoundError, UnsupportedTaskError or UnsupportedStrategyError.</span>
+
+<span class="n">cfg</span><span class="o">.</span><span class="n">resolved_finetune_mode</span><span class="p">()</span>
+<span class="c1"># The mode that will actually run: 'turn_by_turn' for regression,</span>
+<span class="c1"># 'meta-learning' for classification, unless explicitly set.</span>
+
+<span class="n">cfg</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">drop_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="4-tuningconfig">4. <code>TuningConfig</code><a class="headerlink" href="#4-tuningconfig" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>epochs</code></td>
+<td><code>int</code></td>
+<td><code>5</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td><code>float</code></td>
+<td><code>1e-5</code></td>
+<td><code>&gt; 0</code></td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td><code>int</code></td>
+<td><code>32</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td><code>str</code></td>
+<td><code>'auto'</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>finetune_mode</code></td>
+<td><code>str | None</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>early_stopping</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>TabPFNv2.6 / v3 native mode</td>
+</tr>
+<tr>
+<td><code>early_stopping_patience</code></td>
+<td><code>int</code></td>
+<td><code>8</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>validation_split</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td><code>0 &lt;= x &lt; 1</code></td>
+</tr>
+<tr>
+<td><code>gradient_clip_norm</code></td>
+<td><code>float | None</code></td>
+<td><code>None</code></td>
+<td><code>&gt; 0</code></td>
+</tr>
+<tr>
+<td><code>n_estimators_finetune</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>support_size</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td>episodic</td>
+</tr>
+<tr>
+<td><code>query_size</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td>episodic</td>
+</tr>
+<tr>
+<td><code>steps_per_epoch</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td>episodic</td>
+</tr>
+<tr>
+<td><code>n_episodes</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td>episodic</td>
+</tr>
+<tr>
+<td><code>save_checkpoint_path</code></td>
+<td><code>str | None</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>checkpoint_dir</code></td>
+<td><code>str | None</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>checkpoint_epochs</code></td>
+<td><code>int | None</code></td>
+<td><code>None</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>peft_config</code></td>
+<td><code>PeftConfig | None</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Finetune-mode aliases (<code>'tbt'</code> → <code>'turn_by_turn'</code>, etc.) are normalised on validation.</p>
+<hr/>
+<h2 id="5-peftconfig">5. <code>PeftConfig</code><a class="headerlink" href="#5-peftconfig" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>r</code></td>
+<td><code>int</code></td>
+<td><code>8</code></td>
+<td><code>1 &lt;= r &lt;= 1024</code></td>
+</tr>
+<tr>
+<td><code>lora_alpha</code></td>
+<td><code>int</code></td>
+<td><code>16</code></td>
+<td><code>&gt;= 1</code></td>
+</tr>
+<tr>
+<td><code>lora_dropout</code></td>
+<td><code>float</code></td>
+<td><code>0.05</code></td>
+<td><code>0 &lt;= x &lt; 1</code></td>
+</tr>
+<tr>
+<td><code>target_modules</code></td>
+<td><code>list[str] | None</code></td>
+<td><code>None</code></td>
+<td>auto-detected per model</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nt">tuning</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">peft_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">r</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+<span class="w">    </span><span class="nt">lora_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">    </span><span class="nt">lora_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+</code></pre></div>
+<hr/>
+<h2 id="6-processorconfig">6. <code>ProcessorConfig</code><a class="headerlink" href="#6-processorconfig" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imputation_strategy</code></td>
+<td><code>mean</code>, <code>median</code>, <code>most_frequent</code>, <code>iterative</code>, <code>knn</code>, <code>none</code></td>
+</tr>
+<tr>
+<td><code>categorical_encoding</code></td>
+<td><code>onehot</code>, <code>ordinal</code>, <code>target</code>, <code>hashing</code>, <code>binary</code></td>
+</tr>
+<tr>
+<td><code>scaling_strategy</code></td>
+<td><code>standard</code>, <code>minmax</code>, <code>robust</code>, <code>power_transform</code>, <code>none</code></td>
+</tr>
+<tr>
+<td><code>resampling_strategy</code></td>
+<td><code>smote</code>, <code>random_over</code>, <code>random_under</code>, <code>tomek</code>, <code>kmeans</code>, <code>knn</code></td>
+</tr>
+<tr>
+<td><code>feature_selection_strategy</code></td>
+<td><code>variance</code>, <code>select_k_best_anova</code>, <code>select_k_best_chi2</code></td>
+</tr>
+<tr>
+<td><code>correlation_threshold</code></td>
+<td><code>float</code> in <code>(0, 1]</code></td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-contextsamplingconfig">7. <code>ContextSamplingConfig</code><a class="headerlink" href="#7-contextsamplingconfig" title="Permanent link">¶</a></h2>
+<p>Controls support/query construction for meta-learning models.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Alias</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strategy</code></td>
+<td><code>context_sampling_strategy</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>context_size</code></td>
+<td></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>strat_set</code></td>
+<td></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>hybrid_ratio</code></td>
+<td></td>
+<td><code>0.7</code></td>
+</tr>
+<tr>
+<td><code>sampling_seed</code></td>
+<td></td>
+<td><code>42</code></td>
+</tr>
+<tr>
+<td><code>allow_replacement</code></td>
+<td></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>kmeans_centers</code></td>
+<td></td>
+<td><code>2000</code></td>
+</tr>
+<tr>
+<td><code>min_pos</code></td>
+<td></td>
+<td><code>50</code></td>
+</tr>
+<tr>
+<td><code>oversample_weight</code></td>
+<td></td>
+<td><code>5.0</code></td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../resampling/">Resampling Strategies</a>.</p>
+<hr/>
+<h2 id="8-building-configs-in-python">8. Building configs in Python<a class="headerlink" href="#8-building-configs-in-python" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineConfig</span><span class="p">,</span> <span class="n">TuningConfig</span><span class="p">,</span> <span class="n">PeftConfig</span><span class="p">,</span> <span class="n">save_config</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">PipelineConfig</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICLv2"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"peft"</span><span class="p">,</span>
+    <span class="n">tuning</span><span class="o">=</span><span class="n">TuningConfig</span><span class="p">(</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">peft_config</span><span class="o">=</span><span class="n">PeftConfig</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">envelope_mode</span><span class="o">=</span><span class="s2">"error"</span><span class="p">,</span>
+    <span class="n">license_mode</span><span class="o">=</span><span class="s2">"commercial"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"experiments/run.yaml"</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../registry/">Model Registry</a> — what <code>validate_against_registry()</code> checks</li>
+<li><a href="../../api/pipeline/">API: TabularPipeline</a></li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

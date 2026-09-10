@@ -97,6 +97,21 @@
 <li>
 <a href="../../user-guide/causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../../models/orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li class="active">
 <a href="./">PEFT Utils</a>
+</li>
+<li>
+<a href="../registry/">Model Registry</a>
+</li>
+<li>
+<a href="../config/">Configuration</a>
+</li>
+<li>
+<a href="../uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -257,7 +311,7 @@
                         </a>
 </li>
 <li>
-<a href="../../examples/classification/" rel="next">
+<a href="../registry/" rel="next">
                             Next <i class="fas fa-arrow-right"></i>
 </a>
 </li>
@@ -272,82 +326,10 @@
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#api-peft-utilities">API: PEFT Utilities</a></li>
-<li class="second-level"><a href="#tabtune.TuningManager.peft_utils">peft_utils</a></li>
-<li class="second-level"><a href="#tabtune.TuningManager.peft_utils.inject_custom_lora_into_linear_layers">inject_custom_lora_into_linear_layers</a></li>
 </ul>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="api-peft-utilities">API: PEFT Utilities<a class="headerlink" href="#api-peft-utilities" title="Permanent link">¶</a></h1>
-<div class="doc doc-object doc-module">
-<a id="tabtune.TuningManager.peft_utils"></a>
-<div class="doc doc-contents first">
-<div class="doc doc-children">
-<div class="doc doc-object doc-function">
-<h2 class="doc doc-heading" id="tabtune.TuningManager.peft_utils.inject_custom_lora_into_linear_layers">
-<code class="highlight language-python"><span class="n">inject_custom_lora_into_linear_layers</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">exclude_patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-<a class="headerlink" href="#tabtune.TuningManager.peft_utils.inject_custom_lora_into_linear_layers" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
-<p>Inject LoRA adapters into linear layers, optionally excluding certain patterns.</p>
-<details class="quote">
-<summary>Source code in <code>tabtune/TuningManager/peft_utils.py</code></summary>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">inject_custom_lora_into_linear_layers</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
-    <span class="n">target_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">r</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="n">alpha</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
-    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">exclude_patterns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Inject LoRA adapters into linear layers, optionally excluding certain patterns."""</span>
-    <span class="n">items</span> <span class="o">=</span> <span class="n">_collect_linear_items</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">target_names</span> <span class="ow">or</span> <span class="p">()]</span>
-    <span class="n">exclude_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exclude_patterns</span> <span class="ow">or</span> <span class="p">()]</span>
-
-    <span class="n">wrapped_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">parent</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">dotted</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-        <span class="c1"># Skip if doesn't match target patterns</span>
-        <span class="k">if</span> <span class="n">tokens</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_should_wrap</span><span class="p">(</span><span class="n">dotted</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="c1"># Skip if matches exclude patterns</span>
-        <span class="k">if</span> <span class="n">exclude_tokens</span> <span class="ow">and</span> <span class="n">_should_wrap</span><span class="p">(</span><span class="n">dotted</span><span class="p">,</span> <span class="n">exclude_tokens</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="n">base_linear</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">LoRALinear</span><span class="p">(</span><span class="n">base_linear</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">))</span>
-        <span class="n">wrapped_count</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">model</span>
-</code></pre></div></td></tr></table></div>
-</details>
-</div>
-</div>
-</div>
-</div>
-</div></div>
+<h1 id="api-peft-utilities">API: PEFT Utilities<a class="headerlink" href="#api-peft-utilities" title="Permanent link">¶</a></h1></div>
 </div>
 <footer class="col-md-12 text-center">
 <hr/>

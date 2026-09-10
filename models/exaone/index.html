@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
+<meta content="Lexsi Labs" name="author"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>EXAONE Tabular - TabTune Documentation</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<link href="../../assets/lexsilabs.ico" rel="icon"/>
+<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">TabTune Documentation</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quick-start/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/pipeline-overview/">TabularPipeline Overview</a>
+</li>
+<li>
+<a href="../../user-guide/data-processing/">Data Processing</a>
+</li>
+<li>
+<a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/resampling/">Resampling Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/model-selection/">Model Selection</a>
+</li>
+<li>
+<a href="../../user-guide/saving-loading/">Saving and Loading</a>
+</li>
+<li>
+<a href="../../user-guide/leaderboard/">Model Comparison</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+<li>
+<a href="../../user-guide/ensembling/">Ensembling Strategies</a>
+</li>
+<li>
+<a href="../../user-guide/distillation/">Distillation</a>
+</li>
+<li>
+<a href="../../user-guide/causal/">Causal Inference</a>
+</li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../overview/">Overview</a>
+</li>
+<li>
+<a href="../tabpfn/">TabPFN</a>
+</li>
+<li>
+<a href="../tabpfnv3/">TabPFN v3</a>
+</li>
+<li>
+<a href="../tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../tabiclv2/">TabICL v2</a>
+</li>
+<li>
+<a href="../orion-msp/">Orion MSP</a>
+</li>
+<li>
+<a href="../orionmsp1.5/">Orion MSP V1.5</a>
+</li>
+<li>
+<a href="../orion-bix/">Orion BIX</a>
+</li>
+<li>
+<a href="../tabdpt/">TabDPT</a>
+</li>
+<li>
+<a href="../mitra/">Mitra</a>
+</li>
+<li>
+<a href="../contexttab/">ConTextTab</a>
+</li>
+<li>
+<a href="../limix/">Limix</a>
+</li>
+<li>
+<a href="../tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../iltm/">iLTM</a>
+</li>
+<li class="active">
+<a href="./">EXAONE Tabular</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../regression/regression/">Regression Overview</a>
+</li>
+<li>
+<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
+</li>
+<li>
+<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
+</li>
+<li>
+<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
+</li>
+<li>
+<a href="../../advanced/memory-optimization/">Memory Optimization</a>
+</li>
+<li>
+<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api/pipeline/">TabularPipeline</a>
+</li>
+<li>
+<a href="../../api/data-processor/">DataProcessor</a>
+</li>
+<li>
+<a href="../../api/tuning-manager/">TuningManager</a>
+</li>
+<li>
+<a href="../../api/leaderboard/">TabularLeaderboard</a>
+</li>
+<li>
+<a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/classification/">Classification Tasks</a>
+</li>
+<li>
+<a href="../../examples/regression/">Regression Tasks</a>
+</li>
+<li>
+<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
+</li>
+<li>
+<a href="../../examples/benchmarking/">Benchmarking</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/setup/">Development Setup</a>
+</li>
+<li>
+<a href="../../contributing/standards/">Code Standards</a>
+</li>
+<li>
+<a href="../../contributing/new-models/">Adding New Models</a>
+</li>
+<li>
+<a href="../../contributing/documentation/">Documentation Guide</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">About</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../about/release-notes/">Release Notes</a>
+</li>
+<li>
+<a href="../../about/roadmap/">Roadmap</a>
+</li>
+<li>
+<a href="../../about/faq/">FAQ</a>
+</li>
+<li>
+<a href="../../about/license/">License</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+                        </a>
+</li>
+<li>
+<a href="../iltm/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+                        </a>
+</li>
+<li>
+<a href="../../regression/regression/" rel="next">
+                            Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/models/exaone.md">Edit on Lexsi-Labs/TabTune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#exaone-tabular-lg-ai-research">EXAONE Tabular (LG AI Research)</a></li>
+<li class="second-level"><a href="#1-architecture">1. Architecture</a></li>
+<li class="second-level"><a href="#2-three-limits-and-not-one-of-them-is-an-error">2. Three limits, and not one of them is an error</a></li>
+<li class="second-level"><a href="#3-model-parameters">3. Model parameters</a></li>
+<li class="second-level"><a href="#4-supported-strategies">4. Supported strategies</a></li>
+<li class="third-level"><a href="#41-fine-tuning">4.1 Fine-tuning</a></li>
+<li class="third-level"><a href="#42-peft-does-not-mean-lora-here">4.2 PEFT does not mean LoRA here</a></li>
+<li class="second-level"><a href="#5-regression-needs-a-local-checkpoint">5. Regression needs a local checkpoint</a></li>
+<li class="second-level"><a href="#6-licensing">6. Licensing</a></li>
+<li class="second-level"><a href="#7-when-to-use-exaone">7. When to use EXAONE</a></li>
+<li class="second-level"><a href="#see-also">See Also</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="exaone-tabular-lg-ai-research">EXAONE Tabular (LG AI Research)<a class="headerlink" href="#exaone-tabular-lg-ai-research" title="Permanent link">¶</a></h1>
+<p><em>New in TabTune 0.2.0.</em></p>
+<p><strong>EXAONE Tabular</strong> is an in-context learner from LG AI Research built on the <strong>Cross-axis
+Summary Transformer (CAST)</strong>. In TabTune it is registered as <code>EXAONETabular</code>, with <code>EXAONE</code>
+as a short alias.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"EXAONE"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_ensemble"</span><span class="p">:</span> <span class="mi">8</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Name resolution</p>
+<p><code>normalise_name()</code> strips <code>-</code>, <code>_</code>, <code>.</code> and whitespace, so <code>"exaone-tabular"</code>,
+<code>"EXAONE_Tabular"</code> and <code>"exaone tabular"</code> all resolve to <code>EXAONETabular</code>.</p>
+</div>
+<hr/>
+<h2 id="1-architecture">1. Architecture<a class="headerlink" href="#1-architecture" title="Permanent link">¶</a></h2>
+<p>CAST exchanges information across <strong>both axes</strong> of the table:</p>
+<ul>
+<li><strong>3 summary tokens per row</strong> pool that row's columns</li>
+<li><strong>32 summary tokens per feature group</strong> pool that column across rows</li>
+<li>The two axes alternate for <strong>12 blocks</strong> under SSMax-normalised attention</li>
+</ul>
+<div class="mermaid">flowchart LR
+    A[Table] --&gt; B[Row-axis summaries<br/>3 tokens per row]
+    A --&gt; C[Column-axis summaries<br/>32 tokens per feature group]
+    B --&gt; D[Cross-axis block x12<br/>SSMax attention]
+    C --&gt; D
+    D --&gt; E[Classification head<br/>10 slots]
+    E --&gt; F[ECOC decode if &gt;10 classes]
+</div>
+<p>At <strong>~21M parameters</strong> it is the smallest bundled foundation model, which is why the
+released default is an <strong>8-member ensemble</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Family</td>
+<td>Cross-axis ICL</td>
+</tr>
+<tr>
+<td>Parameters</td>
+<td>~21M</td>
+</tr>
+<tr>
+<td>Default ensemble</td>
+<td>8 members</td>
+</tr>
+<tr>
+<td>Weights</td>
+<td><code>LG-AI-Research/EXAONE-Tabular</code></td>
+</tr>
+<tr>
+<td>Native NaN handling</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><a href="https://github.com/LGAI-Research/EXAONE-Tabular">https://github.com/LGAI-Research/EXAONE-Tabular</a></td>
+</tr>
+</tbody>
+</table>
+<p>TabTune vendors the complete inference runtime, including the ECOC decomposition, the
+attention-based feature selector and the CUDA execution planner.</p>
+<hr/>
+<h2 id="2-three-limits-and-not-one-of-them-is-an-error">2. Three limits, and not one of them is an error<a class="headerlink" href="#2-three-limits-and-not-one-of-them-is-an-error" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th style="text-align: right;">Value</th>
+<th>What happens when you exceed it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Support rows</td>
+<td style="text-align: right;"><code>100,000</code></td>
+<td>Random subsample down to the limit</td>
+</tr>
+<tr>
+<td>Features</td>
+<td style="text-align: right;"><code>100</code></td>
+<td>Attention-based selection of the top 100 columns</td>
+</tr>
+<tr>
+<td>Classes</td>
+<td style="text-align: right;"><code>10</code></td>
+<td><strong>ECOC decomposition</strong> — one full ensemble forward per codebook row</td>
+</tr>
+</tbody>
+</table>
+<p>All three ceilings are <strong>soft</strong>, and none of them raises.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>max_classes</code> is deliberately <code>None</code> in the registry</p>
+<p><code>max_classes</code> is a <em>hard</em> constraint that raises even under <code>envelope_mode='warn'</code>.
+Declaring EXAONE's 10-slot head capacity would reject datasets this model handles by
+design via ECOC — so the registry leaves it unset.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_envelope</span><span class="p">,</span> <span class="n">get_model_spec</span>
+
+<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">check_envelope</span><span class="p">(</span><span class="s2">"EXAONE"</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">250_000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">severity</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># rows and features warn; 14 classes is fine</span>
+
+<span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"EXAONE"</span><span class="p">)</span><span class="o">.</span><span class="n">envelope</span><span class="o">.</span><span class="n">max_classes</span>   <span class="c1"># None</span>
+</code></pre></div>
+<p>These values mirror <code>SUPPORT_ROW_LIMIT</code> / <code>FEATURE_LIMIT</code> / <code>CLASS_CAPACITY</code> in
+<code>tabtune/models/exaone/backbone.py</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">ECOC costs real time</p>
+<p>Above ten classes each prediction runs one full 8-member ensemble forward <strong>per codebook
+row</strong>. Budget accordingly, or reduce <code>n_ensemble</code>.</p>
+</div>
+<hr/>
+<h2 id="3-model-parameters">3. Model parameters<a class="headerlink" href="#3-model-parameters" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'n_ensemble'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>           <span class="c1"># ensemble members; default from the released manifest</span>
+    <span class="s1">'device'</span><span class="p">:</span> <span class="s1">'cuda'</span><span class="p">,</span>          <span class="c1"># None -&gt; auto-detect</span>
+    <span class="s1">'dtype'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>             <span class="c1"># None defers to the checkpoint manifest</span>
+    <span class="s1">'checkpoint_path'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># local weights file (required for regression)</span>
+    <span class="s1">'max_vram_bytes'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>    <span class="c1"># cap for the CUDA execution planner</span>
+    <span class="s1">'random_state'</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_ensemble</code></td>
+<td>int</td>
+<td>8</td>
+<td>Ensemble members. Lower it to cut latency, especially with ECOC.</td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td>str</td>
+<td>auto</td>
+<td><code>'cuda'</code> or <code>'cpu'</code></td>
+</tr>
+<tr>
+<td><code>dtype</code></td>
+<td>torch dtype</td>
+<td>manifest</td>
+<td>Override the checkpoint's declared dtype</td>
+</tr>
+<tr>
+<td><code>checkpoint_path</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Local <code>.safetensors</code> file</td>
+</tr>
+<tr>
+<td><code>max_vram_bytes</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Budget hint for the execution planner</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>int</td>
+<td>42</td>
+<td>Seed</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="4-supported-strategies">4. Supported strategies<a class="headerlink" href="#4-supported-strategies" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Strategy</th>
+<th>Modes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Classification</td>
+<td><code>inference</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td><code>finetune</code></td>
+<td><code>meta-learning</code> (default), <code>sft</code>, <code>turn_by_turn</code></td>
+</tr>
+<tr>
+<td>Classification</td>
+<td><code>peft</code></td>
+<td>see the caveat below</td>
+</tr>
+<tr>
+<td>Regression</td>
+<td><code>inference</code>, <code>finetune</code></td>
+<td><code>turn_by_turn</code> — <strong>experimental</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="41-fine-tuning">4.1 Fine-tuning<a class="headerlink" href="#41-fine-tuning" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"EXAONE"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
+    <span class="n">finetune_mode</span><span class="o">=</span><span class="s2">"meta-learning"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="42-peft-does-not-mean-lora-here">4.2 PEFT does not mean LoRA here<a class="headerlink" href="#42-peft-does-not-mean-lora-here" title="Permanent link">¶</a></h3>
+<div class="admonition danger">
+<p class="admonition-title"><code>peft</code> on EXAONE runs as a full fine-tune</p>
+<p>EXAONE applies its projections as raw <code>nn.Parameter</code> tensors through <code>F.linear</code> rather
+than <code>nn.Linear</code> submodules. The LoRA injector finds nothing to wrap, logs a warning,
+and the run proceeds as a <strong>full fine-tune</strong>. Do not attribute a memory saving to LoRA
+here.</p>
+</div>
+<hr/>
+<h2 id="5-regression-needs-a-local-checkpoint">5. Regression needs a local checkpoint<a class="headerlink" href="#5-regression-needs-a-local-checkpoint" title="Permanent link">¶</a></h2>
+<p>Only the <strong>classification</strong> checkpoint is published. The regression code path is complete
+and tested, but nothing downloads:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"EXAONE"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"regression"</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"checkpoint_path"</span><span class="p">:</span> <span class="s2">"/path/to/exaone-tabular-regressor.safetensors"</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Or set the environment variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">EXAONETABULAR_REGRESSOR_WEIGHTS</span><span class="o">=</span>/path/to/weights.safetensors
+<span class="nb">export</span><span class="w"> </span><span class="nv">EXAONETABULAR_CLASSIFIER_WEIGHTS</span><span class="o">=</span>/path/to/classifier.safetensors<span class="w">   </span><span class="c1"># optional override</span>
+</code></pre></div>
+<p>Without either, the wrapper raises <code>FileNotFoundError</code>. This is why <code>regression</code> is marked
+<strong>experimental</strong> on the spec — it is a weights problem, not a code problem.</p>
+<hr/>
+<h2 id="6-licensing">6. Licensing<a class="headerlink" href="#6-licensing" title="Permanent link">¶</a></h2>
+<div class="admonition danger">
+<p class="admonition-title">Code and weights are licensed separately</p>
+<ul>
+<li><strong>Code</strong>: BSD-3-Clause-LG AI Research — permits commercial use.</li>
+<li><strong>Weights</strong>: EXAONE AI Model License Agreement 1.1 - NC — granted <em>"solely for
+  research purposes"</em>; the agreement expressly prohibits using the model, derivatives or
+  output for any commercial purpose.</li>
+</ul>
+<p><code>LicenseSpec</code> describes the <strong>weights</strong>, so <code>commercial_use_ok=False</code> and
+<code>license_mode='commercial'</code> blocks.</p>
+</div>
+<p>A fine-tuned checkpoint is a <strong>Derivative</strong> under that agreement: still research-only, and
+its name must begin with <code>EXAONE</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_license</span>
+<span class="n">check_license</span><span class="p">(</span><span class="s2">"EXAONE"</span><span class="p">,</span> <span class="s2">"commercial"</span><span class="p">)</span>     <span class="c1"># raises LicenseError</span>
+</code></pre></div>
+<p>Commercial alternatives suggested by the registry: Mitra, TabICLv2, OrionMSP, OrionMSPv1.5,
+OrionBix.</p>
+<hr/>
+<h2 id="7-when-to-use-exaone">7. When to use EXAONE<a class="headerlink" href="#7-when-to-use-exaone" title="Permanent link">¶</a></h2>
+<p><strong>Good fit</strong></p>
+<ul>
+<li>Small-to-medium tables where a 21M-parameter model's latency is attractive</li>
+<li>Wide tables — the attention-based selector handles &gt;100 features gracefully</li>
+<li>Many-class problems that other checkpoints reject outright (ECOC handles them)</li>
+<li>Research and internal evaluation</li>
+</ul>
+<p><strong>Poor fit</strong></p>
+<ul>
+<li>Anything commercial (licence)</li>
+<li>Regression without a locally supplied checkpoint</li>
+<li>Latency-critical many-class inference (ECOC multiplies forward passes)</li>
+</ul>
+<hr/>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../overview/">Model Overview</a></li>
+<li><a href="../../user-guide/registry/">Model Registry</a></li>
+<li>Runnable example: <code>examples/17_exaone_tabular.py</code></li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../search/main.js"></script>
+<script>
+        // Initialize Mermaid v9.x after DOM loads
+        // The mermaid2 plugin loads the library and sets window.mermaidConfig
+        (function() {
+            function initMermaid() {
+                if (typeof mermaid !== 'undefined') {
+                    // Get configuration from plugin or use defaults
+                    const config = window.mermaidConfig || {
+                        securityLevel: 'loose',
+                        startOnLoad: false
+                    };
+                    
+                    // Initialize mermaid with config
+                    mermaid.initialize(config);
+                    
+                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run();
+                    } else {
+                        // Fallback for older API - manually initialize elements
+                        const mermaidElements = document.querySelectorAll('.mermaid');
+                        if (mermaidElements.length > 0) {
+                            mermaid.init(undefined, mermaidElements);
+                        }
+                    }
+                } else {
+                    // Retry if mermaid library hasn't loaded yet
+                    setTimeout(initMermaid, 100);
+                }
+            }
+            
+            // Wait for DOM and scripts to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMermaid);
+            } else {
+                // DOM already loaded, but scripts might not be
+                setTimeout(initMermaid, 100);
+            }
+        })();
+    </script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: false
+});</script></body>
+</html>

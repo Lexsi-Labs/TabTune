@@ -97,6 +97,21 @@
 <li>
 <a href="../../user-guide/causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../../models/orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li>
 <a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -277,6 +331,11 @@
 <li class="third-level"><a href="#hardware">Hardware</a></li>
 <li class="second-level"><a href="#installation-methods">Installation Methods</a></li>
 <li class="third-level"><a href="#method-1-install-from-source-recommended">Method 1: Install from Source (Recommended)</a></li>
+<li class="third-level"><a href="#method-2-optional-extras">Method 2: Optional extras</a></li>
+<li class="second-level"><a href="#model-specific-setup">Model-Specific Setup</a></li>
+<li class="third-level"><a href="#tabfm-google">TabFM (Google)</a></li>
+<li class="third-level"><a href="#exaone-tabular">EXAONE Tabular</a></li>
+<li class="third-level"><a href="#xrfm">xRFM</a></li>
 <li class="second-level"><a href="#core-dependencies">Core Dependencies</a></li>
 <li class="third-level"><a href="#essential-packages">Essential Packages</a></li>
 <li class="third-level"><a href="#model-specific-dependencies">Model-Specific Dependencies</a></li>
@@ -332,6 +391,47 @@ conda<span class="w"> </span>activate<span class="w"> </span>tabtune
 </code></pre></div></p>
 </li>
 </ol>
+<h3 id="method-2-optional-extras"><strong>Method 2: Optional extras</strong><a class="headerlink" href="#method-2-optional-extras" title="Permanent link">¶</a></h3>
+<p>TabTune's core install is deliberately lean. Feature subsystems are opt-in:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[causal]"</span><span class="w">         </span><span class="c1"># CausalAnalysis: doubleml, econml, dowhy, causal-learn</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[distillation]"</span><span class="w">   </span><span class="c1"># LightGBM students for tabtune.distillation</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[serving]"</span><span class="w">        </span><span class="c1"># ONNX export of distilled students</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[interactive]"</span><span class="w">    </span><span class="c1"># rich notebook display helpers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[colab]"</span><span class="w">          </span><span class="c1"># pin core packages to Colab's versions</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[docs]"</span><span class="w">           </span><span class="c1"># mkdocs toolchain</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[dev]"</span><span class="w">            </span><span class="c1"># pytest, ruff, black, pre-commit</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[strict]"</span><span class="w">         </span><span class="c1"># pinned torch/transformers/scikit-learn</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabtune[all]"</span><span class="w">            </span><span class="c1"># interactive + causal + distillation + serving + docs</span>
+</code></pre></div>
+<hr/>
+<h2 id="model-specific-setup">Model-Specific Setup<a class="headerlink" href="#model-specific-setup" title="Permanent link">¶</a></h2>
+<p>Most models auto-download their weights from the Hugging Face Hub on first use. Three need
+something extra:</p>
+<h3 id="tabfm-google">TabFM (Google)<a class="headerlink" href="#tabfm-google" title="Permanent link">¶</a></h3>
+<p>Requires the optional upstream package with the PyTorch backend:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"tabfm[pytorch]"</span>
+</code></pre></div>
+<p>Weights (<code>google/tabfm-1.0.0-pytorch</code>) download automatically on first use.</p>
+<h3 id="exaone-tabular">EXAONE Tabular<a class="headerlink" href="#exaone-tabular" title="Permanent link">¶</a></h3>
+<p>Only the <strong>classification</strong> checkpoint is published. For regression, supply a local weights
+file:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">EXAONETABULAR_REGRESSOR_WEIGHTS</span><span class="o">=</span>/path/to/exaone-tabular-regressor.safetensors
+<span class="nb">export</span><span class="w"> </span><span class="nv">EXAONETABULAR_CLASSIFIER_WEIGHTS</span><span class="o">=</span>/path/to/classifier.safetensors<span class="w">   </span><span class="c1"># optional override</span>
+</code></pre></div>
+<h3 id="xrfm">xRFM<a class="headerlink" href="#xrfm" title="Permanent link">¶</a></h3>
+<p>Nothing to install and nothing to download — xRFM trains from scratch, which makes it the
+only bundled model that works in an <strong>air-gapped</strong> environment out of the box.</p>
+<div class="admonition tip">
+<p class="admonition-title">Verify what a model needs before you download it</p>
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model_spec</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"TabFM"</span><span class="p">)</span>
+<span class="n">spec</span><span class="o">.</span><span class="n">weights</span>          <span class="c1"># 'google/tabfm-1.0.0-pytorch'</span>
+<span class="n">spec</span><span class="o">.</span><span class="n">envelope</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="n">spec</span><span class="o">.</span><span class="n">license</span><span class="o">.</span><span class="n">badge</span>
+</code></pre></div>
+The registry is torch-free, so this costs milliseconds and downloads nothing. See
+<a href="../../user-guide/registry/">Model Registry</a>.</p>
+</div>
 <hr/>
 <div class="admonition tip">
 <p class="admonition-title">GPU Support</p>
@@ -375,7 +475,7 @@ category-encoders&gt;<span class="o">=</span><span class="m">2</span>.5.0
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PyTorch version: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># Test TabTune import</span>
+<span class="c1"># Test TabTune import (lazy: this pulls in neither torch nor transformers)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"✅ TabTune successfully installed!"</span><span class="p">)</span>
 </code></pre></div>

@@ -97,6 +97,21 @@
 <li>
 <a href="../causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../../models/orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li>
 <a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -293,6 +347,7 @@
 <li class="third-level"><a href="#performance-profile_1">Performance Profile</a></li>
 <li class="third-level"><a href="#training-loop-details">Training Loop Details</a></li>
 <li class="third-level"><a href="#example-full-training-pipeline">Example: Full Training Pipeline</a></li>
+<li class="third-level"><a href="#35-fine-tuning-modes-finetune_mode">3.5 Fine-Tuning Modes (finetune_mode)</a></li>
 <li class="second-level"><a href="#4-peft-fine-tuning-strategy-peft">4. PEFT Fine-Tuning Strategy (peft)</a></li>
 <li class="third-level"><a href="#definition_2">Definition</a></li>
 <li class="third-level"><a href="#how-lora-works">How LoRA Works</a></li>
@@ -344,7 +399,7 @@
 <td>Baseline</td>
 </tr>
 <tr>
-<td><strong>base-ft</strong></td>
+<td><strong>finetune</strong></td>
 <td>Full params</td>
 <td>High accuracy, ample resources</td>
 <td>High</td>
@@ -361,6 +416,16 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title"><code>tuning_strategy</code> vs <code>finetune_mode</code></p>
+<p><code>tuning_strategy</code> chooses <strong>whether and how much</strong> to train (<code>'inference'</code>,
+<code>'finetune'</code>, <code>'peft'</code>). <code>finetune_mode</code> chooses the <strong>algorithm</strong> used when training
+happens — <code>'meta-learning'</code>, <code>'sft'</code>, <code>'native'</code>, <code>'turn_by_turn'</code>, or xRFM's
+<code>'refit'</code> / <code>'refine'</code>. It applies to both <code>finetune</code> and <code>peft</code>. See
+<a href="#35-fine-tuning-modes-finetune_mode">section 3.5</a>.</p>
+<p>Older docs and examples refer to the <code>finetune</code> strategy as <code>base-ft</code>; <code>'finetune'</code> is
+the current spelling.</p>
+</div>
 <hr/>
 <h2 id="2-inference-strategy">2. Inference Strategy<a class="headerlink" href="#2-inference-strategy" title="Permanent link">¶</a></h2>
 <h3 id="definition">Definition<a class="headerlink" href="#definition" title="Permanent link">¶</a></h3>
@@ -603,7 +668,117 @@
 <span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">'fintuned_pipeline.joblib'</span><span class="p">)</span>
 </code></pre></div>
 <hr/>
+<h3 id="35-fine-tuning-modes-finetune_mode">3.5 Fine-Tuning Modes (<code>finetune_mode</code>)<a class="headerlink" href="#35-fine-tuning-modes-finetune_mode" title="Permanent link">¶</a></h3>
+<p><code>finetune_mode</code> selects the training algorithm. Pass it directly or inside <code>tuning_params</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
+    <span class="n">finetune_mode</span><span class="o">=</span><span class="s2">"meta-learning"</span><span class="p">,</span>      <span class="c1"># or tuning_params={'finetune_mode': ...}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>If left as <code>None</code>, TabTune picks a per-task default: <strong><code>turn_by_turn</code> for regression</strong>,
+<strong><code>meta-learning</code> for classification</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What it does</th>
+<th>Models</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meta-learning</code></td>
+<td>Episodic training that mimics the in-context learning paradigm: sample a support set and a query set each step</td>
+<td>TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabPFNv26, TabPFNv3, TabFM, iLTM, EXAONE</td>
+</tr>
+<tr>
+<td><code>sft</code></td>
+<td>Standard supervised fine-tuning on minibatches</td>
+<td>TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM, ContextTab, iLTM, EXAONE</td>
+</tr>
+<tr>
+<td><code>native</code></td>
+<td>Prior Labs' own finetuner: bar-distribution loss, cosine LR with warmup, AMP, early stopping, validation-based model selection</td>
+<td><strong>TabPFNv2.6 and TabPFNv3 only</strong>, both tasks</td>
+</tr>
+<tr>
+<td><code>turn_by_turn</code> (alias <code>tbt</code>)</td>
+<td>Episodic turn-by-turn training; the default for regression</td>
+<td>TabPFN, TabPFNv26, TabPFNv3, TabICLv2, Mitra, TabDPT, ContextTab, LimiX, TabFM, iLTM, EXAONE</td>
+</tr>
+<tr>
+<td><code>refit</code> / <code>refine</code></td>
+<td><strong>xRFM only</strong> — it has no gradient-descent fine-tuning. <code>refit</code> fits the RFM from scratch; <code>refine</code> warm-starts from the learned <strong>M</strong> matrix</td>
+<td>xRFM</td>
+</tr>
+</tbody>
+</table>
+<p>Not every model implements every mode. Ask the registry rather than guessing:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model_spec</span>
+<span class="n">get_model_spec</span><span class="p">(</span><span class="s2">"TabICLv2"</span><span class="p">)</span><span class="o">.</span><span class="n">finetune_modes</span>
+<span class="c1"># frozenset({'meta-learning', 'sft', 'turn_by_turn'})</span>
+</code></pre></div>
+<p>An unsupported combination raises <code>UnsupportedStrategyError</code> <strong>before</strong> any weights load.</p>
+<h4 id="native-mode-parameters">Native mode parameters<a class="headerlink" href="#native-mode-parameters" title="Permanent link">¶</a></h4>
+<p>These <code>tuning_params</code> apply to TabPFNv2.6 / TabPFNv3 native mode only and are ignored
+elsewhere:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>early_stopping</code></td>
+<td>Enable early stopping</td>
+</tr>
+<tr>
+<td><code>early_stopping_patience</code></td>
+<td>Epochs without improvement before stopping</td>
+</tr>
+<tr>
+<td><code>n_estimators_finetune</code></td>
+<td>Ensemble size during fine-tuning</td>
+</tr>
+<tr>
+<td><code>validation_split</code></td>
+<td>Fraction held out for model selection</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFNv26"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
+    <span class="n">finetune_mode</span><span class="o">=</span><span class="s2">"native"</span><span class="p">,</span>
+    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+        <span class="s2">"early_stopping"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"early_stopping_patience"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr/>
 <h2 id="4-peft-fine-tuning-strategy-peft">4. PEFT Fine-Tuning Strategy (<code>peft</code>)<a class="headerlink" href="#4-peft-fine-tuning-strategy-peft" title="Permanent link">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Two models where <code>peft</code> does not mean LoRA</p>
+<ul>
+<li><strong>xRFM</strong> has no gradient-descent fine-tuning at all. Its <code>peft</code> performs low-rank
+  adaptation of the learned <strong>M</strong> matrix, not LoRA over linear layers, so
+  <code>target_modules</code> does not apply.</li>
+<li><strong>EXAONE Tabular</strong> applies its projections as raw <code>nn.Parameter</code> tensors through
+  <code>F.linear</code> rather than <code>nn.Linear</code> submodules. The injector finds nothing to wrap,
+  logs a warning, and the run proceeds as a <strong>full fine-tune</strong> — do not attribute a
+  memory saving to LoRA here.</li>
+</ul>
+<p><strong>TabICLv2 does not support <code>peft</code> at all.</strong> Use <code>finetune</code>.</p>
+<p>PEFT is <strong>experimental</strong> on TabPFN, TabPFNv2.6 and ContextTab, and <strong>fully supported</strong>
+on TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM.</p>
+</div>
 <h3 id="definition_2">Definition<a class="headerlink" href="#definition_2" title="Permanent link">¶</a></h3>
 <p><strong>Parameter-Efficient Fine-Tuning using LoRA (Low-Rank Adaptation)</strong> where only small adapter weights are trained while base model is frozen.</p>
 <h3 id="how-lora-works">How LoRA Works<a class="headerlink" href="#how-lora-works" title="Permanent link">¶</a></h3>

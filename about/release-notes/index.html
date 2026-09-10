@@ -97,6 +97,21 @@
 <li>
 <a href="../../user-guide/causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../../models/orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li>
 <a href="../../api/peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../../api/registry/">Model Registry</a>
+</li>
+<li>
+<a href="../../api/config/">Configuration</a>
+</li>
+<li>
+<a href="../../api/uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../../api/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../api/caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../../api/ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../../api/distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../../api/causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -272,6 +326,14 @@
 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
 <ul class="nav bs-sidenav">
 <li class="first-level active"><a href="#release-notes">Release Notes</a></li>
+<li class="second-level"><a href="#v020">v0.2.0</a></li>
+<li class="third-level"><a href="#new-models-16-total-up-from-9">New models (16 total, up from 9)</a></li>
+<li class="third-level"><a href="#model-registry">Model registry</a></li>
+<li class="third-level"><a href="#uncertainty-quantification">Uncertainty quantification</a></li>
+<li class="third-level"><a href="#shift-aware-evaluation">Shift-aware evaluation</a></li>
+<li class="third-level"><a href="#typed-configuration">Typed configuration</a></li>
+<li class="third-level"><a href="#prediction-caching">Prediction caching</a></li>
+<li class="third-level"><a href="#causal-inference">Causal inference</a></li>
 <li class="second-level"><a href="#release-2nd-april-2026">Release — 2nd April 2026</a></li>
 <li class="third-level"><a href="#major-highlights">🎯 Major Highlights</a></li>
 <li class="second-level"><a href="#release-notes-26th-feb-2026">Release Notes -&gt; 26th Feb 2026</a></li>
@@ -285,6 +347,122 @@
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">¶</a></h1>
+<hr/>
+<h2 id="v020">v0.2.0<a class="headerlink" href="#v020" title="Permanent link">¶</a></h2>
+<p>This is the largest release since the first public version: <strong>seven new models</strong>, and four new
+subsystems aimed at getting a tabular foundation model into production rather than onto a
+benchmark table.</p>
+<h3 id="new-models-16-total-up-from-9">New models (16 total, up from 9)<a class="headerlink" href="#new-models-16-total-up-from-9" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Family</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EXAONE Tabular</strong> (<code>EXAONETabular</code> / <code>EXAONE</code>)</td>
+<td>Cross-axis ICL (LG AI Research)</td>
+<td>Cross-axis Summary Transformer (CAST). TabTune vendors the full inference runtime: ECOC decomposition for &gt;10 classes, attention-based feature selector, CUDA execution planner. ~21M params, 8-member default ensemble.</td>
+</tr>
+<tr>
+<td><strong>xRFM</strong> (<code>XRFM</code>)</td>
+<td>Kernel / feature learning</td>
+<td>Recursive Feature Machine with AGOP feature learning and tree-partitioned EigenPro. <strong>No pretrained weights</strong> — trains from scratch, so it is the only bundled model that works air-gapped out of the box.</td>
+</tr>
+<tr>
+<td><strong>iLTM</strong> (<code>ILTM</code>)</td>
+<td>Hypernetwork</td>
+<td>A hypernetwork generates MLP ensembles conditioned on dataset embeddings, combining GBDT tree embeddings with retrieval. Apache-2.0 weights, ungated.</td>
+</tr>
+<tr>
+<td><strong>TabFM</strong> (<code>TabFM</code>)</td>
+<td>Hybrid-attention ICL (Google)</td>
+<td>Alternating row/column attention → CLS row compression → causal ICL transformer. Full PEFT support.</td>
+</tr>
+<tr>
+<td><strong>TabPFN v3</strong> (<code>TabPFNv3</code>)</td>
+<td>PFN / ICL</td>
+<td>160 classes, 20,000 features, ~200M cell budget. Native, meta-learning, SFT and PEFT fine-tuning for both tasks.</td>
+</tr>
+<tr>
+<td><strong>TabICLv2</strong> (<code>TabICLv2</code>)</td>
+<td>Scalable ICL</td>
+<td>QASSMax normalisation plus a native quantile regression head.</td>
+</tr>
+<tr>
+<td><strong>TabPFN v2.6</strong> (<code>TabPFNv26</code>)</td>
+<td>PFN / ICL</td>
+<td>Prior Labs' native fine-tuning API with bar-distribution loss.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="model-registry">Model registry<a class="headerlink" href="#model-registry" title="Permanent link">¶</a></h3>
+<p>A <strong>torch-free</strong> registry recording each checkpoint's <strong>capability envelope</strong> and <strong>weight
+licence</strong>, both checked before any weights load.</p>
+<ul>
+<li><code>list_models()</code>, <code>list_model_names()</code>, <code>models_dataframe()</code>, <code>get_model_spec()</code></li>
+<li><code>resolve_model_name()</code> — case-, hyphen- and dot-insensitive alias resolution</li>
+<li><code>check_envelope()</code> — class, feature, row and cell limits; hard limits raise, soft limits warn</li>
+<li><code>check_license()</code> — tri-state <code>commercial_use_ok</code>; unverified terms warn rather than block</li>
+<li><code>register_model()</code> — add your own <code>ModelSpec</code></li>
+<li>New exceptions: <code>TabTuneError</code>, <code>ConfigError</code>, <code>ModelNotFoundError</code>, <code>UnsupportedTaskError</code>, <code>UnsupportedStrategyError</code>, <code>EnvelopeError</code>, <code>LicenseError</code></li>
+</ul>
+<p>New <code>TabularPipeline</code> keyword-only parameters: <code>envelope_mode</code>, <code>license_mode</code>, <code>validate</code>.</p>
+<p>See <a href="../../user-guide/registry/">Model Registry</a>.</p>
+<h3 id="uncertainty-quantification">Uncertainty quantification<a class="headerlink" href="#uncertainty-quantification" title="Permanent link">¶</a></h3>
+<p><code>tabtune.uncertainty</code> adds the two standard fixes for TFM overconfidence. Both consume only
+<code>predict_proba</code> / <code>predict</code>, so they work for pipelines, ensembles, distilled students and
+plain scikit-learn estimators.</p>
+<ul>
+<li><code>ConformalClassifier</code> — <code>'lac'</code> and <code>'aps'</code> methods, <code>predict_set()</code>, <code>set_sizes()</code>, <code>coverage()</code></li>
+<li><code>ConformalRegressor</code> — <code>'absolute'</code> for any model, <code>'cqr'</code> where native quantiles exist</li>
+<li><code>Recalibrator</code> — post-hoc temperature scaling; composes around the pipeline without mutating it</li>
+<li><code>uncertainty_report()</code> / <code>pipeline.uncertainty_report()</code> — ECE, MCE, Brier, coverage, set sizes and <strong>size-stratified coverage (SSCS)</strong></li>
+<li><code>size_stratified_coverage()</code></li>
+</ul>
+<p>Calibration rows must be disjoint from training: a re-used training frame is detected by
+fingerprint and <strong>raises</strong> rather than silently voiding the guarantee.</p>
+<p>See <a href="../../user-guide/uncertainty/">Uncertainty Quantification</a>.</p>
+<h3 id="shift-aware-evaluation">Shift-aware evaluation<a class="headerlink" href="#shift-aware-evaluation" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>TemporalSplit</code> — forward chaining with optional embargo <code>gap</code>; never trains on the future</li>
+<li><code>GroupedSplit</code> — leave-groups-out</li>
+<li><code>StratifiedGroupedSplit</code> — grouped <strong>and</strong> class-balanced</li>
+<li><code>ShiftEvaluator</code> / <code>ShiftReport</code> / <code>FoldResult</code> / <code>shift_gap()</code> — reports the IID-to-shift gap</li>
+<li><code>drop_split_columns</code> prevents the model reading the column that defines the split</li>
+<li>Shared metrics moved to <code>tabtune.evaluation.metrics</code>, so the pipeline, leaderboard, benchmark CSV and shift report agree by construction</li>
+</ul>
+<p>See <a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>.</p>
+<h3 id="typed-configuration">Typed configuration<a class="headerlink" href="#typed-configuration" title="Permanent link">¶</a></h3>
+<p>Pydantic schemas for every knob, with YAML/JSON round-tripping.</p>
+<ul>
+<li><code>PipelineConfig</code>, <code>TuningConfig</code>, <code>PeftConfig</code>, <code>ProcessorConfig</code>, <code>ContextSamplingConfig</code></li>
+<li><code>load_config()</code>, <code>save_config()</code>, <code>dump_config()</code>, <code>config_from_mapping()</code></li>
+<li><code>cfg.validate_against_registry()</code> — fails before any weights load</li>
+<li><code>cfg.resolved_finetune_mode()</code></li>
+<li><code>strict=True</code> turns an unknown key into an error, for CI</li>
+</ul>
+<p>Plain dicts still work everywhere. Unknown keys are still forwarded to the model — the
+difference is they now <strong>warn</strong> instead of vanishing.</p>
+<p>See <a href="../../user-guide/configuration/">Configuration</a>.</p>
+<h3 id="prediction-caching">Prediction caching<a class="headerlink" href="#prediction-caching" title="Permanent link">¶</a></h3>
+<p><code>cache='memory'</code> or <code>'disk'</code> collapses <code>evaluate()</code>'s three redundant forward passes into
+one. Entries are keyed on a fingerprint covering the fitted model <em>and</em> the input data, so
+refitting or changing the data invalidates automatically.</p>
+<ul>
+<li><code>pipeline.cache.stats</code>, <code>pipeline.clear_cache()</code></li>
+<li><code>PredictionCache</code>, <code>CacheStats</code>, <code>make_cache()</code>, <code>fingerprint_data()</code></li>
+</ul>
+<p>See <a href="../../user-guide/caching/">Caching</a>.</p>
+<h3 id="causal-inference">Causal inference<a class="headerlink" href="#causal-inference" title="Permanent link">¶</a></h3>
+<p><code>CausalAnalysis</code> with six estimators (DML, S/T/X/R-Learner, Causal Forest), formal
+identification, a refutation framework (placebo, random common cause, subset stability,
+sensitivity), proxy-attribute auditing, counterfactual fairness and <code>CausalLeaderboard</code>.
+Install with <code>pip install "tabtune[causal]"</code>.</p>
+<p>See <a href="../../user-guide/causal/">Causal Inference</a>.</p>
 <hr/>
 <h2 id="release-2nd-april-2026">Release — 2nd April 2026<a class="headerlink" href="#release-2nd-april-2026" title="Permanent link">¶</a></h2>
 <h3 id="major-highlights">🎯 Major Highlights<a class="headerlink" href="#major-highlights" title="Permanent link">¶</a></h3>

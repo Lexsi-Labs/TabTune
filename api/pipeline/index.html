@@ -97,6 +97,21 @@
 <li>
 <a href="../../user-guide/causal/">Causal Inference</a>
 </li>
+<li>
+<a href="../../user-guide/registry/">Model Registry &amp; Licensing</a>
+</li>
+<li>
+<a href="../../user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
+</li>
+<li>
+<a href="../../user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/configuration/">Typed Configuration</a>
+</li>
+<li>
+<a href="../../user-guide/caching/">Prediction Caching</a>
+</li>
 </ul>
 </li>
 <li class="dropdown">
@@ -113,6 +128,9 @@
 </li>
 <li>
 <a href="../../models/tabicl/">TabICL</a>
+</li>
+<li>
+<a href="../../models/tabiclv2/">TabICL v2</a>
 </li>
 <li>
 <a href="../../models/orion-msp/">Orion MSP</a>
@@ -134,6 +152,18 @@
 </li>
 <li>
 <a href="../../models/limix/">Limix</a>
+</li>
+<li>
+<a href="../../models/tabfm/">TabFM</a>
+</li>
+<li>
+<a href="../../models/xrfm/">xRFM</a>
+</li>
+<li>
+<a href="../../models/iltm/">iLTM</a>
+</li>
+<li>
+<a href="../../models/exaone/">EXAONE Tabular</a>
 </li>
 </ul>
 </li>
@@ -185,6 +215,30 @@
 </li>
 <li>
 <a href="../peft-utils/">PEFT Utils</a>
+</li>
+<li>
+<a href="../registry/">Model Registry</a>
+</li>
+<li>
+<a href="../config/">Configuration</a>
+</li>
+<li>
+<a href="../uncertainty/">Uncertainty</a>
+</li>
+<li>
+<a href="../evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../caching/">Prediction Cache</a>
+</li>
+<li>
+<a href="../ensemble/">TabularEnsemble</a>
+</li>
+<li>
+<a href="../distillation/">TabDistiller</a>
+</li>
+<li>
+<a href="../causal/">CausalAnalysis</a>
 </li>
 </ul>
 </li>
@@ -291,6 +345,17 @@
 <li class="third-level"><a href="#savefile_path">.save(file_path)</a></li>
 <li class="third-level"><a href="#loadfile_path-classmethod">.load(file_path) (classmethod)</a></li>
 <li class="second-level"><a href="#additional-methods">Additional Methods</a></li>
+<li class="third-level"><a href="#uncertainty_reportx_test-y_test-x_calnone-y_calnone-alpha01-n_bins15-methodlac">.uncertainty_report(X_test, y_test, *, X_cal=None, y_cal=None, alpha=0.1, n_bins=15, method='lac')</a></li>
+<li class="third-level"><a href="#predict_quantilesx-quantilesnone">.predict_quantiles(X, quantiles=None)</a></li>
+<li class="third-level"><a href="#predict_intervalsx-confidence095">.predict_intervals(X, confidence=0.95)</a></li>
+<li class="third-level"><a href="#clear_cache">.clear_cache()</a></li>
+<li class="third-level"><a href="#evaluate_interval_calibrationx-y">.evaluate_interval_calibration(X, y, ...)</a></li>
+<li class="third-level"><a href="#get_residualsx-y-analyze_residualsx-y-plot_residuals">.get_residuals(X, y) / .analyze_residuals(X, y) / .plot_residuals(...)</a></li>
+<li class="third-level"><a href="#cross_validatex-y-cv5">.cross_validate(X, y, cv=5, ...)</a></li>
+<li class="third-level"><a href="#distillx_train-y_train">.distill(X_train, y_train, ...)</a></li>
+<li class="third-level"><a href="#get_feature_importancex-ynone">.get_feature_importance(X, y=None, ...)</a></li>
+<li class="third-level"><a href="#evaluate_checkpointsx_test-y_test-checkpoint_dir-epochs-map_locationnone">.evaluate_checkpoints(X_test, y_test, checkpoint_dir, epochs, map_location=None)</a></li>
+<li class="third-level"><a href="#get_paramsdeeptrue">.get_params(deep=True)</a></li>
 <li class="third-level"><a href="#evaluate_calibrationx-y-n_bins15-output_formatrich">.evaluate_calibration(X, y, n_bins=15, output_format='rich')</a></li>
 <li class="third-level"><a href="#evaluate_fairnessx-y-sensitive_features-output_formatrich">.evaluate_fairness(X, y, sensitive_features, output_format='rich')</a></li>
 <li class="third-level"><a href="#show_processing_summary">.show_processing_summary()</a></li>
@@ -313,7 +378,7 @@
 <p>The complete TabularPipeline with a robust constructor that
 explicitly handles parameters for each component and uses late initialization
 for complex models like ContextTab and Mitra.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  59</span>
 <span class="normal">  60</span>
@@ -2475,7 +2540,7 @@ for complex models like ContextTab and Mitra.</p>
 <a class="headerlink" href="#tabtune.TabularPipeline.pipeline.TabularPipeline.__del__" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Cleanup method to properly shut down resources when pipeline is destroyed.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
 <span class="normal">187</span>
@@ -2497,7 +2562,7 @@ for complex models like ContextTab and Mitra.</p>
 <div class="doc doc-contents">
 <p>Trains and evaluates baseline models using AutoGluon on the provided train/test split.
 Now returns per-model F1 scores along with validation scores and training time.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1010</span>
 <span class="normal">1011</span>
@@ -2711,7 +2776,7 @@ Now returns per-model F1 scores along with validation scores and training time.<
 <div class="doc doc-contents">
 <p>Makes predictions on the test set and prints a report with
 Accuracy, F1 Score, and ROC AUC Score.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">644</span>
 <span class="normal">645</span>
@@ -2935,7 +3000,7 @@ Accuracy, F1 Score, and ROC AUC Score.</p>
 <div class="doc doc-contents">
 <p>Calculates and provides a detailed report on model calibration metrics.
 This version supports both binary and multiclass classification.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">803</span>
 <span class="normal">804</span>
@@ -3200,7 +3265,7 @@ This version supports both binary and multiclass classification.</p>
 <a class="headerlink" href="#tabtune.TabularPipeline.pipeline.TabularPipeline.evaluate_fairness" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Calculates and provides a detailed report on group fairness metrics.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">931</span>
 <span class="normal">932</span>
@@ -3324,7 +3389,7 @@ This version supports both binary and multiclass classification.</p>
 <div class="doc doc-contents">
 <p>Predicts class probabilities for the input data.
 Required for calculating AUC score.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">433</span>
 <span class="normal">434</span>
@@ -3537,7 +3602,7 @@ Required for calculating AUC score.</p>
 <a class="headerlink" href="#tabtune.TabularPipeline.pipeline.TabularPipeline.show_processing_summary" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Retrieves and logs the data processing summary from the DataProcessor.</p>
-<details class="quote">
+<details class="mkdocstrings-source">
 <summary>Source code in <code>tabtune/TabularPipeline/pipeline.py</code></summary>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">765</span>
 <span class="normal">766</span>
@@ -3580,18 +3645,27 @@ Required for calculating AUC score.</p>
     <span class="n">processor_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model_checkpoint_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">finetune_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">finetune_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>        <span class="c1"># new in 0.2.0</span>
+    <span class="n">envelope_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>            <span class="c1"># new in 0.2.0</span>
+    <span class="n">license_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'research'</span><span class="p">,</span>         <span class="c1"># new in 0.2.0</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                  <span class="c1"># new in 0.2.0</span>
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">¶</a></h4>
 <p><strong><code>model_name</code></strong> (str, required)
-- Name of the model to use.
-- Supported values: <code>'TabPFN'</code>, <code>'TabPFNv26'</code>, <code>'TabICL'</code>, <code>'TabICLv2'</code>, <code>'OrionMSP'</code>, <code>'OrionMSPv1.5'</code>, <code>'OrionBix'</code>, <code>'TabDPT'</code>, <code>'Mitra'</code>, <code>'ContextTab'</code>, <code>'Limix'</code>
+- Model name or alias. <strong>16 models</strong> are registered.
+- Resolution ignores case, hyphens, underscores, dots and whitespace, so <code>'TabPFN-v2.6'</code> and <code>'tabpfnv26'</code> are equivalent.
+- Canonical names: <code>'TabPFN'</code>, <code>'TabPFNv26'</code>, <code>'TabPFNv3'</code>, <code>'TabICL'</code>, <code>'TabICLv2'</code>, <code>'OrionMSP'</code>, <code>'OrionMSPv1.5'</code>, <code>'OrionBix'</code>, <code>'Mitra'</code>, <code>'ContextTab'</code>, <code>'TabDPT'</code>, <code>'Limix'</code>, <code>'TabFM'</code>, <code>'XRFM'</code>, <code>'ILTM'</code>, <code>'EXAONETabular'</code>
+- Do not hardcode this list — call <code>tabtune.registry.list_model_names()</code>.
 - Example: <code>model_name="TabICLv2"</code></p>
 <p><strong><code>task_type</code></strong> (str, default: <code>'classification'</code>)
 - Type of machine learning task.
 - Supported: <code>'classification'</code>, <code>'regression'</code>
-- Regression is supported for: <code>TabPFN</code>, <code>TabPFNv26</code>, <code>TabICLv2</code>, <code>Mitra</code>, <code>ContextTab</code>, <code>TabDPT</code>, <code>Limix</code>
+- Regression is supported for: <code>TabPFN</code>, <code>TabPFNv26</code>, <code>TabPFNv3</code>, <code>TabICLv2</code>, <code>Mitra</code>, <code>ContextTab</code>, <code>TabDPT</code>, <code>Limix</code>, <code>TabFM</code>, <code>XRFM</code>, <code>ILTM</code>, <code>EXAONETabular</code>
+- Classification-only: <code>TabICL</code>, <code>OrionMSP</code>, <code>OrionMSPv1.5</code>, <code>OrionBix</code>
+- Query it instead of memorising it: <code>[s.name for s in list_models(task="regression")]</code>
 - Example: <code>task_type="regression"</code></p>
 <p><strong><code>tuning_strategy</code></strong> (str, default: <code>'inference'</code>)
 - Training/fine-tuning strategy to use.
@@ -3659,6 +3733,67 @@ Required for calculating AUC score.</p>
   - <code>'meta-learning'</code>: Episodic meta-learning (default)
   - <code>'sft'</code>: Standard supervised fine-tuning
 - Example: <code>finetune_mode="sft"</code></p>
+<h4 id="keyword-only-parameters-new-in-020">Keyword-only parameters (new in 0.2.0)<a class="headerlink" href="#keyword-only-parameters-new-in-020" title="Permanent link">¶</a></h4>
+<p><strong><code>cache</code></strong> (str | bool | None, default: <code>None</code>)
+- Prediction cache: <code>'memory'</code>, <code>'disk'</code>, <code>None</code>, or a <code>PredictionCache</code> instance.
+- Enabling it collapses <code>evaluate()</code>'s three redundant forward passes into one.
+- Entries are keyed on a fingerprint covering the fitted model <em>and</em> the input data, so refitting or changing the data invalidates automatically.
+- Inspect with <code>pipeline.cache.stats</code>; clear with <code>pipeline.clear_cache()</code>.
+- See <a href="../../user-guide/caching/">Prediction Caching</a>.</p>
+<p><strong><code>envelope_mode</code></strong> (str, default: <code>'warn'</code>)
+- How to treat data outside the model's documented limits: <code>'error'</code>, <code>'warn'</code>, <code>'ignore'</code>.
+- Architectural limits (<code>max_classes</code>, <code>min_rows</code>) always raise unless this is <code>'ignore'</code>.
+- Resource limits (<code>max_rows</code>, <code>max_features</code>, <code>max_cells</code>) warn under <code>'warn'</code>.</p>
+<p><strong><code>license_mode</code></strong> (str, default: <code>'research'</code>)
+- <code>'research'</code> — no licence enforcement.
+- <code>'commercial'</code> — raise <code>LicenseError</code> on weights that forbid commercial use.
+- <code>'ignore'</code> — skip the check entirely.
+- Unverified licences warn under <code>'commercial'</code> rather than blocking.</p>
+<p><strong><code>validate</code></strong> (bool, default: <code>True</code>)
+- Check model / task / strategy against the registry <strong>before</strong> loading weights.
+- Set <code>False</code> to use a model TabTune does not know about.</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICLv2"</span><span class="p">,</span>
+    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
+    <span class="n">cache</span><span class="o">=</span><span class="s2">"disk"</span><span class="p">,</span>
+    <span class="n">envelope_mode</span><span class="o">=</span><span class="s2">"error"</span><span class="p">,</span>
+    <span class="n">license_mode</span><span class="o">=</span><span class="s2">"commercial"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>   <span class="c1"># hits / misses / stores / hit_rate</span>
+</code></pre></div>
+<p>See <a href="../../user-guide/registry/">Model Registry</a>.</p>
+<h4 id="raises">Raises<a class="headerlink" href="#raises" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ModelNotFoundError</code></td>
+<td><code>model_name</code> does not resolve to a registered model</td>
+</tr>
+<tr>
+<td><code>UnsupportedTaskError</code></td>
+<td>Model has no head for <code>task_type</code></td>
+</tr>
+<tr>
+<td><code>UnsupportedStrategyError</code></td>
+<td>Model does not implement <code>tuning_strategy</code></td>
+</tr>
+<tr>
+<td><code>EnvelopeError</code></td>
+<td>Data violates a hard architectural limit</td>
+</tr>
+<tr>
+<td><code>LicenseError</code></td>
+<td>Weight licence forbids the intended use under <code>license_mode</code></td>
+</tr>
+</tbody>
+</table>
+<p>All derive from <code>tabtune.registry.TabTuneError</code>.</p>
 <h4 id="returns">Returns<a class="headerlink" href="#returns" title="Permanent link">¶</a></h4>
 <p>Returns a <code>TabularPipeline</code> instance (not yet fitted).</p>
 <hr/>
@@ -3811,6 +3946,68 @@ Required for calculating AUC score.</p>
 </code></pre></div>
 <hr/>
 <h2 id="additional-methods">Additional Methods<a class="headerlink" href="#additional-methods" title="Permanent link">¶</a></h2>
+<h3 id="uncertainty_reportx_test-y_test-x_calnone-y_calnone-alpha01-n_bins15-methodlac"><code>.uncertainty_report(X_test, y_test, *, X_cal=None, y_cal=None, alpha=0.1, n_bins=15, method='lac')</code><a class="headerlink" href="#uncertainty_reportx_test-y_test-x_calnone-y_calnone-alpha01-n_bins15-methodlac" title="Permanent link">¶</a></h3>
+<p><em>New in 0.2.0.</em> One call for calibration <strong>and</strong> conformal coverage diagnostics.</p>
+<div class="highlight"><pre><span></span><code><span class="n">report</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">uncertainty_report</span><span class="p">(</span>
+    <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+    <span class="n">X_cal</span><span class="o">=</span><span class="n">X_cal</span><span class="p">,</span> <span class="n">y_cal</span><span class="o">=</span><span class="n">y_cal</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>          <span class="c1"># 90% target coverage</span>
+    <span class="n">n_bins</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>          <span class="c1"># calibration bins</span>
+    <span class="n">method</span><span class="o">=</span><span class="s1">'lac'</span><span class="p">,</span>       <span class="c1"># 'lac' | 'aps'</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</code></pre></div>
+<p>Returns <code>ece</code>, <code>mce</code>, <code>brier</code>, <code>coverage</code>, <code>avg_set_size</code> and <code>sscs</code> (size-stratified
+coverage — the worst-covered stratum). Omitting <code>X_cal</code> / <code>y_cal</code> gives the calibration
+metrics only.</p>
+<div class="admonition danger">
+<p class="admonition-title">The calibration split must be disjoint from training</p>
+<p>For an in-context model the training data <em>is</em> the support set. A re-used training frame
+is detected by fingerprint and <strong>raises</strong> rather than silently voiding the guarantee.</p>
+</div>
+<p>See <a href="../../user-guide/uncertainty/">Uncertainty Quantification</a>.</p>
+<hr/>
+<h3 id="predict_quantilesx-quantilesnone"><code>.predict_quantiles(X, quantiles=None)</code><a class="headerlink" href="#predict_quantilesx-quantilesnone" title="Permanent link">¶</a></h3>
+<p>Regression only. Returns a dict of predicted quantiles. Available where the model has a
+native quantile head — the TabPFN family and TabICLv2.</p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">predict_quantiles</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
+</code></pre></div>
+<hr/>
+<h3 id="predict_intervalsx-confidence095"><code>.predict_intervals(X, confidence=0.95)</code><a class="headerlink" href="#predict_intervalsx-confidence095" title="Permanent link">¶</a></h3>
+<p>Regression only. Returns prediction intervals at the requested confidence level.</p>
+<p>For a <em>distribution-free</em> guarantee, use
+<a href="../../user-guide/uncertainty/"><code>ConformalRegressor</code></a> instead.</p>
+<hr/>
+<h3 id="clear_cache"><code>.clear_cache()</code><a class="headerlink" href="#clear_cache" title="Permanent link">¶</a></h3>
+<p><em>New in 0.2.0.</em> Drops this pipeline's cached predictions and returns the number of entries
+removed. No-op when <code>cache=None</code>.</p>
+<hr/>
+<h3 id="evaluate_interval_calibrationx-y"><code>.evaluate_interval_calibration(X, y, ...)</code><a class="headerlink" href="#evaluate_interval_calibrationx-y" title="Permanent link">¶</a></h3>
+<p>Regression counterpart to <code>evaluate_calibration</code>: checks whether predicted intervals achieve
+their nominal coverage.</p>
+<hr/>
+<h3 id="get_residualsx-y-analyze_residualsx-y-plot_residuals"><code>.get_residuals(X, y)</code> / <code>.analyze_residuals(X, y)</code> / <code>.plot_residuals(...)</code><a class="headerlink" href="#get_residualsx-y-analyze_residualsx-y-plot_residuals" title="Permanent link">¶</a></h3>
+<p>Regression diagnostics: raw residuals, a summary dict (bias, heteroscedasticity, normality),
+and diagnostic plots.</p>
+<hr/>
+<h3 id="cross_validatex-y-cv5"><code>.cross_validate(X, y, cv=5, ...)</code><a class="headerlink" href="#cross_validatex-y-cv5" title="Permanent link">¶</a></h3>
+<p>IID k-fold cross-validation. For <strong>shift-aware</strong> validation — temporal or grouped splits and
+the IID-to-shift gap — use
+<a href="../../user-guide/shift-evaluation/"><code>ShiftEvaluator</code></a> instead.</p>
+<hr/>
+<h3 id="distillx_train-y_train"><code>.distill(X_train, y_train, ...)</code><a class="headerlink" href="#distillx_train-y_train" title="Permanent link">¶</a></h3>
+<p>Compress this fitted pipeline into a lightweight student model. See
+<a href="../../user-guide/distillation/">Distillation</a>.</p>
+<hr/>
+<h3 id="get_feature_importancex-ynone"><code>.get_feature_importance(X, y=None, ...)</code><a class="headerlink" href="#get_feature_importancex-ynone" title="Permanent link">¶</a></h3>
+<p>Permutation-based feature importance over the fitted pipeline.</p>
+<hr/>
+<h3 id="evaluate_checkpointsx_test-y_test-checkpoint_dir-epochs-map_locationnone"><code>.evaluate_checkpoints(X_test, y_test, checkpoint_dir, epochs, map_location=None)</code><a class="headerlink" href="#evaluate_checkpointsx_test-y_test-checkpoint_dir-epochs-map_locationnone" title="Permanent link">¶</a></h3>
+<p>Evaluate every saved epoch checkpoint in a directory and return per-epoch metrics — useful
+for picking the best epoch after a fine-tuning run.</p>
+<hr/>
+<h3 id="get_paramsdeeptrue"><code>.get_params(deep=True)</code><a class="headerlink" href="#get_paramsdeeptrue" title="Permanent link">¶</a></h3>
+<p>scikit-learn-compatible parameter dict for the pipeline.</p>
+<hr/>
 <h3 id="evaluate_calibrationx-y-n_bins15-output_formatrich"><code>.evaluate_calibration(X, y, n_bins=15, output_format='rich')</code><a class="headerlink" href="#evaluate_calibrationx-y-n_bins15-output_formatrich" title="Permanent link">¶</a></h3>
 <p>Evaluate model calibration (how well probabilities match actual outcomes).</p>
 <div class="highlight"><pre><span></span><code><span class="n">calibration_metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate_calibration</span><span class="p">(</span>
@@ -3921,9 +4118,15 @@ Required for calculating AUC score.</p>
 <p><strong><code>RuntimeError</code></strong>: "You must call fit() before predict()"
 - <strong>Cause</strong>: Calling predict/evaluate before fitting
 - <strong>Solution</strong>: Call <code>.fit()</code> first</p>
-<p><strong><code>ValueError</code></strong>: "Model 'X' not supported"
-- <strong>Cause</strong>: Invalid model name
-- <strong>Solution</strong>: Check supported models list</p>
+<p><strong><code>ModelNotFoundError</code></strong>: "Unknown model 'X'"
+- <strong>Cause</strong>: The name does not resolve to a registered model
+- <strong>Solution</strong>: Check <code>tabtune.registry.list_model_names()</code>; the error suggests the closest match</p>
+<p><strong><code>UnsupportedTaskError</code></strong> / <strong><code>UnsupportedStrategyError</code></strong>
+- <strong>Cause</strong>: The model has no head for that task, or does not implement that strategy
+- <strong>Solution</strong>: <code>get_model_spec(name).tasks</code> and <code>.strategies_for(task)</code></p>
+<p><strong><code>EnvelopeError</code></strong>: "X supports at most N classes (found M)"
+- <strong>Cause</strong>: Data violates a hard architectural limit of the checkpoint
+- <strong>Solution</strong>: Pick a model with a larger envelope, or <code>envelope_mode='ignore'</code> if you know what you are doing</p>
 <p><strong><code>RuntimeError</code></strong>: "CUDA out of memory"
 - <strong>Cause</strong>: Insufficient GPU memory
 - <strong>Solution</strong>: Use PEFT, reduce batch size, or use CPU</p>
@@ -3933,6 +4136,10 @@ Required for calculating AUC score.</p>
 <li><a href="../../user-guide/pipeline-overview/">Pipeline Overview</a>: Detailed usage guide</li>
 <li><a href="../../user-guide/tuning-strategies/">Tuning Strategies</a>: Strategy comparisons</li>
 <li><a href="../../user-guide/model-selection/">Model Selection</a>: Choosing the right model</li>
+<li><a href="../../user-guide/registry/">Model Registry</a>: Envelopes, licensing and <code>validate</code></li>
+<li><a href="../../user-guide/configuration/">Typed Configuration</a>: YAML configs and CI validation</li>
+<li><a href="../../user-guide/caching/">Prediction Caching</a>: the <code>cache</code> parameter</li>
+<li><a href="../../user-guide/uncertainty/">Uncertainty Quantification</a>: <code>uncertainty_report</code> and conformal wrappers</li>
 <li><a href="../../user-guide/troubleshooting/">Troubleshooting</a>: Common issues and solutions</li>
 </ul></div>
 </div>
