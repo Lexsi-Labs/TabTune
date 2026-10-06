@@ -9,9 +9,6 @@ logger = logging.getLogger(__name__)
 class ResultsHandler:
     """
     Manages the collection, display, and incremental saving of benchmark results.
-    
-    MODIFIED: This class now loads existing results from the CSV file upon 
-    initialization to make the benchmark pipeline resumable.
     """
     def __init__(self, filename: str | None = None):
         """
@@ -27,10 +24,9 @@ class ResultsHandler:
         
         self.filename = filename
         
-        # --- START MODIFICATION ---
-        # Load existing results from the file, if it exists
+
         self.results_df = self._load_existing_results()
-        # --- END MODIFICATION ---
+
         
         self._header_written = os.path.exists(self.filename)
         
@@ -80,16 +76,8 @@ class ResultsHandler:
         
         # Create a single-row DataFrame for the new result
         df_to_append = pd.DataFrame([result_record])
-
-        # --- START MODIFICATION ---
-        # Add to the in-memory DataFrame
         self.results_df = pd.concat([self.results_df, df_to_append], ignore_index=True)
-        # --- END MODIFICATION ---
-
-        # --- Append to CSV immediately ---
         try:
-            # If the header hasn't been written yet, write it.
-            # Otherwise, append without the header.
             if not self._header_written:
                 df_to_append.to_csv(self.filename, index=False, mode='a')
                 self._header_written = True
@@ -101,26 +89,22 @@ class ResultsHandler:
 
     def print_summary(self):
         """Prints a formatted summary table of ALL collected results (old and new) to the console."""
-        # --- MODIFICATION: Use self.results_df ---
         if self.results_df.empty:
             logger.info("[ResultsHandler] No results to display")
             return
             
         df = self.results_df
         
-        # Dynamically get the benchmark name from the filename for a cleaner title
         benchmark_title = "Benchmark Summary"
         try:
-            # Extracts 'openml-cc18_TabPFN' from 'benchmark_results_openml-cc18_TabPFN.csv'
             base_name = os.path.basename(self.filename).replace('benchmark_results_', '').replace('.csv', '')
             benchmark_title = f"--- {base_name.upper()} Benchmark Summary ---"
         except IndexError:
-            pass # Keep default title if filename format is unexpected
+            pass 
 
         print("\n" + "="*80)
         print(benchmark_title)
         print("="*80)
-        # Use .to_string() to ensure the whole dataframe is printed
         print(df.to_string()) 
         print("="*80)
 

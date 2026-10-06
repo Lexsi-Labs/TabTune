@@ -1,21 +1,6 @@
 """
 tabtune.causal.leaderboard
 ==========================
-
-Run several ``(estimator, TFM)`` combinations on the same data and rank
-them by stability and refuter pass-rate.
-
-Mirrors :class:`tabtune.TabularLeaderboard` in spirit: add entries with
-:meth:`add_model`, then call :meth:`run` to fit each entry on the same
-``(X, y)`` and produce a ranked DataFrame.
-
-Use cases
----------
-* Model selection -- which TFM gives the most stable ATE on this dataset?
-* Sensitivity to estimator choice -- does the ATE move across DML,
-  X-Learner, and Causal Forest?
-* Compliance -- a leaderboard becomes part of the audit trail showing
-  the headline estimate is not artifactual.
 """
 
 from __future__ import annotations
@@ -39,9 +24,6 @@ _RANK_BY_OPTIONS = (
 )
 
 
-# ---------------------------------------------------------------------------
-# CausalLeaderboard
-# ---------------------------------------------------------------------------
 class CausalLeaderboard:
     """
     Fit multiple causal-analysis configurations and produce a ranked table.
@@ -73,9 +55,7 @@ class CausalLeaderboard:
         self.tuning_params = tuning_params or {}
         self._entries: list[dict] = []
 
-    # ------------------------------------------------------------------
-    # Building the entry list
-    # ------------------------------------------------------------------
+
     def add_model(
         self,
         model_name: str,
@@ -100,9 +80,6 @@ class CausalLeaderboard:
         )
         return self
 
-    # ------------------------------------------------------------------
-    # Running the leaderboard
-    # ------------------------------------------------------------------
     def run(
         self,
         X: pd.DataFrame,

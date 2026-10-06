@@ -16,9 +16,6 @@ Discover what is available and what you may deploy:
     >>> ", ".join(s.name for s in list_models(task="regression", commercial_ok=True))
     'Mitra, TabICLv2'
 
-Imports are lazy. ``import tabtune`` costs milliseconds and pulls in neither
-torch nor transformers; the heavy modules load on first attribute access, so a
-CLI listing models or a docs build reading the registry never pays for them.
 """
 
 from __future__ import annotations
@@ -27,14 +24,10 @@ from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from typing import TYPE_CHECKING, Any
 
-# Version is sourced from installed package metadata so it never drifts from
-# pyproject.toml. The literal below is the single fallback for an uninstalled
-# source tree; setup.py and this module previously carried their own copies and
-# disagreed with pyproject.toml, giving three different answers for __version__.
 __version__ = "0.2.1"
 try:
     __version__ = _pkg_version("tabtune")
-except PackageNotFoundError:  # running from a source checkout
+except PackageNotFoundError:  
     pass
 
 __author__ = (
@@ -49,11 +42,8 @@ from .logger import setup_logger
 
 setup_logger()
 
-# The registry is torch-free and cheap, and is the entry point for discovery
-# ("which models can I use?"), so it stays eager. `config` pulls pydantic and is
-# resolved lazily below.
-from . import registry  # noqa: E402
-from .registry.errors import (  # noqa: E402
+from . import registry 
+from .registry.errors import (  
     ConfigError,
     EnvelopeError,
     LicenseError,
@@ -63,7 +53,7 @@ from .registry.errors import (  # noqa: E402
     UnsupportedTaskError,
 )
 
-if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
+if TYPE_CHECKING:  
     from .caching import PredictionCache
     from .Dataprocess.data_processor import DataProcessor
     from .ensemble.tabular_ensemble import TabularEnsemble
@@ -75,7 +65,6 @@ if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
     from .TimeSeries.pipeline import TimeSeriesPipeline
     from .TuningManager.tuning import TuningManager
 
-# name -> (module path, attribute). Resolved on first access by __getattr__.
 _LAZY_ATTRS: dict[str, tuple[str, str]] = {
     "TabularPipeline": (".TabularPipeline.pipeline", "TabularPipeline"),
     "TimeSeriesPipeline": (".TimeSeries.pipeline", "TimeSeriesPipeline"),
@@ -114,7 +103,6 @@ __all__ = [
     "TimeSeriesLeaderboard",
     "TimeSeriesEnsemble",
     "bridge",
-    # errors
     "TabTuneError",
     "ConfigError",
     "ModelNotFoundError",
@@ -126,16 +114,8 @@ __all__ = [
 ]
 
 
-# Two public class names collide with subpackage names of the same spelling:
-# `tabtune.TabularPipeline` is both the class and the package containing it,
-# and likewise for `tabtune.TabularLeaderboard`. Importing the submodule binds
-# the *module* onto the parent package, which would shadow the class for any
-# code that touched the submodule first. The eager imports used before 0.2.0
-# hid this by always running last; lazy loading exposes it, so these two names
-# are resolved through __getattribute__ on a module subclass instead.
 _SHADOWED_BY_SUBPACKAGE = frozenset({"TabularPipeline", "TabularLeaderboard"})
 
-# Lazily-imported submodules exposed as attributes of the package.
 _LAZY_SUBMODULES = frozenset(
     {
         "config",
@@ -144,12 +124,9 @@ _LAZY_SUBMODULES = frozenset(
         "distillation",
         "ensemble",
         "resampling",
-        # Conformal prediction + recalibration. Pure numpy/scipy over
-        # predict_proba, but lazy for symmetry and import-time hygiene.
+
         "uncertainty",
-        # Time series models. pandas/numpy only until a model is fitted.
         "TimeSeries",
-        # Time series histories as tabular features.
         "bridge",
     }
 )
@@ -192,7 +169,7 @@ def __getattr__(name: str) -> Any:
         ImportError: If the backing module exists but a dependency is missing.
     """
     value = _resolve_lazy(name)
-    globals()[name] = value  # cache so later accesses skip __getattr__
+    globals()[name] = value  
     return value
 
 

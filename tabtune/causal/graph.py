@@ -2,21 +2,6 @@
 tabtune.causal.graph
 ====================
 
-**Step 1 of the causal discipline: Identify.**
-
-This module contains:
-
-* :class:`GraphBuilder` -- accepts a user-supplied DAG, infers one via the PC
-  algorithm (when ``causal-learn`` is installed), or falls back to the
-  canonical "X causes T and Y; T causes Y" assumption.
-
-* :class:`Identifier` -- given the graph and the (T, Y, X) variable triple,
-  reports whether the average treatment effect is identifiable and returns
-  an estimand (backdoor / front-door / IV) using DoWhy when available.
-
-The Identify step is the *safety check* of the pipeline: if the effect
-cannot be expressed as a function of the observable distribution, the
-analysis should stop here rather than produce a misleading number.
 """
 
 from __future__ import annotations
@@ -39,8 +24,6 @@ except ImportError as exc:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
-# Optional dependencies are imported lazily so the module still loads when
-# they are absent. The relevant methods raise informative errors instead.
 def _try_import_dowhy():
     try:
         import dowhy  # noqa: F401
@@ -76,9 +59,6 @@ def _sanitise(name: str) -> str:
     return s or "_"
 
 
-# ---------------------------------------------------------------------------
-# GraphBuilder
-# ---------------------------------------------------------------------------
 class GraphBuilder:
     """
     Builds the causal graph that downstream :class:`Identifier` and
@@ -133,9 +113,6 @@ class GraphBuilder:
        
         all_names = [treatment, outcome, *self.confounders, *self.instruments]
         self._name_map: dict[str, str] = {n: _sanitise(n) for n in all_names}
-        # Detect collisions (two different originals mapping to the same
-        # sanitised name). If this happens we disambiguate with a suffix
-        # so DoWhy still sees distinct nodes.
         seen: dict[str, int] = {}
         for orig, safe in list(self._name_map.items()):
             count = seen.get(safe, 0)
@@ -143,9 +120,6 @@ class GraphBuilder:
                 self._name_map[orig] = f"{safe}_{count}"
             seen[safe] = count + 1
 
-    # ------------------------------------------------------------------
-    # Construction
-    # ------------------------------------------------------------------
     def name_map(self) -> dict[str, str]:
         """Return a shallow copy of the original -> sanitised name map."""
         return dict(self._name_map)
@@ -175,11 +149,9 @@ class GraphBuilder:
             )
         if not nx.is_directed_acyclic_graph(graph):
             raise ValueError("User-supplied graph contains cycles; expected a DAG.")
-        # Sanity-check that T and Y are present
         for node in (self.treatment, self.outcome):
             if node not in graph.nodes:
                 raise ValueError(f"User graph is missing required node '{node}'.")
-        # Relabel to sanitised names so DoWhy can consume it.
         graph = nx.relabel_nodes(graph.copy(), self._name_map)
         self._graph = graph
         return self._graph
@@ -206,8 +178,6 @@ class GraphBuilder:
         data = df[columns].to_numpy()
         cg = pc(data, alpha=alpha, indep_test="fisherz", show_progress=False)
 
-        # causal-learn -> networkx, using *sanitised* node names from the
-        # outset so the graph is consistent with everything else.
         safe_cols = [self._name_map.get(c, _sanitise(c)) for c in columns]
         g = nx.DiGraph()
         g.add_nodes_from(safe_cols)
@@ -216,13 +186,9 @@ class GraphBuilder:
             for j in range(len(safe_cols)):
                 if i == j:
                     continue
-                # In causal-learn's representation, a directed edge i -> j
-                # is encoded as graph[j][i] == 1 and graph[i][j] == -1.
                 if adj[j][i] == 1 and adj[i][j] == -1:
                     g.add_edge(safe_cols[i], safe_cols[j])
         if not nx.is_directed_acyclic_graph(g):
-            # PC can produce a CPDAG with bidirected edges; coerce to DAG
-            # by dropping the reverse of any cycle-forming pair.
             for u, v in list(g.edges()):
                 if g.has_edge(v, u):
                     g.remove_edge(v, u)
@@ -263,9 +229,6 @@ class GraphBuilder:
         )
         return self._graph
 
-    # ------------------------------------------------------------------
-    # Serialisation
-    # ------------------------------------------------------------------
     @property
     def graph(self) -> nx.DiGraph:
         if self._graph is None:
@@ -298,10 +261,6 @@ class GraphBuilder:
         lines.append("]")
         return "\n".join(lines)
 
-
-# ---------------------------------------------------------------------------
-# Identifier
-# ---------------------------------------------------------------------------
 class Identifier:
     """
     Reports whether the causal effect of T on Y is identifiable from data.
@@ -328,8 +287,7 @@ class Identifier:
         causal graph are passed through untouched.
         """
         name_map = self.builder.name_map()
-        # Only rename columns that are in the map AND in the dataframe;
-        # leave everything else alone.
+
         rename = {k: v for k, v in name_map.items() if k in df.columns and k != v}
         if rename:
             df = df.rename(columns=rename)

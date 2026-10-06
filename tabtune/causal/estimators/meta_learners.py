@@ -1,27 +1,6 @@
 """
 tabtune.causal.estimators.meta_learners
 =======================================
-
-S-/T-/X-/R-Learner meta-estimators for heterogeneous treatment effect
-estimation.
-
-A *meta-learner* turns a generic supervised-learning algorithm into a CATE
-estimator by composing one or more sub-models. We expose four variants:
-
-* **S-Learner** -- a single model with treatment as an extra feature.
-  Simplest; biased when treatment effect is small relative to outcome
-  variance.
-* **T-Learner** -- two models, one per treatment arm. Robust when both
-  arms have plenty of data; degrades on imbalanced treatments.
-* **X-Learner** -- uses propensity-weighted combinations of T-learner
-  residuals. Designed for imbalanced treatments.
-* **R-Learner** -- residualises both T and Y first (DML-style), then fits
-  a single CATE model on the residuals. State-of-the-art for many
-  benchmarks.
-
-All four route through EconML's reference implementations
-(``econml.metalearners`` for S/T/X; ``econml.dml.NonParamDML`` for R).
-Nuisance learners arrive as sklearn-compatible TabTune adapters.
 """
 
 from __future__ import annotations
@@ -45,9 +24,6 @@ def _try_import_econml():
         return None
 
 
-# ---------------------------------------------------------------------------
-# Internal common machinery
-# ---------------------------------------------------------------------------
 class _MetaLearnerBase(BaseCausalEstimator):
     """Shared plumbing for S/T/X/R-Learners."""
 
@@ -70,9 +46,6 @@ class _MetaLearnerBase(BaseCausalEstimator):
         n = len(cate_vec)
         ate = float(np.mean(cate_vec))
         se = float(np.std(cate_vec, ddof=1) / np.sqrt(n))
-        # Normal-approx CI; not strictly orthogonal but consistent for ATE
-        # under T-/S-/X-/R-Learner. EconML's BootstrapInference can replace
-        # this when ``bootstrap=True`` is set in estimator_params.
         from scipy.stats import norm
         z = float(norm.ppf(0.5 + confidence_level / 2.0))
         return {
@@ -93,9 +66,6 @@ class _MetaLearnerBase(BaseCausalEstimator):
         return tau
 
 
-# ---------------------------------------------------------------------------
-# S-Learner
-# ---------------------------------------------------------------------------
 class SLearner(_MetaLearnerBase):
     """Single-model meta-learner with treatment as a feature."""
 
@@ -125,9 +95,6 @@ class SLearner(_MetaLearnerBase):
         return self
 
 
-# ---------------------------------------------------------------------------
-# T-Learner
-# ---------------------------------------------------------------------------
 class TLearner(_MetaLearnerBase):
     """Two-model meta-learner, one per treatment arm."""
 
@@ -157,9 +124,6 @@ class TLearner(_MetaLearnerBase):
         return self
 
 
-# ---------------------------------------------------------------------------
-# X-Learner
-# ---------------------------------------------------------------------------
 class XLearner(_MetaLearnerBase):
     """Propensity-weighted X-Learner; strong for imbalanced treatments."""
 
@@ -194,10 +158,6 @@ class XLearner(_MetaLearnerBase):
         logger.info("[Causal] X-Learner fit complete.")
         return self
 
-
-# ---------------------------------------------------------------------------
-# R-Learner
-# ---------------------------------------------------------------------------
 class RLearner(_MetaLearnerBase):
     """
     R-Learner via :class:`econml.dml.NonParamDML`.

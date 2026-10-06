@@ -10,18 +10,6 @@ for the treatment-propensity ``E[T | X]`` (``ml_m``) -- to construct
 Neyman-orthogonal residuals, then regresses the residualised Y on the
 residualised T to recover the ATE.
 
-Implementation
---------------
-* Binary or continuous treatment  -> ``doubleml.DoubleMLPLR``
-  (partially linear regression).
-* Discrete multi-level treatment  -> ``doubleml.DoubleMLAPOS``
-  (Average Potential Outcomes), with the causal contrast against the
-  reference level used as the ATE.
-* Cross-fitting with ``n_folds`` partitions; default 5.
-* Confidence interval reported at ``confidence_level`` (default 0.95).
-
-Both nuisance learners arrive as sklearn-compatible objects, normally
-instances of :class:`tabtune.causal.adapters._TabTuneSklearnAdapter`.
 """
 
 from __future__ import annotations
@@ -39,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 def _try_import_doubleml():
     try:
-        import doubleml as dml  # noqa: F401
+        import doubleml as dml  
         return dml
     except Exception:
         return None
@@ -79,9 +67,6 @@ class DMLEstimator(BaseCausalEstimator):
 
     name = "dml"
 
-    # ------------------------------------------------------------------
-    # Fit
-    # ------------------------------------------------------------------
     def fit(self, df: pd.DataFrame) -> "DMLEstimator":
         self._validate_columns(df)
         self._df = df.copy()
@@ -93,7 +78,6 @@ class DMLEstimator(BaseCausalEstimator):
                 "Install with `pip install doubleml`."
             )
 
-        # ── Detect treatment type ────────────────────────────────────────
         t_values = df[self.treatment].dropna().unique()
         self.treatment_levels_ = np.array(sorted(t_values))
         n_unique = len(self.treatment_levels_)
@@ -145,23 +129,15 @@ class DMLEstimator(BaseCausalEstimator):
             )
 
         self.backend_.fit()
-        # Fit the predict-surrogate so downstream consumers (counterfactual
-        # fairness audit, single-row predictions) can use this estimator
-        # as a regular predict-Y model. See BaseCausalEstimator.predict().
         self._fit_predict_surrogate(self._df)
         self._fitted = True
         logger.info("[Causal] DML fit complete.")
         return self
 
-    # ------------------------------------------------------------------
-    # ATE
-    # ------------------------------------------------------------------
     def ate(self, confidence_level: float = 0.95) -> dict:
         self._require_fit()
 
         if self.is_discrete_:
-            # For multi-level treatments, report the average contrast vs.
-            # the reference level (default = smallest value).
             ref = self.estimator_params.get(
                 "reference_level", float(self.treatment_levels_[0])
             )
@@ -169,7 +145,6 @@ class DMLEstimator(BaseCausalEstimator):
             ci = contrast.confint(level=confidence_level)
             ates = np.asarray(contrast.thetas)
             ses = np.asarray(contrast.ses)
-            # Overall ATE = average over non-reference contrasts.
             ate = float(np.mean(ates))
             se = float(np.sqrt(np.mean(ses ** 2)))
             lo = float(np.mean(ci.iloc[:, 0].values))
@@ -195,7 +170,6 @@ class DMLEstimator(BaseCausalEstimator):
                 "estimator": "doubleml.DoubleMLAPOS",
             }
 
-        # Binary / continuous treatment via PLR.
         ate = float(self.backend_.coef[0])
         se = float(self.backend_.se[0])
         ci = self.backend_.confint(level=confidence_level)
@@ -210,9 +184,6 @@ class DMLEstimator(BaseCausalEstimator):
             "estimator": "doubleml.DoubleMLPLR",
         }
 
-    # ------------------------------------------------------------------
-    # CATE
-    # ------------------------------------------------------------------
     def cate(self, X_query: pd.DataFrame, return_ci: bool = False):
         """
         Approximate CATE for PLR/APOS via per-row outcome-model contrast.
@@ -228,12 +199,6 @@ class DMLEstimator(BaseCausalEstimator):
                 "Per-row CATE for multi-level treatments is not supported by "
                 "DMLEstimator. Use 'causal_forest' or 'x_learner' instead."
             )
-        # Binary treatment approximation. We evaluate the fitted predict
-        # surrogate (built in BaseCausalEstimator.fit via _fit_predict_surrogate)
-        # under T = 1 vs T = 0. The surrogate is a clone of the outcome model
-        # that was actually fitted on (X + T -> Y); the raw self.outcome_model
-        # is only a prototype handed to DoubleML for internal cross-fitting and
-        # is never fitted directly, so it must not be used here.
         X = X_query[self.confounders].copy()
         X_t1 = X.copy()
         X_t1[self.treatment] = 1

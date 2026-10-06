@@ -1,19 +1,4 @@
 """Distribution-shift-aware cross-validation splitters.
-
-Why this exists
----------------
-TabTune's evaluation surface was entirely IID: ``train_test_split``, ``KFold``
-and ``StratifiedKFold``. Every published evaluation of tabular foundation
-models under distribution shift reaches the same conclusion - they degrade
-systematically, and the ranking under an IID split does not predict the ranking
-under a temporal or grouped one.
-
-A model selected on a random split and deployed against next quarter's data has
-been validated against the wrong question. These splitters ask the right one.
-
-All classes follow the scikit-learn splitter protocol (``split``,
-``get_n_splits``), so they drop into ``cross_validate``, ``GridSearchCV`` and
-TabTune's own leaderboard without adaptation.
 """
 
 from __future__ import annotations
@@ -86,18 +71,8 @@ class TemporalSplit:
             sliding window.
         test_size: Fixed test-block size. ``None`` divides the data evenly.
 
-    Example:
-        >>> import pandas as pd
-        >>> X = pd.DataFrame({"t": range(10), "f": range(10)})
-        >>> splitter = TemporalSplit(n_splits=3, time_col="t")
-        >>> for train_idx, test_idx in splitter.split(X):
-        ...     print(len(train_idx), len(test_idx))
-        4 2
-        6 2
-        8 2
     """
 
-    #: Marks this splitter as producing non-IID folds, used by shift reporting.
     shift_type = "temporal"
 
     def __init__(
@@ -145,8 +120,6 @@ class TemporalSplit:
             keys = _column(X, self.time_col, times, "times")
             order = np.argsort(keys, kind="stable")
         else:
-            # No key given: trust the existing row order, which is the common
-            # case for already-sorted event logs.
             logger.debug("[TemporalSplit] No time column given; using row order.")
             order = np.arange(n_samples)
 
@@ -185,13 +158,6 @@ class GroupedSplit:
         group_col: Column of ``X`` holding the group key.
         shuffle: Shuffle group assignment before partitioning.
         random_state: Seed used when ``shuffle`` is set.
-
-    Example:
-        >>> import pandas as pd
-        >>> X = pd.DataFrame({"g": list("aabbcc"), "f": range(6)})
-        >>> splitter = GroupedSplit(n_splits=3, group_col="g")
-        >>> all(set(X.g[tr]).isdisjoint(set(X.g[te])) for tr, te in splitter.split(X))
-        True
     """
 
     shift_type = "grouped"
@@ -298,9 +264,6 @@ class StratifiedGroupedSplit(GroupedSplit):
                 f"StratifiedGroupedSplit needs at least n_splits={self.n_splits} "
                 f"distinct groups, found {len(unique)}."
             )
-
-        # Majority class and size per group, largest groups placed first so the
-        # greedy assignment has room to correct itself later.
         summary = []
         for group in unique:
             mask = keys == group
@@ -328,7 +291,6 @@ class StratifiedGroupedSplit(GroupedSplit):
             yield indices[~mask], indices[mask]
 
 
-#: Name -> splitter class, used by the CLI and config files.
 SPLIT_REGISTRY: dict[str, type] = {
     "temporal": TemporalSplit,
     "grouped": GroupedSplit,
