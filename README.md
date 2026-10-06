@@ -1148,7 +1148,7 @@ Example notebooks showcasing the library's features in depth. Runnable scripts f
 
 ### Time series
 
-The notebooks live in [`notebooks/timeseries/`](notebooks/timeseries/). Each one runs on a CPU; foundation model weights download from the Hugging Face Hub on first use.
+Each one runs on a CPU; foundation model weights download from the Hugging Face Hub on first use.
 
 | Serial No. | Name | Task Performed | Notebook |
 |---|------|------|------|
