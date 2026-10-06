@@ -155,10 +155,6 @@ class TabularEnsemble:
         Wall-clock fitting time per model (seconds).
     """
 
-    # ==================================================================
-    # Construction
-    # ==================================================================
-
     def __init__(
         self,
         models: List[Dict[str, Any]],
@@ -176,7 +172,6 @@ class TabularEnsemble:
         weight_scheme: str = "performance",
         verbose: bool = True,
     ) -> None:
-        # --- Validate inputs ---
         valid_strategies = (
             "weighted_averaging", "greedy_selection", "stacking",
             "temperature_scaled", "cascade_stacking", "random_init",
@@ -215,8 +210,6 @@ class TabularEnsemble:
         self.base_seed = base_seed
         self.weight_scheme = weight_scheme
         self.verbose = verbose
-
-        # State (populated after fit)
         self.pipelines_: Dict[str, Any] = {}
         self.strategy_: Any = None
         self.individual_scores_: Dict[str, float] = {}
@@ -225,10 +218,6 @@ class TabularEnsemble:
         self._is_fitted: bool = False
         self._n_classes: Optional[int] = None
         self._y_le_: Optional[Any] = None
-
-    # ==================================================================
-    # Internal helpers
-    # ==================================================================
 
     def _get_pipeline_id(self, config: Dict[str, Any]) -> str:
         """Generate a unique, human-readable ID for a model configuration."""
@@ -398,10 +387,6 @@ class TabularEnsemble:
                 results.append(enc.transform(df).astype(float))
         return tuple(results)
 
-    # ==================================================================
-    # Scoring helpers
-    # ==================================================================
-
     def _score_individual(
         self,
         output: np.ndarray,
@@ -415,9 +400,6 @@ class TabularEnsemble:
             return float(r2_score(y, output))
         return 0.0
 
-    # ==================================================================
-    # Fit
-    # ==================================================================
 
     def fit(
         self,
@@ -449,14 +431,13 @@ class TabularEnsemble:
         RuntimeError
             If fewer than 1 model fits successfully.
         """
-        # --- Validate ---
+
         if not self.models:
             raise ValueError(
                 "[TabularEnsemble] models list is empty. "
                 "Provide at least one model configuration."
             )
 
-        # --- Coerce inputs ---
         if not isinstance(X_train, pd.DataFrame):
             X_train = pd.DataFrame(X_train)
         if not isinstance(y_train, pd.Series):
@@ -475,9 +456,7 @@ class TabularEnsemble:
         else:
             return self._fit_standard(X_train, y_train, X_val, y_val)
 
-    # ------------------------------------------------------------------
-    # Standard fit (weighted_averaging, greedy_selection, stacking, temp_scaled)
-    # ------------------------------------------------------------------
+  
 
     def _fit_standard(
         self,
@@ -621,10 +600,6 @@ class TabularEnsemble:
         self._is_fitted = True
         return self
 
-    # ------------------------------------------------------------------
-    # Cascade stacking fit
-    # ------------------------------------------------------------------
-
     def _fit_cascade(
         self,
         X_train: pd.DataFrame,
@@ -654,8 +629,6 @@ class TabularEnsemble:
         if self.task_type == "classification" and self._y_le_ is not None:
             y_val_np = self._y_le_.transform(y_val_np)
 
-        # --- FIX: For regression, n_classes=1 (one output column per model).
-        # For classification, n_classes = number of unique classes.
         if self.task_type == "classification":
             n_classes = int(np.unique(y_fit_np).shape[0])
         else:
@@ -666,9 +639,6 @@ class TabularEnsemble:
         self._log(f"\n{'='*60}")
         self._log(f"  Cascade Stacking: {self.n_cascade_levels} levels x {n_models} models")
         self._log(f"{'='*60}")
-
-        # Encode original features for skip connections.
-        # --- FIX: Store the encoder so _predict_cascade can reuse it.
         self._cascade_encoder_ = OrdinalEncoder(
             handle_unknown="use_encoded_value",
             unknown_value=-1,
@@ -682,8 +652,6 @@ class TabularEnsemble:
 
         all_level_val_outputs: List[Dict[str, np.ndarray]] = []
 
-        # --- FIX: Store per-level pipelines (keyed "L{level}_{pid}") so
-        # _predict_cascade can replay the cascade at test time.
         self._cascade_level_pipelines_: Dict[str, Any] = {}
         self._cascade_n_classes_ = n_classes
 
@@ -691,12 +659,12 @@ class TabularEnsemble:
             self._log(f"\n  -- Level {level + 1}/{self.n_cascade_levels} "
                        f"(input dim: {cur_X_fit_df.shape[1]}) --")
 
-            # OOF generation
+
             oof_mat, fold_count = self._generate_oof(
                 cur_X_fit_df, y_fit_np, n_classes, level_label=f"L{level + 1}"
             )
 
-            # Full-train val predictions
+
             val_outputs: Dict[str, np.ndarray] = {}
             self._log(f"    Full-train fit for val predictions ...")
             y_fit_ser = pd.Series(y_fit_np)
@@ -711,10 +679,7 @@ class TabularEnsemble:
                     output = self._get_model_output(pipe, cur_X_val_df, is_tabtune=True)
                     val_outputs[pid] = output
 
-                    # --- FIX: Store EVERY level's pipeline (not just last).
-                    # Key format: "L{level+1}_{pid}"
                     self._cascade_level_pipelines_[f"L{level+1}_{pid}"] = pipe
-                    # Also keep last-level in self.pipelines_ for backward compat
                     if level == self.n_cascade_levels - 1:
                         self.pipelines_[pid] = pipe
 
@@ -729,9 +694,6 @@ class TabularEnsemble:
 
             all_level_val_outputs.append(val_outputs)
 
-            # Skip connection: concat outputs + original encoded features.
-            # For classification outputs are (n, n_classes); for regression (n,).
-            # np.column_stack handles both 1D and 2D arrays correctly.
             if val_outputs:
                 val_pred_parts = [val_outputs[self._get_pipeline_id(c)]
                                   for c in self.models
@@ -745,7 +707,6 @@ class TabularEnsemble:
             cur_X_fit_df = pd.DataFrame(cur_X_fit_arr)
             cur_X_val_df = pd.DataFrame(cur_X_val_arr)
 
-        # Final GES across all level outputs
         self._log(f"\n  Final GES over {sum(len(d) for d in all_level_val_outputs)} candidates")
 
         self.strategy_ = CascadeStackingEnsemble(
@@ -759,14 +720,12 @@ class TabularEnsemble:
             model_names=[self._get_pipeline_id(c) for c in self.models],
         )
 
-        # Ensemble validation score
         try:
             flat_outputs = {}
             for level_idx, level_out in enumerate(all_level_val_outputs):
                 for name, arr in level_out.items():
                     flat_outputs[f"L{level_idx+1}_{name}"] = arr
             ensemble_preds = self.strategy_.predict(flat_outputs)
-            # --- FIX: Use correct metric for scoring
             if self.task_type == "classification":
                 self.ensemble_score_ = float(accuracy_score(y_val_np, ensemble_preds))
             else:
@@ -829,12 +788,10 @@ class TabularEnsemble:
                     c0, c1 = k * n_classes, (k + 1) * n_classes
 
                     if is_reg:
-                        # --- FIX: For regression, use predict() → 1D array.
-                        # Assign into single-column slot per model.
                         preds = np.asarray(pipe.predict(X_fold_oof)).ravel()
                         oof_mat[oof_idx, c0] = preds
                     else:
-                        # Classification: predict_proba → (n, n_classes)
+
                         oof_mat[oof_idx, c0:c1] = pipe.predict_proba(X_fold_oof)
                 except Exception as exc:
                     logger.error(
@@ -843,10 +800,6 @@ class TabularEnsemble:
                     )
 
         return oof_mat, self.cv_folds
-
-    # ------------------------------------------------------------------
-    # Random-init (deep ensembles) fit
-    # ------------------------------------------------------------------
 
     def _fit_random_init(
         self,
@@ -872,7 +825,6 @@ class TabularEnsemble:
                 y_val = pd.Series(y_val)
 
         y_val_np = _to_numpy(y_val)
-        # Encode for scoring 
         if self.task_type == "classification" and self._y_le_ is not None:
             y_val_np = self._y_le_.transform(y_val_np)
         seeds = [self.base_seed + m for m in range(self.n_seeds)]
@@ -893,7 +845,6 @@ class TabularEnsemble:
                 self._log(f"    seed={seed} ...", )
                 try:
                     t0 = time.time()
-                    # Inject seed into tuning_params
                     cfg_copy = dict(config)
                     tp = dict(cfg_copy.get("tuning_params", {}))
                     tp["seed"] = int(seed)
@@ -917,7 +868,7 @@ class TabularEnsemble:
                         "[DeepEnsemble] %s seed=%d failed: %s", pid, seed, exc
                     )
 
-        # Score individual model averages
+
         for pid, outputs in val_per_seed.items():
             if outputs:
                 avg = np.stack(outputs, axis=0).mean(axis=0)
@@ -944,10 +895,6 @@ class TabularEnsemble:
         self._log_fit_summary()
         self._is_fitted = True
         return self
-
-    # ------------------------------------------------------------------
-    # Refit & logging
-    # ------------------------------------------------------------------
 
     def _refit_on_full_data(
         self,
@@ -990,10 +937,6 @@ class TabularEnsemble:
             print(f"  Top weights: {dict(sorted_w)}")
         print(f"{'='*60}\n")
 
-    # ==================================================================
-    # Predict
-    # ==================================================================
-
     def predict(self, X_test: Any) -> np.ndarray:
         """Generate predictions from the ensemble.
 
@@ -1028,7 +971,7 @@ class TabularEnsemble:
             try:
                 preds = self._y_le_.inverse_transform(np.asarray(preds).astype(int))
             except Exception:
-                pass  # Fall back to returning raw indices if decoding fails
+                pass  
 
         return preds
 
@@ -1081,7 +1024,6 @@ class TabularEnsemble:
         """Predict for random_init strategy (collect per-seed outputs)."""
         per_seed: Dict[str, List[np.ndarray]] = {}
         for pid_key, pipeline in self.pipelines_.items():
-            # pid_key format: "{model}_seed{N}"
             base_pid = "_".join(pid_key.split("_")[:-1])  # remove _seed{N}
             if base_pid not in per_seed:
                 per_seed[base_pid] = []
@@ -1114,7 +1056,6 @@ class TabularEnsemble:
         returns a flat dict of ``"L{level}_{pid}" -> predictions`` that
         matches the keys expected by ``self.strategy_``.
         """
-        # Encode raw features with the same encoder used during fit
         X_test_enc = self._cascade_encoder_.transform(X_test).astype(float)
         n_classes = self._cascade_n_classes_
 
@@ -1138,8 +1079,6 @@ class TabularEnsemble:
                 except Exception as exc:
                     logger.error("[Cascade] Predict failed for %s: %s", level_key, exc)
 
-            # Build enriched features for next level:
-            # [level outputs stacked | original encoded features]
             if level < self.n_cascade_levels - 1:
                 if level_outputs:
                     test_pred_parts = [level_outputs[self._get_pipeline_id(c)]
@@ -1162,10 +1101,6 @@ class TabularEnsemble:
         """predict_proba for cascade_stacking strategy."""
         flat = self._replay_cascade(X_test)
         return self.strategy_.predict_proba(flat)
-
-    # ==================================================================
-    # Evaluate
-    # ==================================================================
 
     def evaluate(self, X_test: Any, y_test: Any) -> Dict[str, Any]:
         """Evaluate the ensemble and all individual models.
@@ -1199,14 +1134,11 @@ class TabularEnsemble:
             "fit_times": dict(self.fit_times_),
         }
 
-        # Ensemble metrics
         if self.task_type == "classification":
-            # preds and y_test are both in original label space → direct comparison
             result["ensemble"]["accuracy"] = float(accuracy_score(y_test, preds))
             result["ensemble"]["f1_score"] = float(f1_score(y_test, preds, average="weighted"))
             try:
                 probas = self.predict_proba(X_test)
-                # Use integer-encoded y_test for probability-based metrics
                 if probas.shape[1] == 2:
                     result["ensemble"]["roc_auc"] = float(
                         roc_auc_score(y_test_enc, probas[:, 1])
@@ -1228,7 +1160,6 @@ class TabularEnsemble:
             result["ensemble"]["rmse"] = float(np.sqrt(mean_squared_error(y_test, preds)))
             result["ensemble"]["mae"] = float(mean_absolute_error(y_test, preds))
 
-        # Individual model scores
         for pid, pipeline in self.pipelines_.items():
             try:
                 is_tabtune = hasattr(pipeline, "evaluate")
@@ -1251,15 +1182,10 @@ class TabularEnsemble:
             except Exception as exc:
                 result["individual"][pid] = {"error": str(exc)}
 
-        # Weights
         if hasattr(self.strategy_, "weights_") and self.strategy_.weights_:
             result["weights"] = dict(self.strategy_.weights_)
 
         return result
-
-    # ==================================================================
-    # Leaderboard
-    # ==================================================================
 
     def get_leaderboard(self) -> pd.DataFrame:
         """Return a DataFrame ranking all models plus the ensemble.
@@ -1292,9 +1218,6 @@ class TabularEnsemble:
         df = df.sort_values("val_score", ascending=ascending).reset_index(drop=True)
         return df
 
-    # ==================================================================
-    # Uncertainty (deep ensembles only)
-    # ==================================================================
 
     def get_uncertainty(self) -> Optional[np.ndarray]:
         """Return per-sample epistemic uncertainty (deep ensembles only).
@@ -1309,9 +1232,6 @@ class TabularEnsemble:
             return self.strategy_.uncertainty_
         return None
 
-    # ==================================================================
-    # Serialisation helpers
-    # ==================================================================
 
     def summary(self) -> Dict[str, Any]:
         """Return a JSON-serialisable summary of the ensemble.

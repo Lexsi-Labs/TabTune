@@ -63,12 +63,12 @@ class BenchmarkPipeline:
             except Exception as e:
                 logger.warning(f"[BenchmarkPipeline] GPU cleanup failed: {e}")
 
-    # --- THIS IS THE CORRECTED METHOD DEFINITION ---
+    
     def run(self, dataset_list: list = None, test_size: float = 0.25):
         """
         Executes the full benchmark run, saving results into a separate file for each model.
         """
-        # Auto-discover datasets if no list is provided
+       
         if dataset_list is None:
             logger.info("[BenchmarkPipeline] No specific dataset list provided. Attempting to discover datasets automatically...")
             discovery_loader = self.DatasetLoaderClass(config=self.data_config)
@@ -79,7 +79,7 @@ class BenchmarkPipeline:
 
         logger.info(f"[BenchmarkPipeline] Benchmark will run on {len(dataset_list)} datasets")
 
-        # --- MODIFIED: Outer loop is now over models ---
+        
         for model_key, model_config in self.models_to_benchmark.items():
             
             # 1. Create a dedicated ResultsHandler for this specific model
@@ -90,10 +90,7 @@ class BenchmarkPipeline:
 
             # 2. Inner loop over datasets
             for dataset_identifier in dataset_list:
-                
-                # --- START MODIFICATION: Check for existing results ---
-                
-                # Get the dataset name for logging
+ 
                 if self.benchmark_name in ('openml-cc18', 'openml-ctr23', 'automl-reg-suite', 
                                           'grinsztajn-tabular-benchmark', 'tabarena-study-regression', 'tabzilla'):
                     dataset_name_for_log = f"OpenML-ID-{dataset_identifier}"
@@ -161,14 +158,14 @@ class BenchmarkPipeline:
         """
         logger = logging.getLogger(__name__)
         
-        # Pre-run GPU cleanup
+        
         self._cleanup_gpu_memory()
         
         pipeline = None
         try:
             logger.info(f"[BenchmarkPipeline] Running Model: '{model_key}' on '{dataset_name}'")
             
-            # Handle ContextTab special case
+          
             if model_key == 'ContextTab':
                 X_train = X_train.copy()
                 X_test = X_test.copy()
@@ -188,20 +185,17 @@ class BenchmarkPipeline:
             pipeline.fit(X_train, y_train)
             end_fit = time.time()
             
-            # Evaluate model
             start_eval = time.time()
-            # Use 'rich' format to avoid JSON printing, but we still get the dict
             metrics = pipeline.evaluate(X_test, y_test, output_format='rich')
             end_eval = time.time()
             
-            # Convert metrics to JSON-serializable format (float32 -> float)
-            # Filter out None values and convert numeric types
+
             metrics = {
                 k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
                 else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
                 else v
                 for k, v in metrics.items()
-                if v is not None  # Skip None values (e.g., MAPE/MSLE when undefined)
+                if v is not None  
             }
             
             # Calibration/Interval calibration evaluation (task-specific)
@@ -214,10 +208,8 @@ class BenchmarkPipeline:
                         y_test=y_test,
                         confidence=0.95,
                         n_bins=10,
-                        output_format='rich'  # Use rich to avoid JSON printing
+                        output_format='rich'  
                     )
-                    # Convert to JSON-serializable format
-                    # Filter out None values and complex structures
                     calibration_metrics = {
                         k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
                         else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
@@ -237,14 +229,12 @@ class BenchmarkPipeline:
                     n_bins=15,
                     output_format='rich'  # Use rich to avoid JSON printing
                 )
-                # Convert to JSON-serializable format
-                # Filter out None values
                 calibration_metrics = {
                     k: float(v) if isinstance(v, (np.floating, np.integer, np.float32, np.float64))
                     else int(v) if isinstance(v, (np.integer, np.int32, np.int64))
                     else v
                     for k, v in calibration_metrics.items()
-                    if v is not None  # Skip None values
+                    if v is not None  
                 }
             end_calib = time.time()
 

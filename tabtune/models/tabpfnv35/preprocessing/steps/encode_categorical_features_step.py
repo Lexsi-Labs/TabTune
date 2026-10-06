@@ -1,0 +1,469 @@
+#  Copyright (c) Prior Labs GmbH 2026.
+
+"""Encode Categorical Features Step."""
+
+from __future__ import annotations
+
+import dataclasses
+import warnings
+from typing_extensions import override
+
+import numpy as np
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+
+from tabtune.models.tabpfnv35.preprocessing.datamodel import (
+    Feature,
+    FeatureModality,
+    FeatureSchema,
+    make_names_unique,
+)
+from tabtune.models.tabpfnv35.preprocessing.pipeline_interface import (
+    PreprocessingStep,
+    PreprocessingStepResult,
+)
+from tabtune.models.tabpfnv35.preprocessing.steps.preprocessing_helpers import (
+    EfficientColumnTransformer,
+)
+from tabtune.models.tabpfnv35.utils import infer_random_state
+
+ONE_HOT_ENCODER_NAME = "one_hot_encoder"
+
+# Per-column ``Feature`` metadata carried onto columns that map 1:1 from input to
+# output. ``name`` and ``modality`` are excluded: the rebuilt output schema sets
+# those itself (names from the transform, modality from the encoding result).
+# Derived from the dataclass so a new ``Feature`` field is carried automatically.
+_CARRIED_FEATURE_FIELDS = tuple(
+    f.name for f in dataclasses.fields(Feature) if f.name not in ("name", "modality")
+)
+
+
+def _columntransformer_output_names(
+    ct: ColumnTransformer,
+    input_names: list[str],
+    n_output: int,
+) -> list[str]:
+    """Compute output-order names for a fitted ``ColumnTransformer``.
+
+    Columns that map 1:1 to an input column (passthrough remainder, or a
+    transformer whose output width equals its input width, e.g. ordinal
+    encoding) inherit that input column's name. Expanding transformers (e.g.
+    one-hot) get ``"{transformer_name}_{k}"`` names. The result is de-duplicated
+    so all names are unique. ``remainder="passthrough"`` means every output
+    position is covered, so no name is left unset.
+    """
+    names: list[str] = [""] * n_output
+    all_positions = list(range(n_output))
+    for name, trans, cols in ct.transformers_:
+        if trans == "drop" or name not in ct.output_indices_:
+            continue
+        out_positions = all_positions[ct.output_indices_[name]]
+        col_list = list(cols) if not isinstance(cols, str) else []
+        if len(out_positions) == len(col_list):
+            for k, out_idx in enumerate(out_positions):
+                names[out_idx] = input_names[col_list[k]]
+        else:
+            for k, out_idx in enumerate(out_positions):
+                names[out_idx] = f"{name}_{k}"
+    return make_names_unique(names)
+
+
+def _get_all_cat_indices_after_onehot(
+    ct: ColumnTransformer,
+    n_output_features: int,
+    all_cat_indices: list[int],
+) -> list[int]:
+    """Return output indices of all categorical features after one-hot encoding.
+
+    Includes both one-hot encoded columns and high-cardinality categoricals
+    that were passed through in the remainder.
+    """
+    onehot_input_cols = set(ct.transformers_[0][2])
+    onehot_out = list(range(n_output_features))[
+        ct.output_indices_[ONE_HOT_ENCODER_NAME]
+    ]
+    # Find skipped categoricals in the remainder output
+    remainder_start = ct.output_indices_["remainder"].start
+    remainder_input_cols = sorted(set(range(ct.n_features_in_)) - onehot_input_cols)
+    skipped_cat_out = [
+        remainder_start + remainder_input_cols.index(i)
+        for i in all_cat_indices
+        if i not in onehot_input_cols
+    ]
+    return sorted(onehot_out + skipped_cat_out)
+
+
+def _get_least_common_category_count(x_column: np.ndarray) -> int:
+    if len(x_column) == 0:
+        return 0
+    counts = np.unique(x_column, return_counts=True)[1]
+    return int(counts.min())
+
+
+def _carry_over_input_feature_metadata(
+    input_schema: FeatureSchema,
+    output_schema: FeatureSchema,
+    column_transformer: ColumnTransformer | None,
+    n_input_features: int,
+) -> FeatureSchema:
+    """Carry per-column input metadata onto the columns that pass through 1:1.
+
+    The output schema is rebuilt from names only (via
+    ``from_only_categorical_indices``), which drops input-derived ``Feature``
+    fields. For columns that map 1:1 back to an input column this re-attaches
+    ``scheduled_gpu_transform`` (so the GPU pipeline still sees its targets) and
+    ``ancestor`` (so e.g. ``passthrough_inf`` can map recorded +/-inf positions
+    onto the output column). Transformed columns (ordinal-encoded categoricals,
+    one-hot expansions) keep neither.
+
+    When a ``ColumnTransformer`` is used columns are reordered as
+    ``[transformer_output, remainder_in_order]`` and only the *remainder* maps
+    1:1 back to input columns. Without one (``"numeric"`` / ``"none"`` modes)
+    columns are unchanged and the mapping is the identity.
+    """
+    if not any(
+        getattr(f, attr) is not None
+        for f in input_schema.features
+        for attr in _CARRIED_FEATURE_FIELDS
+    ):
+        return output_schema
+
+    new_features = list(output_schema.features)
+
+    if column_transformer is None:
+        # No reordering — identity mapping.
+        index_pairs = [(i, i) for i in range(min(n_input_features, len(new_features)))]
+    else:
+        # Use the fitted ColumnTransformer's remainder mapping.
+        # The remainder columns have a 1:1 mapping to input columns that
+        # were NOT consumed by the named transformers.  This works for both
+        # ordinal encoding (1:1 cat mapping + remainder) and one-hot
+        # encoding (expanded cat columns + remainder).
+        ct_input_cols: set[int] = set()
+        for _name, _transformer, cols in column_transformer.transformers_:
+            if _name == "remainder":
+                continue
+            if isinstance(cols, list):
+                ct_input_cols.update(cols)
+        remainder_input_cols = [
+            i for i in range(n_input_features) if i not in ct_input_cols
+        ]
+        remainder_start = column_transformer.output_indices_["remainder"].start
+        index_pairs = [
+            (in_idx, remainder_start + offset)
+            for offset, in_idx in enumerate(remainder_input_cols)
+            if remainder_start + offset < len(new_features)
+            and in_idx < len(input_schema.features)
+        ]
+
+    for in_idx, out_idx in index_pairs:
+        in_feat = input_schema.features[in_idx]
+        new_features[out_idx] = dataclasses.replace(
+            new_features[out_idx],
+            **{attr: getattr(in_feat, attr) for attr in _CARRIED_FEATURE_FIELDS},
+        )
+
+    return FeatureSchema(features=new_features)
+
+
+class EncodeCategoricalFeaturesStep(PreprocessingStep):
+    """Encode categorical features using ordinal or one-hot encoding.
+
+    When using with PreprocessingPipeline, register as a bare step (no modalities):
+        pipeline = PreprocessingPipeline(steps=[EncodeCategoricalFeaturesStep()])
+
+    NOT as a modality-targeted step:
+        pipeline = PreprocessingPipeline(steps=[
+            (EncodeCategoricalFeaturesStep(), {FeatureModality.CATEGORICAL})
+        ])
+
+    This is needed for the pipeline with onehot encoding to work.
+    It will be updated in future versions.
+    """
+
+    def __init__(
+        self,
+        categorical_transform_name: str = "ordinal",
+        random_state: int | np.random.Generator | None = None,
+        max_onehot_cardinality: int | None = None,
+    ):
+        super().__init__()
+        self.categorical_transform_name = categorical_transform_name
+        self.random_state = random_state
+        self.max_onehot_cardinality = max_onehot_cardinality
+
+        self.categorical_transformer_ = None
+
+    def _get_transformer(
+        self,
+        X: np.ndarray,
+        categorical_features: list[int],
+    ) -> tuple[ColumnTransformer | None, list[int]]:
+        if self.categorical_transform_name.startswith("ordinal"):
+            name = self.categorical_transform_name[len("ordinal") :]
+            # Create a column transformer
+            if name.startswith("_common_categories"):
+                name = name[len("_common_categories") :]
+                categorical_features = [
+                    i
+                    for i, col in enumerate(X.T)
+                    if i in categorical_features
+                    and _get_least_common_category_count(col) >= 10
+                ]
+            elif name.startswith("_very_common_categories"):
+                name = name[len("_very_common_categories") :]
+                categorical_features = [
+                    i
+                    for i, col in enumerate(X.T)
+                    if i in categorical_features
+                    and _get_least_common_category_count(col) >= 10
+                    and len(np.unique(col)) < (len(X) // 10)  # type: ignore
+                ]
+
+            assert name in ("_shuffled", ""), (
+                "unknown categorical transform name, should be 'ordinal'"
+                f" or 'ordinal_shuffled' it was {self.categorical_transform_name}"
+            )
+
+            if not categorical_features:
+                # Nothing to encode, and a ColumnTransformer passthrough
+                # would rebuild the array
+                return None, categorical_features
+
+            # `EfficientColumnTransformer` rather than a plain `ColumnTransformer`:
+            # ordinal encoding is one-to-one over a subset of the columns with the rest
+            # handed through, which it assembles into one array instead of stacking
+            # each transformer's full-size output.
+            ct = EfficientColumnTransformer(
+                [
+                    (
+                        "ordinal_encoder",
+                        OrdinalEncoder(
+                            handle_unknown="use_encoded_value",
+                            unknown_value=np.nan,
+                        ),  # 'sparse' has been deprecated
+                        categorical_features,
+                    ),
+                ],
+                # The column numbers to be transformed
+                remainder="passthrough",  # Leave the rest of the columns untouched
+            )
+            return ct, categorical_features
+
+        if self.categorical_transform_name == "onehot":
+            # Only one-hot encode features with cardinality <= max_onehot_cardinality
+            onehot_features = categorical_features
+            if self.max_onehot_cardinality is not None:
+                onehot_features = [
+                    i
+                    for i in categorical_features
+                    if len(np.unique(X[:, i])) <= self.max_onehot_cardinality
+                ]
+            # Create a column transformer
+            ct = ColumnTransformer(
+                [
+                    (
+                        ONE_HOT_ENCODER_NAME,
+                        OneHotEncoder(
+                            drop="if_binary",
+                            sparse_output=False,
+                            handle_unknown="ignore",
+                        ),
+                        onehot_features,
+                    ),
+                ],
+                # The column numbers to be transformed
+                remainder="passthrough",  # Leave the rest of the columns untouched
+            )
+            return ct, categorical_features
+
+        if self.categorical_transform_name in ("numeric", "none"):
+            return None, categorical_features
+        raise ValueError(
+            f"Unknown categorical transform {self.categorical_transform_name}",
+        )
+
+    @override
+    def _fit(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> FeatureSchema:
+        input_cat_features = feature_schema.indices_for(FeatureModality.CATEGORICAL)
+        input_names = [f.name for f in feature_schema.features]
+        n_input_features = X.shape[1]
+        ct, ct_cat_features = self._get_transformer(X, input_cat_features)
+        n_features = n_input_features  # Default, may change for one-hot
+        if ct is None:
+            self.categorical_transformer_ = None
+            out = FeatureSchema.from_only_categorical_indices(
+                ct_cat_features, n_features, names=input_names
+            )
+            return _carry_over_input_feature_metadata(
+                feature_schema, out, None, n_input_features
+            )
+
+        _, rng = infer_random_state(self.random_state)
+
+        categorical_features = ct_cat_features
+        if self.categorical_transform_name.startswith("ordinal"):
+            ct.fit(X)
+            categorical_features = list(range(len(ct_cat_features)))
+
+            self.random_mappings_ = {}
+            if self.categorical_transform_name.endswith("_shuffled"):
+                for col_ix in categorical_features:
+                    col_cats = len(
+                        ct.named_transformers_["ordinal_encoder"].categories_[col_ix],
+                    )
+                    perm = rng.permutation(col_cats)
+                    self.random_mappings_[col_ix] = perm
+
+        elif self.categorical_transform_name == "onehot":
+            Xt = ct.fit_transform(X)
+            if Xt.size >= 1_000_000:
+                ct = None
+            else:
+                n_features = Xt.shape[1]
+                categorical_features = _get_all_cat_indices_after_onehot(
+                    ct, n_features, ct_cat_features
+                )
+        else:
+            raise ValueError(
+                f"Unknown categorical transform {self.categorical_transform_name}",
+            )
+
+        self.categorical_transformer_ = ct
+
+        output_names = (
+            input_names
+            if ct is None
+            else _columntransformer_output_names(ct, input_names, n_features)
+        )
+        out = FeatureSchema.from_only_categorical_indices(
+            categorical_features, n_features, names=output_names
+        )
+        return _carry_over_input_feature_metadata(
+            feature_schema, out, ct, n_input_features
+        )
+
+    def _fit_transform_internal(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> tuple[np.ndarray, FeatureSchema]:
+        input_cat_features = feature_schema.indices_for(FeatureModality.CATEGORICAL)
+        input_names = [f.name for f in feature_schema.features]
+        n_input_features = X.shape[1]
+        ct, ct_cat_features = self._get_transformer(X, input_cat_features)
+        n_features = n_input_features  # Default, may change for one-hot
+        if ct is None:
+            self.categorical_transformer_ = None
+            out = FeatureSchema.from_only_categorical_indices(
+                ct_cat_features, n_features, names=input_names
+            )
+            return X, _carry_over_input_feature_metadata(
+                feature_schema, out, None, n_input_features
+            )
+
+        _, rng = infer_random_state(self.random_state)
+
+        categorical_features = ct_cat_features
+        if self.categorical_transform_name.startswith("ordinal"):
+            Xt = ct.fit_transform(X)
+            categorical_features = list(range(len(ct_cat_features)))
+
+            self.random_mappings_ = {}
+            if self.categorical_transform_name.endswith("_shuffled"):
+                for col_ix in categorical_features:
+                    col_cats = len(
+                        ct.named_transformers_["ordinal_encoder"].categories_[col_ix],
+                    )
+                    perm = rng.permutation(col_cats)
+                    self.random_mappings_[col_ix] = perm
+
+                    Xcol: np.ndarray = Xt[:, col_ix]  # type: ignore
+                    not_nan_mask = ~np.isnan(Xcol)
+                    Xcol[not_nan_mask] = perm[Xcol[not_nan_mask].astype(int)].astype(
+                        Xcol.dtype,
+                    )
+
+        elif self.categorical_transform_name == "onehot":
+            Xt = ct.fit_transform(X)
+            if Xt.size >= 1_000_000:
+                ct = None
+                Xt = X
+            else:
+                n_features = Xt.shape[1]
+                categorical_features = _get_all_cat_indices_after_onehot(
+                    ct, n_features, ct_cat_features
+                )
+        else:
+            raise ValueError(
+                f"Unknown categorical transform {self.categorical_transform_name}",
+            )
+
+        self.categorical_transformer_ = ct
+        output_names = (
+            input_names
+            if ct is None
+            else _columntransformer_output_names(ct, input_names, n_features)
+        )
+        out = FeatureSchema.from_only_categorical_indices(
+            categorical_features, n_features, names=output_names
+        )
+        return Xt, _carry_over_input_feature_metadata(
+            feature_schema, out, ct, n_input_features
+        )
+
+    @override
+    def fit_transform(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> PreprocessingStepResult:
+        Xt, output_feature_schema = self._fit_transform_internal(X, feature_schema)
+        self.feature_schema_updated_ = output_feature_schema
+        return PreprocessingStepResult(X=Xt, feature_schema=output_feature_schema)
+
+    @override
+    def _transform(
+        self, X: np.ndarray, *, is_test: bool = False
+    ) -> tuple[np.ndarray, None, None]:
+        if self.categorical_transformer_ is None:
+            return X, None, None
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message=".*Found unknown categories in col.*"
+            )  # These warnings are expected when transforming test data
+            transformed = self.categorical_transformer_.transform(X)
+        if self.categorical_transform_name.endswith("_shuffled"):
+            for col, mapping in self.random_mappings_.items():
+                not_nan_mask = ~np.isnan(transformed[:, col])  # type: ignore
+                transformed[:, col][not_nan_mask] = mapping[
+                    transformed[:, col][not_nan_mask].astype(int)
+                ].astype(transformed[:, col].dtype)
+        return transformed, None, None  # type: ignore
+
+    @override
+    def num_added_features(self, n_samples: int, feature_schema: FeatureSchema) -> int:
+        """Return the number of added features.
+
+        For ordinal, numeric, and none encodings this is always 0 (same column count).
+        For one-hot encoding the true value depends on data cardinality and cannot be
+        determined before fitting, so we still return 0.
+        A warning is emitted upstream when one-hot is combined with feature subsampling.
+        """
+        del n_samples, feature_schema
+        return 0
+
+    @override
+    def has_data_dependent_feature_expansion(self) -> bool:
+        """One-hot encoding creates columns depending on data cardinality."""
+        return self.categorical_transform_name == "onehot"
+
+
+__all__ = [
+    "EncodeCategoricalFeaturesStep",
+]

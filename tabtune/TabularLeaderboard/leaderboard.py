@@ -51,6 +51,7 @@ from ..evaluation.metrics import (
     is_higher_better,
     primary_metric,
 )
+from ..logger import log_table, logged_operation, track
 from ..TabularPipeline.pipeline import TabularPipeline
 
 logger = logging.getLogger(__name__)
@@ -308,6 +309,7 @@ class TabularLeaderboard:
 
     # -------------------------------------------------------------------- run
 
+    @logged_operation("leaderboard")
     def run(
         self,
         rank_by: str | None = None,
@@ -337,7 +339,7 @@ class TabularLeaderboard:
         self.entries = []
 
         total = len(self.models_to_run)
-        for index, config in enumerate(self.models_to_run, start=1):
+        for index, config in enumerate(track(self.models_to_run, logger=logger, description="Configurations processed"), start=1):
             if progress is not None:
                 progress(index, total, config["model_name"])
             logger.info(
@@ -550,29 +552,15 @@ class TabularLeaderboard:
         return front
 
     def show(self) -> None:
-        """Render the leaderboard, using rich display when available.
-
-        Falls back to plain text outside IPython. The previous implementation
-        imported ``IPython.display`` at module scope, which made the whole
-        module unimportable in a headless environment even though ``IPython``
-        is only declared in the optional ``interactive`` extra.
-        """
+        """Render the ranked table through the configured logging sinks."""
         frame = self.results
         if frame.empty:
-            logger.info("[Leaderboard] No results to display; call run() first.")
+            logger.info("No results to display; call run() first.")
             return
-
-        try:
-            from IPython.display import Markdown, display
-
-            display(Markdown(f"### TabTune Leaderboard - ranked by `{self._rank_by}`"))
-            display(frame)
-            return
-        except Exception:
-            pass
-
-        print(f"\nTabTune Leaderboard - ranked by {self._rank_by}")
-        print(frame.to_string())
+        columns = [c for c in ("Model", "Strategy", "Status", self._rank_by, "fit_s", "predict_s") if c in frame]
+        frame = frame[columns]
+        log_table(logger, f"Leaderboard / ranked by {self._rank_by}",
+                  frame.columns, frame.itertuples(index=False, name=None))
 
     def to_markdown(self, path: str | Path | None = None) -> str:
         """Render the leaderboard as a Markdown table.

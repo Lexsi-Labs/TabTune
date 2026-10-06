@@ -1,4 +1,4 @@
-"""Model registry: metadata, discovery and validation for the bundled TFMs.
+"""Model registry: metadata, discovery and validation for the bundled TFMs and TSFMs.
 
 The registry is the answer to two questions TabTune could not previously
 answer without loading a multi-gigabyte checkpoint:
@@ -53,6 +53,18 @@ from .spec import (
     ModelSpec,
     normalise_name,
 )
+from .TimeSeries import (
+    TS_MODEL_REGISTRY,
+    TS_MODEL_SPECS,
+    TimeSeriesModelSpec,
+    check_forecast_envelope,
+    check_schema_support,
+    get_time_series_model_spec,
+    list_time_series_models,
+    register_time_series_model,
+    resolve_time_series_model_name,
+    validate_time_series_request,
+)
 
 __all__ = [
     # specs
@@ -74,6 +86,17 @@ __all__ = [
     "check_envelope",
     "check_license",
     "infer_data_shape",
+    # time series
+    "TimeSeriesModelSpec",
+    "TS_MODEL_REGISTRY",
+    "TS_MODEL_SPECS",
+    "register_time_series_model",
+    "resolve_time_series_model_name",
+    "get_time_series_model_spec",
+    "list_time_series_models",
+    "validate_time_series_request",
+    "check_forecast_envelope",
+    "check_schema_support",
     # errors
     "TabTuneError",
     "ConfigError",

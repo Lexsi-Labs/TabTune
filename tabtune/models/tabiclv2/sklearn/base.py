@@ -234,6 +234,9 @@ class TabICLBaseEstimator(BaseEstimator):
 
         # Read save options set by save(), or use defaults for direct pickle
         save_model_weights = state.pop("_save_model_weights", False)
+        # TabTune: a fine-tuned module is not reconstructable from the checkpoint,
+        # so its weights must travel with the pickle (TabularPipeline.save, deepcopy).
+        save_model_weights = save_model_weights or state.get("_tabtune_finetuned", False)
         save_kv_cache = state.pop("_save_kv_cache", True)
         save_training_data = state.pop("_save_training_data", True)
 

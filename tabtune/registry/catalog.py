@@ -65,10 +65,18 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
             ),
         ),
         license=LicenseSpec(
-            name="Prior Labs License",
-            commercial_use_ok=None,
-            url="https://docs.priorlabs.ai/models",
-            notes=PRIOR_LABS_LICENSE_NOTE,
+            name="Prior Labs License (Apache-2.0 + attribution)",
+            commercial_use_ok=True,
+            requires_attribution=True,
+            url="https://github.com/PriorLabs/TabPFN",
+            notes=(
+                "TabPFN v2 weights are under the Prior Labs License: Apache-2.0 plus an "
+                "attribution clause (display 'Built with PriorLabs-TabPFN'; derived models "
+                "you distribute must be named starting with 'TabPFN'). Later checkpoints "
+                "(v2.5, v2.6, v3, v3.5) are non-commercial. " + "Checked 2026-09-28" + " against the "
+                "tabpfn 9.0.0 release and AutoGluon's model table ('Prior Labs License "
+                "(commercial use permitted)')."
+            ),
         ),
         commercial_alternatives=_COMMERCIAL_FALLBACKS,
         paper="https://doi.org/10.1038/s41586-024-08328-6",
@@ -80,10 +88,11 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
         family="pfn",
         aliases=("TabPFN-v2.6", "TabPFN2.6", "TabPFNv2.6", "TabPFN26"),
         summary="Prior Labs release adding a native fine-tuning API with bar-distribution loss.",
-        classification_strategies=_ICL_CLS,
+        # No "peft": the v2.6 meta-learning and SFT loops take no LoRA config and
+        # there is no v2.6 LoRA target table, so a PEFT request would not train.
+        classification_strategies=frozenset({"inference", "finetune"}),
         regression_strategies=_REG_FT,
         finetune_modes=frozenset({"meta-learning", "sft", "native", "turn_by_turn"}),
-        experimental=frozenset({"peft"}),
         preprocessor_key="tabpfn_special",
         envelope=CapabilityEnvelope(
             max_classes=10,
@@ -92,10 +101,14 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
             native_nan=True,
         ),
         license=LicenseSpec(
-            name="Prior Labs License",
-            commercial_use_ok=None,
-            url="https://docs.priorlabs.ai/models",
-            notes=PRIOR_LABS_LICENSE_NOTE,
+            name="TabPFN-2.6 license (non-commercial)",
+            commercial_use_ok=False,
+            url="https://github.com/PriorLabs/TabPFN",
+            notes=(
+                "The v2.6 weights are non-commercial; a commercial license from Prior Labs "
+                "is required. " + "Checked 2026-09-28" + " against the tabpfn 9.0.0 release and "
+                "AutoGluon's model table ('Commercial license required')."
+            ),
         ),
         commercial_alternatives=_COMMERCIAL_FALLBACKS,
         paper="https://arxiv.org/abs/2511.08667",
@@ -139,6 +152,185 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
         commercial_alternatives=_COMMERCIAL_FALLBACKS,
         paper="https://arxiv.org/abs/2605.13986",
         weights="Prior-Labs/tabpfn_3",
+    ),
+    # ---------------------------------------------------------- TabPFN v3.5
+    ModelSpec(
+        name="TabPFNv35",
+        family="pfn",
+        aliases=("TabPFN-v3.5", "TabPFN3.5", "TabPFNV35", "TabPFN-3.5"),
+        summary=(
+            "Prior Labs' v3.5 PFN. A distinct architecture from v3, and the first "
+            "release where one multitask checkpoint carries both the "
+            "classification and the regression head."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=_REG_FT,
+        finetune_modes=frozenset({"meta-learning", "sft", "native", "turn_by_turn"}),
+        preprocessor_key="tabpfn_special",
+        # Limits are left undeclared rather than copied from v3: this module's
+        # rule is that an unverified limit is not invented, and v3.5's class
+        # ceiling, feature count and cell budget have not been measured here.
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_text=True,
+            native_categorical=True,
+            notes=(
+                "v3.5 preprocessing handles text and datetime columns natively "
+                "through skrub. Row/feature/cell limits unverified for this "
+                "release; v3 advertises a cell budget (~1M x 200, 100k x 2,000, "
+                "1k x 20,000) rather than a row cap."
+            ),
+        ),
+        license=LicenseSpec(
+            name="tabpfn-3-5-license-v1.0 (non-commercial)",
+            commercial_use_ok=False,
+            url="https://github.com/PriorLabs/TabPFN",
+            notes=(
+                "TabPFN-3.5 weights (gated repo Prior-Labs/tabpfn_3_5) are non-commercial; "
+                "the tabpfn code is Apache-2.0 since tabpfn 9.0.0 (2026-09-14). "
+                + "Checked 2026-09-28" + " against the tabpfn 9.0.0 wheel and AutoGluon's model "
+                "table ('Commercial license required')."
+            ),
+        ),
+        commercial_alternatives=_COMMERCIAL_FALLBACKS,
+        paper="https://docs.priorlabs.ai/models",
+        weights="Prior-Labs/tabpfn_3_5",
+    ),
+    # ----------------------------------------------------- TabPFN v3.5-fast
+    ModelSpec(
+        name="TabPFNv35Fast",
+        family="pfn",
+        aliases=("TabPFN-v3.5-fast", "TabPFN3.5Fast", "TabPFN-3.5-fast"),
+        summary=(
+            "The v3.5-fast checkpoint: a separate, smaller-cost model trained "
+            "alongside v3.5, not a re-export of it."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=_REG_FT,
+        finetune_modes=frozenset({"meta-learning", "sft", "native", "turn_by_turn"}),
+        preprocessor_key="tabpfn_special",
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_text=True,
+            native_categorical=True,
+            notes="Shares the v3.5 runtime; limits unverified.",
+        ),
+        license=LicenseSpec(
+            name="tabpfn-3-5-license-v1.0 (non-commercial)",
+            commercial_use_ok=False,
+            url="https://github.com/PriorLabs/TabPFN",
+            notes=(
+                "A separate checkpoint (tabpfn-v3.5-fast-20260909.safetensors) in the same "
+                "gated repo as TabPFN-3.5, under the same non-commercial license. "
+                + "Checked 2026-09-28" + "."
+            ),
+        ),
+        commercial_alternatives=_COMMERCIAL_FALLBACKS,
+        paper="https://docs.priorlabs.ai/models",
+        weights="Prior-Labs/tabpfn_3_5",
+    ),
+    # -------------------------------------------------------------- Causilo
+    ModelSpec(
+        name="Causilo",
+        family="icl",
+        aliases=("Causilo-v1", "causilo"),
+        summary=(
+            "Nums AI in-context model: column attention, row mixing and a pooled "
+            "prediction stage over a fixed pretrained context. Reports rank 1 on "
+            "TabArena Full for classification, regression and overall."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=frozenset({"inference", "finetune", "peft"}),
+        # Causilo publishes no fine-tuning recipe, so TabTune supplies the
+        # episodic loop it uses for the other in-context models. There is no
+        # upstream "native" mode to offer.
+        finetune_modes=frozenset({"meta-learning"}),
+        preprocessor_key="causilo_special",
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_categorical=True,
+            notes=(
+                "Missing values, categoricals and normalisation are handled inside "
+                "the model's own PreparedDataset, so TabTune passes features "
+                "through untouched. The classification head has a native 10-class "
+                "capacity; more classes are decomposed with error-correcting "
+                "output codes, costing one ensemble pass per codebook row. "
+                "max_classes is therefore deliberately left None - it is a hard "
+                "constraint that would reject datasets this model handles by "
+                "design."
+            ),
+        ),
+        license=LicenseSpec(
+            name="Apache-2.0 code / Causilo License v1.0 weights (non-commercial)",
+            commercial_use_ok=False,
+            url="https://github.com/nums-ai/causilo",
+            notes=(
+                "Code Apache-2.0; weights under the Causilo License v1.0: non-commercial "
+                "research, evaluation and modification, and free research redistribution, "
+                "are permitted; commercial or production use of the model, derivatives or "
+                "outputs, and any hosted/API/SaaS service (paid or free), need a separate "
+                "license from Nums AI. " + "Checked 2026-09-28" + " against the vendor README, "
+                "AutoGluon and TabArena metadata ('non-commercial weights')."
+            ),
+        ),
+        commercial_alternatives=_COMMERCIAL_FALLBACKS,
+        paper="https://huggingface.co/nums-ai/causilo",
+        weights="nums-ai/causilo",
+    ),
+    # -------------------------------------------------------------- TabLDM
+    ModelSpec(
+        name="TabLDM",
+        family="icl",
+        aliases=("Xiaomi-TabLDM", "XiaomiTabLDM", "TabLDM-v1"),
+        summary=(
+            "Xiaomi tabular foundation model: dual-stream feature grouping, a "
+            "lightweight attention residual and a sparse mixture of experts, "
+            "pretrained only on structural-causal-model synthetic data. Reports "
+            "rank 1 on OpenML-CTR23 and rank 2 on regression across TALENT, "
+            "TabArena and BCCO."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=frozenset({"inference", "finetune", "peft"}),
+        # TabLDM ships inference-only, so there is no upstream "native" mode.
+        # Its forward() keeps the supervised branch, though, so the episodic
+        # loop TabTune runs is the vendor's own training path.
+        finetune_modes=frozenset({"meta-learning"}),
+        preprocessor_key="tabldm_special",
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_categorical=True,
+            notes=(
+                "Categorical detection, missing-value handling, outlier clipping "
+                "and normalisation all happen inside the model's own "
+                "TransformToNumerical/EnsembleGenerator, so TabTune passes "
+                "features through untouched. No envelope limit is declared: the "
+                "classification head has a native 10-class capacity but more "
+                "classes are handled by hierarchical grouping "
+                "(support_many_classes), and the 300-feature max_num_features "
+                "default triggers per-member feature subsampling rather than "
+                "rejecting the dataset. Declaring either as a limit would reject "
+                "datasets this model handles by design. Upstream states the "
+                "pretraining distribution covers hundreds to tens of thousands of "
+                "rows and up to roughly a hundred columns, and that accuracy may "
+                "decline beyond it, but publishes no hard bound. KV caching is "
+                "unavailable above 10 classes and cannot be combined with the "
+                "candidate-enhancement path."
+            ),
+        ),
+        license=LicenseSpec(
+            name="Apache-2.0 code; weight license conflicting",
+            commercial_use_ok=None,
+            url="https://github.com/XiaomiMiMo/Xiaomi-TabLDM",
+            notes=(
+                "The repository LICENSE and README License section say Apache-2.0 (as does "
+                "TabArena), but a README news line added 2026-09-28 says weight usage 'is "
+                "subject to Xiaomi-TabLDM Non-Commercial License' while linking to the Apache "
+                "LICENSE. Until Xiaomi resolves this, TabTune does not assert commercial use. "
+                + "Checked 2026-09-28" + "."
+            ),
+        ),
+        paper="https://arxiv.org/abs/2609.03880",
+        weights="occams/Xiaomi-TabLDM",
     ),
     # -------------------------------------------------------------- TabICL
     ModelSpec(
@@ -254,13 +446,56 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
             ),
         ),
         license=LicenseSpec(
-            name="CC-BY-4.0",
+            name="Apache-2.0",
             commercial_use_ok=True,
-            requires_attribution=True,
             url="https://huggingface.co/autogluon/mitra-classifier",
+            notes=(
+                "AutoGluon's release notes: Mitra's 'weights are fully open-sourced under the "
+                "Apache-2.0 license'. (Earlier TabTune releases recorded CC-BY-4.0; that was "
+                "wrong.) " + "Checked 2026-09-28" + " against autogluon@6f9ebe9 docs."
+            ),
         ),
         paper="https://arxiv.org/abs/2510.21204",
         weights="autogluon/mitra-classifier",
+    ),
+    # -------------------------------------------------------------- Mitra 2
+    ModelSpec(
+        name="MitraV2",
+        family="icl",
+        aliases=("Mitra-2", "Mitra2", "mitra-classifier-2", "mitra-regressor-2"),
+        summary=(
+            "Second-generation Mitra checkpoint on the same 2D row-and-column "
+            "attention architecture (AWS). Shares TabTune's vendored Tab2D with "
+            "Mitra v1; only the weights differ."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=_REG_FT,
+        finetune_modes=frozenset({"meta-learning", "sft", "turn_by_turn"}),
+        preprocessor_key="mitra_special",
+        envelope=CapabilityEnvelope(
+            notes=(
+                "No limit is declared. v1's entry documents a practical ceiling "
+                "near 10k context rows, but that was measured on v1's weights; "
+                "v2's dim / n_layers / n_heads come from its own config.json and "
+                "were not readable when this entry was written, so carrying v1's "
+                "number across would be asserting a limit nobody measured. "
+                "Classification head width is architectural, not the dataset's "
+                "class count, and is sliced to the task at prediction time."
+            ),
+        ),
+        license=LicenseSpec(
+            name="Apache-2.0",
+            commercial_use_ok=True,
+            url="https://huggingface.co/autogluon/mitra-classifier-2",
+            notes=(
+                "The mitra-classifier-2 / mitra-regressor-2 model cards state Apache-2.0 (read "
+                "through search-result text; huggingface.co was not reachable) and TabArena's "
+                "metadata agrees. AutoGluon itself still defaults to the v1 weights. "
+                + "Checked 2026-09-28" + "."
+            ),
+        ),
+        paper="https://arxiv.org/abs/2510.21204",
+        weights="autogluon/mitra-classifier-2",
     ),
     # ----------------------------------------------------------- ContextTab
     ModelSpec(
@@ -325,10 +560,20 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
         preprocessor_key="limix_special",
         envelope=CapabilityEnvelope(native_nan=True),
         license=LicenseSpec(
-            name="LimiX (academic use free)",
-            commercial_use_ok=False,
-            url="https://github.com/limix-ldm-ai/LimiX",
-            notes="Free for academic use; commercial deployment requires authorization.",
+            name="Stable AI Technology License 1.0 (Apache-2.0 + attribution)",
+            commercial_use_ok=True,
+            requires_attribution=True,
+            url="https://github.com/limix-ldm-ai/LimiX/blob/main/LICENSE.txt",
+            notes=(
+                "TabTune loads LimiX-16M (stableai-org/LimiX-16M). The LimiX README lists "
+                "LimiX-16M and LimiX-2M under the Stable AI Technology Co., Ltd. License 1.0 "
+                "(Sept 2026): Apache-2.0 sections 1-9 plus section 10, which requires "
+                "displaying 'Built with StableAI LimiX' and a name starting with 'LimiX' for "
+                "derived models you distribute; internal research use triggers neither. "
+                "LimiX-2 weights are non-commercial and are not used by TabTune. "
+                "Checked 2026-09-28 against the GitHub LICENSE.txt and README; the Hugging "
+                "Face license file itself could not be fetched."
+            ),
         ),
         commercial_alternatives=_COMMERCIAL_FALLBACKS,
         paper="https://arxiv.org/abs/2509.03505",

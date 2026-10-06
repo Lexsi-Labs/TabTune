@@ -419,8 +419,8 @@ class ConformalRegressor:
       truth escapes the model's own ``[alpha/2, 1 - alpha/2]`` quantile band,
       and the band is widened (or tightened) by the conformal quantile. Interval
       widths adapt to the input, but the pipeline must expose
-      ``predict_quantiles`` - among TabTune models only the TabPFN regressor
-      family does today (see
+      ``predict_quantiles`` - among TabTune models the TabPFN regressor
+      family (v2 to v3.5-fast) and TabICLv2 do (see
       :meth:`~tabtune.TabularPipeline.pipeline.TabularPipeline.predict_quantiles`).
 
     Args:
@@ -452,9 +452,9 @@ class ConformalRegressor:
         if method == "cqr" and not hasattr(pipeline, "predict_quantiles"):
             raise ValueError(
                 f"method='cqr' needs a pipeline exposing predict_quantiles, and "
-                f"{type(pipeline).__name__} does not. In TabTune only the "
-                f"TabPFN regressor family supports native quantiles; for any "
-                f"other model use method='absolute', which needs only predict()."
+                f"{type(pipeline).__name__} does not. In TabTune the TabPFN "
+                f"regressor family and TabICLv2 support native quantiles; for "
+                f"any other model use method='absolute', which needs only predict()."
             )
         self.pipeline = pipeline
         self.method = method

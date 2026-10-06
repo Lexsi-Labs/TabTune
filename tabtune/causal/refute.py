@@ -2,26 +2,6 @@
 tabtune.causal.refute
 =====================
 
-**Step 3 of the causal discipline: Refute.**
-
-A causal estimate rests on assumptions that data alone cannot verify.
-This module stress-tests a fitted estimator to bound the consequences if
-those assumptions break:
-
-* **Placebo treatment** -- shuffle T at random; the new estimate should
-  collapse to (near) zero. Detects pipelines that find signal in noise.
-* **Random common cause** -- inject a synthetic noise covariate; the
-  estimate should barely move. Tests robustness to missing-confounder
-  misspecification.
-* **Data subset** -- refit on bootstrap subsamples; estimates should be
-  stable across resamples.
-* **Sensitivity** -- compute the E-value (Vanderweele & Ding, 2017)
-  reporting how strong an unobserved confounder must be to nullify the
-  result. Also returns Manski bounds when feasible.
-
-The module attempts to use ``dowhy.causal_refuters`` when the user
-supplied a graph and identification succeeded; otherwise it falls back
-to direct refit-based refuters that do not require DoWhy.
 """
 
 from __future__ import annotations
@@ -44,9 +24,6 @@ def _try_import_dowhy():
         return None
 
 
-# ---------------------------------------------------------------------------
-# Refuter
-# ---------------------------------------------------------------------------
 class Refuter:
     """
     Run a battery of robustness checks on a fitted causal estimator.
@@ -77,9 +54,7 @@ class Refuter:
         self.estimator_factory = estimator_factory
         self._original_ate: float | None = None
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+
     def run(
         self,
         checks: Iterable[str] = (
@@ -140,9 +115,6 @@ class Refuter:
         )
         return out
 
-    # ------------------------------------------------------------------
-    # Individual refuters
-    # ------------------------------------------------------------------
     def _refit_ate(self, df: pd.DataFrame) -> float:
         """Refit a fresh estimator on the given dataframe; return ATE."""
         if self.estimator_factory is None:
@@ -169,7 +141,6 @@ class Refuter:
             placebo_ate = self._refit_ate(df)
         except Exception as exc:
             return {"ate": None, "pass": False, "rule": f"error: {exc}"}
-        # Pass criterion: |placebo_ate| < 0.5 * |original_ate|
         threshold = 0.5 * abs(self._original_ate)
         passed = abs(placebo_ate) < threshold if threshold > 0 else abs(placebo_ate) < 0.05
         return {
@@ -189,7 +160,6 @@ class Refuter:
         df = self.df.copy()
         rcc_col = "__rcc_noise__"
         df[rcc_col] = rng.standard_normal(len(df))
-        # Temporarily extend confounders.
         original_confounders = list(self.estimator.confounders)
         try:
             est = self.estimator_factory()
@@ -253,9 +223,7 @@ class Refuter:
         ate = self._original_ate
         std_err = float(self.estimator.ate().get("std_error") or 0.0)
 
-        # E-value on the ATE itself (continuous-outcome variant).
         if std_err > 0:
-            # Approximate the risk-ratio scale via |ATE| / SD(Y).
             sd_y = float(
                 self.estimator._df[self.estimator.outcome].std(ddof=1)  # type: ignore[attr-defined]
             )

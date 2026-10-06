@@ -128,3 +128,92 @@ class TestPEFTExperimentalModels:
             # If it fails, that's expected for experimental support
             pytest.skip(f"PEFT not working for {model_name}: {e}")
 
+
+
+class TestFunctionalWeightLoRA:
+    """Coverage for the LoRA wrapper used where a weight is read, not called.
+
+    ``LoRALinear`` adds its delta inside ``forward``. Any caller that takes
+    ``layer.weight`` and applies it itself - a functional attention call, or a
+    bare ``F.linear`` - never runs that, so the adapters would be allocated,
+    counted as trainable, and have no effect on a single output.
+    """
+
+    @staticmethod
+    def _functional_module():
+        import torch
+        import torch.nn.functional as F
+
+        class FunctionallyApplied(torch.nn.Module):
+            def __init__(self) -> None:
+                super().__init__()
+                self.out_proj = torch.nn.Linear(4, 4)
+
+            def forward(self, x):
+                return F.linear(x, self.out_proj.weight, self.out_proj.bias)
+
+        return FunctionallyApplied()
+
+    def test_plain_wrapper_is_a_no_op_for_a_functional_caller(self) -> None:
+        from tabtune.TuningManager.peft_utils import (
+            LoRALinear,
+            inject_custom_lora_into_linear_layers,
+        )
+
+        import torch
+
+        model = self._functional_module()
+        x = torch.randn(3, 4)
+        inject_custom_lora_into_linear_layers(model, ["out_proj"], r=2, alpha=4)
+        assert isinstance(model.out_proj, LoRALinear)
+        with torch.no_grad():
+            before = model(x).clone()
+            model.out_proj.lora_B.weight.normal_(0.0, 1.0)
+            after = model(x)
+        assert torch.equal(before, after)
+
+    def test_functional_wrapper_reaches_the_same_caller(self) -> None:
+        from tabtune.TuningManager.peft_utils import (
+            FunctionalWeightLoRALinear,
+            inject_custom_lora_into_linear_layers,
+        )
+
+        import torch
+
+        model = self._functional_module()
+        x = torch.randn(3, 4)
+        inject_custom_lora_into_linear_layers(
+            model, ["out_proj"], r=2, alpha=4,
+            functional_weight_patterns=["out_proj"],
+        )
+        assert isinstance(model.out_proj, FunctionalWeightLoRALinear)
+        with torch.no_grad():
+            before = model(x).clone()
+            model.out_proj.lora_B.weight.normal_(0.0, 1.0)
+            after = model(x)
+        assert not torch.equal(before, after)
+
+    def test_functional_wrapper_is_still_correct_when_called(self) -> None:
+        """It must not double-count the delta for a normal module call."""
+        from tabtune.TuningManager.peft_utils import FunctionalWeightLoRALinear
+
+        import torch
+
+        base = torch.nn.Linear(4, 4)
+        wrapped = FunctionalWeightLoRALinear(base, r=2, alpha=4)
+        with torch.no_grad():
+            wrapped.lora_B.weight.normal_(0.0, 1.0)
+            x = torch.randn(3, 4)
+            called = wrapped(x)
+            merged = torch.nn.functional.linear(x, wrapped.weight, wrapped.bias)
+        assert torch.allclose(called, merged, atol=1e-5)
+
+    def test_it_is_off_unless_a_model_asks_for_it(self) -> None:
+        """Only models measured to need it opt in; the field defaults to empty."""
+        from tabtune.TuningManager.peft_utils import MODEL_LORA_TARGETS
+
+        opted_in = {
+            name for name, config in MODEL_LORA_TARGETS.items()
+            if config.functional_weight_substrings
+        }
+        assert opted_in == {"Causilo", "TabLDM"}

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tabtune"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   { name="Aditya Tanna", email="aditya.tanna@lexsi.ai" },
   { name="Pratinav Seth", email="pratinav.seth@lexsi.ai" },
@@ -50,6 +50,10 @@ dependencies = [
     "pydantic>=1.8.0,<3.0.0",
     "pydantic_settings>=2.0.0",
     "safetensors>=0.3.0",
+    # Required by the vendored TabPFN v3.5 tree: its text and datetime
+    # preprocessing import skrub at module level. Capped as upstream caps it,
+    # because skrub is pre-1.0 and its minor releases change transformer behavior.
+    "skrub>=0.7,<0.11",
     "omegaconf>=2.1.0",
     "psutil>=5.8.0",
     "torcheval>=0.0.6",
@@ -66,6 +70,8 @@ dependencies = [
     "scipy>=1.10.0",
     "xgboost>=2.0.0",
     "catboost>=1.2",
+    "rotary-embedding-torch>=0.8.6",
+    "jaxtyping>=0.2.29",
 ]
 
 [project.optional-dependencies]
@@ -81,6 +87,7 @@ dev = [
 ]
 docs = [
     "mkdocs>=1.5.0",
+    "mkdocs-cinder>=1.2.0",     # the theme mkdocs.yml uses
     "mkdocs-material>=9.0.0",
     "mkdocstrings[python]>=0.24.0",
     "mkdocs-mermaid2-plugin>=1.1.0",
@@ -116,9 +123,25 @@ causal = [
     "jinja2>=3.0.0",
 ]
 
+# Backend libraries for the vendored Toto 2.0 time series model: Datadog's
+# u-microP parameterisation, which its weights depend on, plus the shape
+# annotations its source uses. Named by TimeSeriesModelSpec(dependency_extra=
+# "toto2"), so a missing install is reported as `pip install 'tabtune[toto2]'`.
+# Deliberately NOT part of `all`: both declare requires-python >= 3.12, so
+# including them would break `pip install 'tabtune[all]'` on 3.10/3.11. They do
+# run on 3.11; installing there needs --ignore-requires-python.
+toto2 = [
+    "dd-unit-scaling>=0.1.0",
+    "jaxtyping>=0.2.25",
+]
+
+
 all = [
     "tabtune[interactive,causal,distillation,serving,docs]",
 ]
+
+[project.scripts]
+tabtune = "tabtune.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Lexsi-Labs/TabTune"
@@ -152,6 +175,10 @@ markers = [
     "weights: tests that download model weights",
     "integration: end-to-end tests across modules",
     "unit: fast, dependency-free unit tests",
+    "time_series: tests of the time series pipeline, schema and registry",
+    "model_chronos: tests of the Chronos time series adapters",
+    "model_timesfm: tests of the TimesFM time series adapter",
+    "model_toto: tests of the Toto time series adapter",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:pythonjsonlogger.*",

@@ -15,10 +15,13 @@ from ..TuningManager.tuning import TuningManager
 from ..models.tabpfn.classifier import TabPFNClassifier
 from ..models.tabpfnv26 import TabPFNv26Classifier
 from ..models.tabpfnv3 import TabPFNv3Classifier
+from ..models.tabpfnv35 import TabPFNv35Classifier, TabPFNv35FastClassifier
+from ..models.causilo import CausiloTabTuneClassifier
+from ..models.tabldm import TabLDMTabTuneClassifier
 from ..models.tabicl.sklearn.classifier import TabICLClassifier
 from ..models.contexttab.contexttab import ConTextTabClassifier
 from ..models.mitra.tab2d import Tab2D
-from ..models.mitra.model_loading import MITRA_CLASSIFIER_REPO
+from ..models.mitra.model_loading import MITRA_CLASSIFIER_REPO, resolve_mitra_repo
 from ..models.orion_bix.sklearn.classifier import OrionBixClassifier
 from ..models.tabdpt.classifier import TabDPTClassifier
 from ..models.orion_msp.sklearn.classifier import OrionMSPClassifier
@@ -35,6 +38,12 @@ from ..models.tabiclv2.sklearn.regressor import TabICLRegressor as TabICLv2Regre
 from ..models.regression.tabpfn.regressor import TabPFNRegressorWrapper
 from ..models.regression.tabpfnv26.regressor import TabPFNv26RegressorWrapper
 from ..models.regression.tabpfnv3.regressor import TabPFNv3RegressorWrapper
+from ..models.regression.tabpfnv35.regressor import (
+    TabPFNv35FastRegressorWrapper,
+    TabPFNv35RegressorWrapper,
+)
+from ..models.regression.causilo.regressor import CausiloRegressorWrapper
+from ..models.regression.tabldm.regressor import TabLDMRegressorWrapper
 from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
 from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
 from ..models.regression.mitra.regressor import MitraRegressorWrapper
@@ -49,6 +58,7 @@ from ..resampling.context_sampling import sample_context, normalize_sampling_str
 
 from .._internal.device import resolve_device, torch_device
 from .._internal.deprecation import warn_once
+from ..logger import log_banner, log_event, log_metrics, log_table, logged_operation
 from ..caching import make_cache, fingerprint_data
 from ..config.schemas import ProcessorConfig, TuningConfig
 from ..evaluation.metrics import compute_metrics
@@ -107,41 +117,40 @@ from sklearn.preprocessing import LabelEncoder
 
 logger = logging.getLogger(__name__)
 
-_BANNER = r"""
-  ████████╗ █████╗ ██████╗  ████████╗██╗   ██╗███╗   ██╗███████╗
-  ╚══██╔══╝██╔══██╗██╔══██╗ ╚══██╔══╝██║   ██║████╗  ██║██╔════╝
-     ██║   ███████║██████╔╝    ██║   ██║   ██║██╔██╗ ██║█████╗
-     ██║   ██╔══██║██╔══██╗    ██║   ██║   ██║██║╚██╗██║██╔══╝
-     ██║   ██║  ██║██████╔╝    ██║   ╚██████╔╝██║ ╚████║███████╗
-     ╚═╝   ╚═╝  ╚═╝╚═════╝     ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝
-
-Unified Library for Fine-Tuning and Inference of Foundational Tabular Models
-"""
-
-_BANNER_SHOWN = False
-
-
 def _log_banner() -> None:
-    """Log the TabTune banner once per process.
+    log_banner(logger, domain="tabular")
 
-    It used to be ``print``-ed from ``TabularPipeline.__init__``, which meant it
-    appeared once per cross-validation fold and once per ensemble member,
-    drowning the output it was framing. Routing it through the logger also lets
-    host applications silence it.
+
+def _native_tabpfn_regressor_types() -> tuple[type, ...]:
+    """Classes a native TabPFN v2.6 / v3 / v3.5 regression fine-tune can return.
     """
-    global _BANNER_SHOWN
-    if _BANNER_SHOWN:
-        return
-    _BANNER_SHOWN = True
-    logger.info("%s", _BANNER)
+    from ..models.tabpfnv26.regressor import TabPFNRegressor as V26Base
+    from ..models.tabpfnv3.regressor import TabPFNRegressor as V3Base
+
+    types: list[type] = [V26Base, V3Base]
+    try:
+        from ..models.tabpfnv35.finetuning.finetuned_regressor import FinetunedTabPFNRegressor
+        types.append(FinetunedTabPFNRegressor)
+    except ImportError:  
+        pass
+    return tuple(types)
+
+
+def _native_tabpfn_classifier_types() -> tuple[type, ...]:
+    """Classes a native TabPFN v3 / v3.5 classification fine-tune can return."""
+    from ..models.tabpfnv3.classifier import TabPFNClassifier as V3Base
+    from ..models.tabpfnv35.classifier import TabPFNClassifier as V35Base
+
+    types: list[type] = [V3Base, V35Base]
+    try:
+        from ..models.tabpfnv35.finetuning.finetuned_classifier import FinetunedTabPFNClassifier
+        types.append(FinetunedTabPFNClassifier)
+    except ImportError:  
+        pass
+    return tuple(types)
 
 
 class TabularPipeline:
-    """
-    The complete TabularPipeline with a robust constructor that
-    explicitly handles parameters for each component and uses late initialization
-    for complex models like ContextTab and Mitra.
-    """
     def __init__(self, model_name: str,
                  task_type: str = 'classification',
                  tuning_strategy: str = 'inference',
@@ -190,11 +199,6 @@ class TabularPipeline:
             UnsupportedStrategyError: Model does not implement ``tuning_strategy``.
             LicenseError: ``license_mode='commercial'`` and the weights forbid it.
 
-        .. versionchanged:: 0.2.0
-           Added ``cache``, ``envelope_mode``, ``license_mode`` and ``validate``.
-           The ASCII banner now logs once per process at INFO rather than being
-           printed on every construction - it previously fired once per fold in
-           ``cross_validate`` and once per member in every ensemble.
         """
         _log_banner()
 
@@ -227,16 +231,14 @@ class TabularPipeline:
         self.model = None 
         self.model_checkpoint_path = model_checkpoint_path
         if finetune_mode is None:
+            finetune_mode = self.tuning_params.get('finetune_mode')
+        if finetune_mode is None:
             if task_type == 'regression':
                 self.finetune_mode = 'turn_by_turn'
             else:
                 self.finetune_mode = 'meta-learning'
         else:
             self.finetune_mode = finetune_mode
-
-        # Registry validation. This is the cheap gate: it costs microseconds and
-        # runs before any multi-gigabyte checkpoint download, replacing the
-        # hardcoded regression-finetune allowlist that used to live here.
         if validate:
             try:
                 self.spec = validate_request(
@@ -244,12 +246,11 @@ class TabularPipeline:
                 )
                 check_license(self.spec, self.license_mode)
             except ModelNotFoundError:
-                pass  # already warned above
+                pass  
 
         proc_params = dict(self.processor_params)
 
         self.context_sampling_params = {
-            # allow either key name:
             "context_sampling_strategy": normalize_sampling_strategy_name(
                 proc_params.pop("context_sampling_strategy", None)
                 or proc_params.pop("context_resampling_strategy", None)
@@ -262,14 +263,11 @@ class TabularPipeline:
             "hybrid_ratio": proc_params.pop("hybrid_ratio", 0.7),
             "sampling_seed": proc_params.pop("sampling_seed", 42),
             "allow_replacement": proc_params.pop("allow_replacement", True),
-            # knobs
             "kmeans_centers": proc_params.pop("kmeans_centers", 2000),
             "min_pos": proc_params.pop("min_pos", 50),
             "oversample_weight": proc_params.pop("oversample_weight", 5.0),
         }
 
-        # Validate the remaining processor params so typos surface immediately
-        # rather than being silently swallowed by DataProcessor's **kwargs.
         ProcessorConfig.from_dict(
             {k: v for k, v in proc_params.items() if k != 'model_params'},
             context='processor_params',
@@ -281,48 +279,77 @@ class TabularPipeline:
 
         self.tuner = TuningManager()
 
-        # Validate tuning params against the typed schema. Unknown keys are
-        # forwarded unchanged (models accept their own kwargs) but now warn.
         self.tuning_config = TuningConfig.from_dict(
             self.tuning_params, context='tuning_params'
         )
 
         if self.tuning_strategy in ('finetune', 'peft'):
             self.tuning_params['finetune_mode'] = self.finetune_mode
-        
-        # Model initialization based on task_type
+            self.tuning_params.setdefault(
+                'device', resolve_device(self.model_params.get('device')))
+
         if self.task_type == 'regression':
-            # Regression models (inference-only)
             if self.model_name == 'TabPFN':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True, 'tuning_strategy': 'inference'}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] Config: {config}")
+                logger.debug(f"[Pipeline] Config: {config}")
                 self.model = TabPFNRegressorWrapper(**config)
             elif self.model_name == 'TabPFNv26':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabPFNv26 Config: {config}")
+                logger.debug(f"[Pipeline] TabPFNv26 Config: {config}")
                 self.model = TabPFNv26RegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
 
             elif self.model_name == 'TabPFNv3':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabPFNv3 Config: {config}")
+                logger.debug(f"[Pipeline] TabPFNv3 Config: {config}")
                 self.model = TabPFNv3RegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
+
+            elif self.model_name == 'TabPFNv35':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
+                config = {'device': device, 'ignore_pretraining_limits': True, 'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] TabPFNv35 Config: {config}")
+                self.model = TabPFNv35RegressorWrapper(**config)
+
+            elif self.model_name == 'TabPFNv35Fast':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
+                config = {'device': device, 'ignore_pretraining_limits': True, 'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] TabPFNv35Fast Config: {config}")
+                self.model = TabPFNv35FastRegressorWrapper(**config)
+
+            elif self.model_name == 'Causilo':
+                device = self.tuning_params.get('device', self.model_params.get('device', 'auto'))
+                config = {'device': device, 'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] Causilo Config: {config}")
+                self.model = CausiloRegressorWrapper(**config)
+                if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+                    self.model._initialize_model_variables()
+
+            elif self.model_name == 'TabLDM':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] TabLDM Config: {config}")
+                self.model = TabLDMRegressorWrapper(**config)
 
             elif self.model_name == 'ContextTab':
                 config = {'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
                 self.model = ConTextTabRegressorWrapper(**config)
             elif self.model_name == 'TabDPT':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {
                     'device': device,
                     'compile': True,
@@ -338,7 +365,7 @@ class TabularPipeline:
                 config.update(self.model_params)
                 self.model = TabDPTRegressorWrapper(**config)
             elif self.model_name == 'Limix':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {
                     'device': device,
                     'repo_id': 'stableai-org/LimiX-16M',
@@ -347,8 +374,8 @@ class TabularPipeline:
                 }
                 config.update(self.model_params)
                 self.model = LimixRegressorWrapper(**config)
-            elif self.model_name == 'Mitra':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+            elif self.model_name in ('Mitra', 'MitraV2'):
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {
                     'dim': 512, 
                     'n_layers': 12,  
@@ -357,83 +384,118 @@ class TabularPipeline:
                     'path_to_weights': '',
                     'device': device,
                     'tuning_strategy': 'inference',
-                    'cache_dir': self.model_params.get('cache_dir', None)
+                    'cache_dir': self.model_params.get('cache_dir', None),
+                    'pretrained_repo_id': resolve_mitra_repo(
+                        self.model_name, 'regression',
+                        variant=self.model_params.get('mitra_variant'),
+                    ),
                 }
                 config.update(self.model_params)
                 self.model = MitraRegressorWrapper(**config)
             elif self.model_name == 'TabICLv2':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'n_jobs': 1}
                 config.update(self.model_params)
                 self.model = TabICLv2Regressor(**config)
             elif self.model_name == 'TabFM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabFM (regression) Config: {config}")
+                logger.debug(f"[Pipeline] TabFM (regression) Config: {config}")
                 self.model = TabFMRegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
             elif self.model_name == 'XRFM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] XRFM (regression) Config: {config}")
+                logger.debug(f"[Pipeline] XRFM (regression) Config: {config}")
                 self.model = XRFMRegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
             elif self.model_name == 'ILTM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] ILTM (regression) Config: {config}")
+                logger.debug(f"[Pipeline] ILTM (regression) Config: {config}")
                 self.model = ILTMRegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
             elif self.model_name == 'EXAONETabular':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] EXAONETabular (regression) Config: {config}")
+                logger.debug(f"[Pipeline] EXAONETabular (regression) Config: {config}")
                 self.model = EXAONETabularRegressorWrapper(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
             else:
-                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, ContextTab, TabDPT, Mitra, Limix, TabICLv2, TabFM, XRFM, ILTM, EXAONETabular")
+                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, TabPFNv35, TabPFNv35Fast, Causilo, TabLDM, ContextTab, TabDPT, Mitra, Limix, TabICLv2, TabFM, XRFM, ILTM, EXAONETabular")
         else:
             
             if self.model_name in ['TabPFN']:
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] Config: {config}")
+                logger.debug(f"[Pipeline] Config: {config}")
                 self.model = TabPFNClassifier(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
 
             elif self.model_name == 'TabPFNv26': 
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabPFNv26 Config: {config}")
+                logger.debug(f"[Pipeline] TabPFNv26 Config: {config}")
                 self.model = TabPFNv26Classifier(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
 
             elif self.model_name == 'TabPFNv3':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'ignore_pretraining_limits': True}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabPFNv3 Config: {config}")
+                logger.debug(f"[Pipeline] TabPFNv3 Config: {config}")
                 self.model = TabPFNv3Classifier(**config)
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
+
+            elif self.model_name == 'TabPFNv35':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
+                config = {'device': device, 'ignore_pretraining_limits': True}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] TabPFNv35 Config: {config}")
+                self.model = TabPFNv35Classifier(**config)
+
+            elif self.model_name == 'TabPFNv35Fast':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
+                config = {'device': device, 'ignore_pretraining_limits': True}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] TabPFNv35Fast Config: {config}")
+                self.model = TabPFNv35FastClassifier(**config)
+
+            elif self.model_name == 'Causilo':
+                device = self.tuning_params.get('device', self.model_params.get('device', 'auto'))
+                config = {'device': device, 'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                logger.debug(f"[Pipeline] Causilo Config: {config}")
+                self.model = CausiloTabTuneClassifier(**config)
+                if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
+                    self.model._initialize_model_variables()
+
+            elif self.model_name == 'TabLDM':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] TabLDM Config: {config}")
+                self.model = TabLDMTabTuneClassifier(**config)
 
             elif self.model_name == 'ContextTab':
                 self.model = ConTextTabClassifier(**self.model_params)
     
             elif self.model_name in ['TabICL', 'OrionBix','OrionMSP', 'OrionMSPv1.5']:
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'n_jobs': 1, 'device': device}
                 config.update(self.model_params)
                 if self.model_name == 'TabICL':
@@ -454,35 +516,33 @@ class TabularPipeline:
                         self.model._load_model()
 
             elif self.model_name == 'TabDPT':
-                # Use GPU if available, otherwise fall back to CPU
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {
                     'device': device,
-                    'compile': True,  # Disable compilation to avoid GPU issues
-                    'use_flash': True,  # Disable flash attention to avoid kernel issues
+                    'compile': True,  
+                    'use_flash': True, 
                     'normalizer': 'standard',
                     'missing_indicators': False,
                     'clip_sigma': 4.0,
                     'feature_reduction': 'pca',
                     'faiss_metric': 'l2',
-                    # Inference parameters with GPU-friendly defaults
                     'n_ensembles': 8,
                     'temperature': 0.8,
                     'context_size': 512,
                     'permute_classes': True,
                     'seed': None,
                 }
-                config.update(self.model_params)  # All parameters now valid
+                config.update(self.model_params) 
                 self.model = TabDPTClassifier(**config)
 
             elif self.model_name == 'Limix':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device}
                 config.update(self.model_params)
                 self.model = LimixClassifier(**config)
 
             elif self.model_name == 'TabICLv2':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'n_jobs': 1, 'device': device}
                 config.update(self.model_params)
                 self.model = TabICLv2Classifier(**config)
@@ -490,42 +550,40 @@ class TabularPipeline:
                     self.model._load_model()
 
             elif self.model_name == 'TabFM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] TabFM Config: {config}")
+                logger.debug(f"[Pipeline] TabFM Config: {config}")
                 self.model = TabFMClassifier(**config)
                 if self.tuning_strategy in ('finetune', 'peft'):
                     self.model._load_model()
 
             elif self.model_name == 'XRFM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] XRFM Config: {config}")
+                logger.debug(f"[Pipeline] XRFM Config: {config}")
                 self.model = XRFMClassifier(**config)
-                # No pretrained weights to eager-load: xRFM trains from scratch at fit time.
 
             elif self.model_name == 'ILTM':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] ILTM Config: {config}")
+                logger.debug(f"[Pipeline] ILTM Config: {config}")
                 self.model = ILTMClassifier(**config)
                 if self.tuning_strategy in ('finetune', 'peft'):
                     self.model._load_model()
 
             elif self.model_name == 'EXAONETabular':
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 config = {'device': device, 'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
-                logger.info(f"[Pipeline] EXAONETabular Config: {config}")
+                logger.debug(f"[Pipeline] EXAONETabular Config: {config}")
                 self.model = EXAONETabularClassifier(**config)
                 if self.tuning_strategy in ('finetune', 'peft'):
                     self.model._load_model()
 
-            # Handle models that require late initialization (processor needs to be fit first)
-            elif self.model_name == 'Mitra':
+            elif self.model_name in ('Mitra', 'MitraV2'):
                 pass
             else:
                 raise ValueError(f"Model '{self.model_name}' not supported for classification.")
@@ -580,10 +638,9 @@ class TabularPipeline:
         try:
             if stop_embedding_server is not None and self.model_name == 'ContextTab':
                 stop_embedding_server()
-        except Exception:  # pragma: no cover - interpreter shutdown is hostile
+        except Exception: 
             pass
 
-    # ------------------------------------------------------------------ cache
 
     def _cache_scope(self) -> str:
         """Return a key identifying this fitted model for cache lookups.
@@ -615,7 +672,6 @@ class TabularPipeline:
         cfg = self.context_sampling_params or {}
         context_size = cfg.get("context_size", None)
 
-        # Not configured -> no-op
         if context_size is None:
             return X, y
 
@@ -677,6 +733,7 @@ class TabularPipeline:
         return self.processor.fit_resample(X, y)
 
 
+    @logged_operation()
     def fit(self, X: pd.DataFrame, y: pd.Series) -> "TabularPipeline":
         """Fit the preprocessing pipeline and adapt the model.
 
@@ -692,17 +749,10 @@ class TabularPipeline:
                 the model (for example TabFM's ten-class ceiling) and
                 ``envelope_mode`` is not ``'ignore'``.
 
-        .. versionchanged:: 0.2.0
-           Checks the capability envelope before loading weights, applies any
-           configured ``resampling_strategy`` (previously unreachable through
-           the pipeline), and invalidates cached predictions.
         """
         self.X_raw_train = X.copy()
         self.y_raw_train = y.copy()
-        # Fail fast on architectural limits, before any expensive work.
         self._check_envelope(X, y)
-
-        # A refit must not serve predictions cached by the previous fit.
         self._fit_counter += 1
 
         X_fit, y_fit = self._apply_context_sampling_if_configured(X, y)
@@ -710,7 +760,8 @@ class TabularPipeline:
         self.X_context_train_ = X_fit.copy()
         self.y_context_train_ = y_fit.copy()
 
-        logger.info("[Pipeline] Starting fit process")
+        log_event(logger, "data_received", "Tabular data received",
+                  rows=len(X), features=X.shape[1])
 
 
         if self.task_type == 'regression':
@@ -721,7 +772,7 @@ class TabularPipeline:
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
                 if self.tuning_strategy == "finetune":
                     logger.info(f"[Pipeline] Fine-tuning {self.model_name} regressor (raw data -> TuningManager)")
@@ -734,7 +785,7 @@ class TabularPipeline:
                         processor=None,   
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for ContextTab regression: {self.tuning_strategy}")
@@ -745,7 +796,7 @@ class TabularPipeline:
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data, no preprocessing)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -756,21 +807,20 @@ class TabularPipeline:
                         y_fit,
                         strategy="finetune",
                         params=self.tuning_params,
-                        processor=None,  # Limix uses raw data
+                        processor=None,  
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for Limix regression: {self.tuning_strategy}")
 
-            # TabICLv2 handles all preprocessing internally
             if isinstance(self.model, TabICLv2Regressor):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -784,18 +834,17 @@ class TabularPipeline:
                         processor=None,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for TabICLv2 regression: {self.tuning_strategy}")
 
-            # TabFM handles all preprocessing internally (raw mixed-type frames in)
             if isinstance(self.model, TabFMRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -809,18 +858,17 @@ class TabularPipeline:
                         processor=None,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for TabFM regression: {self.tuning_strategy}")
 
-            # XRFM handles all preprocessing internally (raw mixed-type frames in)
             if isinstance(self.model, XRFMRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -834,18 +882,17 @@ class TabularPipeline:
                         processor=None,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for XRFM regression: {self.tuning_strategy}")
 
-            # ILTM handles all preprocessing internally (raw mixed-type frames in)
             if isinstance(self.model, ILTMRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -859,18 +906,16 @@ class TabularPipeline:
                         processor=None,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for ILTM regression: {self.tuning_strategy}")
-
-            # EXAONE handles all preprocessing internally (raw mixed-type frames in)
             if isinstance(self.model, EXAONETabularRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (raw data)")
                     self.model.fit(X_fit, y_fit)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 if self.tuning_strategy == "finetune":
@@ -884,7 +929,7 @@ class TabularPipeline:
                         processor=None,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
 
                 raise ValueError(f"Unsupported tuning_strategy for EXAONETabular regression: {self.tuning_strategy}")
@@ -906,7 +951,7 @@ class TabularPipeline:
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (processed data)")
                     self.model.fit(X_to_tune, y_to_tune)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
  
                 if self.tuning_strategy == "finetune":
@@ -920,17 +965,17 @@ class TabularPipeline:
                         processor=self.processor,
                      )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
                 raise ValueError(f"Unsupported tuning_strategy for TabDPT regression: {self.tuning_strategy}")
 
             if isinstance(self.model, MitraRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (processed data)")
-                    # IMPORTANT: use processed data so train cache matches what predict will see
+              
                     self.model.fit(X_to_tune, y_to_tune)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
             
                 if self.tuning_strategy == "finetune":
@@ -944,15 +989,13 @@ class TabularPipeline:
                         processor=self.processor,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
             
                 raise ValueError(f"Unsupported tuning_strategy for Mitra regression: {self.tuning_strategy}")
 
             
 
-
-            # ---- TabPFNv26 regression ----
             if isinstance(self.model, TabPFNv26RegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode")
@@ -969,11 +1012,9 @@ class TabularPipeline:
                 else:
                     raise ValueError(f"Unsupported tuning_strategy for TabPFNv26 regression: {self.tuning_strategy}")
                 self._is_fitted = True
-                logger.info("[Pipeline] Fit process complete")
+                logger.debug("[Pipeline] Fit process complete")
                 return self
 
-            
-            # ---- TabPFNv3 regression ----
             if isinstance(self.model, TabPFNv3RegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode")
@@ -990,17 +1031,16 @@ class TabularPipeline:
                 else:
                     raise ValueError(f"Unsupported tuning_strategy for TabPFNv3 regression: {self.tuning_strategy}")
                 self._is_fitted = True
-                logger.info("[Pipeline] Fit process complete")
+                logger.debug("[Pipeline] Fit process complete")
                 return self
 
 
-            # ---- TabPFN regression ----
             if isinstance(self.model, TabPFNRegressorWrapper):
                 if self.tuning_strategy == "inference":
                     logger.info(f"[Pipeline] Fitting {self.model_name} regressor in inference mode (processed data)")
                     self.model.fit(X_to_tune, y_to_tune)
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
             
                 if self.tuning_strategy == "finetune":
@@ -1014,7 +1054,7 @@ class TabularPipeline:
                         processor=self.processor,
                     )
                     self._is_fitted = True
-                    logger.info("[Pipeline] Fit process complete")
+                    logger.debug("[Pipeline] Fit process complete")
                     return self
             
                 raise ValueError(f"Unsupported tuning_strategy for TabPFN regression: {self.tuning_strategy}")
@@ -1026,7 +1066,7 @@ class TabularPipeline:
             self.processor.fit(X_fit, y_fit)
             self.model = self.tuner.tune(self.model, X_fit, y_fit, strategy=self.tuning_strategy)
             self._is_fitted = True
-            logger.info("[Pipeline] Fit process complete")
+            logger.debug("[Pipeline] Fit process complete")
             return self
 
        
@@ -1038,33 +1078,27 @@ class TabularPipeline:
             logger.info(f"[Pipeline] Handing off to TuningManager for inference setup for {self.model_name}")
             self.model = self.tuner.tune(self.model, X_fit, y_fit, strategy=self.tuning_strategy)
             self._is_fitted = True
-            logger.info("[Pipeline] Fit process complete")
+            logger.debug("[Pipeline] Fit process complete")
             return self
 
         # Late initialization for models that need info from the fitted processor (classification only)
         if self.model is None and self.task_type == 'classification':
             logger.info("[Pipeline] Performing late initialization of the model...")
-            if self.model_name == 'Mitra':
+            if self.model_name in ('Mitra', 'MitraV2'):
                 n_classes = len(self.processor.custom_preprocessor_.label_encoder_.classes_)
-                device = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto'))))
                 self._mitra_n_classes = n_classes
 
-                # Mitra classification used to build a Tab2D here with
-                # use_pretrained_weights=False and no path_to_weights, i.e. a
-                # RANDOMLY INITIALISED network. It never loaded the checkpoint the
-                # registry declares (ModelSpec(name="Mitra").weights ==
-                # "autogluon/mitra-classifier"), so zero-shot Mitra scored at or
-                # below chance -- ROC-AUC under 0.5 -- while looking healthy,
-                # because nothing raised. The regression path never had this bug:
-                # MitraRegressorWrapper calls Tab2D.from_pretrained.
-                #
-                # Load the released classifier by default, and honour explicit
-                # overrides so a local checkpoint or a deliberate random init are
-                # still reachable.
                 user_params = dict(self.model_params or {})
                 explicit_weights = user_params.pop('path_to_weights', None)
                 use_pretrained = user_params.pop('use_pretrained_weights', 'auto')
-                repo_id = user_params.pop('pretrained_repo_id', MITRA_CLASSIFIER_REPO)
+                repo_id = user_params.pop(
+                    'pretrained_repo_id',
+                    resolve_mitra_repo(
+                        self.model_name, 'classification',
+                        variant=user_params.pop('mitra_variant', None),
+                    ),
+                )
                 user_params.pop('device', None)
 
                 self.model = None
@@ -1072,7 +1106,7 @@ class TabularPipeline:
                     source = explicit_weights or repo_id
                     try:
                         if explicit_weights:
-                            # A local file or directory the caller supplied.
+                            
                             if os.path.isdir(explicit_weights):
                                 self.model = Tab2D.from_pretrained(explicit_weights, device=device)
                             else:
@@ -1085,14 +1119,13 @@ class TabularPipeline:
                         else:
                             self.model = Tab2D.from_pretrained(source, device=device)
                         logger.info(
-                            "[Pipeline] Loaded pretrained Mitra classifier from '%s' "
+                            "[Pipeline] Loaded pretrained %s classifier from '%s' "
                             "(head width %s, task classes %s)",
-                            source, getattr(self.model, 'dim_output', '?'), n_classes,
+                            self.model_name, source,
+                            getattr(self.model, 'dim_output', '?'), n_classes,
                         )
                     except Exception as e:
                         if use_pretrained is True or explicit_weights:
-                            # The caller explicitly asked for these weights; failing
-                            # silently is how the original bug stayed invisible.
                             raise RuntimeError(
                                 f"[Pipeline] Could not load Mitra classifier weights from "
                                 f"'{source}': {e}"
@@ -1121,24 +1154,16 @@ class TabularPipeline:
                         logger.error(f"[Pipeline] Failed to load checkpoint: {e}")
 
         if hasattr(self.model, 'to'):
-            # Resolve whatever was asked for, rather than only the default.
-            # 'auto' is the library-wide spelling for "pick a backend" and is the
-            # default of TuningConfig.device, so it arrives here verbatim from
-            # tuning_params. Passing it straight to torch.device raised
-            # "Expected one of cpu, cuda, ... at start of device string: auto",
-            # which meant a fine-tune that did not name a device crashed for
-            # every model with a .to(). Routing the request through the shared
-            # resolver also clamps an out-of-range CUDA index and falls back to
-            # CPU with a warning instead of failing inside .to().
             requested_device = self.tuning_params.get(
                 'device', self.model_params.get('device')
             )
             device_str = resolve_device(requested_device)
             device = torch.device(device_str)
             self.model.to(device)
-            if self.model_name == 'Mitra':
+            if self.model_name in ('Mitra', 'MitraV2'):
                 try:
                     setattr(self.model, 'device_type', device_str)
+                    setattr(self.model, '_tabtune_model_name', self.model_name)
                 except Exception:
                     pass
             if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
@@ -1147,9 +1172,6 @@ class TabularPipeline:
 
         if (isinstance(self.model, ConTextTabClassifier) and self.tuning_strategy in ['finetune']) or \
            (isinstance(self.model, (TabFMClassifier, XRFMClassifier, ILTMClassifier, EXAONETabularClassifier)) and self.tuning_strategy in ['finetune', 'peft']):
-            # TabFM / XRFM / ILTM / EXAONE (like ContextTab) fine-tune on RAW frames: the vendored
-            # engine runs its own preprocessing (episode features / kernel numerics
-            # come from the vendored normalisation inside the TuningManager).
             logger.info(f"[Pipeline] Preparing raw data for {self.model_name} fine-tuning")
             if not isinstance(X_fit, pd.DataFrame):
                 X_to_tune = pd.DataFrame(X_fit)
@@ -1202,7 +1224,7 @@ class TabularPipeline:
             self.model.fit(X_to_tune, y_to_tune)
 
         self._is_fitted = True
-        logger.info("[Pipeline] Fit process complete")
+        logger.debug("[Pipeline] Fit process complete")
         if self.tuning_strategy == "peft":
             logger.info("[Pipeline] PEFT STATUS SUMMARY")
             logger.info("[Pipeline] LoRA adapters were applied to the model")
@@ -1211,6 +1233,7 @@ class TabularPipeline:
             logger.info("[Pipeline] See documentation for more details on PEFT limitations")
         return self
 
+    @logged_operation()
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         """Predict labels (classification) or values (regression).
 
@@ -1224,13 +1247,12 @@ class TabularPipeline:
         Raises:
             RuntimeError: If called before :meth:`fit`.
 
-        .. versionchanged:: 0.2.0
-           Routed through the prediction cache when one is configured.
         """
         return self.cache.get_or_compute(
             self._cache_scope(), X, "predict", lambda: self._predict_uncached(X)
         )
 
+    @logged_operation()
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         """Predict class probabilities.
 
@@ -1245,10 +1267,6 @@ class TabularPipeline:
             RuntimeError: If called before :meth:`fit`.
             NotImplementedError: For regression pipelines.
 
-        .. versionchanged:: 0.2.0
-           Routed through the prediction cache. ``evaluate()`` and
-           ``evaluate_calibration()`` previously triggered three full forward
-           passes over the test set for a single evaluation.
         """
         return self.cache.get_or_compute(
             self._cache_scope(), X, "predict_proba", lambda: self._predict_proba_uncached(X)
@@ -1309,16 +1327,12 @@ class TabularPipeline:
             {'ece': 0.061, 'mce': 0.19, 'brier': 0.31,
              'coverage': 0.905, 'avg_set_size': 1.4, 'sscs': 0.77, 'alpha': 0.1}
 
-        .. versionadded:: 0.2.0
         """
         if not self._is_fitted:
             raise RuntimeError(
                 "You must call fit() on the pipeline before uncertainty_report()."
             )
 
-        # Resolved at call time through the module object rather than bound at
-        # import time: the uncertainty package is lazily
-        # imported and stays monkeypatchable in tests.
         from tabtune import uncertainty as _uq
 
         return _uq.uncertainty_report(
@@ -1336,9 +1350,8 @@ class TabularPipeline:
         if not self._is_fitted:
             raise RuntimeError("You must call fit() on the pipeline before calling predict().")
         
-        logger.info("[Pipeline] Starting prediction")
-        
-        # Handle regression models
+        logger.debug("[Pipeline] Starting prediction")
+
         if self.task_type == 'regression':
             if isinstance(self.model, (ConTextTabRegressorWrapper, LimixRegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper, XRFMRegressorWrapper, ILTMRegressorWrapper, EXAONETabularRegressorWrapper)):
                 predictions = self.model.predict(X)
@@ -1354,7 +1367,7 @@ class TabularPipeline:
         elif hasattr(self.model, 'model_') and isinstance(self.model.model_, torch.nn.Module):
             self.model.model_.eval()
 
-        if isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier)):
+        if isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier, TabPFNv35Classifier, TabPFNv35FastClassifier)):
             if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context (without refitting weights)...")
                 saved_weights = self.model.model_.state_dict()
@@ -1373,9 +1386,18 @@ class TabularPipeline:
             return predictions
             
 
+        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier)):
+            logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
+            X_processed = self.processor.transform(X)
+            predictions = self.model.predict(X_processed)
+            label_encoder = getattr(self.processor.custom_preprocessor_, 'label_encoder_', None)
+            if getattr(label_encoder, 'classes_', None) is not None:
+                predictions = label_encoder.inverse_transform(
+                    np.asarray(predictions).ravel().astype(int)
+                )
+            return predictions
+
         if isinstance(self.model, (ConTextTabClassifier, TabFMClassifier, XRFMClassifier, ILTMClassifier, EXAONETabularClassifier)):
-            # TabFM / ConTextTab / XRFM / ILTM / EXAONE run their own preprocessing on RAW
-            # frames and return labels in the original space (inference AND after fine-tuning).
             logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
             predictions = self.model.predict(X)
 
@@ -1405,8 +1427,8 @@ class TabularPipeline:
                 predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions)
 
         
-        elif self.model_name == 'Mitra':
-            logger.debug("[Pipeline] Using in-context prediction for Mitra (Tab2D)")
+        elif self.model_name in ('Mitra', 'MitraV2'):
+            logger.debug("[Pipeline] Using in-context prediction for %s (Tab2D)", self.model_name)
             label_encoder = self.processor.custom_preprocessor_.label_encoder_
             known_class = label_encoder.classes_[0]
             y_dummy = pd.Series([known_class] * len(X))
@@ -1414,10 +1436,14 @@ class TabularPipeline:
             X_query, _ = self.processor.transform(X, y_dummy)
             
             X_support, y_support = self.X_train_processed_, self.y_train_processed_
-            
-            device_str = self.tuning_params.get('device', self.model_params.get('device', resolve_device('auto')))
-            device = device_str
-            
+ 
+            try:
+                device = next(self.model.parameters()).device
+            except (StopIteration, AttributeError):
+                device = torch_device(resolve_device(
+                    self.tuning_params.get('device', self.model_params.get('device'))))
+            device_str = str(device)
+
             X_support_t = torch.tensor(X_support, dtype=torch.float32).unsqueeze(0).to(device)
             y_support_t = torch.tensor(y_support, dtype=torch.long).unsqueeze(0).to(device)
             X_query_t = torch.tensor(X_query, dtype=torch.float32).unsqueeze(0).to(device)
@@ -1434,12 +1460,7 @@ class TabularPipeline:
                     padding_features=padding_features, padding_obs_support=padding_obs_support,
                     padding_obs_query__=padding_obs_query
                 )
-            
-            # The released Mitra checkpoint has a fixed-width classification head
-            # (dim_output from the checkpoint), which is >= the number of classes in
-            # this task. Trim to the task's classes before argmax, otherwise the
-            # argmax can land on a column the label encoder knows nothing about and
-            # inverse_transform either raises or silently mislabels.
+
             logits = self._trim_mitra_logits(logits)
             predictions_raw = logits.squeeze(0).cpu().numpy().argmax(axis=-1)
             predictions = self.processor.custom_preprocessor_.label_encoder_.inverse_transform(predictions_raw)
@@ -1484,46 +1505,62 @@ class TabularPipeline:
         return logits[..., :n_classes]
 
     def predict_quantiles(self, X: pd.DataFrame, quantiles: list[float] = None) -> dict:
-        """
-        Predict quantiles for regression tasks.
-        
-        Currently only supported for TabPFN regression models.
-        
+        """Predict quantiles for regression tasks.
+
+        Supported by the models whose regression head outputs a predictive
+        distribution: the TabPFN family (v2, v2.6, v3, v3.5, v3.5-fast; the
+        quantiles of TabPFN's bar distribution) and TabICLv2 (its quantile
+        head). Other models raise ``NotImplementedError``; wrap them in
+        :class:`~tabtune.uncertainty.ConformalRegressor` for intervals.
+
         Args:
-            X: Input data for prediction
-            quantiles: List of quantiles to predict (e.g., [0.1, 0.5, 0.9])
-                     Default: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        
+            X: Input data for prediction.
+            quantiles: Quantile levels in ``[0, 1]``
+                (default ``[0.1, 0.2, ..., 0.9]``).
+
         Returns:
-            dict: Dictionary mapping quantile values to prediction arrays
-                 e.g., {0.1: array([...]), 0.5: array([...]), ...}
+            dict: quantile level -> prediction array of shape ``(n_samples,)``,
+            e.g. ``{0.1: array([...]), 0.5: array([...]), ...}``.
+
         """
         if not self._is_fitted:
             raise RuntimeError("You must call fit() on the pipeline before calling predict_quantiles().")
-        
+
         if self.task_type != 'regression':
             raise ValueError("predict_quantiles() is only available for regression tasks.")
-        
+
         if quantiles is None:
             quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        
+        quantiles = [float(q) for q in quantiles]
+
         # Validate quantiles
         if not all(0 <= q <= 1 for q in quantiles):
             raise ValueError("All quantiles must be between 0 and 1.")
-        
+
         logger.info(f"[Pipeline] Starting quantile prediction for quantiles: {quantiles}")
-        
-        # Only TabPFN supports quantiles currently
-        if isinstance(self.model, TabPFNRegressorWrapper):
-            quantile_predictions = self.model.predict(X, output_type="quantiles", quantiles=quantiles)
-            result = {q: pred for q, pred in zip(quantiles, quantile_predictions)}
-            logger.info("[Pipeline] Quantile prediction complete")
-            return result
+
+        tabpfn_family = (
+            TabPFNRegressorWrapper,
+            TabPFNv26RegressorWrapper,
+            TabPFNv3RegressorWrapper,
+            TabPFNv35RegressorWrapper, 
+        ) + _native_tabpfn_regressor_types()  
+        if isinstance(self.model, tabpfn_family):
+            X_processed = self.processor.transform(X)
+            predictions = self.model.predict(X_processed, output_type="quantiles", quantiles=quantiles)
+            result = {q: np.asarray(pred) for q, pred in zip(quantiles, predictions)}
+        elif isinstance(self.model, TabICLv2Regressor):
+            predictions = np.asarray(self.model.predict(X, output_type="quantiles", alphas=quantiles))
+            predictions = predictions.reshape(len(X), len(quantiles))
+            result = {q: predictions[:, j] for j, q in enumerate(quantiles)}
         else:
             raise NotImplementedError(
                 f"Quantile prediction is not yet supported for {self.model_name}. "
-                "Currently only TabPFN supports quantile predictions."
+                "Supported: TabPFN (v2, v2.6, v3, v3.5, v3.5-fast) and TabICLv2; use "
+                "tabtune.uncertainty.ConformalRegressor for intervals with other models."
             )
+        logger.info("[Pipeline] Quantile prediction complete")
+        return result
 
     def predict_intervals(self, X: pd.DataFrame, confidence: float = 0.95) -> dict:
         """
@@ -1535,9 +1572,6 @@ class TabularPipeline:
         coverage on TabPFN itself - wrap the fitted pipeline in
         :class:`tabtune.uncertainty.ConformalRegressor`, which needs only
         ``predict`` and a held-out calibration split.
-
-        .. versionchanged:: 0.2.0
-           Documented the conformal alternative; behaviour is unchanged.
         """
         if not self._is_fitted:
             raise RuntimeError("You must call fit() on the pipeline before calling predict_intervals().")
@@ -1596,21 +1630,29 @@ class TabularPipeline:
             X_processed = self.processor.transform(X)
             return self.model.ensemble_predict_proba(X_processed)
 
-        elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier)):
+        elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier, TabPFNv35Classifier, TabPFNv35FastClassifier)):
             if self.tuning_strategy in ['finetune', 'peft']:
                 logger.debug("[Pipeline] Setting TabPFN inference context for proba...")
                 self.model.fit(self.X_train_processed_, self.y_train_processed_)
             
             X_processed = self.processor.transform(X)
             return self.model.predict_proba(X_processed)
+
+        elif isinstance(self.model, _native_tabpfn_classifier_types()):
+            logger.debug(f"[Pipeline] Using {type(self.model).__name__}.predict_proba after native fine-tuning")
+            return self.model.predict_proba(self.processor.transform(X))
             
         
+        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier)):
+            logger.debug(f"[Pipeline] Using model's native predict_proba for {type(self.model).__name__}")
+            return self.model.predict_proba(self.processor.transform(X))
+
         if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, ConTextTabClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier, TabFMClassifier, XRFMClassifier, ILTMClassifier, EXAONETabularClassifier)):
             logger.debug("[Pipeline] Using model's native predict_proba method")
 
             X_processed = self.processor.transform(X)
             if isinstance(self.model, (ConTextTabClassifier, TabFMClassifier, XRFMClassifier, ILTMClassifier, EXAONETabularClassifier)):
-                 # TabFM / ConTextTab / XRFM / ILTM / EXAONE: raw-frame native predict_proba (both modes).
+                 
                  return self.model.predict_proba(X)
 
             if isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, LimixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
@@ -1661,14 +1703,13 @@ class TabularPipeline:
                     padding_features=padding_features, padding_obs_support=padding_obs_support,
                     padding_obs_query__=padding_obs_query
                 )
-                # Trim the fixed-width pretrained head to this task's classes BEFORE
-                # the softmax, so the returned columns line up 1:1 with
-                # label_encoder_.classes_ and the probabilities still sum to 1.
                 logits = self._trim_mitra_logits(logits)
                 probabilities = torch.softmax(logits.squeeze(0), dim=-1).cpu().numpy()
             else:
-                 if self.model_name == 'Mitra':
-                    raise NotImplementedError("predict_proba is not implemented for Mitra (Tab2D)")
+                 if self.model_name in ('Mitra', 'MitraV2'):
+                    raise NotImplementedError(
+                        f"predict_proba is not implemented for {self.model_name} (Tab2D)"
+                    )
         
         logger.info("[Pipeline] Probability prediction complete")
         return probabilities
@@ -1685,9 +1726,6 @@ class TabularPipeline:
             return list(self.model.classes_)
         if hasattr(self.model, "y_encoder_") and hasattr(self.model.y_encoder_, "classes_"):
             return list(self.model.y_encoder_.classes_)
-        # Models that delegate label encoding to their preprocessor expose the
-        # ordering there. The third branch here used to be a verbatim repeat of
-        # the first, so this case was unreachable.
         custom = getattr(self.processor, "custom_preprocessor_", None)
         encoder = getattr(custom, "label_encoder_", None) if custom is not None else None
         if encoder is not None and hasattr(encoder, "classes_"):
@@ -1773,6 +1811,7 @@ class TabularPipeline:
         return aligned
 
 
+    @logged_operation()
     def evaluate(self, X_test: pd.DataFrame, y_test: pd.Series, output_format: str = 'rich'):
         """
         Makes predictions on the test set and prints a report with
@@ -1781,8 +1820,8 @@ class TabularPipeline:
         if not self._is_fitted:
             raise RuntimeError("You must call fit() on the pipeline before evaluating.")
         
-        logger.info("\n" + "="*60)
-        logger.info("[Pipeline] Running Evaluation")
+        if output_format not in ("rich", "json", None):
+            raise ValueError("output_format must be 'rich', 'json', or None")
         
         predictions = self.predict(X_test)
         
@@ -1794,7 +1833,7 @@ class TabularPipeline:
                 y_test_encoded = self.processor.custom_preprocessor_.label_encoder_.transform(y_test)
             elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
                 y_test_encoded = self.model.y_encoder_.transform(y_test)
-            elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier)):
+            elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier, TabPFNv35Classifier, TabPFNv35FastClassifier)):
                 le = LabelEncoder()
                 le.classes_ = self.model.classes_
                 y_test_encoded = le.transform(y_test)
@@ -1822,7 +1861,7 @@ class TabularPipeline:
                     le = self.processor.custom_preprocessor_.label_encoder_
                 elif isinstance(self.model, (TabICLClassifier, OrionBixClassifier, OrionMSPClassifier, OrionMSPv15Classifier)):
                     le = self.model.y_encoder_
-                elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier)):
+                elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier, TabPFNv35Classifier, TabPFNv35FastClassifier)):
                     le = LabelEncoder(); le.classes_ = self.model.classes_
                 elif hasattr(self.processor, 'label_encoder_') and self.processor.label_encoder_ is not None:
                     le = self.processor.label_encoder_
@@ -1857,45 +1896,16 @@ class TabularPipeline:
              y_pred = predictions
              results = self._calculate_regression_metrics(y_true, y_pred)
 
-             if output_format == 'rich':
-                logger.info("\n" + "="*60)
-                logger.info("[Pipeline] Running Evaluation")
-                logger.info("\n[Pipeline] Regression Evaluation Report")
-                logger.info(f"[Pipeline] MSE: {results['mse']:.4f}")
-                logger.info(f"[Pipeline] RMSE: {results['rmse']:.4f}")
-                logger.info(f"[Pipeline] MAE: {results['mae']:.4f}")
-                logger.info(f"[Pipeline] R2 Score: {results['r2_score']:.4f}")
-                if 'mape' in results and results['mape'] is not None:
-                    logger.info(f"[Pipeline] MAPE: {results['mape']:.4f}%")
-                if 'medae' in results:
-                    logger.info(f"[Pipeline] MedAE: {results['medae']:.4f}")
-                if 'explained_variance' in results:
-                    logger.info(f"[Pipeline] Explained Variance: {results['explained_variance']:.4f}")
-                if 'max_error' in results:
-                    logger.info(f"[Pipeline] Max Error: {results['max_error']:.4f}")
-                if 'msle' in results and results['msle'] is not None:
-                    logger.info(f"[Pipeline] MSLE: {results['msle']:.4f}")
-                logger.info("="*60)
-             elif output_format == 'json':
-                print(json.dumps(results, indent=4))
-
-        if output_format == 'json' and self.task_type == 'classification':
-                print(json.dumps(results, indent=4))
-        elif output_format == 'rich' and self.task_type == 'classification':
-                logger.info("\n" + "="*60)
-                logger.info("[Pipeline] Running Evaluation")
-                logger.info("\n[Pipeline] Evaluation Report")
-                logger.info(f"[Pipeline] Accuracy: {accuracy:.4f}")
-                logger.info(f"[Pipeline] Weighted F1-Score: {f1:.4f}")
-                logger.info(f"[Pipeline] Weighted Precision: {precision:.4f}")
-                logger.info(f"[Pipeline] Weighted Recall: {recall:.4f}")
-                logger.info(f"[Pipeline] MCC: {mcc:.4f}")
-                logger.info(f"[Pipeline] ROC AUC Score: {auc:.4f}")
-                logger.info("\n[Pipeline] Classification Report")
-                logger.info(classification_report(y_test, predictions, zero_division=0))
-                logger.info("="*60)
-        else:
-            logger.warning(f"[Pipeline] Unknown output_format: '{output_format}'. No output printed.")
+        if output_format == 'json':
+            print(json.dumps(results, indent=4))
+        elif output_format == 'rich':
+            log_metrics(logger, results, title=f"{self.task_type.capitalize()} evaluation")
+            if self.task_type == 'classification':
+                report = classification_report(y_test, predictions, zero_division=0, output_dict=True)
+                rows = [(label, values.get('precision'), values.get('recall'),
+                         values.get('f1-score'), values.get('support'))
+                        for label, values in report.items() if isinstance(values, dict)]
+                log_table(logger, "Classification report", ["Class", "Precision", "Recall", "F1", "Support"], rows)
 
         return results
 
@@ -1957,8 +1967,7 @@ class TabularPipeline:
             'skewness': stats.skew(residuals),
             'kurtosis': stats.kurtosis(residuals)
         }
-        
-        # Normality test (Shapiro-Wilk for small samples, otherwise D'Agostino)
+
         if len(residuals) <= 5000:
             try:
                 shapiro_stat, shapiro_p = stats.shapiro(residuals)
@@ -1972,7 +1981,6 @@ class TabularPipeline:
                 logger.warning(f"[Pipeline] Could not perform Shapiro-Wilk test: {e}")
         else:
             try:
-                # D'Agostino's test for larger samples
                 k2_stat, k2_p = stats.normaltest(residuals)
                 results['normality_test'] = {
                     'test': 'd_agostino',
@@ -2018,29 +2026,25 @@ class TabularPipeline:
         
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))
         fig.suptitle('Residual Analysis Plots', fontsize=14)
-        
-        # 1. Residuals vs Predicted
+
         axes[0, 0].scatter(predictions, residuals, alpha=0.5)
         axes[0, 0].axhline(y=0, color='r', linestyle='--')
         axes[0, 0].set_xlabel('Predicted Values')
         axes[0, 0].set_ylabel('Residuals')
         axes[0, 0].set_title('Residuals vs Predicted')
         axes[0, 0].grid(True, alpha=0.3)
-        
-        # 2. Q-Q Plot
+
         stats.probplot(residuals, dist="norm", plot=axes[0, 1])
         axes[0, 1].set_title('Q-Q Plot (Normality Check)')
         axes[0, 1].grid(True, alpha=0.3)
-        
-        # 3. Residuals Histogram
+
         axes[1, 0].hist(residuals, bins=30, edgecolor='black', alpha=0.7)
         axes[1, 0].axvline(x=0, color='r', linestyle='--')
         axes[1, 0].set_xlabel('Residuals')
         axes[1, 0].set_ylabel('Frequency')
         axes[1, 0].set_title('Residuals Distribution')
         axes[1, 0].grid(True, alpha=0.3)
-        
-        # 4. Residuals vs Index (for detecting patterns)
+
         axes[1, 1].plot(residuals, alpha=0.5)
         axes[1, 1].axhline(y=0, color='r', linestyle='--')
         axes[1, 1].set_xlabel('Sample Index')
@@ -2069,11 +2073,10 @@ class TabularPipeline:
         Returns:
             dict: Dictionary containing all regression metrics
         """
-        # Convert to numpy arrays if needed
+
         y_true = np.array(y_true).flatten()
         y_pred = np.array(y_pred).flatten()
-        
-        # Basic metrics
+
         mse = mean_squared_error(y_true, y_pred)
         rmse = np.sqrt(mse)
         mae = mean_absolute_error(y_true, y_pred)
@@ -2086,21 +2089,16 @@ class TabularPipeline:
             "r2_score": r2
         }
         
-        # Additional metrics
-        # Median Absolute Error
+
         medae = median_absolute_error(y_true, y_pred)
         results["medae"] = medae
-        
-        # Explained Variance Score
+
         explained_variance = explained_variance_score(y_true, y_pred)
         results["explained_variance"] = explained_variance
-        
-        # Max Error
+
         max_err = max_error(y_true, y_pred)
         results["max_error"] = max_err
-        
-        # Mean Absolute Percentage Error (MAPE)
-        # Handle zero division: if any y_true is zero, MAPE is undefined
+
         if np.any(y_true == 0):
             mape = None
             logger.debug("[Pipeline] MAPE not calculated: some true values are zero")
@@ -2108,8 +2106,7 @@ class TabularPipeline:
             mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
         results["mape"] = mape
         
-        # Mean Squared Log Error (MSLE)
-        # Only calculate if all values are positive
+
         if np.all(y_true > 0) and np.all(y_pred > 0):
             msle = mean_squared_log_error(y_true, y_pred)
             results["msle"] = msle
@@ -2170,7 +2167,7 @@ class TabularPipeline:
         """
         logger.info("\n" + "="*60)
         summary = self.processor.get_processing_summary()
-        # Log the multi-line summary as a single message
+       
         summary_lines = summary.split('\n')
         
         for line in summary_lines:
@@ -2203,6 +2200,7 @@ class TabularPipeline:
                 
         return ece, mce
 
+    @logged_operation()
     def evaluate_calibration(self, X_test: pd.DataFrame, y_test: pd.Series, n_bins: int = 15, output_format: str = 'rich'):
         """
         Calculates and provides a detailed report on model calibration metrics.
@@ -2211,21 +2209,19 @@ class TabularPipeline:
         if not self._is_fitted:
             raise RuntimeError("You must call fit() on the pipeline before evaluating calibration.")
 
-        # --- Metric Calculation (common for all formats) ---
         probabilities = self.predict_proba(X_test)
 
-        # 1. Find the correct label encoder (same logic as in evaluate())
         le = None
         if hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
             le = self.processor.custom_preprocessor_.label_encoder_
         elif isinstance(self.model, (TabICLClassifier, OrionBixClassifier, OrionMSPClassifier, OrionMSPv15Classifier)):
-            # Use model's internal encoder if in inference mode
+           
             if hasattr(self.model, 'y_encoder_'):
                 le = self.model.y_encoder_
-            # Use processor's encoder if in finetune mode
+            
             elif hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
                  le = self.processor.custom_preprocessor_.label_encoder_
-        elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier)):
+        elif isinstance(self.model, (TabPFNClassifier, TabPFNv26Classifier, TabPFNv3Classifier, TabPFNv35Classifier, TabPFNv35FastClassifier)):
             if hasattr(self.model, 'classes_'):
                 le = LabelEncoder()
                 le.classes_ = self.model.classes_
@@ -2235,33 +2231,24 @@ class TabularPipeline:
         if le is None:
              raise RuntimeError("Could not find a fitted label encoder to evaluate calibration.")
 
-        # 2. Encode y_test using the found encoder
+        
         y_test_encoded = le.transform(y_test)
-        
-        # 3. Align probability columns to match the encoder's class order
-        probs_aligned = self._align_proba_to_encoder(probabilities, le)
 
-        # 4. Calculate metrics using the aligned probabilities
-        # brier_score_loss handles (n_samples, n_classes) for multiclass
-        # when y_true is (n_samples,) with integer labels [0, K-1].
-        
-        # Validate inputs before calculating Brier score
+        probs_aligned = self._align_proba_to_encoder(probabilities, le)
         if probs_aligned is None:
             logger.warning("[Pipeline] Probabilities are None, skipping Brier score calculation")
             brier_score = float('nan')
         else:
-            # Check for NaN or infinite values
+
             if np.any(np.isnan(probs_aligned)) or np.any(np.isinf(probs_aligned)):
                 logger.warning("[Pipeline] Probabilities contain NaN or infinite values, skipping Brier score calculation")
                 brier_score = float('nan')
             else:
-                # Validate that probabilities sum to 1.0 (within tolerance)
                 prob_sums = np.sum(probs_aligned, axis=1)
                 if not np.allclose(prob_sums, 1.0, rtol=1e-6):
                     logger.warning(f"[Pipeline] Probabilities don't sum to 1.0 (range: {prob_sums.min():.6f} to {prob_sums.max():.6f})")
                     logger.warning("[Pipeline] This may indicate model calibration issues")
-                
-                # Validate that y_test_encoded contains valid class indices
+
                 max_class_idx = len(le.classes_) - 1
                 if np.any(y_test_encoded < 0) or np.any(y_test_encoded > max_class_idx):
                     logger.warning(f"[Pipeline] Invalid class indices in y_test_encoded (range: {y_test_encoded.min()} to {y_test_encoded.max()})")
@@ -2273,8 +2260,7 @@ class TabularPipeline:
                     except Exception as e:
                         logger.error(f"[Pipeline] Error calculating Brier score: {e}")
                         brier_score = float('nan')
-        
-        # _calculate_calibration_errors also works with (n, K) probability matrix
+
         if probs_aligned is None:
             logger.warning("[Pipeline] Probabilities are None, skipping ECE and MCE calculation")
             ece, mce = float('nan'), float('nan')
@@ -2328,7 +2314,6 @@ class TabularPipeline:
         else:
             logger.warning(f"[Pipeline] Unknown output_format: '{output_format}'. No console output printed.")
 
-        # The method still returns the dictionary for programmatic use
         return results
 
     def evaluate_interval_calibration(self, X_test: pd.DataFrame, y_test: pd.Series, 
@@ -2363,7 +2348,7 @@ class TabularPipeline:
         if self.task_type != 'regression':
             raise ValueError("evaluate_interval_calibration() is only available for regression tasks.")
         
-        # Check if model supports prediction intervals
+       
         if not isinstance(self.model, TabPFNRegressorWrapper):
             raise NotImplementedError(
                 f"Interval calibration is not yet supported for {self.model_name}. "
@@ -2371,33 +2356,26 @@ class TabularPipeline:
             )
         
         logger.info(f"[Pipeline] Evaluating interval calibration for {confidence*100:.1f}% confidence intervals")
-        
-        # Get prediction intervals
+
         intervals = self.predict_intervals(X_test, confidence=confidence)
         y_true = np.array(y_test).flatten()
         lower = intervals['lower']
         upper = intervals['upper']
-        
-        # Calculate coverage: fraction of true values within intervals
+
         in_interval = (y_true >= lower) & (y_true <= upper)
         coverage_probability = np.mean(in_interval)
         coverage_error = abs(coverage_probability - confidence)
-        
-        # Calculate average interval width
         interval_widths = upper - lower
         average_interval_width = np.mean(interval_widths)
-        
-        # Reliability diagram: bin by predicted value and calculate coverage per bin
+
         predictions = intervals['mean']
         reliability_data = []
-        
-        # Create bins based on predicted values
         pred_min, pred_max = np.min(predictions), np.max(predictions)
         bin_edges = np.linspace(pred_min, pred_max, n_bins + 1)
         
         for i in range(n_bins):
             bin_mask = (predictions >= bin_edges[i]) & (predictions < bin_edges[i+1])
-            if i == n_bins - 1:  # Include right edge for last bin
+            if i == n_bins - 1:  
                 bin_mask = (predictions >= bin_edges[i]) & (predictions <= bin_edges[i+1])
             
             if np.sum(bin_mask) > 0:
@@ -2443,7 +2421,6 @@ class TabularPipeline:
             logger.info("="*80)
             
         elif output_format == 'json':
-            # Convert reliability_data to JSON-serializable format
             json_results = {
                 "coverage_probability": float(coverage_probability),
                 "nominal_coverage": float(confidence),
@@ -2462,6 +2439,7 @@ class TabularPipeline:
         
         return results
         
+    @logged_operation()
     def evaluate_fairness(self, X_test: pd.DataFrame, y_test: pd.Series, sensitive_features: pd.Series, output_format: str = 'rich'):
         """
         Calculates and provides a detailed report on group fairness metrics.
@@ -2496,23 +2474,22 @@ class TabularPipeline:
                         'mean_residual': np.mean(group_y_true - group_y_pred),
                         'count': len(group_y_true)
                     }
-            
-            # Calculate fairness metrics
+
             if len(groups) >= 2:
                 group_list = list(groups)
-                # Mean prediction difference (statistical parity for regression)
+                
                 mean_pred_diff = abs(group_stats[group_list[0]]['mean_prediction'] - 
                                     group_stats[group_list[1]]['mean_prediction'])
                 
-                # Residual difference (equalized residuals)
+                
                 residual_diff = abs(group_stats[group_list[0]]['mean_residual'] - 
                                    group_stats[group_list[1]]['mean_residual'])
                 
-                # MSE difference
+               
                 mse_diff = abs(group_stats[group_list[0]]['mse'] - 
                               group_stats[group_list[1]]['mse'])
                 
-                # MAE difference
+                
                 mae_diff = abs(group_stats[group_list[0]]['mae'] - 
                               group_stats[group_list[1]]['mae'])
             else:
@@ -2654,10 +2631,6 @@ class TabularPipeline:
             raise RuntimeError("You must call fit() on the pipeline before getting feature importance.")
         
         if method == 'shap':
-            # Previously this logged a warning and silently substituted
-            # permutation importance, so callers received numbers that were not
-            # what they asked for and had no way to tell. Failing loudly is the
-            # honest behaviour until a real SHAP path exists.
             raise NotImplementedError(
                 "method='shap' is not implemented for TabularPipeline. TabTune "
                 "previously fell back to permutation importance here without "
@@ -2670,8 +2643,6 @@ class TabularPipeline:
             )
 
         if method == 'permutation':
-            # Use manual permutation importance implementation
-            # (sklearn's permutation_importance may not work with TabularPipeline due to sklearn compatibility)
             if y is None:
                 # Use predictions as baseline
                 y = self.predict(X)
@@ -2711,27 +2682,20 @@ class TabularPipeline:
             feature_importances = []
             
             for _ in range(n_repeats):
-                # Permute the feature
                 X_permuted[feature_name] = np.random.permutation(X_permuted[feature_name].values)
-                
-                # Calculate score with permuted feature
+
                 if self.task_type == 'regression':
                     permuted_pred = self.predict(X_permuted)
                     permuted_score = r2_score(y, permuted_pred)
                 else:
                     permuted_pred = self.predict(X_permuted)
                     permuted_score = accuracy_score(y, permuted_pred)
-                
-                # Importance is the decrease in score
                 importance = baseline_score - permuted_score
                 feature_importances.append(importance)
-                
-                # Restore original feature
                 X_permuted[feature_name] = X[feature_name]
             
             importances[feature_name] = np.mean(feature_importances)
-        
-        # Sort by importance (descending)
+
         importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
         
         return importances
@@ -2741,12 +2705,12 @@ class TabularPipeline:
         y_true_encoded = None
         y_pred_encoded = None
 
-        # Find the correct LabelEncoder
+        
         le = None
         if hasattr(self.processor, 'custom_preprocessor_') and hasattr(self.processor.custom_preprocessor_, 'label_encoder_'):
             le = self.processor.custom_preprocessor_.label_encoder_
         elif isinstance(self.model, (TabICLClassifier, OrionMSPClassifier, OrionBixClassifier, TabPFNClassifier, OrionMSPv15Classifier, TabICLv2Classifier)):
-             # Fit a temporary encoder on the training labels seen during .fit()
+             
             le = LabelEncoder().fit(self.y_train_processed_ if self.y_train_processed_ is not None else y_true)
         elif isinstance(self.model, LimixClassifier) and hasattr(self.model, 'le_'):
              le = self.model.le_
@@ -2754,12 +2718,13 @@ class TabularPipeline:
             raise RuntimeError("Could not find a fitted label encoder to evaluate metrics.")
 
         y_true_encoded = le.transform(y_true)
-        # Handle cases where y_pred might be different (e.g., raw y_test for fairness)
+        
         if y_pred is not None:
             y_pred_encoded = le.transform(y_pred)
             
         return y_true_encoded, y_pred_encoded
 
+    @logged_operation()
     def cross_validate(self, X: pd.DataFrame, y: pd.Series, cv: int = 5, 
                       scoring: list = None, random_state: int = None) -> dict:
         """
@@ -2790,13 +2755,12 @@ class TabularPipeline:
             else:
                 scoring = ['accuracy', 'f1_score', 'roc_auc_score']
         
-        # Prepare CV splitter
+        
         if self.task_type == 'classification':
             kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=random_state)
         else:
             kf = KFold(n_splits=cv, shuffle=True, random_state=random_state)
-        
-        # Initialize results storage
+
         fold_scores = {metric: [] for metric in scoring}
         fit_times = []
         score_times = []
@@ -2811,8 +2775,7 @@ class TabularPipeline:
             X_test_fold = X.iloc[test_idx]
             y_train_fold = y.iloc[train_idx]
             y_test_fold = y.iloc[test_idx]
-            
-            # Create a new pipeline instance for this fold
+
             fold_pipeline = TabularPipeline(
                 model_name=self.model_name,
                 task_type=self.task_type,
@@ -2821,8 +2784,7 @@ class TabularPipeline:
                 model_params=self.model_params.copy() if self.model_params else {},
                 processor_params=self.processor_params.copy() if self.processor_params else {}
             )
-            
-            # Fit and evaluate
+
             import time
             start_fit = time.time()
             fold_pipeline.fit(X_train_fold, y_train_fold)
@@ -2830,26 +2792,22 @@ class TabularPipeline:
             fit_times.append(fit_time)
             
             start_score = time.time()
-            # evaluate() returns a dict regardless of output_format
             metrics = fold_pipeline.evaluate(X_test_fold, y_test_fold, output_format='json')
             score_time = time.time() - start_score
             score_times.append(score_time)
-            
-            # Store scores for each metric
+
             for metric in scoring:
                 if metric in metrics:
                     fold_scores[metric].append(metrics[metric])
                 else:
                     logger.warning(f"[Pipeline] Metric '{metric}' not found in evaluation results for fold {fold_idx + 1}")
                     fold_scores[metric].append(np.nan)
-        
-        # Calculate mean and std for each metric
+
         mean_scores = {}
         std_scores = {}
         
         for metric in scoring:
             scores = np.array(fold_scores[metric])
-            # Filter out NaN values
             valid_scores = scores[~np.isnan(scores)]
             if len(valid_scores) > 0:
                 mean_scores[metric] = np.mean(valid_scores)
@@ -2904,13 +2862,10 @@ class TabularPipeline:
 
         logger.info("Preparing data for AutoGluon...")
 
-        # Prepare data with target column
         X_train_with_label = X_train.copy()
         X_train_with_label['__target__'] = y_train.values if hasattr(y_train, 'values') else y_train
         X_test_with_label = X_test.copy()
         X_test_with_label['__target__'] = y_test.values if hasattr(y_test, 'values') else y_test
-
-        # Configure model hyperparameters
         hyperparameters = None
         if models is not None:
             models_to_run = [models] if isinstance(models, str) else models
@@ -2921,7 +2876,6 @@ class TabularPipeline:
             ag_models = [model_map.get(m.lower(), m.upper()) for m in models_to_run]
             hyperparameters = {model: {} for model in ag_models}
 
-        # Determine problem type and evaluation metric
         if self.task_type == 'regression':
             problem_type = 'regression'
             eval_metric = 'root_mean_squared_error'
@@ -2947,7 +2901,6 @@ class TabularPipeline:
         logger.info("Generating test predictions using best model ensemble...")
         predictions = predictor.predict(X_test)
 
-        # Calculate metrics based on task type
         if self.task_type == 'regression':
             from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
             overall_mse = mean_squared_error(y_test, predictions)
@@ -2966,11 +2919,9 @@ class TabularPipeline:
         for _, row in leaderboard.iterrows():
             model_name = row['model']
 
-            # Individual model predictions
             model_pred = predictor.predict(X_test, model=model_name)
 
             if self.task_type == 'regression':
-                # Model-specific regression metrics
                 model_mse = mean_squared_error(y_test, model_pred)
                 model_mae = mean_absolute_error(y_test, model_pred)
                 model_r2 = r2_score(y_test, model_pred)
@@ -3029,7 +2980,6 @@ class TabularPipeline:
                 )
         logger.info("=" * 80)
 
-        # Return appropriate results
         if self.task_type == 'regression':
             return {
                 "overall_rmse": overall_rmse,
@@ -3068,8 +3018,7 @@ class TabularPipeline:
             for name, param in self.model.model.named_parameters():
                 logger.info(f"   {name} mean: {torch.mean(param).item():.6f}")
                 break
-    
-            # then evaluate normally
+
             metrics = self.evaluate(X_test, y_test)
             results[ep] = metrics
     
@@ -3113,7 +3062,6 @@ class TabularPipeline:
         elif strategy == "finetune":
             selected_strategy = "finetune"
 
-        # Defaults resolver that DOES NOT depend on isinstance()
         def _default_tuning_config(model_name: str, finetune_mode: str) -> dict:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -3188,7 +3136,7 @@ class TabularPipeline:
                 "show_progress": True,
                 }
 
-            if model_name in {"Mitra", "Tab2D"}:
+            if model_name in {"Mitra", "MitraV2", "Tab2D"}:
                 if finetune_mode == "sft":
                     return {
                     "device": device,

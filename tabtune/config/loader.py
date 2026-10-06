@@ -1,9 +1,4 @@
 """Load and save TabTune configurations as YAML or JSON.
-
-A run described by a file rather than by a Python call site is reproducible,
-diffable and reviewable. That property is what makes experiment tracking and
-model-risk documentation possible, so the loader is deliberately strict about
-round-tripping: ``load_config(save_config(cfg, p)) == cfg``.
 """
 
 from __future__ import annotations
@@ -25,7 +20,7 @@ __all__ = ["load_config", "save_config", "config_from_mapping", "dump_config"]
 def _read_yaml(path: Path) -> dict[str, Any]:
     try:
         import yaml
-    except ImportError as exc:  # pragma: no cover - pyyaml is a transitive dep
+    except ImportError as exc:  
         raise ConfigError(
             "Reading YAML configs requires PyYAML. Install it with `pip install pyyaml`."
         ) from exc
@@ -68,7 +63,6 @@ def config_from_mapping(data: Mapping[str, Any], *, strict: bool = False) -> Pip
     """
     payload = dict(data)
 
-    # Accept the legacy *_params names used by TabularPipeline's constructor.
     aliases = {
         "tuning_params": "tuning",
         "processor_params": "processor",
@@ -87,9 +81,6 @@ def config_from_mapping(data: Mapping[str, Any], *, strict: bool = False) -> Pip
     except Exception as exc:
         raise ConfigError(f"Invalid pipeline configuration: {exc}") from exc
 
-    # File-driven configs are validated eagerly: the whole point of a config
-    # file is that `tabtune fit --config run.yaml` fails in the first second
-    # rather than after a checkpoint download.
     return config.validate_against_registry()
 
 

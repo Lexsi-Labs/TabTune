@@ -26,7 +26,7 @@ try:
         _faiss_index_cls = getattr(faiss, _faiss_index_cls_name, None)
         if _faiss_index_cls is not None and not hasattr(_faiss_index_cls, "seed"):
             setattr(_faiss_index_cls, "seed", _faiss_noop_seed)
-            logger.info("Patched faiss.%s.seed -> no-op", _faiss_index_cls_name)
+            logger.debug("Patched faiss.%s.seed -> no-op", _faiss_index_cls_name)
 
 except ImportError:
     faiss = None  # Optional dependency

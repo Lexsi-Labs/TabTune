@@ -1,22 +1,4 @@
 """Typed, validated configuration objects for TabTune.
-
-Historically every knob in TabTune travelled as an untyped ``dict``. Unknown
-keys were silently dropped or silently forwarded into a model constructor, and
-the defaults for each fine-tuning loop were duplicated in three places (the
-loop body, ``TabularPipeline.get_params`` and the documentation).
-
-These schemas make the contract explicit while staying **fully backward
-compatible**: every configuration object accepts a plain dict, forwards unknown
-keys unchanged, and exposes ``.to_dict()`` so existing code paths that expect a
-dict keep working. The only behavioural change is that typos now produce a
-warning instead of vanishing.
-
-Example:
-    >>> cfg = TuningConfig(epochs=10, learning_rate=1e-5)
-    >>> cfg.epochs
-    10
-    >>> TuningConfig.from_dict({"epochs": 3, "lr": 1e-4}).extras  # doctest: +SKIP
-    {'lr': 0.0001}
 """
 
 from __future__ import annotations
@@ -34,6 +16,7 @@ __all__ = [
     "TuningConfig",
     "ProcessorConfig",
     "ContextSamplingConfig",
+    "ForecastConfig",
     "PipelineConfig",
     "TaskType",
     "TuningStrategy",
@@ -44,7 +27,7 @@ TaskType = Literal["classification", "regression"]
 TuningStrategy = Literal["inference", "finetune", "peft"]
 FinetuneMode = Literal["meta-learning", "sft", "native", "turn_by_turn", "tbt"]
 
-#: Aliases accepted for ``finetune_mode`` so users are not tripped by spelling.
+
 _FINETUNE_MODE_ALIASES: dict[str, str] = {
     "meta_learning": "meta-learning",
     "metalearning": "meta-learning",
@@ -116,7 +99,7 @@ class _Base(BaseModel):
             instance = cls(**dict(data))
         except ConfigError:
             raise
-        except Exception as exc:  # pydantic ValidationError and friends
+        except Exception as exc:  
             raise ConfigError(f"Invalid {context or cls.__name__}: {exc}") from exc
 
         unknown = sorted(instance.extras)
@@ -212,17 +195,6 @@ class TuningConfig(_Base):
     validation_split: float = Field(default=0.0, ge=0.0, lt=1.0)
     gradient_clip_norm: float | None = Field(default=None, gt=0.0)
     n_estimators_finetune: int | None = Field(default=None, ge=1)
-
-    # Episodic fine-tuning knobs for the in-context models (TabFM, iLTM, LimiX,
-    # EXAONE Tabular). Each step samples a fresh support/query episode out of the
-    # training frame rather than a flat minibatch, so ``batch_size`` does not
-    # describe the unit of work; these do.
-    #
-    # .. versionadded:: 0.2.0
-    #    They were already the de-facto vocabulary -- the episodic tuners read
-    #    exactly these keys -- but were undeclared, so passing one tripped the
-    #    "unrecognised tuning_params key(s)" typo warning. The library was
-    #    warning about its own parameter names.
     support_size: int | None = Field(default=None, ge=1)
     query_size: int | None = Field(default=None, ge=1)
     steps_per_epoch: int | None = Field(default=None, ge=1)
@@ -257,8 +229,6 @@ class TuningConfig(_Base):
     @model_validator(mode="after")
     def _check_consistency(self) -> TuningConfig:
         if self.checkpoint_epochs is not None and self.checkpoint_dir is None:
-            # Not fatal: the tuner falls back to ./checkpoints. Surface it so
-            # the user is not surprised by files appearing in their CWD.
             object.__setattr__(self, "checkpoint_dir", self.checkpoint_dir)
         return self
 
@@ -348,6 +318,40 @@ class ContextSamplingConfig(_Base):
         }
 
 
+class ForecastConfig(_Base):
+    """What a ``TimeSeriesPipeline`` is asked to forecast.
+
+    Only model-agnostic settings live here. Backend knobs (Chronos's sample
+    count, for example) belong in ``model_params``, so this schema means the
+    same thing for every time series model.
+
+    Attributes:
+        prediction_length: Forecast horizon, in steps of the series frequency.
+        quantile_levels: Quantiles to return alongside the point forecast,
+            strictly inside ``(0, 1)``. Sorted and de-duplicated on input.
+        context_length: Most recent observations to condition on. ``None``
+            uses the model's maximum context.
+
+    Example:
+        >>> ForecastConfig(prediction_length=24).quantile_levels
+        [0.1, 0.5, 0.9]
+    """
+
+    prediction_length: int = Field(ge=1)
+    quantile_levels: list[float] = Field(default_factory=lambda: [0.1, 0.5, 0.9])
+    context_length: int | None = Field(default=None, ge=1)
+
+    @field_validator("quantile_levels", mode="after")
+    @classmethod
+    def _check_quantiles(cls, value: list[float]) -> list[float]:
+        for level in value:
+            if not 0.0 < level < 1.0:
+                raise ValueError(
+                    f"quantile_levels must lie strictly between 0 and 1, got {level}"
+                )
+        return sorted(set(value))
+
+
 class PipelineConfig(_Base):
     """A complete, serialisable description of a TabTune run.
 
@@ -384,13 +388,6 @@ class PipelineConfig(_Base):
     @model_validator(mode="after")
     def _canonicalise(self) -> PipelineConfig:
         """Canonicalise the model name and keep nested task types in sync.
-
-        Registry *validation* deliberately does not happen here. Pydantic wraps
-        any ``ValueError`` raised inside a validator in a ``ValidationError``,
-        which would bury TabTune's actionable "here are compatible models"
-        messages under a pydantic traceback. Callers invoke
-        :meth:`validate_against_registry` explicitly instead, which is also
-        what lets a config be constructed for a model registered later.
         """
         from ..registry import resolve_model_name
         from ..registry.errors import ModelNotFoundError
@@ -398,8 +395,6 @@ class PipelineConfig(_Base):
         try:
             self.__dict__["model_name"] = resolve_model_name(self.model_name)
         except ModelNotFoundError:
-            # Leave the name untouched; validate_against_registry() reports it
-            # with a suggestion when the caller is ready to act on it.
             pass
 
         if self.processor.task_type != self.task_type:

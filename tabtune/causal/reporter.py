@@ -1,22 +1,6 @@
 """
 tabtune.causal.reporter
 =======================
-
-Compose the outputs of identification, estimation, refutation, and
-sensitive-attribute audits into a single compliance-ready artifact.
-
-Two output modes are supported:
-
-* ``rich`` -- logs a tidy, human-readable summary via the standard TabTune
-  logger (``logger.info("[Causal] ...")``). Mirrors the
-  :class:`TabularPipeline.evaluate(output_format='rich')` style so users
-  who already know TabTune feel at home.
-* ``html`` -- writes a self-contained HTML model card to ``output_path``.
-  When :mod:`jinja2` is installed we use a templated render; otherwise a
-  pure-Python fallback builds the file with no extra dependencies.
-
-The HTML report is intended to be embedded directly in a model card or
-attached to a regulatory submission.
 """
 
 from __future__ import annotations
@@ -37,9 +21,7 @@ def _try_import_jinja():
         return None
 
 
-# ---------------------------------------------------------------------------
-# Reporter
-# ---------------------------------------------------------------------------
+
 class Reporter:
     """
     Pretty-print and serialise a causal-analysis report.
@@ -56,9 +38,6 @@ class Reporter:
     def __init__(self, report: dict):
         self.report = report
 
-    # ------------------------------------------------------------------
-    # rich text
-    # ------------------------------------------------------------------
     def to_rich(self) -> None:
         """Pretty-print the report through the TabTune logger."""
         r = self.report
@@ -193,16 +172,12 @@ class Reporter:
                 )
         logger.info("=" * 72)
 
-    # ------------------------------------------------------------------
-    # json
-    # ------------------------------------------------------------------
+
     def to_json(self) -> str:
         """Return the report as a JSON string (printable / loggable)."""
         return json.dumps(self.report, indent=2, default=str)
 
-    # ------------------------------------------------------------------
-    # html
-    # ------------------------------------------------------------------
+
     def to_html(self, output_path: str | Path) -> str:
         """Render an HTML model card and write it to ``output_path``."""
         jinja = _try_import_jinja()
@@ -216,9 +191,7 @@ class Reporter:
         logger.info("[Causal] HTML report written to %s", str(path))
         return str(path)
 
-    # ------------------------------------------------------------------
-    # rendering internals
-    # ------------------------------------------------------------------
+
     _JINJA_TEMPLATE = """
 <!doctype html>
 <html lang="en">
@@ -352,9 +325,7 @@ class Reporter:
             counterfactual_fairness=self.report.get("counterfactual_fairness"),
         )
 
-    # ------------------------------------------------------------------
-    # Dependency-free fallback renderer
-    # ------------------------------------------------------------------
+
     def _render_fallback(self) -> str:
         r = self.report
         lines: list[str] = []

@@ -539,7 +539,12 @@ class TabDistiller:
         elif self.student_type == "lgbm":
             return self._train_gbdt_student(X_tr, y_tr, sl_tr, sw_tr)
         else:
-            raise ValueError(f"Unknown student type: {self.student_type}")
+            raise ValueError(
+                f"Unknown student type: {self.student_type!r}. "
+                f"Implemented students are 'mlp' and 'lgbm'. "
+                f"Gradient-boosting students other than LightGBM (xgboost, "
+                f"catboost) are not implemented."
+            )
 
     def _train_mlp_student(self, X_tr, y_tr, soft_labels, X_val, y_val,
                            sample_weights, sample_temperatures, n_features=None):

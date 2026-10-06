@@ -3,11 +3,45 @@ Pytest configuration and shared fixtures for TabTune tests.
 
 This file provides reusable fixtures that can be used across all test modules.
 """
+import os
+import sys
+
 import pytest
 import pandas as pd
+
+# Tests import sibling test modules by name; pytest runs with
+# --import-mode=importlib, which does not put the tests directory on the path.
+sys.path.insert(0, os.path.dirname(__file__))
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
+
+
+@pytest.fixture(autouse=True)
+def _tabtune_logs_reach_caplog():
+    """Let ``caplog`` see records from TabTune's own loggers.
+
+    ``tabtune/logger.py::setup_logger`` runs on import and sets
+    ``logging.getLogger('tabtune').propagate = False`` so the library's colour
+    output is not duplicated by an application's root handler. That is a
+    reasonable choice for a library, but it means records never reach the
+    handler pytest installs on the ROOT logger, so ``caplog.records`` comes back
+    empty even though the message was clearly printed.
+
+    Whether a test notices depends on the pytest version: 9.x attaches its
+    handler to the logger named in ``caplog.at_level(..., logger=...)`` and
+    passes anyway, 8.x does not and fails. Restoring propagation for the
+    duration of each test makes those assertions mean the same thing on both.
+    """
+    import logging
+
+    logger = logging.getLogger("tabtune")
+    previous = logger.propagate
+    logger.propagate = True
+    try:
+        yield
+    finally:
+        logger.propagate = previous
 
 
 @pytest.fixture(scope="session")
@@ -226,6 +260,23 @@ def sensitive_features(minimal_data):
     return pd.Series(np.random.choice(['GroupA', 'GroupB'], len(y_test)))
 
 
+@pytest.fixture
+def isolated_ts_registry():
+    """Let a test register time series models without leaking them into others.
+
+    The registry dicts are restored in place, because the pipeline and other
+    modules hold references to them.
+    """
+    from tabtune.registry import TimeSeries as ts_registry
+
+    live = (ts_registry.TS_MODEL_REGISTRY, ts_registry._TS_ALIASES)
+    saved = tuple(dict(d) for d in live)
+    yield ts_registry
+    for current, snapshot in zip(live, saved, strict=True):
+        current.clear()
+        current.update(snapshot)
+
+
 @pytest.fixture(autouse=True)
 def reset_logging():
     """Reset logging configuration before each test."""
@@ -268,6 +319,18 @@ _RESOURCE_UNAVAILABLE_SIGNATURES = (
     "outgoing traffic has been disabled",
     "tabpfnhuggingfacegatedrepoerror",
     "requires the tabpfn_token",
+    # TabPFN licence gate. Accepting the licence and holding a token are
+    # SEPARATE steps, so a machine with TABPFN_TOKEN set can still be refused
+    # the weights. Without these signatures those refusals were reported as
+    # test failures, which reads as "the integration is broken" when it means
+    # "nobody has clicked accept on this machine's account yet".
+    "tabpfnlicenseerror",
+    "license not yet accepted",
+    "requires a one-time license acceptance",
+    "accept-license",
+    "accept the license",
+    "accept its terms",
+    "this model is gated",
     # TabTune / transformers download wrappers
     "failed to download",
     "could not download",
@@ -353,3 +416,92 @@ def pytest_runtest_makereport(item, call):
             "(set TABTUNE_STRICT_TESTS=1 to fail instead).",
         )
 
+
+@pytest.fixture
+def tiny_timemoe_checkpoint(tmp_path_factory):
+    """A 2-layer, 4-expert Time-MoE with heads (1, 4, 8), saved with save_pretrained."""
+    from tabtune.models.time_moe import TimeMoeConfig, TimeMoeForPrediction
+
+    path = tmp_path_factory.mktemp("timemoe")
+    config = TimeMoeConfig(
+        hidden_size=16,
+        intermediate_size=32,
+        num_hidden_layers=2,
+        num_attention_heads=2,
+        num_experts=4,
+        num_experts_per_tok=2,
+        horizon_lengths=[1, 4, 8],
+        max_position_embeddings=128,
+        use_cache=False,
+    )
+    torch.manual_seed(0)
+    TimeMoeForPrediction(config).save_pretrained(str(path))
+    return str(path)
+
+
+@pytest.fixture(scope="session")
+def tiny_tirex_checkpoint(tmp_path_factory):
+    """A 2-block TiRex with patch size 4 and a 32-step training context, saved as model.ckpt."""
+    from tabtune.models.tirex import TiRexZero
+
+    path = tmp_path_factory.mktemp("tirex")
+    hyper = {
+        "model_config": {
+            "input_patch_size": 4,
+            "output_patch_size": 4,
+            "quantiles": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+            "block_kwargs": {"embedding_dim": 8, "num_heads": 2, "num_blocks": 2},
+            "input_ff_dim": 16,
+        },
+        "train_ctx_len": 32,
+    }
+    torch.manual_seed(0)
+    model = TiRexZero(**hyper)
+    with torch.no_grad():
+        for p in model.parameters():
+            p.normal_(0.0, 0.2)
+    torch.save({"hyper_parameters": hyper, "state_dict": model.state_dict()}, path / "model.ckpt")
+    return str(path)
+
+
+def _tiny_tirex2_config(time_mixer: str) -> dict:
+    block = {
+        "dropout": 0.0,
+        "eps": 1e-6,
+        "time_mixer": {"embedding_dim": 16, "model_type": time_mixer, "num_heads": 2, "num_slstm_heads": 2},
+        "variate_mixer": {"embedding_dim": 16, "num_heads": 2},
+    }
+    return {
+        "act_func": "SiLU",
+        "context_len": 32,
+        "dropout": 0.0,
+        "embedding_dim": 16,
+        "future_len": 8,
+        "h_expand": 1,
+        "input_ff_dim": 32,
+        "input_patch_size": 4,
+        "output_patch_size": 4,
+        "num_blocks": 2,
+        "quantiles": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        "scaler_cfg": {"binaryaware": True, "use_arcsinh": True},
+        "stack_config": {"recipe": ["s", "s"], "templates": {"s": block}},
+        "stack_out_norm_config": {"eps": 1e-6},
+        "tokenizer_cfg": {"input_patch_size": 4, "input_patch_stride": 4, "output_patch_size": 4},
+        "tta_diff": True,
+    }
+
+
+@pytest.fixture(scope="session", params=["bi-slstm", "bi-mlstm"])
+def tiny_tirex2_checkpoint(request, tmp_path_factory):
+    """A 2-block TiRex-2 (patch 4, context 32, future 8), saved as model-config.yaml + model.ckpt."""
+    import yaml
+
+    from tabtune.models.tirex2 import TiRex2
+
+    path = tmp_path_factory.mktemp(f"tirex2-{request.param}")
+    config = _tiny_tirex2_config(request.param)
+    torch.manual_seed(0)
+    model = TiRex2(**config, device="cpu")
+    (path / "model-config.yaml").write_text(yaml.safe_dump(config))
+    torch.save({"state_dict": model.state_dict()}, path / "model.ckpt")
+    return str(path)

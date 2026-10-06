@@ -1,23 +1,5 @@
 """
 tabtune.causal.estimators.base
-==============================
-
-Abstract base class for all causal estimators in :mod:`tabtune.causal`.
-
-Every concrete estimator (DML, S/T/X/R-Learners, Causal Forest) implements
-this interface, which mirrors :class:`tabtune.TabularPipeline` in spirit:
-
-* Construct with explicit configuration.
-* ``.fit(X, treatment, outcome)`` fits the nuisance learners and estimates
-  the ATE.
-* ``.ate()`` returns a dict with ``ate`` / ``std_error`` / ``ci_lower`` /
-  ``ci_upper``.
-* ``.cate(X_query)`` returns per-row treatment effects (heterogeneous).
-* ``.counterfactual(row, intervention)`` answers single-row what-if queries.
-
-Concrete estimators do not have to implement every method -- DML provides
-ATE robustly, meta-learners provide CATE, etc. Methods that aren't
-implemented should raise :class:`NotImplementedError` with a clear message.
 """
 
 from __future__ import annotations
@@ -75,9 +57,6 @@ class BaseCausalEstimator(ABC):
         self._fitted = False
         self._df: pd.DataFrame | None = None
 
-    # ------------------------------------------------------------------
-    # Required interface
-    # ------------------------------------------------------------------
     @abstractmethod
     def fit(self, df: pd.DataFrame) -> "BaseCausalEstimator":
         """
@@ -108,9 +87,6 @@ class BaseCausalEstimator(ABC):
         """
         raise NotImplementedError
 
-    # ------------------------------------------------------------------
-    # Optional interface (default = NotImplementedError)
-    # ------------------------------------------------------------------
     def cate(self, X_query: pd.DataFrame, return_ci: bool = False):
         """
         Return per-row Conditional Average Treatment Effects.
@@ -123,17 +99,6 @@ class BaseCausalEstimator(ABC):
             f"{self.__class__.__name__} does not implement CATE estimation."
         )
 
-    # ------------------------------------------------------------------
-    # Prediction surface
-    # ------------------------------------------------------------------
-    # IMPORTANT: ``self.outcome_model`` is the *unfitted* adapter handed to
-    # DoubleML / EconML. Those libraries clone it internally for cross-
-    # fitting, so the original instance is never fitted directly. To answer
-    # downstream "what does the model think Y is for these rows?" queries
-    # (counterfactual fairness, single-row predictions), we therefore fit a
-    # lightweight *surrogate* during ``fit`` on (X, T, Y) and expose it via
-    # ``.predict``. The surrogate is identical in shape to the outcome
-    # model used as a nuisance learner.
     def _fit_predict_surrogate(self, df: pd.DataFrame) -> None:
         """Fit a self-contained predict-Y model on (X, T) using a clone of
         ``self.outcome_model``. Called by subclasses' ``fit`` methods."""
@@ -142,8 +107,6 @@ class BaseCausalEstimator(ABC):
         try:
             surrogate = clone(self.outcome_model)
         except Exception:
-            # If clone fails for any reason, fall back to direct reuse;
-            # we will re-fit it below either way.
             surrogate = self.outcome_model
         X_full = df[self.confounders + [self.treatment]]
         y = df[self.outcome]
@@ -226,10 +189,6 @@ class BaseCausalEstimator(ABC):
             "delta": pred_modified - pred_original,
             "intervention": intervention,
         }
-
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
     def _require_fit(self) -> None:
         if not self._fitted:
             raise RuntimeError(

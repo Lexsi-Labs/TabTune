@@ -49,7 +49,7 @@ def _ensure_checkpoint(repo_id: str, filename: str, ckpt_dir: str) -> str:
         )
         return path
     except HfHubHTTPError as e:
-        if e.response.status_code in (401, 403):
+        if getattr(e.response, "status_code", None) in (401, 403):
             error_msg = (
                 f"\nFailed to download checkpoint '{filename}' from Hugging Face.\n"
                 f"Repository: {repo_id}\n\n"

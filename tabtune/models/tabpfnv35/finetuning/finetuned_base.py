@@ -1,0 +1,1409 @@
+#  Copyright (c) Prior Labs GmbH 2026.
+
+"""Abstract base class for fine-tuning TabPFN models.
+
+This module provides the FinetunedTabPFNBase class, which contains shared
+functionality for fine-tuning TabPFN on a specific dataset using the familiar
+scikit-learn .fit() and .predict() API.
+"""
+
+from __future__ import annotations
+
+import copy
+import datetime
+import logging
+import os
+import time
+import warnings
+from abc import ABC, abstractmethod
+from collections.abc import Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass, field, replace
+from functools import partial
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal
+
+import numpy as np
+import torch
+import torch.distributed as dist
+from sklearn.base import BaseEstimator
+from sklearn.model_selection import train_test_split
+from torch.nn.parallel import DistributedDataParallel
+from torch.nn.utils import clip_grad_norm_
+from torch.optim.lr_scheduler import LambdaLR
+from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
+from tqdm.auto import tqdm
+
+from tabtune.models.tabpfnv35.architectures.interface import PerformanceOptions
+from tabtune.models.tabpfnv35.architectures.tabpfn_v3_5 import TabPFNV3p5
+from tabtune.models.tabpfnv35.finetuning._torch_compat import GradScaler, autocast, sdpa_kernel_context
+from tabtune.models.tabpfnv35.finetuning.data_util import (
+    ClassifierBatch,
+    RegressorBatch,
+    get_preprocessed_dataset_chunks,
+    meta_dataset_collator,
+)
+from tabtune.models.tabpfnv35.finetuning.logging import FinetuningLogger, NullLogger
+from tabtune.models.tabpfnv35.finetuning.train_util import (
+    get_and_init_optimizer,
+    get_checkpoint_path_and_epoch_from_output_dir,
+    get_cosine_schedule_with_warmup,
+    save_checkpoint,
+)
+from tabtune.models.tabpfnv35.settings import settings
+from tabtune.models.tabpfnv35.utils import infer_devices, infer_random_state
+from tabtune.models.tabpfnv35.validation import (
+    check_input_shape_matches,
+    ensure_compatible_fit_inputs_sklearn,
+    extract_input_shape,
+)
+
+logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from tabtune.models.tabpfnv35.constants import ModelVersion, TaskType, XType, YType
+
+# Currently, we only support a batch size of 1 for finetuning.
+META_BATCH_SIZE = 1
+
+# Hard limit on the number of samples to use for validation.
+# This is used to avoid spending too much time on validation
+# and prevent OOM issues for very large datasets.
+MAX_VALIDATION_SAMPLES = 50_000
+
+
+def _init_distributed_if_needed(
+    device: str,
+) -> tuple[bool, int, str]:
+    """Initialize NCCL process group from torchrun env vars (single-node).
+
+    Returns:
+        (using_ddp, local_rank, device_str)
+    """
+    local_rank_str = os.environ.get("LOCAL_RANK")
+    if local_rank_str is None:
+        return False, 0, device
+
+    local_rank = int(local_rank_str)
+
+    if not dist.is_initialized():
+        dist.init_process_group(
+            backend="nccl",
+            timeout=datetime.timedelta(minutes=30),
+        )
+
+    device_str = f"cuda:{local_rank}"
+    torch.cuda.set_device(device_str)
+    return True, local_rank, device_str
+
+
+def _maybe_setup_ddp(
+    device: str,
+) -> tuple[bool, bool, int, str, bool]:
+    """Entry point for optional DDP setup (single-node only).
+
+    Auto-detects torchrun via LOCAL_RANK env var. No-op on single GPU.
+
+    Returns:
+        (using_ddp, created_process_group, local_rank,
+         device_str, is_main_process)
+    """
+    already_initialized = dist.is_initialized()
+    using_ddp, local_rank, device_str = _init_distributed_if_needed(device)
+
+    if not using_ddp:
+        return False, False, 0, device, True
+
+    created_process_group = not already_initialized
+    is_main_process = local_rank == 0
+
+    if is_main_process:
+        logger.info(
+            "DDP enabled: world_size=%d, local_rank=%d, device=%s",
+            dist.get_world_size(),
+            local_rank,
+            device_str,
+        )
+
+    return (
+        using_ddp,
+        created_process_group,
+        local_rank,
+        device_str,
+        is_main_process,
+    )
+
+
+@contextmanager
+def main_process_first() -> Iterator[None]:
+    """Run the with-block on the main process before all other ranks.
+
+    Useful under ``torchrun`` for work that should happen once and be read
+    from a shared cache afterwards, such as dataset downloads: the main
+    process runs the block while the other ranks wait at a barrier, then the
+    other ranks run it against the warm cache.
+
+    Initializes the process group from the torchrun env vars if needed, and
+    leaves it initialized so that a subsequent ``fit()`` reuses it. Call
+    ``torch.distributed.destroy_process_group()`` at the end of your script.
+    No-op when running with a single process.
+    """
+    if int(os.environ.get("WORLD_SIZE", "1")) <= 1:
+        yield
+        return
+
+    using_ddp, _, _ = _init_distributed_if_needed("cuda")
+    if not using_ddp:
+        # WORLD_SIZE was set by something other than torchrun (no LOCAL_RANK),
+        # so there is no process group to coordinate through.
+        yield
+        return
+
+    is_main_process = dist.get_rank() == 0
+    if not is_main_process:
+        dist.barrier()
+    try:
+        yield
+    finally:
+        if is_main_process:
+            dist.barrier()
+
+
+def _move_tabpfn_cached_contexts_to_device(estimator: Any, device: str) -> None:
+    """Move cached executor X_trains/y_trains to the given device.
+
+    During DDP training, ``fit_from_preprocessed`` stores context tensors on
+    whatever device was current at call time, but the DDP wrapper may need them
+    on a specific GPU.
+    """
+    executor = getattr(estimator, "executor_", None)
+    if executor is None:
+        return
+    x_trains = getattr(executor, "X_trains", None)
+    y_trains = getattr(executor, "y_trains", None)
+    target = torch.device(device)
+    if x_trains is not None:
+        executor.X_trains = [
+            t.to(target) if t.device != target else t for t in x_trains
+        ]
+    if y_trains is not None:
+        executor.y_trains = [
+            t.to(target) if t.device != target else t for t in y_trains
+        ]
+
+
+def _snapshot_model_state(model: torch.nn.Module) -> dict[str, torch.Tensor]:
+    """Return a detached CPU copy of a model's weights."""
+    return {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+
+
+def _ratio_ctx_query_split(
+    X: Any,
+    y: Any,
+    *,
+    query_ratio: float,
+    min_query_size: int,
+    random_state: int,
+    stratify: Any = None,
+) -> list[Any]:
+    """Split a chunk into context and query sets, sized relative to the chunk.
+
+    Chunks can be smaller than the configured context+query size (the remainder
+    chunk of an epoch's chunking, or a small dataset), so the query size is
+    computed per chunk as ``query_ratio`` of the chunk rather than from the
+    configured maximum. ``min_query_size`` bounds it from below (e.g. the number
+    of classes). Falls back to an unstratified split when the chunk cannot
+    satisfy stratification.
+    """
+    test_size = max(int(len(X) * query_ratio), min_query_size)
+    try:
+        return train_test_split(
+            X, y, test_size=test_size, random_state=random_state, stratify=stratify
+        )
+    except ValueError:
+        if stratify is None:
+            raise
+        return train_test_split(
+            X, y, test_size=test_size, random_state=random_state, stratify=None
+        )
+
+
+def _parameters_unused_by_task(
+    model: torch.nn.Module,
+    task_type: TaskType,
+) -> list[torch.nn.Parameter]:
+    """Parameters that a forward pass for ``task_type`` never touches.
+
+    A multitask checkpoint (v3.5) holds one target encoder and head per task in
+    a single module, so fine-tuning one task leaves the other's parameters
+    without a gradient. Single-task architectures have none and return ``[]``.
+    """
+    if not isinstance(model, TabPFNV3p5):
+        return []
+    if task_type == "multiclass":
+        other = "regression"
+        heads = [model.heads.mlp_regression, model.heads.output_projection]
+    else:
+        other = "multiclass"
+        heads = [model.heads.mlp_classification, model.heads.many_class_decoder]
+    modules = [model.col_y_encoder[other], model.icl_y_encoder[other], *heads]
+    return [p for m in modules for p in m.parameters()]
+
+
+class _TabPFNDDPWrapper(torch.nn.Module):
+    """Thin wrapper that registers estimator.model_ as a submodule for DDP."""
+
+    def __init__(self, estimator: Any) -> None:
+        super().__init__()
+        self.estimator = estimator
+        self.model = estimator.model_
+
+    def forward(self, *args: Any, **kwargs: Any) -> Any:
+        return self.estimator.forward(*args, **kwargs)
+
+
+@dataclass(frozen=True)
+class _EstimatorShard:
+    """Contiguous estimator shard assigned to one distributed rank."""
+
+    start: int
+    stop: int
+    total_estimators: int
+    world_size: int
+
+    @property
+    def size(self) -> int:
+        """Number of estimators handled by this rank."""
+        return self.stop - self.start
+
+    @property
+    def gradient_scale(self) -> float:
+        """Scale local mean loss so DDP's rank mean equals the global mean."""
+        return self.world_size * self.size / self.total_estimators
+
+
+def _get_estimator_shard(
+    total_estimators: int, rank: int, world_size: int
+) -> _EstimatorShard:
+    """Split estimators as evenly as possible into non-empty rank shards."""
+    if world_size < 1:
+        raise ValueError(f"world_size must be positive; got {world_size}.")
+    if not 0 <= rank < world_size:
+        raise ValueError(f"rank must be in [0, {world_size}); got {rank}.")
+    if total_estimators < world_size:
+        raise ValueError(
+            "Estimator sharding requires n_estimators_finetune >= world_size; "
+            f"got {total_estimators} estimators and {world_size} ranks."
+        )
+    base, remainder = divmod(total_estimators, world_size)
+    start = rank * base + min(rank, remainder)
+    stop = start + base + int(rank < remainder)
+    return _EstimatorShard(start, stop, total_estimators, world_size)
+
+
+def _slice_batch_estimators(
+    batch: ClassifierBatch | RegressorBatch,
+    shard: _EstimatorShard,
+) -> ClassifierBatch | RegressorBatch:
+    """Keep only this rank's estimator inputs in a collated fine-tuning batch."""
+    estimator_slice = slice(shard.start, shard.stop)
+    # After meta_dataset_collator, cat_indices is [dataset batch][estimator][column].
+    cat_indices = [items[estimator_slice] for items in batch.cat_indices]
+    return replace(
+        batch,
+        X_context=batch.X_context[estimator_slice],
+        X_query=batch.X_query[estimator_slice],
+        y_context=batch.y_context[estimator_slice],
+        cat_indices=cat_indices,
+        configs=batch.configs[estimator_slice],
+    )
+
+
+def _get_loss_for_logging(
+    loss: torch.Tensor,
+    estimator_shard: _EstimatorShard | None,
+) -> float:
+    """Return the global estimator-mean loss without changing its gradients."""
+    loss_for_logging = loss.detach()
+    if estimator_shard is not None:
+        # ``loss`` includes the DDP gradient-correction scale. Its rank mean is
+        # therefore the global estimator mean, including for uneven shards.
+        loss_for_logging = loss_for_logging / estimator_shard.world_size
+        dist.all_reduce(loss_for_logging, op=dist.ReduceOp.SUM)
+    return float(loss_for_logging.item())
+
+
+@dataclass
+class EvalResult:
+    """Container for evaluation results.
+
+    Attributes:
+        primary: The primary metric used for early stopping decisions.
+        secondary: Additional metrics for logging purposes only.
+    """
+
+    primary: float
+    secondary: dict[str, float] = field(default_factory=dict)
+
+
+class FinetunedTabPFNBase(BaseEstimator, ABC):
+    """Abstract base class for fine-tuning TabPFN models.
+
+    This class encapsulates the shared fine-tuning logic, allowing you to
+    fine-tune TabPFN on a specific dataset using the familiar .fit() and
+    .predict() API.
+
+    Args:
+        device: The device to run the model on. Defaults to "cuda".
+        epochs: The total number of passes through the fine-tuning data.
+            Defaults to 30.
+        time_limit: Time limit in seconds for fine-tuning.
+            If None, no time limit is applied. Defaults to None.
+        learning_rate: The learning rate for the AdamW optimizer. A small value
+            is crucial for stable fine-tuning. Defaults to 1e-5.
+        weight_decay: The weight decay for the AdamW optimizer. Defaults to 0.01.
+        validation_split_ratio: Fraction of the original training data reserved
+            as a validation set for early stopping and monitoring. Set to 0 or
+            None to disable validation: all data is then used for fine-tuning,
+            per-epoch evaluation is skipped, and early stopping is disabled.
+            Ignored when explicit validation data is passed to ``fit``.
+            Defaults to 0.1.
+        n_finetune_ctx_plus_query_samples: The total number of samples per
+            meta-dataset during fine-tuning (context plus query) before applying
+            the `finetune_ctx_query_split_ratio`. Defaults to 50_000.
+        finetune_ctx_query_split_ratio: The proportion of each fine-tuning
+            meta-dataset to use as query samples for calculating the loss. The
+            remainder is used as context. Defaults to 0.2.
+        n_inference_subsample_samples: The total number of subsampled training
+            samples per estimator during validation and final inference. If
+            None, no subsampling is applied and the full training set is used
+            as context. Defaults to None.
+        random_state: Seed for reproducibility of data splitting and model
+            initialization. Defaults to 0.
+        early_stopping: Whether to use early stopping based on validation
+            performance. When enabled, the best-performing weights are restored
+            at the end of training and a best checkpoint is saved alongside the
+            interval checkpoints. When disabled, training runs all epochs and
+            the last-epoch weights are kept (no best checkpoint is saved).
+            Defaults to True.
+        early_stopping_patience: Number of validation checks to wait for
+            improvement before early stopping. Defaults to 8.
+        validation_frequency: Number of epochs between validation checks. A value
+            of 1 (default) validates after every epoch, preserving the existing
+            behavior. The initial evaluation of the unfine-tuned model still runs
+            whenever validation data is available. With a value greater than 1,
+            early_stopping_patience counts validation checks rather than epochs.
+            Must be a positive integer.
+        min_delta: Minimum change in metric to be considered as an improvement.
+            Defaults to 1e-4.
+        grad_clip_value: Maximum norm for gradient clipping. If None, gradient
+            clipping is disabled. Gradient clipping helps stabilize training by
+            preventing exploding gradients. Defaults to 1.0.
+        use_lr_scheduler: Whether to use a learning rate scheduler (linear warmup
+            with optional cosine decay) during fine-tuning. Defaults to True.
+        lr_warmup_only: If True, only performs linear warmup to the base learning
+            rate and then keeps it constant. If False, applies cosine decay after
+            warmup. Defaults to False.
+        n_estimators_finetune: If set, overrides `n_estimators` of the underlying
+            estimator only during fine-tuning to control the number of
+            estimators (ensemble size) used in the training loop. If None, the
+            value from `kwargs` or the estimator default is used.
+            Defaults to 2.
+        n_estimators_validation: If set, overrides `n_estimators` only for
+            validation-time evaluation during fine-tuning (early-stopping /
+            monitoring). If None, the value from `kwargs` or the
+            estimator default is used. Defaults to 2.
+        n_estimators_final_inference: If set, overrides `n_estimators` only for
+            the final fitted inference model that is used after fine-tuning. If
+            None, the value from `kwargs` or the estimator default is used.
+            Defaults to 2.
+        use_activation_checkpointing: Whether to use activation checkpointing to
+            reduce memory usage. Defaults to True.
+        shard_estimators_across_gpus: When True under DDP, every rank processes the
+            same data chunk but only a shard of the fine-tuning estimators. DDP then
+            averages gradients across estimator shards. This reduces per-rank
+            activation memory instead of only distributing data chunks. Defaults to
+            False.
+        save_checkpoint_interval: Number of epochs between checkpoint saves. This
+            only has an effect if `output_dir` is provided during the `fit()` call.
+            If None, no intermediate checkpoints are saved. The best model checkpoint
+            is always saved regardless of this setting. Defaults to 10.
+        use_fixed_preprocessing_seed: Whether to use a fixed preprocessing seed.
+            If True, the preprocessing will always use the same random seed throughout
+            data batches. This is helpful in most cases because, e.g., the column order
+            will stay the same across batches.
+            If False, the preprocessing will use a different random seed for each batch.
+        experiment_logger: An optional logger implementing the ``FinetuningLogger``
+            protocol (e.g., ``WandbLogger``) for experiment tracking. If None,
+            a no-op ``NullLogger`` is used. Defaults to None.
+        model_version: Which TabPFN model version to fine-tune. If None
+            (default), uses the package default version
+            (``settings.tabpfn.model_version``) — the same version a default
+            ``TabPFNClassifier``/``TabPFNRegressor`` loads — so fine-tuning
+            tracks the current default model rather than a hardcoded one.
+            Defaults to None.
+    """
+
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        device: str = "cuda",
+        epochs: int = 30,
+        time_limit: int | None = None,
+        learning_rate: float = 1e-5,
+        weight_decay: float = 0.01,
+        validation_split_ratio: float | None = 0.1,
+        n_finetune_ctx_plus_query_samples: int = 50_000,
+        finetune_ctx_query_split_ratio: float = 0.2,
+        n_inference_subsample_samples: int | None = None,
+        random_state: int = 0,
+        early_stopping: bool = True,
+        early_stopping_patience: int = 8,
+        validation_frequency: int = 1,
+        min_delta: float = 1e-4,
+        grad_clip_value: float | None = 1.0,
+        use_lr_scheduler: bool = True,
+        lr_warmup_only: bool = False,
+        n_estimators_finetune: int = 2,
+        n_estimators_validation: int = 2,
+        n_estimators_final_inference: int = 2,
+        use_activation_checkpointing: bool = True,
+        shard_estimators_across_gpus: bool = False,
+        save_checkpoint_interval: int | None = 10,
+        use_fixed_preprocessing_seed: bool = True,
+        experiment_logger: FinetuningLogger | None = None,
+        model_version: ModelVersion | None = None,
+    ):
+        super().__init__()
+        self.experiment_logger = experiment_logger
+        self.model_version = model_version
+        self.device = device
+        self.epochs = epochs
+        self.time_limit = time_limit
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.validation_split_ratio = validation_split_ratio
+        self.n_finetune_ctx_plus_query_samples = n_finetune_ctx_plus_query_samples
+        self.finetune_ctx_query_split_ratio = finetune_ctx_query_split_ratio
+        self.n_inference_subsample_samples = n_inference_subsample_samples
+        self.random_state = random_state
+        self.early_stopping = early_stopping
+        self.early_stopping_patience = early_stopping_patience
+        self.validation_frequency = validation_frequency
+        self.min_delta = min_delta
+        self.grad_clip_value = grad_clip_value
+        self.use_lr_scheduler = use_lr_scheduler
+        self.lr_warmup_only = lr_warmup_only
+        self.n_estimators_finetune = n_estimators_finetune
+        self.n_estimators_validation = n_estimators_validation
+        self.n_estimators_final_inference = n_estimators_final_inference
+        self.use_activation_checkpointing = use_activation_checkpointing
+        self.shard_estimators_across_gpus = shard_estimators_across_gpus
+        self.save_checkpoint_interval = save_checkpoint_interval
+        self.meta_batch_size = META_BATCH_SIZE
+        self.use_fixed_preprocessing_seed = use_fixed_preprocessing_seed
+        self._ddp_module_: DistributedDataParallel | None = None
+        self._local_n_estimators_ = n_estimators_finetune
+        self._estimator_gradient_scale_ = 1.0
+
+        if self.use_fixed_preprocessing_seed and not (
+            self.n_estimators_finetune
+            == self.n_estimators_validation
+            == self.n_estimators_final_inference
+        ):
+            warnings.warn(
+                "`use_fixed_preprocessing_seed` should only be used "
+                "if `n_estimators_finetune` == `n_estimators_validation` == "
+                "`n_estimators_final_inference`. Consider setting the number of "
+                "estimators for validation and final inference to the same value "
+                f"as `n_estimators_finetune`(={self.n_estimators_finetune}).",
+                UserWarning,
+                stacklevel=2,
+            )
+
+    @property
+    def finetune_model_version(self) -> ModelVersion:
+        """Model version to fine-tune; falls back to the package default version.
+
+        When ``model_version`` is not set explicitly, this resolves to
+        ``settings.tabpfn.model_version`` (the same default a plain
+        ``TabPFNClassifier``/``TabPFNRegressor`` uses), so fine-tuning tracks the
+        current default model version instead of a hardcoded one.
+        """
+        if self.model_version is not None:
+            return self.model_version
+        return settings.tabpfn.model_version
+
+    def _build_estimator_config(
+        self,
+        base_config: dict[str, Any],
+        n_estimators_override: int | None,
+    ) -> dict[str, Any]:
+        """Return a deep-copy of base_config with an optional n_estimators override."""
+        config = copy.deepcopy(base_config)
+        existing_inference_config = dict(config.get("inference_config", {}) or {})
+        existing_inference_config["ENABLE_GPU_PREPROCESSING"] = False
+        # The training loop hands the model numpy arrays, which the text and date
+        # transformers never touch, so the estimators built here must not run them
+        # either: otherwise the final model would see features the weights were
+        # not tuned on.
+        existing_inference_config["TRANSFORM_TEXT"] = False
+        existing_inference_config["TRANSFORM_DATES"] = False
+        config["inference_config"] = existing_inference_config
+        if n_estimators_override is not None:
+            config["n_estimators"] = n_estimators_override
+        return config
+
+    def _build_eval_config(
+        self,
+        base_config: dict[str, Any],
+        n_estimators_override: int | None,
+    ) -> dict[str, Any]:
+        """Return eval config with n_estimators override and subsample setting."""
+        config = self._build_estimator_config(base_config, n_estimators_override)
+        config["inference_config"]["SUBSAMPLE_SAMPLES"] = (
+            self.n_inference_subsample_samples
+        )
+        return config
+
+    def _training_forward(self, *args: Any, **kwargs: Any) -> Any:
+        """Forward pass that routes through DDP wrapper during training if active."""
+        if self._ddp_module_ is not None:
+            return self._ddp_module_(*args, **kwargs)
+        return self.finetuned_estimator_.forward(*args, **kwargs)
+
+    @property
+    @abstractmethod
+    def _estimator_kwargs(self) -> dict[str, Any]:
+        """Return the task-specific estimator kwargs."""
+        ...
+
+    @property
+    @abstractmethod
+    def _model_type(self) -> Literal["classifier", "regressor"]:
+        """Return the model type string ('classifier' or 'regressor')."""
+        ...
+
+    @property
+    @abstractmethod
+    def _metric_name(self) -> str:
+        """Return the name of the primary metric for logging."""
+        ...
+
+    @abstractmethod
+    def _create_estimator(self, config: dict[str, Any]) -> Any:
+        """Create and return the underlying TabPFN estimator with the given config."""
+        ...
+
+    @abstractmethod
+    def _setup_batch(self, batch: ClassifierBatch | RegressorBatch) -> None:
+        """Perform any batch-specific setup before the forward pass."""
+        ...
+
+    @abstractmethod
+    def _should_skip_batch(self, batch: ClassifierBatch | RegressorBatch) -> bool:
+        """Check if the batch should be skipped."""
+        ...
+
+    @abstractmethod
+    def _forward_with_loss(
+        self,
+        batch: ClassifierBatch | RegressorBatch,
+    ) -> torch.Tensor:
+        """Perform forward pass and compute loss for the given batch.
+
+        Args:
+            batch: The batch tuple from the dataloader.
+
+        Returns:
+            The computed loss tensor.
+        """
+        ...
+
+    @abstractmethod
+    def _evaluate_model(
+        self,
+        eval_config: dict[str, Any],
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray,
+        y_val: np.ndarray,
+    ) -> EvalResult:
+        """Evaluate the model on validation data and return metrics.
+
+        Args:
+            eval_config: Configuration dictionary for the evaluation estimator.
+            X_train: Training input samples.
+            y_train: Training target values.
+            X_val: Validation input samples.
+            y_val: Validation target values.
+
+        Returns:
+            EvalResult with primary metric for early stopping and secondary
+            metrics for logging.
+        """
+        ...
+
+    @abstractmethod
+    def _is_improvement(self, current: float, best: float) -> bool:
+        """Return True if current metric is an improvement over best.
+
+        Args:
+            current: The current metric value.
+            best: The best metric value seen so far.
+
+        Returns:
+            True if current is better than best (accounting for min_delta).
+        """
+        ...
+
+    @abstractmethod
+    def _get_initial_best_metric(self) -> float:
+        """Return initial 'best' metric (inf for min, -inf for max)."""
+        ...
+
+    @abstractmethod
+    def _get_checkpoint_metrics(self, eval_result: EvalResult) -> dict[str, float]:
+        """Return the metrics dict to save in checkpoints."""
+        ...
+
+    @abstractmethod
+    def _log_epoch_evaluation(
+        self, epoch: int, eval_result: EvalResult, mean_train_loss: float | None
+    ) -> None:
+        """Log the evaluation results for the current epoch."""
+        ...
+
+    @abstractmethod
+    def _setup_inference_model(
+        self, final_inference_eval_config: dict[str, Any]
+    ) -> None:
+        """Set up the final inference model after fine-tuning completes."""
+        ...
+
+    @abstractmethod
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict target values for X."""
+        ...
+
+    def _get_train_val_split(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Split data into train/validation sets with task-specific options."""
+        n_samples = len(y)
+        test_size = int(n_samples * self.validation_split_ratio)
+
+        if test_size > MAX_VALIDATION_SAMPLES:
+            warnings.warn(
+                f"Validation set size would be {test_size:,} samples "
+                f"based on validation_split_ratio="
+                f"{self.validation_split_ratio:.2f}, but limiting to "
+                f"{MAX_VALIDATION_SAMPLES:,} samples to avoid excessive "
+                f"validation time and memory usage.",
+                UserWarning,
+                stacklevel=3,
+            )
+            test_size = MAX_VALIDATION_SAMPLES
+
+        # test_size should be greater or equal to the number of classes
+        if self._model_type == "classifier":
+            n_classes = len(np.unique(y))
+            test_size = max(test_size, n_classes)
+
+        return train_test_split(  # type: ignore[return-value]
+            X,
+            y,
+            test_size=test_size,
+            random_state=self.random_state,
+            stratify=y if self._model_type == "classifier" else None,
+        )
+
+    @abstractmethod
+    def _get_valid_finetuning_query_size(
+        self, *, query_size: int, y_train: np.ndarray | None
+    ) -> int:
+        """Calculate a valid finetuning query size."""
+        ...
+
+    def fit(
+        self,
+        X: XType,
+        y: YType,
+        X_val: XType | None = None,
+        y_val: YType | None = None,
+        output_dir: Path | None = None,
+    ) -> FinetunedTabPFNBase:
+        """Fine-tune the TabPFN model on the provided training data.
+
+        Args:
+            X: The training input samples of shape (n_samples, n_features).
+            y: The target values of shape (n_samples,).
+            X_val: Optional validation input samples.
+            y_val: Optional validation target values.
+            output_dir: Directory path for saving checkpoints. If None, no
+                checkpointing is performed and progress will be lost if
+                training is interrupted.
+
+        Returns:
+            The fitted instance itself.
+        """
+        if output_dir is None:
+            warnings.warn(
+                "`output_dir` is not set. This means no checkpointing will be done and "
+                "all progress will be lost if the training is interrupted.",
+                UserWarning,
+                stacklevel=2,
+            )
+        else:
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+        return self._fit(X=X, y=y, X_val=X_val, y_val=y_val, output_dir=output_dir)
+
+    def _fit(  # noqa: C901,PLR0912
+        self,
+        X: XType,
+        y: YType,
+        X_val: XType | None = None,
+        y_val: YType | None = None,
+        output_dir: Path | None = None,
+    ) -> FinetunedTabPFNBase:
+        """Internal implementation of fit that runs the finetuning loop."""
+        validation_frequency = self.validation_frequency
+        if validation_frequency < 1:
+            raise ValueError("validation_frequency must be positive")
+
+        # --- DDP setup ---
+        (
+            using_ddp,
+            created_process_group,
+            local_rank,
+            device_str,
+            is_main_process,
+        ) = _maybe_setup_ddp(self.device)
+
+        if using_ddp:
+            self.device = device_str
+
+        self._local_n_estimators_ = self.n_estimators_finetune
+        self._estimator_gradient_scale_ = 1.0
+        estimator_shard: _EstimatorShard | None = None
+        if self.shard_estimators_across_gpus:
+            if not using_ddp:
+                warnings.warn(
+                    "`shard_estimators_across_gpus=True` has no effect without DDP.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            else:
+                estimator_shard = _get_estimator_shard(
+                    self.n_estimators_finetune,
+                    dist.get_rank(),
+                    dist.get_world_size(),
+                )
+                self._local_n_estimators_ = estimator_shard.size
+                self._estimator_gradient_scale_ = estimator_shard.gradient_scale
+                logger.info(
+                    "Rank %d fine-tuning estimator shard [%d:%d] of %d",
+                    dist.get_rank(),
+                    estimator_shard.start,
+                    estimator_shard.stop,
+                    estimator_shard.total_estimators,
+                )
+
+        _logger = self.experiment_logger or NullLogger()
+        global_step = 0
+
+        if is_main_process:
+            config = {
+                k: v for k, v in self.get_params().items() if k != "experiment_logger"
+            }
+            try:
+                _logger.setup(config)
+            except (OSError, ModuleNotFoundError):
+                logger.warning(
+                    "Experiment logger setup failed, falling back to NullLogger.",
+                    exc_info=True,
+                )
+                _logger = NullLogger()
+
+        # Store the original training size for checkpoint naming
+        train_size = X.shape[0]
+        start_time = time.monotonic()
+
+        _estimator_kwargs = copy.deepcopy(self._estimator_kwargs)
+        model_path = _estimator_kwargs.pop("model_path", None)
+        # Any inference_config (e.g. {"PASSTHROUGH_INF": True}) the user supplied via
+        # extra_*_kwargs flows through the spread below unchanged.
+        base_estimator_config: dict[str, Any] = {
+            **_estimator_kwargs,
+            "ignore_pretraining_limits": True,
+            "device": self.device,
+            "random_state": self.random_state,
+        }
+
+        # Config used for the finetuning loop.
+        finetuning_estimator_config = self._build_estimator_config(
+            base_estimator_config,
+            self.n_estimators_finetune,
+        )
+        if model_path is not None:
+            finetuning_estimator_config["model_path"] = model_path
+
+        # Configs used for validation-time evaluation and final inference.
+        validation_eval_config = self._build_eval_config(
+            base_estimator_config,
+            self.n_estimators_validation,
+        )
+        final_inference_eval_config = self._build_eval_config(
+            base_estimator_config,
+            self.n_estimators_final_inference,
+        )
+
+        if using_ddp:
+            # Use all GPUs participating in DDP for eval inference.
+            eval_devices = tuple(
+                torch.device("cuda", i) for i in range(dist.get_world_size())
+            )
+        else:
+            eval_devices = infer_devices(self.device)
+        validation_eval_config["device"] = eval_devices
+        final_inference_eval_config["device"] = eval_devices
+
+        epoch_to_start_from = 0
+        checkpoint_path = None
+        if output_dir is not None:
+            checkpoint_path, epoch_to_start_from = (
+                get_checkpoint_path_and_epoch_from_output_dir(
+                    output_dir=output_dir,
+                    train_size=train_size,
+                    get_best=False,
+                )
+            )
+            if checkpoint_path is not None:
+                logger.info(
+                    f"Restarting training from checkpoint {checkpoint_path} at epoch "
+                    f"{epoch_to_start_from}",
+                )
+                finetuning_estimator_config["model_path"] = checkpoint_path
+
+        self.finetuned_estimator_ = self._create_estimator(finetuning_estimator_config)
+        self.finetuned_estimator_._initialize_model_variables()
+        self.feature_names_in_, self.n_features_in_ = extract_input_shape(X)
+        X_validated, y_validated = ensure_compatible_fit_inputs_sklearn(
+            X,
+            y,
+            estimator=self.finetuned_estimator_,
+            ensure_y_numeric=self._model_type == "regressor",
+        )
+        self.X_ = X
+        self.y_ = y
+        X, y = X_validated, y_validated
+
+        if X_val is not None and y_val is not None:
+            X_train, y_train = X, y
+            # The validation set has to match the shape the training set recorded
+            # above, not replace it.
+            check_input_shape_matches(X_val, estimator=self)
+            X_val, y_val = ensure_compatible_fit_inputs_sklearn(
+                X_val,
+                y_val,
+                estimator=self.finetuned_estimator_,
+                ensure_y_numeric=self._model_type == "regressor",
+            )
+        elif self.validation_split_ratio:
+            X_train, X_val, y_train, y_val = self._get_train_val_split(X, y)
+        else:
+            # Validation disabled: train on all data, skip per-epoch evaluation.
+            X_train, y_train = X, y
+            X_val = y_val = None
+
+        do_validation = X_val is not None
+        has_scheduled_validation = (
+            self.epochs // validation_frequency
+            > epoch_to_start_from // validation_frequency
+        )
+        # Early stopping requires a validation metric from the remaining run.
+        early_stopping_enabled = (
+            self.early_stopping and do_validation and has_scheduled_validation
+        )
+        if is_main_process and self.early_stopping and not early_stopping_enabled:
+            if not do_validation:
+                logger.info(
+                    "Validation is disabled (validation_split_ratio=%s); "
+                    "early stopping is disabled as well.",
+                    self.validation_split_ratio,
+                )
+            else:
+                logger.info(
+                    "validation_frequency=%d schedules no validation checks in "
+                    "the remaining epochs; early stopping is disabled.",
+                    validation_frequency,
+                )
+
+        # Calculate the context size used during finetuning.
+        n_finetune_ctx_plus_query_samples = min(
+            self.n_finetune_ctx_plus_query_samples,
+            len(y_train),
+        )
+
+        self.finetuned_estimator_.model_.to(self.device)
+
+        finetuning_performance_options = PerformanceOptions(
+            force_recompute_layer=self.use_activation_checkpointing,
+            use_chunkwise_inference=False,
+        )
+
+        # Freeze the other task's parameters of a multitask checkpoint before
+        # wrapping in DDP, so it does not wait for gradients that never come.
+        task_type = "multiclass" if self._model_type == "classifier" else "regression"
+        for param in _parameters_unused_by_task(
+            self.finetuned_estimator_.model_, task_type
+        ):
+            param.requires_grad = False
+
+        # --- DDP model wrapping ---
+        model_for_optimization = self.finetuned_estimator_.model_
+        self._ddp_module_ = None
+        if using_ddp:
+            ddp_wrapper = _TabPFNDDPWrapper(self.finetuned_estimator_)
+            self._ddp_module_ = DistributedDataParallel(
+                ddp_wrapper,
+                device_ids=[local_rank],
+                output_device=local_rank,
+                broadcast_buffers=False,
+                find_unused_parameters=False,
+            )
+            model_for_optimization = self._ddp_module_
+
+        optimizer = get_and_init_optimizer(
+            model_parameters=model_for_optimization.parameters(),  # type: ignore
+            learning_rate=self.learning_rate,
+            weight_decay=self.weight_decay,
+            checkpoint_path=checkpoint_path,
+            device=self.device,
+        )
+
+        use_amp = self.device.startswith("cuda") and torch.cuda.is_available()
+        scaler = GradScaler() if use_amp else None  # type: ignore
+
+        # --- DDP helpers ---
+        def _synchronize_epoch_timer() -> float:
+            """Return a synchronized start time across ranks."""
+            if using_ddp:
+                dist.barrier()
+            return time.monotonic()
+
+        def _ddp_broadcast_primary_metric(metric: float) -> float:
+            """Broadcast primary metric from rank 0 to all ranks."""
+            if not using_ddp:
+                return metric
+            t = torch.tensor([metric], dtype=torch.float64, device=self.device)
+            dist.broadcast(t, src=0)
+            return float(t.item())
+
+        # --- Initial eval (rank 0 only) ---
+        if is_main_process and do_validation:
+            logger.info("--- 🚀 Eval default model ---")
+            eval_result = self._evaluate_model(
+                validation_eval_config,
+                X_train,  # pyright: ignore[reportArgumentType]
+                y_train,  # pyright: ignore[reportArgumentType]
+                X_val,  # pyright: ignore[reportArgumentType]
+                y_val,  # pyright: ignore[reportArgumentType]
+            )
+            self._log_epoch_evaluation(-1, eval_result, mean_train_loss=None)
+            best_metric: float = eval_result.primary
+        else:
+            best_metric = self._get_initial_best_metric()
+
+        best_metric = _ddp_broadcast_primary_metric(best_metric)
+
+        static_seed, rng = infer_random_state(self.random_state)
+        preprocessing_random_state = (
+            static_seed if self.use_fixed_preprocessing_seed else rng
+        )
+
+        if is_main_process:
+            logger.info("--- 🚀 Starting Fine-tuning ---")
+        patience_counter = 0
+        # Seed with the default weights so a run that never beats the default
+        # restores the base model (not the last, degraded epoch) at early stop.
+        # Seeded on every rank so DDP weights stay in sync in that case.
+        best_model_state: dict[str, torch.Tensor] | None = None
+        if early_stopping_enabled:
+            best_model_state = _snapshot_model_state(self.finetuned_estimator_.model_)
+
+        scheduler: LambdaLR | None = None
+
+        start_time = _synchronize_epoch_timer()
+
+        # Lower bound for the per-chunk query size (e.g. >= n_classes for
+        # classification); the actual size is computed per chunk by the splitter.
+        min_finetuning_query_size = self._get_valid_finetuning_query_size(
+            query_size=1,
+            y_train=y_train,
+        )
+        for epoch in range(epoch_to_start_from, self.epochs):
+            epoch_start_time = _synchronize_epoch_timer()
+            # Per-epoch aggregates for cleaner learning curves.
+            epoch_loss_sum = 0.0
+            epoch_batches = 0
+
+            epoch_random_state = static_seed + epoch
+
+            # Regenerate datasets each epoch with a different random_state
+            training_splitter = partial(
+                _ratio_ctx_query_split,
+                query_ratio=self.finetune_ctx_query_split_ratio,
+                min_query_size=min_finetuning_query_size,
+                random_state=epoch_random_state,
+            )
+
+            training_datasets = get_preprocessed_dataset_chunks(
+                calling_instance=self.finetuned_estimator_,
+                X_raw=X_train,
+                y_raw=y_train,
+                split_fn=training_splitter,
+                max_data_size=n_finetune_ctx_plus_query_samples,
+                model_type=self._model_type,
+                equal_split_size=False,
+                data_shuffle_seed=epoch_random_state,
+                preprocessing_random_state=preprocessing_random_state,
+            )
+
+            if using_ddp and estimator_shard is None:
+                sampler = DistributedSampler(
+                    training_datasets,
+                    num_replicas=dist.get_world_size(),
+                    rank=local_rank,
+                    shuffle=True,
+                    seed=epoch_random_state,
+                )
+                sampler.set_epoch(epoch)
+                finetuning_dataloader = DataLoader(
+                    training_datasets,
+                    batch_size=self.meta_batch_size,
+                    collate_fn=meta_dataset_collator,
+                    sampler=sampler,
+                )
+            else:
+                # Estimator sharding requires identical data and ordering on every
+                # rank; only the estimator dimension differs between ranks.
+                dataloader_generator = torch.Generator().manual_seed(epoch_random_state)
+                finetuning_dataloader = DataLoader(
+                    training_datasets,
+                    batch_size=self.meta_batch_size,
+                    collate_fn=meta_dataset_collator,
+                    shuffle=True,
+                    generator=dataloader_generator,
+                )
+
+            steps_per_epoch = len(finetuning_dataloader)
+            if steps_per_epoch == 0:
+                logger.warning(
+                    "No training batches available; ending training early.",
+                )
+                break
+
+            # Instantiate the LR scheduler only once
+            if self.use_lr_scheduler and scheduler is None:
+                total_steps = steps_per_epoch * self.epochs
+                warmup_steps = int(total_steps * 0.1)
+
+                lrate_schedule_fn = get_cosine_schedule_with_warmup(
+                    total_steps=total_steps,
+                    warmup_steps=warmup_steps,
+                    warmup_only=self.lr_warmup_only,
+                )
+                # On checkpoint resume, start the schedule at the step it
+                # reached instead of re-running warmup from 0. -1 (fresh run)
+                # is LambdaLR's default starting position.
+                last_step = epoch_to_start_from * steps_per_epoch - 1
+                if last_step >= 0:
+                    # LambdaLR requires initial_lr when resuming; loaded
+                    # optimizer state may lack it (e.g. checkpoint from a
+                    # run without a scheduler).
+                    for group in optimizer.param_groups:
+                        group.setdefault("initial_lr", self.learning_rate)
+                scheduler = LambdaLR(
+                    optimizer, lr_lambda=lrate_schedule_fn, last_epoch=last_step
+                )
+
+                if is_main_process:
+                    logger.info(
+                        "Using LambdaLR %s schedule: total_steps=%d, warmup_steps=%d",
+                        "warmup-only (constant LR after warmup)"
+                        if self.lr_warmup_only
+                        else "warmup+cosine",
+                        total_steps,
+                        warmup_steps,
+                    )
+
+            progress_bar = tqdm(
+                finetuning_dataloader,
+                desc=f"Finetuning Epoch {epoch + 1}/{self.epochs}",
+                disable=using_ddp and not is_main_process,
+            )
+            for batch in progress_bar:
+                optimizer.zero_grad()
+
+                # Decide whether to skip from the complete estimator ensemble.
+                # Classifier context labels may be permuted per estimator, so a
+                # rank-local shard alone does not preserve the original check's
+                # union-of-labels semantics.
+                should_skip = self._should_skip_batch(batch)
+                rank_batch = (
+                    _slice_batch_estimators(batch, estimator_shard)
+                    if estimator_shard is not None
+                    else batch
+                )
+                if using_ddp:
+                    # All ranks must agree — if any rank skips, all skip,
+                    # otherwise DDP all-reduce in backward will deadlock.
+                    skip_t = torch.tensor([int(should_skip)], device=self.device)
+                    dist.all_reduce(skip_t, op=dist.ReduceOp.MAX)
+                    should_skip = bool(skip_t.item())
+                if should_skip:
+                    continue
+
+                self._setup_batch(rank_batch)
+
+                self.finetuned_estimator_.fit_from_preprocessed(
+                    rank_batch.X_context,
+                    rank_batch.y_context,
+                    rank_batch.cat_indices,
+                    rank_batch.configs,
+                    performance_options=finetuning_performance_options,
+                )
+
+                if using_ddp:
+                    _move_tabpfn_cached_contexts_to_device(
+                        self.finetuned_estimator_, self.device
+                    )
+
+                use_scaler = use_amp and scaler is not None
+
+                with autocast(enabled=use_scaler), sdpa_kernel_context():  # type: ignore
+                    loss = self._forward_with_loss(rank_batch)
+                    # DDP averages rank gradients. Correct the local estimator-mean
+                    # loss so that uneven shards still produce the global
+                    # estimator-mean gradient after that averaging.
+                    loss = loss * self._estimator_gradient_scale_
+
+                if use_scaler:
+                    with sdpa_kernel_context():
+                        scaler.scale(loss).backward()  # type: ignore
+                    scaler.unscale_(optimizer)  # type: ignore
+
+                    if self.grad_clip_value is not None:
+                        clip_grad_norm_(
+                            model_for_optimization.parameters(),
+                            self.grad_clip_value,
+                        )
+
+                    scaler.step(optimizer)  # type: ignore
+                    scaler.update()  # type: ignore
+                else:
+                    with sdpa_kernel_context():
+                        loss.backward()
+
+                    if self.grad_clip_value is not None:
+                        clip_grad_norm_(
+                            model_for_optimization.parameters(),
+                            self.grad_clip_value,
+                        )
+
+                    optimizer.step()
+
+                if scheduler is not None:
+                    scheduler.step()
+
+                loss_scalar = _get_loss_for_logging(loss, estimator_shard)
+
+                epoch_loss_sum += loss_scalar
+                epoch_batches += 1
+                global_step += 1
+
+                if is_main_process:
+                    current_lr = (
+                        float(scheduler.get_last_lr()[0])
+                        if scheduler is not None
+                        else self.learning_rate
+                    )
+                    _logger.log_step(
+                        {
+                            "train/loss": loss_scalar,
+                            "train/lr": current_lr,
+                            "train/epoch": epoch,
+                            "train/global_step": global_step,
+                        },
+                        step=global_step,
+                    )
+
+                progress_bar.set_postfix(
+                    loss=f"{loss_scalar:.4f}",
+                )
+
+            # --- Epoch loss aggregation across ranks ---
+            if using_ddp:
+                loss_tensor = torch.tensor(
+                    [epoch_loss_sum, float(epoch_batches)],
+                    dtype=torch.float64,
+                    device=self.device,
+                )
+                dist.all_reduce(loss_tensor, op=dist.ReduceOp.SUM)
+                epoch_loss_sum = float(loss_tensor[0].item())
+                epoch_batches = int(loss_tensor[1].item())
+
+            mean_train_loss = (
+                epoch_loss_sum / epoch_batches if epoch_batches > 0 else None
+            )
+            epoch_train_time = time.monotonic() - epoch_start_time
+            if is_main_process:
+                logger.info(
+                    "Fine-tuning epoch %d/%d took %.2fs (%d batches across ranks)",
+                    epoch + 1,
+                    self.epochs,
+                    epoch_train_time,
+                    epoch_batches,
+                )
+
+            # --- Validation (rank 0 only), broadcast metric ---
+            run_validation = do_validation and (epoch + 1) % validation_frequency == 0
+            # NaN means "no validation metric for this epoch". It is also the
+            # placeholder on non-main ranks, which receive rank 0's value from
+            # the broadcast below.
+            eval_result = EvalResult(primary=float("nan"))
+            if is_main_process and run_validation:
+                eval_result = self._evaluate_model(
+                    validation_eval_config,
+                    X_train,  # pyright: ignore[reportArgumentType]
+                    y_train,  # pyright: ignore[reportArgumentType]
+                    X_val,  # pyright: ignore[reportArgumentType]
+                    y_val,  # pyright: ignore[reportArgumentType]
+                )
+                self._log_epoch_evaluation(epoch, eval_result, mean_train_loss)
+
+                epoch_log_metrics: dict[str, float] = {
+                    "train/epoch": epoch,
+                    f"val/{self._metric_name}": eval_result.primary,
+                }
+                if mean_train_loss is not None:
+                    epoch_log_metrics["train/mean_loss"] = mean_train_loss
+                for k, v in eval_result.secondary.items():
+                    epoch_log_metrics[f"val/{k}"] = v
+                _logger.log_epoch(epoch_log_metrics, step=global_step)
+            elif is_main_process and mean_train_loss is not None:
+                # No validation this epoch: log training progress only.
+                logger.info(
+                    "📊 Epoch %d | Train Loss: %.4f", epoch + 1, mean_train_loss
+                )
+                _logger.log_epoch(
+                    {"train/epoch": epoch, "train/mean_loss": mean_train_loss},
+                    step=global_step,
+                )
+
+            primary_metric = _ddp_broadcast_primary_metric(eval_result.primary)
+
+            if output_dir is not None and (not using_ddp or is_main_process):
+                save_interval_checkpoint = (
+                    self.save_checkpoint_interval is not None
+                    and (epoch + 1) % self.save_checkpoint_interval == 0
+                )
+
+                # The "best model" concept only exists under early stopping
+                # (which requires validation): without it the last epoch is
+                # the result, so only interval checkpoints are saved.
+                is_best = (
+                    early_stopping_enabled
+                    and not np.isnan(primary_metric)
+                    and self._is_improvement(primary_metric, best_metric)
+                )
+
+                if save_interval_checkpoint or is_best:
+                    if run_validation:
+                        checkpoint_metrics = self._get_checkpoint_metrics(eval_result)
+                    elif mean_train_loss is not None:
+                        checkpoint_metrics = {"train_loss": mean_train_loss}
+                    else:
+                        checkpoint_metrics = {}
+                    save_checkpoint(
+                        estimator=self.finetuned_estimator_,
+                        output_dir=output_dir,
+                        epoch=epoch + 1,
+                        optimizer=optimizer,
+                        metrics=checkpoint_metrics,
+                        train_size=train_size,
+                        is_best=is_best,
+                        save_interval_checkpoint=save_interval_checkpoint,
+                    )
+
+            if early_stopping_enabled and not np.isnan(primary_metric):
+                if self._is_improvement(primary_metric, best_metric):
+                    best_metric = primary_metric
+                    patience_counter = 0
+                    best_model_state = _snapshot_model_state(
+                        self.finetuned_estimator_.model_
+                    )
+                else:
+                    patience_counter += 1
+                    if is_main_process:
+                        logger.info(
+                            "⚠️  No improvement for %s validation checks. Best %s: %.4f",
+                            patience_counter,
+                            self._metric_name,
+                            best_metric,
+                        )
+
+                if patience_counter >= self.early_stopping_patience:
+                    if is_main_process:
+                        logger.info(
+                            "🛑 Early stopping triggered. Best %s: %.4f",
+                            self._metric_name,
+                            best_metric,
+                        )
+                    if best_model_state is not None:
+                        self.finetuned_estimator_.model_.load_state_dict(
+                            best_model_state
+                        )
+                    break
+
+            if self.time_limit is not None:
+                elapsed_time = time.monotonic() - start_time
+                if elapsed_time > self.time_limit:
+                    if is_main_process:
+                        logger.info(
+                            "🛑 Time limit of %d seconds reached. Stopping training.",
+                            self.time_limit,
+                        )
+                    break
+
+                n_epochs_run = epoch + 1 - epoch_to_start_from
+                if elapsed_time + (elapsed_time / n_epochs_run) > self.time_limit:
+                    if is_main_process:
+                        logger.info(
+                            "🛑 Not enough time remaining for another epoch. "
+                            "Stopping training.",
+                        )
+                    break
+
+        if early_stopping_enabled and best_model_state is not None:
+            self.finetuned_estimator_.model_.load_state_dict(best_model_state)
+
+        # --- DDP cleanup ---
+        self._ddp_module_ = None
+        if using_ddp:
+            dist.barrier()
+            if created_process_group:
+                dist.destroy_process_group()
+
+        if is_main_process:
+            _logger.finish()
+            logger.info("--- ✅ Fine-tuning Finished ---")
+
+        if is_main_process:
+            self._setup_inference_model(final_inference_eval_config)
+
+        self.is_fitted_ = True
+        return self

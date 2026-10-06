@@ -6,23 +6,23 @@
 </div>
 
   
-# TabTune - A Unified Library for Inference and Fine-Tuning Tabular Foundation Models
+# TabTune - A Unified Library for Inference and Fine-Tuning Tabular and Time Series Foundation Models
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.6+-red.svg)](https://pytorch.org/)
 [![Documentation](https://img.shields.io/badge/docs-available-green.svg)](https://github.com/Lexsi-Labs/TabTune)
 [![arXiv](https://img.shields.io/badge/arXiv-2511.02802-b31b1b.svg)](https://arxiv.org/abs/2511.02802)
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?&logo=discord&logoColor=white)](https://discord.gg/dSB62Q7A)
 
-A powerful and flexible Python library designed to simplify the **training and fine-tuning** of modern foundation models on tabular data.
+A Python library for the **inference and fine-tuning** of foundation models on tabular data and, since 0.2.1, on time series.
 
-Provides a **high-level, scikit-learn-compatible API** that abstracts away the complexities of data preprocessing and model-specific training loops, allowing you to focus on results.
+It provides a **high-level, scikit-learn-compatible API** that takes care of data preprocessing and model-specific training loops. `TabularPipeline` covers 21 tabular foundation models; `TimeSeriesPipeline` covers nine time series foundation models, every tabular model as a forecaster, and five statistical baselines, with forecasting, anomaly detection, imputation and embeddings behind one call.
 
 ---
 
 ## 🚀 Core Features
 
-The library is built on **four main components** that work together seamlessly:
+The library is built on **five main components**:
 
 - **`DataProcessor`** -- A smart, model-aware data preparation engine.  
   Automatically handles imputation, scaling, and categorical encoding based on the requirements of the selected model (e.g., integer encoding for TabPFN, text embeddings for ContextTab).
@@ -36,13 +36,16 @@ The library is built on **four main components** that work together seamlessly:
 - **`TabularLeaderboard`** -- A leaderboard utility for model comparison.  
   Makes it easy to compare multiple models and strategies on the same dataset splits with automatic ranking and metric reporting.
 
+- **`TimeSeriesPipeline`** -- The same pattern for time series.  
+  `fit`, `predict`, `evaluate`, `backtest`, `calibrate`, `save` and `load` over nine vendored time series foundation models, every tabular model as a forecaster and five baselines, with `TimeSeriesLeaderboard`, `TimeSeriesEnsemble` and `TimeSeriesBenchmark` beside it.
+
 ---
 
 ## 🤔 Why TabTune?
 
 Using diverse tabular foundation models often requires writing model-specific boilerplate for data preparation, training, and inference. TabTune solves this by providing:
 
-- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) across **16 models** — TabPFN, TabPFNv2.6, TabPFNv3, TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, Mitra, ContextTab, TabDPT, LimiX, TabFM, xRFM, iLTM and EXAONE Tabular.
+- **Unified API**: A single, consistent interface (`.fit()`, `.predict()`, `.evaluate()`) across **21 models** — TabPFN, TabPFNv2.6, TabPFNv3, TabPFNv3.5, TabPFNv3.5-fast, TabICL, TabICLv2, OrionMSP, OrionMSPv1.5, OrionBix, Mitra, Mitra v2, ContextTab, TabDPT, LimiX, TabFM, xRFM, iLTM, EXAONE Tabular, Causilo and TabLDM.
 
 - **Automated Preprocessing**: The DataProcessor is model-aware, automatically applying the correct transformations without manual configuration.
 
@@ -58,41 +61,44 @@ Using diverse tabular foundation models often requires writing model-specific bo
 
 - **Deployment Awareness**: A torch-free model registry records each checkpoint's capability envelope and weight license, so a class-count mismatch or a research-only license fails in milliseconds instead of after a multi-gigabyte download.
 
+- **Time Series Too**: One `TimeSeriesPipeline` for Chronos, Chronos-Bolt, Chronos-2, TimesFM 3, Toto 1 and 2, TiRex, TiRex-2 and Time-MoE, with the model code vendored so no model package is installed. Zero-shot, full fine-tuning and LoRA for all nine; conformal intervals, covariates, multivariate targets, anomaly detection, imputation and embeddings from the same fitted model.
+
+- **One Logger**: `setup_logger` configures Rich, plain or JSON console output and rotating log files once, and every pipeline, leaderboard and benchmark reports through it.
+
 ---
 
 
 ## 🚀 What's New in this release
 
--   ✅ **EXAONE Tabular (LG AI Research)** - Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for >10 classes, the attention-based feature selector and the CUDA execution planner. 
+-   ✅ **Time series on `TimeSeriesPipeline`** - Time series models use the same pipeline pattern as tabular ones: `TimeSeriesPipeline(model_name, task_type, tuning_strategy, tuning_params, model_params, forecast_params)` with `fit`, `predict`, `evaluate`, `save` and `load`. Tasks are forecasting, anomaly detection, imputation and embeddings; strategies are zero-shot `inference`, `finetune` and `peft` (LoRA). The pipeline adds conformal `calibrate()`, rolling-origin `backtest()`, context-length tuning and automatic model selection, plus `TimeSeriesLeaderboard`, `TimeSeriesEnsemble` and `TimeSeriesBenchmark`. The `tabtune.tsfm` facade is removed. 
 
--   ✅ **xRFM and iLTM** - Two non-transformer models. **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
+- ✅ **Five new tabular models** - **TabPFN v3.5** and **TabPFN v3.5-fast** (Prior Labs; one multitask checkpoint carries both the classification and the regression head), **Causilo** (Nums AI; column attention, row mixing and a pooled prediction stage), **TabLDM** (Xiaomi; dual-stream feature grouping with a sparse mixture of experts) and **Mitra v2** (AWS; new weights on Mitra's 2D row-and-column attention). All five are in the registry with their envelopes and weight licenses. Their preprocessing needs `skrub`, which is now a core dependency.
 
--   ✅ **Model Registry** - A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight license**. Both are checked before any weights load.
+-   ✅ **Tabular models as forecasters** - Every tabular model with a regression head forecasts as `TabularTS-<name>`, with TabPFN-TS's time features or a pooled lag design. `TabPFN-TS` is re-implemented on TabTune's vendored TabPFN, and `TabularTS-GBM` is a weight-free gradient-boosting baseline. 
 
--   ✅ **Uncertainty Quantification** - Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage.
-
--   ✅ **Shift-Aware Evaluation** - `TemporalSplit`, `GroupedSplit` and `StratifiedGroupedSplit`, plus a `ShiftEvaluator` that reports the **IID-to-shift gap** — the number that predicts production behaviour, rather than the IID score that does not.
-
-
+-   ✅ **Time series histories as tabular features** - `tabtune.bridge.SeriesFeaturizer` gives each table row leak-safe features of its entity's history (summary statistics and model embeddings, as of the row's own timestamp), for any `TabularPipeline` model.
 
 ---
 
 ## 📊 Supported Models
 
-**16 models across seven architectural families.** The `Commercial` column reflects the
+**21 models across seven architectural families.** The `Commercial` column reflects the
 **weight** license, which is what decides whether you can ship.
 
 | Model | Family / Paradigm | Key Innovation | Supported Strategies |
 |-------|------------------|----------------|----------------------|
 | **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
-| **TabPFN-v2.6** | PFN / ICL | PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT | 
+| **TabPFN-v2.6** | PFN / ICL | PriorLabs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, Regression, Regression FT | 
 | **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
+| **TabPFN-v3.5** | PFN / ICL | New architecture; one multitask checkpoint with both classification and regression heads; native text and datetime columns | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
+| **TabPFN-v3.5-fast** | PFN / ICL | Separately trained lower-cost v3.5 checkpoint on the same runtime | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
 | **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT | 
 | **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT | 
 | **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT | 
 | **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT | 
 | **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT | 
 | **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT | 
+| **Mitra v2** | Scalable ICL | Second-generation Mitra weights on the same vendored Tab2D architecture | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression-FT | 
 | **ContextTab** | Semantics-Aware ICL | Modality-specific semantic embeddings; first-class text and datetime | Inference, Full Fine-Tuning, PEFT*, Regression, Regression-FT | 
 | **TabDPT** | Denoising Transformer | Denoising pre-training + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression-FT | 
 | **LimiX** | Probabilistic / ICL | Likelihood-based mixture modeling; uncertainty-aware | Inference, Regression, Regression-FT | 
@@ -100,10 +106,12 @@ Using diverse tabular foundation models often requires writing model-specific bo
 | **xRFM** | Kernel / Feature Learning | Recursive Feature Machine: AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights — trains from scratch** | Inference, Refit, Refine, PEFT†, Regression | 
 | **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings; GBDT tree embeddings + retrieval | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT | 
 | **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | Cross-axis Summary Transformer (CAST); ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ | 
+| **Causilo** | ICL (Nums AI) | Column attention → row mixing → pooled prediction over a pretrained context; ECOC for >10 classes | Inference, Meta-Learning FT, PEFT, Regression, Regression FT, Regression PEFT | 
+| **TabLDM** | ICL (Xiaomi) | Dual-stream feature grouping, attention residual and sparse mixture of experts; pretrained only on SCM synthetic data | Inference, Meta-Learning FT, PEFT, Regression, Regression FT, Regression PEFT | 
 
 
 
-\* PEFT is experimental for ContextTab, TabPFN and TabPFN-v2.6; `inference` is fully supported.
+\* PEFT is experimental for ContextTab and TabPFN; `inference` is fully supported.
 † xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
 ‡ EXAONE's projections are raw `nn.Parameter` tensors applied through `F.linear`, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
 
@@ -148,14 +156,9 @@ pip install "tabtune[interactive]"    # rich notebook display helpers
 pip install "tabtune[colab]"          # pin core packages to Colab's versions
 pip install "tabtune[docs]"           # mkdocs toolchain
 pip install "tabtune[dev]"            # pytest, ruff, black, pre-commit
+pip install "tabtune[toto2]"          # the Toto 2 time series model (Python 3.12+)
 ```
 
-> **TabFM (Google):** the `TabFM` model requires the optional `tabfm` package with the
-> PyTorch backend. Install it alongside TabTune with `pip install "tabfm[pytorch]"`.
-> Pretrained weights (`google/tabfm-1.0.0-pytorch`) are auto-downloaded from the Hugging Face Hub on first use.
-
-> **xRFM** needs no weights at all — it trains from scratch, which makes it the only
-> bundled model that works in an air-gapped environment out of the box.
 
 ---
 
@@ -247,6 +250,114 @@ print(get_model_spec("EXAONE").envelope.max_classes)   # None
 ```
 
 
+
+---
+
+## ⏱️ Time Series
+
+`TimeSeriesPipeline` mirrors `TabularPipeline`: name a model, a task and a tuning strategy, call `fit`, then `predict`. The data is a long frame with one row per series and timestamp, and a `TimeSeriesSchema` names the role of each column.
+
+```python
+from tabtune.TimeSeries import TimeSeriesPipeline, TimeSeriesSchema, make_panel, split_horizon
+
+df = make_panel(n_series=5, length=400, freq="h")                 # or your own long frame
+schema = TimeSeriesSchema(target="target", item_id="item_id")
+history, actual = split_horizon(df, schema, prediction_length=24)
+
+pipe = TimeSeriesPipeline("ChronosBolt", forecast_params={"prediction_length": 24})
+forecast = pipe.fit(history, schema).predict()
+forecast.to_pandas()          # item_id, timestamp, target, point, 0.1, 0.5, 0.9
+pipe.evaluate(actual)         # MAE, RMSE, sMAPE, MASE, pinball, WQL, coverage
+pipe.backtest(windows=3)      # rolling-origin scores
+pipe.calibrate(windows=4)     # conformal intervals, for any model
+```
+
+Swap `"ChronosBolt"` for `"TiRex"`, `"TabPFN-TS"` or `"SeasonalNaive"` and nothing else changes.
+
+### Models
+
+**Nine time series foundation models, vendored.** No model package is installed: the upstream code lives in `tabtune/models/` with its licence files and is imported only when a pipeline is fitted. All nine run zero-shot, fine-tune fully or with LoRA, and serve embeddings.
+
+| Model | Default checkpoint | Multivariate | Covariates | NaN in history | Max context | Weight licence |
+|---|---|---|---|---|---|---|
+| **Chronos** | `amazon/chronos-t5-small` | no | no | yes | 512 | Apache-2.0 |
+| **Chronos-Bolt** | `amazon/chronos-bolt-small` | no | no | yes | 2,048 | Apache-2.0 |
+| **Chronos-2** | `amazon/chronos-2` | yes | past + known, incl. categorical | yes | 8,192 | Apache-2.0 |
+| **TimesFM 3** | `google/timesfm-3.0-pytorch` | yes | past + known, numeric | yes | 15,360 | non-commercial |
+| **Toto 1** | `Datadog/Toto-Open-Base-1.0` | yes | past + known, numeric | yes | 4,096 | Apache-2.0 |
+| **Toto 2** | `Datadog/Toto-2.0-22m` | yes | no | yes | 4,096 | Apache-2.0 (`tabtune[toto2]`) |
+| **TiRex** | `NX-AI/TiRex` | no | no | yes | 2,048 | NXAI Community (conditional) |
+| **TiRex-2** | `NX-AI/TiRex-2` | yes | past + known, numeric | yes | from checkpoint | unverified |
+| **Time-MoE** | `Maple728/TimeMoE-50M` | no | no | no | 4,096 | unverified |
+
+**Tabular foundation models as forecasters.** `TabPFN-TS` re-implements the TabPFN-TS recipe on TabTune's vendored TabPFN, and every tabular model with a regression head is registered as `TabularTS-<name>` (17 today), with TabPFN-TS's time features or a pooled lag design (`model_params={"features": "time" | "lags"}`). `TabularTS-GBM` is a weight-free gradient-boosting forecaster, and any scikit-learn regressor drops in through `SklearnBackend`. Experimental
+
+**Statistical baselines.** `SeasonalNaive`, `Naive`, `Mean`, `Drift` and `WindowAverage`, so every leaderboard has a floor.
+
+`tabtune timeseries list-models` prints the whole catalog with licences; `list_time_series_models(task=..., strategy=..., commercial_ok=True)` filters it in Python.
+
+### What the pipeline guarantees
+
+- **Checks before downloads.** The registry confirms the model supports the task and strategy, `license_mode="commercial"` refuses non-commercial weights, and `envelope_mode` warns (or errors) when the horizon exceeds what the checkpoint was documented for.
+- **Quantiles that mean what they say.** You ask for `quantile_levels`; each adapter maps them onto what its model produces (interpolate inside the grid, clamp outside it with a warning, or refuse a level the model never produced). Quantiles are sorted before they reach you, and `forecast.metadata["point_forecast"]` says whether the point is a mean or a median.
+- **Covariates a model cannot read are an error**, with the models that can read them named. Known covariates travel in a separate `future_df`.
+- **No configuration is scored on data it was fitted on.** `backtest`, `TimeSeriesLeaderboard` and `TimeSeriesEnsemble` train without the scored windows.
+
+### Four tasks from one fitted model
+
+```python
+TimeSeriesPipeline("ChronosBolt", task_type="anomaly_detection", task_params={"method": "interval"}).fit(df, schema).predict()
+TimeSeriesPipeline("ChronosBolt", task_type="imputation").fit(df_with_gaps, schema).predict()
+TimeSeriesPipeline("TiRex", task_type="embedding").fit(df, schema).predict().embeddings
+```
+
+### Compare, combine, select
+
+```python
+from tabtune.TimeSeries import TimeSeriesLeaderboard, TimeSeriesEnsemble
+
+board = TimeSeriesLeaderboard(history, schema, forecast_params={"prediction_length": 24}, windows=2)
+board.add_models(["SeasonalNaive", "Chronos2", "TiRex", "TabularTS-GBM"])
+board.add_model("TiRex", tuning_strategy="peft", tuning_params={"epochs": 2}, label="TiRex LoRA")
+board.run()
+
+ensemble = TimeSeriesEnsemble(["ChronosBolt", "TiRex", "SeasonalNaive"], forecast_params={"prediction_length": 24})
+ensemble.fit(history, schema).predict()
+
+best = TimeSeriesPipeline.select(history, schema, {"prediction_length": 24},
+                                 candidates=["Chronos2", "TiRex", "SeasonalNaive"], license_mode="commercial")
+```
+
+### Covariates and multivariate targets
+
+```python
+schema = TimeSeriesSchema(target=["load", "price"], item_id="site",
+                          past_covariates=["temperature"], known_covariates=["promo"])
+pipe = TimeSeriesPipeline("Chronos2", forecast_params={"prediction_length": 24})
+pipe.fit(history, schema, future_df=future_promo)      # known covariates over the horizon
+pipe.evaluate(actual)["per_target"]
+```
+
+### Series histories as tabular features
+
+```python
+from tabtune.bridge import SeriesFeaturizer
+
+X = SeriesFeaturizer(transactions, id_col="customer", time_col="date", cutoff="as_of",
+                     model="TiRex", n_components=4).fit_transform(customers)
+```
+
+Each row gets summary statistics and model embeddings of its entity's history as of its own timestamp, for any `TabularPipeline` model.
+
+### Command line
+
+```bash
+tabtune timeseries list-models --commercial
+tabtune timeseries forecast  --data sales.csv --model Chronos2 --horizon 14 --output forecast.csv
+tabtune timeseries evaluate  --data sales.csv --model TiRex --horizon 14
+tabtune timeseries anomalies --data sensors.csv --model ChronosBolt
+tabtune timeseries benchmark --models Chronos2,TiRex,SeasonalNaive --data a.csv --data b.csv --horizon 24
+```
 
 ---
 
@@ -723,7 +834,7 @@ TabularPipeline(
 
 #### Key Parameters:
 
-- **`model_name`** (str): Model name or alias. Resolution ignores case, hyphens, underscores and whitespace, so `'TabPFN-v2.6'` and `'tabpfnv26'` are equivalent. 16 models are registered — call `tabtune.registry.list_model_names()` rather than hardcoding a list.
+- **`model_name`** (str): Model name or alias. Resolution ignores case, hyphens, underscores and whitespace, so `'TabPFN-v2.6'` and `'tabpfnv26'` are equivalent. 21 models are registered — call `tabtune.registry.list_model_names()` rather than hardcoding a list.
 
 - **`task_type`** (str): The type of task — `'classification'` or `'regression'`.
 
@@ -891,7 +1002,7 @@ rather than silently voiding the guarantee. Regression gets
 `ConformalRegressor` (absolute-residual for any model, CQR where native
 quantiles exist).
 
-See [Uncertainty & Conformal Prediction](docs/user-guide/uncertainty.md) and
+See the `tabtune.uncertainty` module docstrings and
 [`examples/18_uncertainty.py`](examples/18_uncertainty.py).
 
 ---
@@ -976,6 +1087,22 @@ something else.
 
 ---
 
+## 🪵 Logging
+
+Every pipeline, leaderboard, ensemble and benchmark reports through the `tabtune` logger. `setup_logger` configures it once, for both the tabular and the time series modules:
+
+```python
+from tabtune import setup_logger
+
+setup_logger()                                   # Rich in a terminal or notebook, plain text when redirected
+setup_logger(level="WARNING")                    # warnings only
+setup_logger(log_file="runs/experiment.jsonl", file_format="json", file_level="DEBUG")   # structured events on disk
+```
+
+Console output goes to stderr by default; `stream=sys.stdout` restores the old stream. Repeated calls replace only the handlers TabTune created. See [`docs/development/logging.md`](docs/development/logging.md) and [`examples/logging_showcase.py`](examples/logging_showcase.py).
+
+---
+
 ## ⚡ Prediction Caching
 
 ```python
@@ -997,6 +1124,8 @@ leaderboard runs and shift-evaluation sweeps, which query the same test rows rep
 
 Example notebooks showcasing the library's features in depth. Runnable scripts for every feature also live in `examples/`.
 
+### Tabular
+
 | Serial No. | Name | Task Performed | Link To Notebook |
 |---|------|------|------|
 | 1 | Unified API | Showcasing A Unified API Across Multiple Models |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KcaSdYRjZnMlb0MLmQ5IlnbPDiuEr1Ld?usp=sharing) |
@@ -1016,6 +1145,22 @@ Example notebooks showcasing the library's features in depth. Runnable scripts f
 | 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
 | 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
 | 17 | EXAONE Model | End-to-end usecase of the EXAONE Model |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1RR-mhJkGW0xpAU0si76ru-1NuggPKDNH#scrollTo=89s93vNcnSk0)| 
+
+### Time series
+
+The notebooks live in [`notebooks/timeseries/`](notebooks/timeseries/). Each one runs on a CPU; foundation model weights download from the Hugging Face Hub on first use.
+
+| Serial No. | Name | Task Performed | Notebook |
+|---|------|------|------|
+| 1 | Quickstart | Fit, forecast, plot, evaluate, backtest, save; swap the model by name | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/01_quickstart_forecasting.ipynb) |
+| 2 | Model catalog and licences | Every registered model, its envelope and weight licence; `license_mode`, `envelope_mode`, the CLI | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/02_model_catalog_and_licenses.ipynb) |
+| 3 | Quantiles and calibration | Quantile levels per model, interval coverage, conformal `calibrate()` for any forecaster | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/03_probabilistic_forecasts_and_calibration.ipynb) |
+| 4 | Covariates and multivariate | Past and known covariates with `future_df`, refusals, joint forecasts of several targets | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/04_covariates_and_multivariate.ipynb) |
+| 5 | Fine-tuning and LoRA | `finetune` and `peft` with early stopping, the training report, fair comparison on a leaderboard | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/05_fine_tuning_and_lora.ipynb) |
+| 6 | Anomalies, imputation, embeddings | Three more tasks from one fitted model; `SeriesFeaturizer` history features for a tabular model | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/06_anomalies_imputation_embeddings.ipynb) |
+| 7 | Leaderboards, ensembles, selection | `TimeSeriesLeaderboard`, `TimeSeriesEnsemble`, `TimeSeriesPipeline.select` with licence filtering | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/07_leaderboard_ensemble_and_selection.ipynb) |
+| 8 | Tabular models as forecasters | TabPFN-TS, `TabularTS-*`, the time and lags designs, any scikit-learn regressor | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/08_tabular_models_as_forecasters.ipynb) |
+| 9 | Benchmarks and the CLI | `TimeSeriesBenchmark` on built-in and your own datasets, reports, `tabtune timeseries` commands | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/Lexsi-Labs/TabTune/blob/main/notebooks/timeseries/09_benchmark_and_cli.ipynb) |
 
 
 ---
@@ -1070,18 +1215,17 @@ Full documentation: **[tabtune.lexsi.ai](https://tabtune.lexsi.ai/)**
 
 | Topic | Page |
 |---|---|
-| Model registry, envelopes, licensing | `docs/user-guide/registry.md` |
-| Typed configuration and YAML | `docs/user-guide/configuration.md` |
-| Prediction caching | `docs/user-guide/caching.md` |
-| Shift-aware evaluation | `docs/user-guide/shift-evaluation.md` |
-| Conformal prediction and recalibration | `docs/user-guide/uncertainty.md` |
-| Ensembling (six strategies) | `docs/user-guide/ensembling.md` |
-| Distillation | `docs/user-guide/distillation.md` |
-| Causal inference | `docs/user-guide/causal.md` |
-| All 16 models compared | `docs/models/overview.md` |
-| EXAONE Tabular | `docs/models/exaone.md` |
-| xRFM / iLTM | `docs/models/xrfm.md`, `docs/models/iltm.md` |
-| TabPFN v2.6 / v3, TabICL v2, TabFM | `docs/models/tabpfnv26.md`, `tabpfnv3.md`, `tabiclv2.md`, `tabfm.md` |
+| Models compared (all 21) | `docs/models/overview.md` |
+| One page per model | `docs/models/*.md` (TabPFN v2 to v3.5, TabICL/v2, Orion, TabDPT, Mitra/v2, ConTextTab, LimiX, TabFM, EXAONE, xRFM, iLTM, Causilo, TabLDM) |
+| Time series models (`TimeSeriesPipeline`) | `docs/timeseries/overview.md`, `docs/timeseries/models.md`, `docs/timeseries/fine-tuning.md` |
+| Time series notebooks | `notebooks/timeseries/` |
+| Logging | `docs/development/logging.md` |
+| Tabular models as forecasters | `docs/timeseries/tabular-forecasters.md` |
+| Time series histories as tabular features | `docs/timeseries/series-features.md` |
+| Real-weight benchmarks | `benchmarks/README.md` |
+
+The registry, configuration, caching, shift-evaluation, uncertainty, ensembling, distillation
+and causal modules are documented in their module docstrings and in `examples/`.
 
 Build the docs locally:
 
@@ -1107,6 +1251,12 @@ TabTune is built upon the excellent work of the following projects and research 
 - **[AutoGluon](https://github.com/autogluon/autogluon)** - AutoML framework that inspired our unified API design
 - **[LimiX](https://github.com/limix-ldm-ai/LimiX)** – Likelihood-based mixture modeling and probabilistic inference framework for structured tabular learning  
 - **[TabFM](https://github.com/google-research/tabfm)** – Google Research's zero-shot, hybrid-attention tabular foundation model pretrained on synthetic structural causal models  
+- **[Chronos](https://github.com/amazon-science/chronos-forecasting)** - Chronos, Chronos-Bolt and Chronos-2 time series foundation models (Amazon)
+- **[TimesFM](https://github.com/google-research/timesfm)** - Decoder-only time series foundation model (Google Research)
+- **[TiRex](https://github.com/NX-AI/tirex)** and **[TiRex-2](https://github.com/NX-AI/tirex-2)** - xLSTM time series forecasters (NXAI)
+- **[Time-MoE](https://github.com/Time-MoE/Time-MoE)** - Mixture-of-experts time series foundation models
+- **[Toto](https://github.com/DataDog/toto)** - Toto 1 and Toto 2 time series foundation models for observability data (Datadog)
+- **[TabPFN-TS](https://github.com/PriorLabs/tabpfn-time-series)** - Time series forecasting with TabPFN
 
 ---
 
@@ -1131,6 +1281,11 @@ TabTune is built upon the excellent work of the following projects and research 
 
 This project is released under the MIT License.  
 Please cite appropriately if used in academic or production projects.
+
+Vendored model code keeps its own license, in the `LICENSE` file of its folder under
+`tabtune/models/`: Chronos, TimesFM, Toto, TiRex-2 and Time-MoE are Apache-2.0, and TiRex is under the
+NXAI Community License. Built with technology from NXAI. Weight licences differ from code licences and are
+recorded per checkpoint in the registry; `license_mode="commercial"` checks them before any download.
 
 **Citation:**
 

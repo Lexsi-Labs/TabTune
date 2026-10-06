@@ -1,3 +1,4 @@
+from ..logger import logged_operation
 import torch
 from torch.optim import Adam
 from torch.optim import AdamW
@@ -58,9 +59,18 @@ from ..models.regression.exaone.regressor import EXAONETabularRegressorWrapper
 
 from ..models.tabpfnv26 import TabPFNv26Classifier
 from ..models.tabpfnv3 import TabPFNv3Classifier
+from ..models.tabpfnv35 import TabPFNv35Classifier
+from ..models.causilo import CausiloTabTuneClassifier
+from ..models.tabldm import TabLDMTabTuneClassifier
 from ..models.tabpfnv26.regressor import TabPFNRegressor as TabPFNv26Regressor
 from ..models.regression.tabpfnv26.regressor import TabPFNv26RegressorWrapper
 from ..models.regression.tabpfnv3.regressor import TabPFNv3RegressorWrapper
+from ..models.regression.tabpfnv35.regressor import (
+    TabPFNv35FastRegressorWrapper,
+    TabPFNv35RegressorWrapper,
+)
+from ..models.regression.causilo.regressor import CausiloRegressorWrapper
+from ..models.regression.tabldm.regressor import TabLDMRegressorWrapper
 
 
 from ..models.contexttab.contexttab import to_device
@@ -97,19 +107,159 @@ def _normalise_device_param(params: dict) -> dict:
     return params
 
 
+
+# Vendored TabPFN trees, longest package name first so "tabpfnv35" wins over "tabpfnv3".
+_TABPFN_TREES = ("tabpfnv35", "tabpfnv26", "tabpfnv3", "tabpfn")
+
+
+def _tabpfn_tree(estimator) -> str | None:
+    """The vendored TabPFN package an estimator (or its TabTune wrapper) comes from."""
+    for cls in type(estimator).__mro__:
+        for tree in _TABPFN_TREES:
+            if cls.__module__.startswith(f"tabtune.models.{tree}."):
+                return tree
+    return None
+
+
+def _pin_trained_tabpfn(estimator) -> bool:
+    """Make later ``fit()`` calls reuse the estimator's trained weights.
+
+    Every vendored TabPFN estimator (v2, v2.6, v3, v3.5) rebuilds its module
+    from ``model_path`` inside ``fit()``. TabTune calls ``fit()`` after
+    fine-tuning, both to rebuild the inference executor and in
+    ``TabularPipeline.predict``, so without this the checkpoint's weights
+    replace the fine-tuned ones. Pointing ``model_path`` at the
+    tree's own ``ClassifierModelSpecs`` / ``RegressorModelSpecs`` around the
+    in-memory module is upstream's pattern (``clone_model_for_evaluation``).
+    The module object itself is reused, so LoRA adapters stay in place.
+
+    Returns ``True`` if the estimator was pinned, ``False`` if it is not a
+    fitted TabPFN estimator (a no-op then).
+    """
+    import importlib
+
+    tree = _tabpfn_tree(estimator)
+    if tree is None:
+        return False
+    base = importlib.import_module(f"tabtune.models.{tree}.base")
+    if not hasattr(estimator, "_tabtune_pretrained_model_path") and hasattr(estimator, "model_path"):
+        estimator._tabtune_pretrained_model_path = estimator.model_path
+    regressor = getattr(estimator, "znorm_space_bardist_", None)
+    is_regressor = "Regressor" in type(estimator).__name__
+    if tree == "tabpfn":
+        module, config = getattr(estimator, "model_", None), getattr(estimator, "config_", None)
+        if module is None or config is None:
+            return False
+        estimator.model_path = (
+            base.RegressorModelSpecs(module, config, regressor) if is_regressor
+            else base.ClassifierModelSpecs(module, config)
+        )
+        return True
+    modules = getattr(estimator, "models_", None)
+    configs = getattr(estimator, "configs_", None)
+    inference = getattr(estimator, "inference_config_", None)
+    if not modules or not configs or inference is None:
+        return False
+    if is_regressor:
+        specs = [base.RegressorModelSpecs(m, c, inference, regressor) for m, c in zip(modules, configs)]
+    else:
+        specs = [base.ClassifierModelSpecs(m, c, inference) for m, c in zip(modules, configs)]
+    estimator.model_path = specs[0] if len(specs) == 1 else specs
+    return True
+
+
+def _refit_keeping_weights(estimator, X, y):
+    """``estimator.fit(X, y)`` without reloading a vendored TabPFN checkpoint."""
+    _pin_trained_tabpfn(estimator)
+    return estimator.fit(X, y)
+
+
+def _refit_without_reload(estimator, X, y):
+    """``estimator.fit(X, y)`` that keeps the current (fine-tuned) module.
+
+    TabLDM and TabICLv2 rebuild ``model_`` from the checkpoint inside
+    ``fit()`` (``_load_model()``), so a refit after fine-tuning would restore
+    the pretrained weights. Shadowing ``_load_model`` on the instance for this
+    one call keeps ``model_`` while ``fit()`` rebuilds the ensemble, target
+    scaling, calibration and caches around it.
+    """
+    if getattr(estimator, "model_", None) is None:
+        return estimator.fit(X, y)
+    _mark_finetuned(estimator)
+    estimator._load_model = lambda: None
+    try:
+        return estimator.fit(X, y)
+    finally:
+        del estimator._load_model
+
+
+def _mark_finetuned(estimator) -> None:
+    """Make a fine-tuned TabICLv2 / TabLDM estimator pickle its weights.
+
+    Their ``__getstate__`` drops ``model_`` and ``__setstate__`` reloads the
+    checkpoint unless weights are requested. The flag requests them and
+    persists across pickle round trips.
+    """
+    for cls in type(estimator).__mro__:
+        if cls.__module__.startswith(("tabtune.models.tabiclv2.", "tabtune.models.tabldm.")):
+            estimator._tabtune_finetuned = True
+            return
+
+
+def _mitra_lora_name(model) -> str:
+    """Which MODEL_LORA_TARGETS entry a Tab2D instance should use.
+
+    v1 and v2 share the vendored ``Tab2D``, so ``isinstance`` cannot tell them
+    apart; the pipeline tags the module with the name it was built under. The
+    fallback is "Mitra" because a Tab2D that reached here without a tag came
+    from the v1 path, and the two target sets are identical anyway - the tag
+    decides which entry is *reported*, not which layers get adapted.
+    """
+    return getattr(model, "_tabtune_model_name", "Mitra")
+
+
 class TuningManager:
     """
     Handles the model adaptation process
     """
+    @logged_operation("adapt")
     def tune(self, model, X_train, y_train, strategy='inference', params=None, processor=None):
+        """Adapt ``model`` with ``strategy`` and return the model to predict with.
+
+        After fine-tuning, a vendored TabPFN estimator is pinned to its trained
+        module (see :func:`_pin_trained_tabpfn`), so the refits that
+        ``TabularPipeline`` performs before predicting keep the new weights.
+        """
+        # A second fine-tune (e.g. one pipeline reused across CV folds) starts from the
+        # checkpoint, not from the previous run's weights pinned by _pin_trained_tabpfn.
+        pretrained = getattr(model, "_tabtune_pretrained_model_path", None)
+        if pretrained is not None:
+            model.model_path = pretrained
+            if strategy == "finetune" and hasattr(model, "_initialize_model_variables"):
+                # Rebuild the module from the checkpoint, as a new pipeline does at
+                # construction (PEFT is left alone: its adapters are already injected).
+                model._initialize_model_variables()
+        tuned = self._tune(model, X_train, y_train, strategy=strategy, params=params, processor=processor)
+        if strategy in ("finetune", "peft"):
+            _pin_trained_tabpfn(tuned)
+            _mark_finetuned(tuned)
+        return tuned
+
+    def _tune(self, model, X_train, y_train, strategy='inference', params=None, processor=None):
         
         params_copy = dict(params) if isinstance(params, dict) else {}
         _normalise_device_param(params_copy)
         finetune_mode = params_copy.get('finetune_mode', 'turn_by_turn')
+        # Read (do not pop) here: the classification path below pops the same key
+        # from params_copy, and popping twice would hide it from whichever ran
+        # second. Regression arms that support PEFT read it from this name.
+        regression_peft_config = params_copy.get('peft_config')
 
         # --- Regression wrappers: allow ContextTab finetune (turn-by-turn) ---
         if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
-                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper, XRFMRegressorWrapper, ILTMRegressorWrapper, EXAONETabularRegressorWrapper)):
+                              TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper, XRFMRegressorWrapper, ILTMRegressorWrapper, EXAONETabularRegressorWrapper,
+                              TabPFNv35RegressorWrapper, TabPFNv35FastRegressorWrapper,
+                              CausiloRegressorWrapper, TabLDMRegressorWrapper)):
             if strategy == 'inference':
                 logger.info("[TuningManager] Regression model - inference path")
                 model.fit(X_train, y_train)
@@ -155,7 +305,29 @@ class TuningManager:
                 logger.info("[TuningManager] Using v2.6 native FinetunedTabPFNRegressor")
                 return self._finetune_tabpfnv26_native_regressor(model, X_train, y_train, params_copy)
 
-            # TabPFNv3 regression finetune (native default; turn-by-turn alternative)
+            # TabLDM regression finetune (episodic; PEFT supported)
+            if isinstance(model, TabLDMRegressorWrapper) and strategy in ("finetune", "peft"):
+                params_copy.pop('peft_config', None)
+                return self._finetune_tabldm(model, X_train, y_train, params_copy,
+                                             peft_config=regression_peft_config, task="regression")
+
+            # Causilo regression finetune (episodic; PEFT supported)
+            if isinstance(model, CausiloRegressorWrapper) and strategy in ("finetune", "peft"):
+                params_copy.pop('peft_config', None)
+                return self._finetune_causilo(model, X_train, y_train, params_copy,
+                                              peft_config=regression_peft_config, task="regression")
+
+            # TabPFNv3.5 regression finetune (native default; turn-by-turn alternative)
+            if isinstance(model, TabPFNv35RegressorWrapper) and strategy == "finetune":
+                finetune_mode = (params_copy or {}).pop("finetune_mode", None)  # None -> native (the default)
+                if finetune_mode == "turn_by_turn":
+                    logger.info("[TuningManager] Fine-tuning TabPFNv35 regressor (turn-by-turn)")
+                    return self._finetune_tabpfnv3_regression_turn_by_turn(
+                        model, X_train, y_train, params_copy, tree="tabpfnv35"
+                    )
+                logger.info("[TuningManager] Using v3.5 native FinetunedTabPFNRegressor")
+                return self._finetune_tabpfnv35_native_regressor(model, X_train, y_train, params_copy)
+
             if isinstance(model, TabPFNv3RegressorWrapper) and strategy == "finetune":
                 # `finetune_mode` defaults to 'turn_by_turn' at the top of tune() for
                 # the regression dispatch block; for TabPFNv3 the documented default is
@@ -261,7 +433,7 @@ class TuningManager:
                 self._finetune_mitra(model, X_train, y_train, params=params_copy, peft_config=peft_config)
             is_finetuned = True
 
-        elif isinstance(model, TabPFNv26Classifier) and selected_strategy in ('finetune'):
+        elif isinstance(model, TabPFNv26Classifier) and selected_strategy in ('finetune',):
             if finetune_mode == 'native':
                 logger.info("[TuningManager] Using v2.6 native FinetunedTabPFNClassifier")
                 model = self._finetune_tabpfnv26_native_classifier(model, X_train, y_train, params=params_copy)
@@ -292,6 +464,37 @@ class TuningManager:
             else:  # default: 'meta-learning'
                 logger.info("[TuningManager] Using Episodic Meta-Learning for TabPFNv3 (default)")
                 self._finetune_tabpfnv3_meta(model, X_train, y_train, params=params_copy, peft_config=peft_config)
+            is_finetuned = True
+
+        elif isinstance(model, TabLDMTabTuneClassifier) and selected_strategy in ('finetune', 'peft'):
+            model = self._finetune_tabldm(model, X_train, y_train, params=params_copy,
+                                          peft_config=peft_config, task="classification")
+            is_finetuned = True
+
+        elif isinstance(model, CausiloTabTuneClassifier) and selected_strategy in ('finetune', 'peft'):
+            model = self._finetune_causilo(model, X_train, y_train, params=params_copy,
+                                           peft_config=peft_config, task="classification")
+            is_finetuned = True
+
+        elif isinstance(model, TabPFNv35Classifier) and selected_strategy in ('finetune', 'peft'):
+            # Same loops as v3: the vendored trees expose identical fine-tuning
+            # helpers and attention module names, so only the tree differs.
+            if finetune_mode == 'native':
+                if selected_strategy == 'peft' or peft_config is not None:
+                    logger.warning(
+                        "[TuningManager] PEFT is not supported with finetune_mode='native' for "
+                        "TabPFNv35 (native trains full weights). Use finetune_mode='meta-learning' "
+                        "or 'sft' for LoRA/PEFT. Proceeding with native full fine-tuning."
+                    )
+                model = self._finetune_tabpfnv35_native_classifier(model, X_train, y_train, params=params_copy)
+            elif finetune_mode == 'sft':
+                logger.info("[TuningManager] Using Pure SFT for TabPFNv35 (task-optimized)")
+                self._finetune_tabpfnv3_sft(model, X_train, y_train, params=params_copy,
+                                            peft_config=peft_config, tree='tabpfnv35')
+            else:
+                logger.info("[TuningManager] Using Episodic Meta-Learning for TabPFNv35 (default)")
+                self._finetune_tabpfnv3_meta(model, X_train, y_train, params=params_copy,
+                                             peft_config=peft_config, tree='tabpfnv35')
             is_finetuned = True
 
         elif isinstance(model, (TabPFNClassifier)) and selected_strategy in ('finetune', 'peft'):
@@ -394,6 +597,15 @@ class TuningManager:
             model.fit(X_train, y_train)
         elif isinstance(model, TabPFNv3Classifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabPFNv3 (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, TabPFNv35Classifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for TabPFNv35 (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, TabLDMTabTuneClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for TabLDM (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, CausiloTabTuneClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for Causilo (inference mode)")
             model.fit(X_train, y_train)
         elif isinstance(model, TabFMClassifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabFM (zero-shot inference mode)")
@@ -2099,6 +2311,7 @@ class TuningManager:
                     continue
 
                 # forward with episodic labels (contiguous, ≤ C_out)
+                optimizer.zero_grad(set_to_none=True)
                 logits = model.model_(X_episode, ys_m.unsqueeze(0))  # [1, Q, <=C_out]
                 logits = logits.squeeze(0)                           # [Q, <=C_out]
                  # ensure mapping fits the actual head width (in case adapters changed it mid-run)
@@ -2147,8 +2360,9 @@ class TuningManager:
         device = torch.device(config["device"])
         if peft_config:
             try:
-                model = apply_tabular_lora("Mitra", model, peft_config)
-                logger.info("[TuningManager] PEFT SUCCESS: Applied LoRA adapters to Mitra (Tab2D) model")
+                lora_name = _mitra_lora_name(model)
+                model = apply_tabular_lora(lora_name, model, peft_config)
+                logger.info("[TuningManager] PEFT SUCCESS: Applied LoRA adapters to %s (Tab2D) model", lora_name)
             except Exception as e:
                 logger.warning(f"[TuningManager] PEFT FAILED: Mitra (Tab2D) incompatible with PEFT: {e}")
                 logger.info("[TuningManager] FALLBACK: Proceeding with base fine-tuning (fully supported)")
@@ -2187,8 +2401,22 @@ class TuningManager:
                 
                 X_batch = torch.from_numpy(np.stack(X_episodes)).to(device)
                 y_batch = torch.from_numpy(np.stack(y_episodes)).long().to(device)
-                
-                s_size = config['support_size']
+
+                # `episode_size` is clamped to the dataset above, but the split
+                # point was not, so on any dataset with fewer than
+                # support_size + 1 rows the query slice came out EMPTY. Tab2D
+                # then failed inside einx with "Failed to determine the size of
+                # all axes" from `b s f -> (b f) s` with s=0, which names
+                # neither the support size nor the dataset. Clamp the split so
+                # at least one query row survives.
+                rows = X_batch.shape[1]
+                s_size = min(config['support_size'], max(1, rows - 1))
+                if s_size != config['support_size']:
+                    logger.warning(
+                        "[TuningManager] support_size (%s) leaves no query rows in a "
+                        "%s-row episode; using %s so the split keeps %s query row(s).",
+                        config['support_size'], rows, s_size, rows - s_size,
+                    )
                 X_support, X_query = X_batch[:, :s_size, :], X_batch[:, s_size:, :]
                 y_support, y_query = y_batch[:, :s_size], y_batch[:, s_size:]
                 
@@ -2402,8 +2630,9 @@ class TuningManager:
 
         if peft_config:
             try:
-                model = apply_tabular_lora("Mitra", model, peft_config)
-                logger.info("[TuningManager] Applied LoRA adapters to Mitra (pure SFT)")
+                lora_name = _mitra_lora_name(model)
+                model = apply_tabular_lora(lora_name, model, peft_config)
+                logger.info("[TuningManager] Applied LoRA adapters to %s (pure SFT)", lora_name)
             except Exception as e:
                 logger.warning(f"[TuningManager] LoRA failed: {e}")
 
@@ -2764,6 +2993,7 @@ class TuningManager:
                     continue
 
                 # forward with episodic labels (contiguous, ≤ C_out)
+                optimizer.zero_grad(set_to_none=True)
                 logits = model.model_(X_episode, ys_m.unsqueeze(0))  # [1, Q, <=C_out]
                 logits = logits.squeeze(0)        # [Q, <=C_out]
                 # ensure mapping fits the actual head width (in case adapters changed it mid-run)
@@ -3282,7 +3512,10 @@ class TuningManager:
             config.update(params)
      
         try:
-            from ..models.tabpfnv26.finetuning import FinetunedTabPFNClassifier
+            # v2.6-pinned: upstream's wrapper would build the estimator from v2.5 weights.
+            from ..models.tabpfnv26.finetuning._tabtune_v26_pin import (
+                V26PinnedFinetunedClassifier as FinetunedTabPFNClassifier,
+            )
         except ImportError:
             logger.error("[TuningManager] FinetunedTabPFNClassifier not available. "
                          "Falling back to meta-learning.")
@@ -3355,7 +3588,7 @@ class TuningManager:
     
             # Re-fit in standard mode so predict/predict_proba works
             try:
-                ft_est.fit(X_np, y_np)
+                _refit_keeping_weights(ft_est, X_np, y_np)
                 logger.info("[TuningManager] Re-fitted finetuned classifier for standard inference")
             except Exception as e:
                 logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
@@ -3405,11 +3638,15 @@ class TuningManager:
             config.update(params)
      
         try:
-            from ..models.tabpfnv26.finetuning import FinetunedTabPFNRegressor
-        except ImportError:
-            logger.error("[TuningManager] FinetunedTabPFNRegressor not available. "
-                         "Falling back to turn-by-turn.")
-            return self._finetune_tabpfnv26_regression_turn_by_turn(model, X_train, y_train, params)
+            # v2.6-pinned: upstream's wrapper would build the estimator from v2.5 weights.
+            from ..models.tabpfnv26.finetuning._tabtune_v26_pin import (
+                V26PinnedFinetunedRegressor as FinetunedTabPFNRegressor,
+            )
+        except ImportError as exc:
+            raise ImportError(
+                "TabPFNv26 regression fine-tuning needs tabtune.models.tabpfnv26.finetuning, "
+                "which failed to import"
+            ) from exc
      
         if isinstance(X_train, pd.DataFrame):
             X_np = X_train.to_numpy()
@@ -3466,7 +3703,7 @@ class TuningManager:
             # Re-fit in standard mode so predict() works
             # (finetuning uses 'batched' mode which doesn't support standard predict)
             try:
-                ft_est.fit(X_np, y_np)
+                _refit_keeping_weights(ft_est, X_np, y_np)
                 logger.info("[TuningManager] Re-fitted finetuned regressor for standard inference")
             except Exception as e:
                 logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
@@ -3524,7 +3761,27 @@ class TuningManager:
         except Exception:
             return model.models_[0]
 
-    def _maybe_apply_v3_lora(self, model, torch_module, peft_config):
+    # The v3 and v3.5 vendored trees expose the same fine-tuning helpers and the
+    # same attention module names, so one set of loops serves both. Only the
+    # package the helpers are imported from, and the LoRA target key, differ.
+    _TABPFN_TREES = {
+        "tabpfnv3": "TabPFNv3",
+        "tabpfnv35": "TabPFNv35",
+    }
+
+    @staticmethod
+    def _tabpfn_tree(model) -> str:
+        """Which vendored TabPFN tree a fitted estimator came from."""
+        module = type(model).__module__
+        return "tabpfnv35" if ".tabpfnv35" in module else "tabpfnv3"
+
+    @staticmethod
+    def _tabpfn_data_util(tree: str):
+        """The episode collator/chunker from the tree the model belongs to."""
+        import importlib
+        return importlib.import_module(f"tabtune.models.{tree}.finetuning.data_util")
+
+    def _maybe_apply_v3_lora(self, model, torch_module, peft_config, tree="tabpfnv3"):
         """Inject LoRA adapters into the v3 backbone if peft_config is provided.
 
         Uses TabTune's custom LoRA injector with v3-specific target substrings
@@ -3541,12 +3798,13 @@ class TuningManager:
             logger.warning("[TuningManager] peft_utils unavailable; skipping LoRA injection.")
             return torch_module, [p for p in torch_module.parameters() if p.requires_grad]
 
-        logger.info("[TuningManager] Injecting LoRA adapters into TabPFNv3 backbone")
+        lora_key = self._TABPFN_TREES.get(tree, "TabPFNv3")
+        logger.info(f"[TuningManager] Injecting LoRA adapters into {lora_key} backbone")
         # Freeze all base params first; LoRALinear sets base.requires_grad_=False itself,
         # but we also freeze any non-wrapped params so only adapters train.
         for p in torch_module.parameters():
             p.requires_grad = False
-        apply_tabular_lora("TabPFNv3", torch_module, peft_config=peft_config)
+        apply_tabular_lora(lora_key, torch_module, peft_config=peft_config)
         trainable = [p for p in torch_module.parameters() if p.requires_grad]
         n_train = sum(p.numel() for p in trainable)
         n_total = sum(p.numel() for p in torch_module.parameters())
@@ -3627,7 +3885,7 @@ class TuningManager:
             # Re-fit in standard mode so predict/predict_proba works
             # (FT uses 'batched' mode which doesn't support standard predict).
             try:
-                ft_est.fit(X_np, y_np)
+                _refit_keeping_weights(ft_est, X_np, y_np)
                 logger.info("[TuningManager] Re-fitted finetuned v3 classifier for standard inference")
             except Exception as e:
                 logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
@@ -3712,7 +3970,7 @@ class TuningManager:
             ft_est = finetuner.finetuned_estimator_
             ft_est._finetuner_ = finetuner
             try:
-                ft_est.fit(X_np, y_np)
+                _refit_keeping_weights(ft_est, X_np, y_np)
                 logger.info("[TuningManager] Re-fitted finetuned v3 regressor for standard inference")
             except Exception as e:
                 logger.warning(f"[TuningManager] Post-finetune re-fit failed: {e}")
@@ -3727,8 +3985,135 @@ class TuningManager:
         logger.warning("[TuningManager] No finetuned v3 regressor estimator, returning original")
         return model
 
+    def _finetune_tabldm(self, model, X_train, y_train, params=None, peft_config=None,
+                         task="classification"):
+        """Episodic fine-tuning for TabLDM, optionally with LoRA adapters.
+
+        TabLDM ships inference-only but keeps its supervised branch: ``forward``
+        dispatches on ``self.training``, and only the ``_sklearn`` call sites are
+        wrapped in ``torch.no_grad()``. ``tabtune_support.finetune`` puts the
+        module in train mode and drives that branch, so the loop runs the
+        vendor's own training path rather than a reconstruction of it.
+
+        The estimator must be fitted first - that is what loads the weights and
+        builds the ensemble the episodes are drawn from - so this fits,
+        fine-tunes, then refits to rebuild caches from the new weights.
+        """
+        from ..models.tabldm.tabtune_support import finetune as tabldm_finetune
+
+        logger.info("[TuningManager] Starting TabLDM episodic fine-tuning (%s)", task)
+        model.fit(X_train, y_train)
+        tabldm_finetune(model, task=task, params=params, peft_config=peft_config)
+        # Weights changed, so the ensemble and caches built by the first fit are
+        # stale (NNLS candidate weights and calibration included). Refit around
+        # the trained module; a plain fit() would reload the checkpoint.
+        _refit_without_reload(model, X_train, y_train)
+        logger.info("[TuningManager] TabLDM fine-tuning complete")
+        return model
+
+    def _finetune_causilo(self, model, X_train, y_train, params=None, peft_config=None,
+                          task="classification"):
+        """Episodic fine-tuning for Causilo, optionally with LoRA adapters.
+
+        Causilo ships as an inference library: its public prediction paths run
+        under ``torch.inference_mode()``, so they cannot be trained through. The
+        network itself is ordinary, and ``tabtune_support.finetune`` drives it
+        through ``ModelRunner.predict``, which is the same episodic scheme used
+        for the other in-context models here.
+
+        The estimator must be fitted first - that is what downloads the weights
+        and builds the preprocessing state the episodes are drawn from - so this
+        fits, fine-tunes, then refits to rebuild caches from the new weights.
+        """
+        from ..models.causilo.tabtune_support import finetune as causilo_finetune
+
+        logger.info("[TuningManager] Starting Causilo episodic fine-tuning (%s)", task)
+        model.fit(X_train, y_train)
+        causilo_finetune(model, task=task, params=params, peft_config=peft_config)
+        # Weights changed, so the context prepared by the first fit is stale.
+        model.fit(X_train, y_train)
+        logger.info("[TuningManager] Causilo fine-tuning complete")
+        return model
+
+    def _finetune_tabpfnv35_native_classifier(self, model, X_train, y_train, params=None):
+        """Native classification FT through the vendored v3.5 FinetunedTabPFNClassifier.
+
+        No version pin module is needed here, unlike v3: upstream v9 resolves the
+        version through a ``finetune_model_version`` property that defaults to
+        ``settings.tabpfn.model_version`` (v3.5). It is still passed explicitly so
+        the fine-tuned weights cannot drift to a different checkpoint if that
+        default moves.
+        """
+        return self._finetune_tabpfnv35_native(model, X_train, y_train, params, task="classification")
+
+    def _finetune_tabpfnv35_native_regressor(self, model, X_train, y_train, params=None):
+        """Native regression FT through the vendored v3.5 FinetunedTabPFNRegressor."""
+        return self._finetune_tabpfnv35_native(model, X_train, y_train, params, task="regression")
+
+    def _finetune_tabpfnv35_native(self, model, X_train, y_train, params=None, task="classification"):
+        import numpy as np
+        import pandas as pd
+
+        logger.info(f"[TuningManager] Starting TabPFNv35 native fine-tuning ({task})")
+        config = {
+            "device": resolve_device('auto'),
+            "epochs": 30,
+            "learning_rate": 1e-5,
+            "weight_decay": 0.01,
+            "early_stopping": True,
+            "early_stopping_patience": 8,
+            "validation_split_ratio": 0.1,
+            "n_finetune_ctx_plus_query_samples": 10_000,
+            "finetune_ctx_query_split_ratio": 0.2,
+            "n_estimators_finetune": 2,
+            "n_estimators_validation": 2,
+            "n_estimators_final_inference": 8,
+            "grad_clip_value": 1.0,
+            "use_lr_scheduler": True,
+            "use_activation_checkpointing": True,
+            "random_state": 0,
+        }
+        if params:
+            config.update(params)
+
+        try:
+            from ..models.tabpfnv35.constants import ModelVersion
+            from ..models.tabpfnv35.finetuning import (
+                FinetunedTabPFNClassifier,
+                FinetunedTabPFNRegressor,
+            )
+        except ImportError as exc:
+            logger.error(
+                "[TuningManager] v3.5 native fine-tuning unavailable (%s); "
+                "falling back to meta-learning.", exc,
+            )
+            return self._finetune_tabpfnv3_meta(model, X_train, y_train, params, tree="tabpfnv35")
+
+        X_np = X_train.to_numpy() if isinstance(X_train, pd.DataFrame) else np.asarray(X_train)
+        if isinstance(y_train, (pd.Series, pd.DataFrame)):
+            y_np = y_train.to_numpy().ravel()
+        else:
+            y_np = np.asarray(y_train).ravel()
+
+        finetuner_cls = (
+            FinetunedTabPFNClassifier if task == "classification" else FinetunedTabPFNRegressor
+        )
+        signature = __import__("inspect").signature(finetuner_cls.__init__)
+        kwargs = dict(config)
+        if "model_version" in signature.parameters:
+            kwargs["model_version"] = ModelVersion.V3_5
+        accepted = {k: v for k, v in kwargs.items() if k in signature.parameters}
+        dropped = sorted(set(kwargs) - set(accepted))
+        if dropped:
+            logger.info("[TuningManager] v3.5 finetuner ignores: %s", ", ".join(dropped))
+
+        finetuner = finetuner_cls(**accepted)
+        finetuner.fit(X_np, y_np)
+        logger.info(f"[TuningManager] TabPFNv35 native {task} fine-tuning complete")
+        return getattr(finetuner, "estimator_", finetuner)
+
     def _finetune_tabpfnv3_meta(self, model, X_train_processed, y_train_processed,
-                                params=None, peft_config=None):
+                                params=None, peft_config=None, tree=None):
         """Episodic meta-learning FT for TabPFN v3 (default classification mode).
 
         Builds (support, query) episodes per epoch and trains the backbone to
@@ -3770,7 +4155,9 @@ class TuningManager:
         torch_module.train()
 
         # Optional LoRA/PEFT: inject adapters & restrict optimized params.
-        torch_module, trainable_params = self._maybe_apply_v3_lora(model, torch_module, peft_config)
+        torch_module, trainable_params = self._maybe_apply_v3_lora(
+            model, torch_module, peft_config, tree=tree or self._tabpfn_tree(model)
+        )
         if not trainable_params:
             trainable_params = list(torch_module.parameters())
 
@@ -3793,9 +4180,9 @@ class TuningManager:
         scaler = torch.amp.GradScaler() if use_amp else None
         perf = self._v3_performance_options(config["use_activation_checkpointing"])
 
-        from ..models.tabpfnv3.finetuning.data_util import (
-            meta_dataset_collator, get_preprocessed_dataset_chunks,
-        )
+        _data_util = self._tabpfn_data_util(tree or self._tabpfn_tree(model))
+        meta_dataset_collator = _data_util.meta_dataset_collator
+        get_preprocessed_dataset_chunks = _data_util.get_preprocessed_dataset_chunks
 
         def _move(item, dev):
             if isinstance(item, torch.Tensor):
@@ -3920,7 +4307,7 @@ class TuningManager:
         return model
 
     def _finetune_tabpfnv3_sft(self, model, X_train_processed, y_train_processed,
-                               params=None, peft_config=None):
+                               params=None, peft_config=None, tree=None):
         """Single-episode SFT for TabPFN v3.
 
         Uses the entire dataset as ONE (support, query) episode and trains over it
@@ -3958,7 +4345,9 @@ class TuningManager:
         torch_module = self._v3_trainable_module(model)
         torch_module.to(device)
         torch_module.train()
-        torch_module, trainable_params = self._maybe_apply_v3_lora(model, torch_module, peft_config)
+        torch_module, trainable_params = self._maybe_apply_v3_lora(
+            model, torch_module, peft_config, tree=tree or self._tabpfn_tree(model)
+        )
         if not trainable_params:
             trainable_params = list(torch_module.parameters())
 
@@ -3981,9 +4370,9 @@ class TuningManager:
         scaler = torch.amp.GradScaler() if use_amp else None
         perf = self._v3_performance_options(config["use_activation_checkpointing"])
 
-        from ..models.tabpfnv3.finetuning.data_util import (
-            meta_dataset_collator, get_preprocessed_dataset_chunks,
-        )
+        _data_util = self._tabpfn_data_util(tree or self._tabpfn_tree(model))
+        meta_dataset_collator = _data_util.meta_dataset_collator
+        get_preprocessed_dataset_chunks = _data_util.get_preprocessed_dataset_chunks
 
         def _move(item, dev):
             if isinstance(item, torch.Tensor):
@@ -4098,7 +4487,7 @@ class TuningManager:
         logger.info("[TuningManager] TabPFNv3 SFT fine-tuning complete")
         return model
 
-    def _finetune_tabpfnv3_regression_turn_by_turn(self, model, X_train, y_train, params=None):
+    def _finetune_tabpfnv3_regression_turn_by_turn(self, model, X_train, y_train, params=None, tree=None):
         """Turn-by-turn regression FT for TabPFN v3.
 
         Lightweight alternative to native FT: builds regression episodes and trains
@@ -4150,9 +4539,9 @@ class TuningManager:
         scaler = torch.amp.GradScaler() if use_amp else None
         perf = self._v3_performance_options(config["use_activation_checkpointing"])
 
-        from ..models.tabpfnv3.finetuning.data_util import (
-            meta_dataset_collator, get_preprocessed_dataset_chunks,
-        )
+        _data_util = self._tabpfn_data_util(tree or self._tabpfn_tree(model))
+        meta_dataset_collator = _data_util.meta_dataset_collator
+        get_preprocessed_dataset_chunks = _data_util.get_preprocessed_dataset_chunks
 
         def _move(item, dev):
             if isinstance(item, torch.Tensor):
@@ -4283,7 +4672,7 @@ class TuningManager:
         try:
             if hasattr(model, "fit_mode") and model.fit_mode == "batched":
                 model.fit_mode = "fit_preprocessors"
-            model.fit(X_train, y_train)
+            _refit_keeping_weights(model, X_train, y_train)
             logger.info("[TuningManager] Re-fitted v3 regressor for standard inference")
         except Exception as e:  # noqa: BLE001
             logger.warning(f"[TuningManager] Post-FT re-fit failed: {e}")
@@ -4443,9 +4832,10 @@ class TuningManager:
         model.model_.eval()
         logger.info("[TuningManager] TabICLv2 regression fine-tuning complete")
 
-        # Re-fit for inference (rebuilds caches etc.)
+        # Re-fit for inference (rebuilds caches etc.) around the trained module;
+        # a plain fit() would reload the checkpoint.
         try:
-            model.fit(X_np, y_np)
+            _refit_without_reload(model, X_np, y_np)
         except Exception as e:
             logger.warning(f"[TuningManager] Post-finetune re-fit: {e}")
 
@@ -5639,7 +6029,7 @@ class TuningManager:
         logger.info("[TuningManager] TabPFN regression fine-tuning complete")
     
         try:
-            model.fit(X_train, y_train)
+            _refit_keeping_weights(model, X_train, y_train)
         except Exception as e:
             logger.warning(f"[TuningManager] Post-finetune model.fit failed (predict may break): {e}")
     

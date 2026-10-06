@@ -26,6 +26,7 @@ from __future__ import annotations
 from .loader import config_from_mapping, dump_config, load_config, save_config
 from .schemas import (
     ContextSamplingConfig,
+    ForecastConfig,
     PeftConfig,
     PipelineConfig,
     ProcessorConfig,
@@ -38,6 +39,7 @@ __all__ = [
     "PeftConfig",
     "ProcessorConfig",
     "ContextSamplingConfig",
+    "ForecastConfig",
     "load_config",
     "save_config",
     "dump_config",

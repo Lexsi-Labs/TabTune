@@ -1,30 +1,5 @@
 """Prediction caching for tabular foundation models.
 
-Motivation
-----------
-Inference with a TFM is expensive: a single forward pass over a large test set
-can take minutes and gigabytes of VRAM. TabTune's own evaluation path used to
-pay that cost three times for one call:
-
-* ``evaluate()`` calls ``predict(X_test)``, then ``predict_proba(X_test)``
-* ``evaluate_calibration()`` calls ``predict_proba(X_test)`` again
-
-The benchmarking pipeline compounded it further. This module removes the
-duplication by memoising predictions on ``(pipeline fingerprint, data
-fingerprint, method)``.
-
-Correctness
------------
-A cache that returns stale predictions is worse than no cache. The fingerprint
-therefore covers everything that can change a prediction: the model identity,
-task, tuning strategy, fine-tune mode, a fit counter that increments on every
-``fit()``, and a content hash of the input frame including its column names,
-dtypes and index. Refitting or mutating the data invalidates automatically.
-
-Example:
-    >>> cache = PredictionCache(backend="memory", max_entries=8)
-    >>> cache.stats()["hits"]
-    0
 """
 
 from __future__ import annotations
@@ -41,15 +16,14 @@ from typing import Any, Literal
 
 import numpy as np
 
+from ..logger import log_event
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["PredictionCache", "CacheStats", "fingerprint_data", "make_cache"]
 
 Backend = Literal["memory", "disk", "none"]
 
-#: Cap on rows hashed byte-for-byte. Beyond this we hash a deterministic
-#: stratified sample plus the exact shape, which keeps fingerprinting O(1) on
-#: million-row frames while still detecting realistic mutations.
 _FULL_HASH_ROW_LIMIT = 50_000
 
 
@@ -103,12 +77,10 @@ def fingerprint_data(X: Any) -> str:
 
         n_rows = array.shape[0] if array.ndim else 0
         if n_rows > _FULL_HASH_ROW_LIMIT:
-            # Deterministic stride sample: first, last and evenly spaced rows.
             stride = max(1, n_rows // _FULL_HASH_ROW_LIMIT)
             array = array[::stride]
 
         if array.dtype == object:
-            # Object arrays are not guaranteed to expose a stable buffer.
             hasher.update(np.array2string(array, threshold=array.size + 1).encode("utf-8"))
         else:
             contiguous = np.ascontiguousarray(array)
@@ -167,14 +139,12 @@ class PredictionCache:
         else:
             self.cache_dir = None
 
-    # ------------------------------------------------------------------ keys
 
     @staticmethod
     def make_key(scope: str, data_fingerprint: str, method: str) -> str:
         """Build a cache key from its three components."""
         return f"{scope}|{method}|{data_fingerprint}"
 
-    # -------------------------------------------------------------- core API
 
     @property
     def enabled(self) -> bool:
@@ -262,9 +232,10 @@ class PredictionCache:
 
         cached = self.get(key)
         if cached is not None:
-            logger.debug("[Cache] hit for %s (%s)", method, fingerprint[:8])
+            log_event(logger, "cache_hit", "Prediction cache hit", level=logging.DEBUG, method=method)
             return cached
 
+        log_event(logger, "cache_miss", "Prediction cache miss", level=logging.DEBUG, method=method)
         value = compute()
         if value is not None:
             self.set(key, value)
@@ -299,7 +270,6 @@ class PredictionCache:
         with self._lock:
             return len(self._store)
 
-    # --------------------------------------------------------------- pickling
 
     def __getstate__(self) -> dict[str, Any]:
         """Return picklable state: configuration only, no lock and no entries.
@@ -335,7 +305,6 @@ class PredictionCache:
             f"{self.stats})"
         )
 
-    # ----------------------------------------------------------------- disk
 
     def _path_for(self, key: str) -> Path:
         assert self.cache_dir is not None  # guarded by callers

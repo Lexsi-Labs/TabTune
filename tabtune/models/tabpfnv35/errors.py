@@ -1,0 +1,211 @@
+"""Custom exception classes for TabPFN."""
+
+#  Copyright (c) Prior Labs GmbH 2026.
+
+from __future__ import annotations
+
+from collections.abc import Generator
+from contextlib import contextmanager
+from typing import TYPE_CHECKING
+
+import torch
+
+from tabtune.models.tabpfnv35.settings import settings
+
+if TYPE_CHECKING:
+    from tabtune.models.tabpfnv35.constants import XType
+
+
+class TabPFNError(Exception):
+    """Base class for all TabPFN-specific exceptions."""
+
+
+class TabPFNUserError(TabPFNError):
+    """Base class for errors caused by invalid user input (safe to map to HTTP 400)."""
+
+
+class TabPFNValidationError(ValueError, TabPFNUserError):
+    """User provided invalid data (shape, NaNs, categories, etc.)."""
+
+
+class TabPFNLicenseError(TabPFNError):
+    """Error raised when the user has not accepted the TabPFN license."""
+
+    def __init__(self, message: str | None = None):
+        if message is None:
+            gui_url = settings.tabpfn.auth_gui_url
+            message = (
+                "TabPFN requires a one-time license acceptance"
+                " to download model weights for local"
+                " inference.\n\n"
+                "To authenticate in a non-interactive"
+                " environment:\n"
+                f"  1. Open {gui_url} in a browser"
+                " and log in (or register)\n"
+                "  2. Accept the license on the Licenses tab\n"
+                "  3. Copy your API Key from"
+                f" {gui_url}/account\n"
+                "  4. Set the environment variable:"
+                ' export TABPFN_TOKEN="<your-api-key>"\n'
+                "     or in Python (before calling .fit()):"
+                ' import os; os.environ["TABPFN_TOKEN"] = "<your-api-key>"'
+            )
+        super().__init__(message)
+
+
+class TabPFNHuggingFaceGatedRepoError(TabPFNError):
+    """Error raised when a model is gated and requires user to accept terms."""
+
+    def __init__(self, repo_id: str):
+        message = (
+            f"HuggingFace authentication error downloading from '{repo_id}'.\n"
+            "This model is gated and requires you to accept its terms.\n\n"
+            "Please follow these steps:\n"
+            f"1. Visit https://huggingface.co/{repo_id} in your browser and"
+            f" accept the terms of use.\n"
+            "2. Log in to your Hugging Face account via"
+            " the command line by running:\n"
+            "   hf auth login\n"
+            "   (Alternatively, you can set the HF_TOKEN environment variable"
+            "   with a read token.)\n\n"
+            "For detailed instructions, see "
+            "https://docs.priorlabs.ai/how-to-access-gated-models"
+        )
+        super().__init__(message)
+
+
+class TabPFNOutOfMemoryError(TabPFNError):
+    """Base class for GPU out-of-memory errors during prediction.
+
+    This error provides guidance on how to handle large test sets that exceed
+    available GPU memory.
+    """
+
+    device_name: str = "GPU"  # Override in subclasses
+
+    def __init__(
+        self,
+        original_error: Exception | None = None,
+        *,
+        n_train_samples: int | None = None,
+        n_test_samples: int | None = None,
+        n_features: int | None = None,
+        model_type: str = "classifier",
+    ):
+        predict_method = "predict_proba" if model_type == "classifier" else "predict"
+
+        size_info = f" with {n_test_samples:,} test samples" if n_test_samples else ""
+
+        size_line = ""
+        if n_train_samples is not None and n_test_samples is not None:
+            size_line = (
+                f"Your sizes: {n_train_samples:,} train / "
+                f"{n_test_samples:,} test samples"
+            )
+            if n_features is not None:
+                size_line += f", {n_features} features"
+            size_line += ".\n"
+
+        max_batched_test_rows = settings.tabpfn.max_batched_test_rows
+        message = (
+            f"{self.device_name} out of memory{size_info}.\n\n"
+            f"This is issue is usually caused by one of the following two reasons:\n\n"
+            f"1) Large test set — split into batches:\n\n"
+            f"    predictions = []\n"
+            f"    for i in range(0, len(X_test), 100):\n"
+            f"        pred = model.{predict_method}("
+            f"X_test[i:i + 100])\n"
+            f"        predictions.append(pred)\n"
+            f"    predictions = np.vstack(predictions)\n\n"
+            f"   Only with fit_mode='fit_with_cache', test rows are chunked\n"
+            f"   automatically — lower the TABPFN_MAX_BATCHED_TEST_ROWS\n"
+            f"   environment variable (currently {max_batched_test_rows}) to\n"
+            f"   reduce peak memory without changing your code.\n\n"
+            f"2) Large training set — batching won't help.\n"
+            f"   Subsample your training data; see https://docs.priorlabs.ai\n"
+            f"   for further guidance.\n\n"
+            f"{size_line}"
+            f"Not sure which? If model.{predict_method}(X_test[:1]) "
+            f"also fails, it's (2)."
+        )
+        if original_error is not None:
+            message += f"\n\nOriginal error: {original_error}"
+        super().__init__(message)
+        self.original_error = original_error
+
+
+class TabPFNCUDAOutOfMemoryError(TabPFNOutOfMemoryError):
+    """Error raised when CUDA GPU runs out of memory during prediction."""
+
+    device_name = "CUDA"
+
+
+class TabPFNMPSOutOfMemoryError(TabPFNOutOfMemoryError):
+    """Error raised when MPS (Apple Silicon) runs out of memory during prediction."""
+
+    device_name = "MPS"
+
+
+def is_oom_error(e: Exception) -> bool:
+    """Return True if *e* is a GPU out-of-memory error (CUDA or MPS)."""
+    return isinstance(e, torch.OutOfMemoryError) or (
+        isinstance(e, RuntimeError) and "out of memory" in str(e).lower()
+    )
+
+
+def _sizes_for_message(X: XType) -> tuple[int, int | None]:
+    """Read the row and column counts an OOM message should report."""
+    shape = getattr(X, "shape", None)
+    if shape is None:
+        return len(X), None
+    return shape[0], shape[1] if len(shape) > 1 else None
+
+
+@contextmanager
+def handle_oom_errors(
+    devices: tuple[torch.device, ...],
+    X: XType,
+    model_type: str,
+    n_train_samples: int | None = None,
+) -> Generator[None, None, None]:
+    """Context manager to catch OOM errors and raise helpful TabPFN exceptions.
+
+    Args:
+        devices: The devices the model is running on.
+        X: The input data as the model sees it, i.e. already converted, whose
+            sample and feature counts the error message reports. The width is
+            deliberately read from here rather than from `n_features_in_`, which
+            describes the caller's frame and can be narrower (date expansion) --
+            the message is about memory, so it has to name what the transformer
+            actually runs on.
+        model_type: Either "classifier" or "regressor".
+        n_train_samples: Number of training samples (for the error message).
+
+    Raises:
+        TabPFNCUDAOutOfMemoryError: If a CUDA OOM error occurs.
+        TabPFNMPSOutOfMemoryError: If an MPS OOM error occurs.
+    """
+    try:
+        yield
+    except torch.OutOfMemoryError as e:
+        n_test_samples, n_features = _sizes_for_message(X)
+        raise TabPFNCUDAOutOfMemoryError(
+            e,
+            n_train_samples=n_train_samples,
+            n_test_samples=n_test_samples,
+            n_features=n_features,
+            model_type=model_type,
+        ) from None
+    except RuntimeError as e:
+        is_mps = any(d.type == "mps" for d in devices)
+        is_oom = "out of memory" in str(e).lower()
+        if is_mps and is_oom:
+            n_test_samples, n_features = _sizes_for_message(X)
+            raise TabPFNMPSOutOfMemoryError(
+                e,
+                n_train_samples=n_train_samples,
+                n_test_samples=n_test_samples,
+                n_features=n_features,
+                model_type=model_type,
+            ) from None
+        raise

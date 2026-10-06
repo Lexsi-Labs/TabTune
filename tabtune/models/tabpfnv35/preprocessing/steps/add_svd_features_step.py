@@ -1,0 +1,160 @@
+#  Copyright (c) Prior Labs GmbH 2026.
+
+"""Adds SVD features to the data."""
+
+from __future__ import annotations
+
+from typing import Literal
+from typing_extensions import override
+
+import numpy as np
+from sklearn.decomposition import TruncatedSVD
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+from tabtune.models.tabpfnv35.preprocessing.datamodel import FeatureModality, FeatureSchema
+from tabtune.models.tabpfnv35.preprocessing.pipeline_interface import PreprocessingStep
+from tabtune.models.tabpfnv35.preprocessing.steps.utils import make_scaler_safe
+from tabtune.models.tabpfnv35.utils import infer_random_state
+
+
+def _pin_layout(X: np.ndarray) -> np.ndarray:
+    """Return ``X`` in Fortran order, the layout this step's solver is calibrated on.
+
+    ``TruncatedSVD(algorithm="arpack")`` is an iterative Lanczos solver, and on a
+    near-degenerate spectrum -- singular values within a fraction of a percent of each
+    other, which wide tables routinely produce -- the basis it converges to depends on
+    the order the underlying BLAS accumulates in, and so on whether the array it is
+    handed is C- or Fortran-contiguous. The values are unaffected and so is the
+    subspace; which basis of it comes back is not. Pinning the layout here is what
+    keeps the components stable against a layout change in any earlier step.
+
+    A no-op when the input is already Fortran-contiguous.
+    """
+    return np.asfortranarray(X)
+
+
+def get_svd_n_components(
+    global_transformer_name: Literal["svd", "svd_quarter_components"],
+    n_samples: int,
+    n_features: int,
+) -> int:
+    """Compute the number of SVD components matching the TabPFN convention.
+
+    Used by both the sklearn and torch SVD feature steps.
+    """
+    if global_transformer_name == "svd":
+        divisor = 2
+    elif global_transformer_name == "svd_quarter_components":
+        divisor = 4
+    else:
+        raise ValueError(f"Invalid global transformer name: {global_transformer_name}.")
+    return max(1, min(n_samples // 10 + 1, n_features // divisor))
+
+
+class AddSVDFeaturesStep(PreprocessingStep):
+    """Append low-rank SVD projection features to the input.
+
+    This keeps the original `X` and adds additional numerical features given by a
+    truncated SVD of (scaled) `X`, i.e. a compressed/global view of the feature
+    space. This can be used for numerical columns or other modalities that are encoded
+    as numericals (e.g. categoricals that use target encoding or one-hot encoding).
+    """
+
+    def __init__(
+        self,
+        global_transformer_name: Literal[
+            "svd", "svd_quarter_components"
+        ] = "svd_quarter_components",
+        random_state: int | np.random.Generator | None = None,
+    ):
+        """Initializes the AddSVDFeaturesStep."""
+        super().__init__()
+        self.global_transformer_name = global_transformer_name
+        self.random_state = random_state
+        self.is_no_op: bool = False
+
+    @override
+    def added_feature_prefix(self) -> str:
+        return "svd"
+
+    @override
+    def num_added_features(self, n_samples: int, feature_schema: FeatureSchema) -> int:
+        """Return the number of added features."""
+        n_features = feature_schema.num_columns
+        if n_features < 2:
+            return 0
+
+        transformer = get_svd_features_transformer(
+            self.global_transformer_name,
+            n_samples=n_samples,
+            n_features=n_features,
+        )
+        svd_transformer = transformer.steps[1][1]
+        assert isinstance(svd_transformer, TruncatedSVD)
+        return svd_transformer.n_components
+
+    @override
+    def _fit(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> FeatureSchema:
+        self.is_no_op = False
+        n_samples, n_features = X.shape
+        if n_features < 2:
+            self.is_no_op = True
+            return feature_schema
+
+        static_seed, _ = infer_random_state(self.random_state)
+        transformer = get_svd_features_transformer(
+            self.global_transformer_name,
+            n_samples,
+            n_features,
+            random_state=static_seed,
+        )
+        transformer.fit(_pin_layout(X))
+
+        self.transformer_ = transformer
+        self.feature_schema_updated_ = feature_schema
+
+        return feature_schema
+
+    @override
+    def _transform(
+        self, X: np.ndarray, *, is_test: bool = False
+    ) -> tuple[np.ndarray, np.ndarray | None, FeatureModality | None]:
+        if self.is_no_op:
+            return X, None, None
+
+        assert self.feature_schema_updated_ is not None
+        assert self.transformer_ is not None
+
+        # Only the solver's input is pinned; `X` itself is handed back as it came.
+        return X, self.transformer_.transform(_pin_layout(X)), FeatureModality.NUMERICAL
+
+
+def get_svd_features_transformer(
+    global_transformer_name: Literal["svd", "svd_quarter_components"],
+    n_samples: int,
+    n_features: int,
+    random_state: int | None = None,
+) -> Pipeline:
+    """Returns a transformer to add SVD features to the data."""
+    n_components = get_svd_n_components(global_transformer_name, n_samples, n_features)
+    return Pipeline(
+        steps=[
+            (
+                "save_standard",
+                make_scaler_safe("standard", StandardScaler(with_mean=False)),
+            ),
+            (
+                "svd",
+                TruncatedSVD(
+                    algorithm="arpack",
+                    n_components=n_components,
+                    random_state=random_state,
+                ),
+            ),
+        ],
+    )

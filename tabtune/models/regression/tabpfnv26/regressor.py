@@ -37,7 +37,8 @@ class TabPFNv26RegressorWrapper(TabPFNv26Regressor):
         y = np.array(y).flatten()
         return super().fit(X, y)
 
-    def predict(self, X):
+    def predict(self, X, output_type="mean", quantiles=None):
+        """Predict (``output_type="mean"`` by default); ``"quantiles"``/``"main"`` pass through."""
         if issparse(X):
             X = X.toarray()
         elif isinstance(X, pd.DataFrame):
@@ -45,4 +46,4 @@ class TabPFNv26RegressorWrapper(TabPFNv26Regressor):
                 if hasattr(X[col], 'sparse') and X[col].sparse:
                     X = X.copy()
                     X[col] = X[col].sparse.to_dense()
-        return super().predict(X)
+        return super().predict(X, output_type=output_type, quantiles=quantiles)

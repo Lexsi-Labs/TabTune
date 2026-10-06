@@ -29,6 +29,8 @@ from .tabfm_preprocessor import TabFMPreprocessor
 from .xrfm_preprocessor import XRFMPreprocessor
 from .iltm_preprocessor import ILTMPreprocessor
 from .exaone_preprocessor import EXAONEPreprocessor
+from .causilo_preprocessor import CausiloPreprocessor
+from .tabldm_preprocessor import TabLDMPreprocessor
 from .regression.base_processor import RegressionDataProcessor
 from .regression.tabpfn_processor import TabPFNRegressionProcessor
 from .regression.contexttab_processor import ContextTabRegressionProcessor
@@ -46,17 +48,12 @@ class DataProcessor(BaseEstimator, TransformerMixin):
     a full suite of standard preprocessing tools with custom, model-specific
     logic.
     """
-    #: Strategy applied when the user gives no explicit value and the model has
-    #: no model-aware default of its own.
     _FALLBACK_STRATEGIES = {
         'imputation_strategy': 'mean',
         'categorical_encoding': 'onehot',
         'scaling_strategy': 'standard',
     }
 
-    #: model_name -> preprocessing defaults. ``categorical_encoding`` doubles as
-    #: the key selecting the model-specific preprocessor in
-    #: :meth:`_get_custom_preprocessor`.
     MODEL_AWARE_DEFAULTS = {
         'TabPFN': {'categorical_encoding': 'tabpfn_special'},
         'TabICL': {'categorical_encoding': 'tabicl_special'},
@@ -64,16 +61,21 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         'OrionMSPv1.5': {'categorical_encoding': 'orion_msp_special'},
         'ContextTab': {'categorical_encoding': 'contexttab_special'},
         'Mitra': {'categorical_encoding': 'mitra_special'},
+        'MitraV2': {'categorical_encoding': 'mitra_special'},
         'OrionBix': {'categorical_encoding': 'orion_bix_special'},
         'TabDPT': {'categorical_encoding': 'tabdpt_special'},
         'Limix': {'categorical_encoding': 'limix_special'},
         'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
         'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
         'TabPFNv3': {'categorical_encoding': 'tabpfn_special'},
+        'TabPFNv35': {'categorical_encoding': 'tabpfn_special'},
+        'TabPFNv35Fast': {'categorical_encoding': 'tabpfn_special'},
         'TabFM': {'categorical_encoding': 'tabfm_special'},
         'XRFM': {'categorical_encoding': 'xrfm_special'},
         'ILTM': {'categorical_encoding': 'iltm_special'},
         'EXAONETabular': {'categorical_encoding': 'exaone_special'},
+        'Causilo': {'categorical_encoding': 'causilo_special'},
+        'TabLDM': {'categorical_encoding': 'tabldm_special'},
     }
 
     def __init__(
@@ -132,10 +134,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self.feature_selection_k = feature_selection_k
         self.correlation_threshold = correlation_threshold
         self.model_params = model_params or {}
-
-        # Record what the caller asked for *before* defaults are filled in, so
-        # an explicit choice can be distinguished from an unset one. Prior to
-        # 0.2.0 this distinction did not exist and user values were discarded.
         self._user_specified = {
             name
             for name in (
@@ -168,7 +166,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self._correlation_cols_to_drop = []
         self.original_cols_ = None
         self.processing_summary_ = {}
-        # Standard steps that run *before* a model-specific preprocessor.
         self._pre_stage_active = False
 
     # ------------------------------------------------------------------ setup
@@ -208,10 +205,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if not self.user_specified(name):
                 setattr(self, name, value)
 
-        # Anything still unset and not model-supplied falls back to the generic
-        # default. ``categorical_encoding`` is deliberately left as None for
-        # unknown models so that _get_custom_preprocessor returns None and the
-        # standard path takes over with the documented default.
         for name, fallback in self._FALLBACK_STRATEGIES.items():
             if getattr(self, name) is None and not config:
                 setattr(self, name, fallback)
@@ -232,12 +225,20 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'xrfm_special': XRFMPreprocessor,
             'iltm_special': ILTMPreprocessor,
             'exaone_special': EXAONEPreprocessor,
+            'causilo_special': CausiloPreprocessor,
+            'tabldm_special': TabLDMPreprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
             PreprocessorClass = special_encoders[self.categorical_encoding]
             if self.categorical_encoding == 'tabfm_special':
                 # TabFM preprocessor needs task_type (label-encode target for classification).
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding == 'causilo_special':
+                # Causilo needs task_type to decide whether to label-encode the target.
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding == 'tabldm_special':
+                # TabLDM needs task_type to decide whether to label-encode the target.
                 return PreprocessorClass(task_type=self.task_type)
             if self.categorical_encoding == 'xrfm_special':
                 # XRFM preprocessor needs task_type (label-encode target for classification).
@@ -271,9 +272,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
 
     def _get_regression_processor(self):
         """Factory method to return the correct regression processor instance.
-        
-        Note: Most models handle target normalization internally, so default is 'none'.
-        Only override if explicitly specified in model_params.
         """
         # Get target_scaling from model_params, but use model-specific defaults if not specified
         target_scaling = self.model_params.get('target_scaling', None)
@@ -299,7 +297,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return TabDPTRegressionProcessor(target_scaling_strategy=target_scaling)
-        elif self.model_name == 'Mitra':
+        elif self.model_name in ('Mitra', 'MitraV2'):
             # Mitra handles normalization internally, default to 'none'
             if target_scaling is None:
                 target_scaling = 'none'
@@ -309,7 +307,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return LimixRegressionProcessor(target_scaling_strategy=target_scaling)
-        elif self.model_name in ('TabPFNv26', 'TabPFNv3'):
+        elif self.model_name in ('TabPFNv26', 'TabPFNv3', 'TabPFNv35', 'TabPFNv35Fast'):
             # TabPFN v2.6 / v3 handle target normalization internally -> default 'none'.
             if target_scaling is None:
                 target_scaling = 'none'
@@ -330,12 +328,17 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 target_scaling = 'none'
             return ILTMRegressionProcessor(target_scaling_strategy=target_scaling)
         elif self.model_name == 'EXAONETabular':
-            # The vendored EXAONE regressor centres/scales the target internally
-            # and predict() already returns the ORIGINAL space, so any
-            # pipeline-level scaling would never be inverted -> force 'none'.
             if target_scaling is None:
                 target_scaling = 'none'
             return EXAONERegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'TabLDM':
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'Causilo':
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
 
         # Fallback to generic processor (use 'standard' for unknown models)
         if target_scaling is None:
@@ -348,10 +351,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
     @property
     def has_pre_stage(self) -> bool:
         """Whether standard steps run before the model-specific preprocessor.
-
-        True when the user explicitly asked for imputation, scaling or feature
-        selection *and* a model-specific preprocessor is also in play. Before
-        0.2.0 those requests were silently discarded in this situation.
         """
         return bool(self._pre_stage_active)
 
@@ -377,8 +376,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self.feature_names_in_ = list(self.original_cols_)
         y_fit = y.copy() if y is not None else None
 
-        # Column types are needed by both paths: the standard pipeline uses them
-        # directly, and the pre-stage needs them to know what to impute/scale.
         self._infer_column_types(X_fit)
 
         self.custom_preprocessor_ = self._get_custom_preprocessor()
@@ -387,11 +384,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             self.processing_summary_['strategy'] = 'custom'
             self.processing_summary_['steps'] = {}
 
-            # Pre-stage: honour explicit imputation/scaling/feature-selection
-            # requests before the model-aware preprocessor sees the data.
-            # ``categorical_encoding`` is excluded by design - for these models
-            # it is the switch that *selects* the preprocessor, so running a
-            # second encoder here would fight with it.
             if self._wants_pre_stage():
                 logger.info(
                     "[DataProcessor] Applying standard pre-stage (%s) before the "
@@ -547,9 +539,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         try:
             X_resampled, y_resampled = self.resampler_.fit_resample(X, y)
         except Exception as exc:
-            # Resampling is a convenience, not a correctness requirement:
-            # SMOTE in particular fails on tiny minority classes. Degrading to
-            # the original data is better than losing the run.
+
             warn_once(
                 f"Resampling with {self.resampling_strategy!r} failed ({exc}); "
                 f"continuing with the original data.",
@@ -610,12 +600,8 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 summary_lines.append("  - No detailed summary available for this preprocessor.")
             else:
                 summary_lines.append("\n  Applied Steps:")
-                # --- NEW: Detailed loop for rich summary ---
                 for i, (step_name, step_info) in enumerate(steps.items()):
                     summary_lines.append(f"    {i+1}. {step_name}:")
-                    # Some entries (e.g. a per-column breakdown) are structured
-                    # data rather than a description/details pair, so read the
-                    # optional keys defensively instead of indexing directly.
                     description = step_info.get('description') if isinstance(step_info, dict) else None
                     if description:
                         summary_lines.append(f"       - {description}")
@@ -672,7 +658,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                     f"  - Strategy: '{resampling['strategy']}' "
                     f"({resampling['rows_before']} -> {resampling['rows_after']} rows)."
                 )
-            else:  # pre-0.2.0 summaries stored a bare strategy string
+            else:  
                 summary_lines.append(f"  - Strategy: '{resampling}' applied to the training data.")
 
         if self.has_pre_stage:
@@ -830,8 +816,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         try:
             encoded_cols = self.encoder_.get_feature_names_out(self.categorical_cols_)
         except Exception as exc:
-            # category_encoders transformers do not all implement the
-            # get_feature_names_out protocol; fall back to positional names.
             logger.debug("[DataProcessor] Encoder has no feature names: %s", exc)
             encoded_cols = [f"cat_{i}" for i in range(np.asarray(encoded_data).shape[1])]
         encoded_df = pd.DataFrame(
@@ -888,7 +872,6 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         self.selector_ = factory()
         X_to_fit = X.copy()
         if strategy == 'select_k_best_chi2':
-            # chi2 requires non-negative inputs.
             X_to_fit = MinMaxScaler().fit_transform(X_to_fit)
         try:
             self.selector_.fit(X_to_fit, y)

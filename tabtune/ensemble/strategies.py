@@ -44,10 +44,6 @@ from sklearn.model_selection import KFold, StratifiedKFold
 logger = logging.getLogger(__name__)
 
 
-# ======================================================================
-# Utility helpers
-# ======================================================================
-
 _CLS_METRICS: Dict[str, Tuple[Any, bool]] = {
     "accuracy": (accuracy_score, True),
     "log_loss": (log_loss, False),
@@ -141,10 +137,6 @@ def _to_numpy(y: Any) -> np.ndarray:
     return np.asarray(y)
 
 
-# ======================================================================
-# Strategy 1: Weighted Averaging
-# ======================================================================
-
 class WeightedAveraging:
     """Combine model outputs via weighted averaging.
 
@@ -224,8 +216,6 @@ class WeightedAveraging:
         _validate_model_outputs(model_outputs, context="WeightedAveraging.fit")
         self.model_names_ = list(model_outputs.keys())
         y_val = _to_numpy(y_val)
-
-        # Manual weights
         if weights is not None:
             missing = set(self.model_names_) - set(weights.keys())
             if missing:
@@ -241,14 +231,12 @@ class WeightedAveraging:
             logger.info("[WeightedAveraging] Using manual weights: %s", self.weights_)
             return self
 
-        # Uniform weights
         if self.weight_scheme == "uniform":
             n = len(self.model_names_)
             self.weights_ = {k: 1.0 / n for k in self.model_names_}
             logger.info("[WeightedAveraging] Uniform weights assigned.")
             return self
 
-        # Performance / inverse-error weights
         metric_fn, higher_is_better = _get_metric_fn(metric, self.task_type)
         scores: Dict[str, float] = {}
         for name, output in model_outputs.items():
@@ -325,10 +313,6 @@ class WeightedAveraging:
             raise RuntimeError("[WeightedAveraging] No model outputs to combine.")
         return combined
 
-
-# ======================================================================
-# Strategy 2: Greedy Ensemble Selection (Caruana et al., ICML 2004)
-# ======================================================================
 
 class GreedyEnsembleSelection:
     """Iterative forward ensemble selection with replacement.
@@ -411,7 +395,6 @@ class GreedyEnsembleSelection:
             and next(iter(model_outputs.values())).ndim == 2
         )
 
-        # Incremental running sum for O(ensemble_size * n_models) complexity
         running_sum: Optional[np.ndarray] = None
         n_selected = 0
 
@@ -469,8 +452,6 @@ class GreedyEnsembleSelection:
                     step + 1, self.ensemble_size,
                     self.metric, best_score, best_name,
                 )
-
-        # Derive effective weights from selection counts
         counts = Counter(selected)
         total = sum(counts.values())
         self.weights_ = {
@@ -510,10 +491,6 @@ class GreedyEnsembleSelection:
             raise RuntimeError("[GreedyEnsembleSelection] No outputs to combine.")
         return combined
 
-
-# ======================================================================
-# Strategy 3: Stacking (Wolpert, 1992)
-# ======================================================================
 
 class StackingEnsemble:
     """Meta-learner trained on base-model predictions.
@@ -689,10 +666,6 @@ class StackingEnsemble:
         return self.meta_model_.predict(meta_X)
 
 
-# ======================================================================
-# Strategy 4: Temperature-Scaled Blending (Guo et al., ICML 2017)
-# ======================================================================
-
 class TemperatureScaledBlending:
     """Per-model temperature calibration followed by weighted combination.
 
@@ -843,10 +816,6 @@ class TemperatureScaledBlending:
         return combined
 
 
-# ======================================================================
-# Strategy 5: Cascade Stacking 
-# ======================================================================
-
 class CascadeStackingEnsemble:
     """Multi-level cascade stacking with skip connections and final GES.
 
@@ -931,7 +900,6 @@ class CascadeStackingEnsemble:
 
         is_reg = task_type == "regression"
 
-        # Flatten regression blocks to 1-D for scoring
         if is_reg:
             val_blocks = [b.ravel() if b.ndim > 1 else b for b in val_blocks]
             test_blocks = [b.ravel() if b.ndim > 1 else b for b in test_blocks]
@@ -945,7 +913,6 @@ class CascadeStackingEnsemble:
             for k in range(n_cands):
                 candidate = (running_sum + val_blocks[k]) / (n_selected + 1)
                 if is_reg:
-                    # Negative MSE (higher = better)
                     score = -float(mean_squared_error(y_val, candidate))
                 else:
                     score = float(accuracy_score(y_val, candidate.argmax(axis=1)))
@@ -1064,11 +1031,6 @@ class CascadeStackingEnsemble:
             raise RuntimeError("[CascadeStacking] No outputs to combine.")
         return combined
 
-
-# ======================================================================
-# Strategy 6: Random-Initialisation Ensemble (Deep Ensembles)
-# (Lakshminarayanan et al., NeurIPS 2017)
-# ======================================================================
 
 class RandomInitEnsemble:
     """Average multiple runs of the same model(s) with different seeds.
@@ -1221,7 +1183,6 @@ class RandomInitEnsemble:
             per_model_avg[name] = stacked.mean(axis=0)
             all_instances.extend(seed_outputs)
 
-        # Weighted cross-model combination
         combined: Optional[np.ndarray] = None
         for name, w in self.weights_.items():
             if w > 0 and name in per_model_avg:
@@ -1231,13 +1192,11 @@ class RandomInitEnsemble:
         if combined is None:
             raise RuntimeError("[RandomInitEnsemble] No outputs to combine.")
 
-        # Epistemic uncertainty (Lakshminarayanan et al. eq. 6)
         if all_instances:
             try:
                 all_stack = np.stack(all_instances, axis=0)
                 mean_pred = all_stack.mean(axis=0)
                 if all_stack.ndim == 3:
-                    # (M, n, k) -> per-sample: mean over seeds and classes
                     self.uncertainty_ = (
                         (all_stack - mean_pred[None, :, :]) ** 2
                     ).mean(axis=(0, 2))
@@ -1264,9 +1223,6 @@ class RandomInitEnsemble:
         return probas
 
 
-# ======================================================================
-# Strategy factory
-# ======================================================================
 
 STRATEGY_MAP: Dict[str, type] = {
     "weighted_averaging": WeightedAveraging,
