@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "classification_metrics",
     "regression_metrics",
+    "forecasting_metrics",
     "calibration_metrics",
     "expected_calibration_error",
     "compute_metrics",
@@ -79,6 +80,7 @@ HIGHER_IS_BETTER: dict[str, bool] = {
     "mse": False,
     "median_absolute_error": False,
     "max_error": False,
+    "mean_pinball_loss": False,
 }
 
 
@@ -200,6 +202,44 @@ def regression_metrics(y_true: Any, y_pred: Any) -> dict[str, float]:
         "explained_variance": _safe(explained_variance_score, y_true, y_pred),
         "max_error": _safe(max_error, y_true, y_pred),
     }
+
+
+def forecasting_metrics(
+    y_true: Any,
+    y_point: Any,
+    y_quantiles: Any = None,
+    quantile_levels: Sequence[float] = (),
+) -> dict[str, float]:
+    """Compute point and quantile accuracy for aligned forecasts.
+
+    The point metrics are the regression bundle's MAE, RMSE and MSE, so a
+    forecast and a regressor evaluated on the same numbers agree. Quantile
+    accuracy is the pinball loss averaged over the requested levels.
+
+    Args:
+        y_true: Observed values, flattened over items and horizon, shape ``(n,)``.
+        y_point: Point forecasts aligned with ``y_true``, shape ``(n,)``.
+        y_quantiles: Quantile forecasts, shape ``(n, len(quantile_levels))``.
+        quantile_levels: The level of each column of ``y_quantiles``.
+
+    Returns:
+        ``mae``, ``rmse`` and ``mse``, plus ``mean_pinball_loss`` when
+        quantiles are given.
+    """
+    from sklearn.metrics import mean_pinball_loss
+
+    point = regression_metrics(y_true, y_point)
+    results = {key: point[key] for key in ("mae", "rmse", "mse")}
+
+    if y_quantiles is not None and len(quantile_levels):
+        y_true_arr = _as_array(y_true).astype(float, copy=False)
+        q_arr = _as_array(y_quantiles).astype(float, copy=False)
+        losses = [
+            _safe(mean_pinball_loss, y_true_arr, q_arr[:, i], alpha=float(level))
+            for i, level in enumerate(quantile_levels)
+        ]
+        results["mean_pinball_loss"] = float(np.mean(losses))
+    return results
 
 
 def expected_calibration_error(

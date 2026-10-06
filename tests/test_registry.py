@@ -40,10 +40,10 @@ pytestmark = pytest.mark.unit
 
 
 def test_registry_is_populated():
-    assert len(MODEL_REGISTRY) == 16
+    assert len(MODEL_REGISTRY) == 21
     for expected in (
-        "TabPFN", "TabPFNv3", "TabICLv2", "Mitra", "TabFM", "OrionMSP", "XRFM", "ILTM",
-        "EXAONETabular",
+        "TabPFN", "TabPFNv3", "TabPFNv35", "TabPFNv35Fast", "Causilo", "TabLDM", "MitraV2", "TabICLv2",
+        "Mitra", "TabFM", "OrionMSP", "XRFM", "ILTM", "EXAONETabular",
     ):
         assert expected in MODEL_REGISTRY
 
@@ -138,13 +138,18 @@ def test_list_models_commercial_filter_is_conservative():
     # trains from scratch, iLTM is Apache-2.0 with ungated weights.
     assert "XRFM" in commercial and "ILTM" in commercial
     assert "TabPFNv3" not in commercial  # explicitly research-only
-    assert "TabPFN" not in commercial  # unverified, so excluded by default
+    # 0.4.0 verified the Prior Labs terms: only the v2 weights are commercial
+    # (with attribution); v2.6, v3.5 and v3.5-fast are non-commercial.
+    assert "TabPFN" in commercial
+    assert {"TabPFNv26", "TabPFNv35", "TabPFNv35Fast", "Causilo"}.isdisjoint(commercial)
+    assert "TabLDM" not in commercial  # conflicting upstream statements: unverified
+    assert "Limix" in commercial  # LimiX-16M: Apache-2.0-derived Stable AI license (Sept 2026)
     # EXAONE's *code* is BSD-3-Clause-LG AI Research, but its weights are
     # research-only, and the registry records the weight licence.
     assert "EXAONETabular" not in commercial
 
     lenient = {s.name for s in list_models(commercial_ok=True, include_unverified_licenses=True)}
-    assert "TabPFN" in lenient
+    assert "TabLDM" in lenient and "TabPFNv35" not in lenient
 
 
 def test_list_models_by_strategy():
@@ -301,7 +306,7 @@ def test_commercial_mode_allows_permissive_weights():
 def test_commercial_mode_warns_on_unverified_weights():
     """TabTune must not invent a restriction it has not verified."""
     with pytest.warns(UserWarning, match="has not verified"):
-        check_license("TabPFN", "commercial")
+        check_license("TabLDM", "commercial")
 
 
 def test_license_badge_reflects_attribution():

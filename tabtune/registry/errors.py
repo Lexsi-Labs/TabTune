@@ -134,6 +134,7 @@ class LicenseError(TabTuneError, ValueError):
         url: str = "",
         alternatives: Sequence[str] = (),
         notes: str = "",
+        distill_hint: bool = True,
     ) -> None:
         self.model = model
         self.license_name = license_name
@@ -147,10 +148,11 @@ class LicenseError(TabTuneError, ValueError):
             lines.append(
                 "  Commercially deployable alternatives: " + ", ".join(alternatives)
             )
-            lines.append(
-                "  Or distill this teacher into a model you own:\n"
-                f"      TabDistiller(teachers={model!r}, student='lgbm')"
-            )
+            if distill_hint:
+                lines.append(
+                    "  Or distill this teacher into a model you own:\n"
+                    f"      TabDistiller(teachers={model!r}, student='lgbm')"
+                )
         if url:
             lines.append(f"  License text: {url}")
         lines.append(

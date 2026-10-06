@@ -164,8 +164,18 @@ class TestV3PinBugFix:
         from tabtune.models.tabpfnv3.finetuning._tabtune_v3_pin import (
             V3PinnedFinetunedClassifier,
         )
-        clf = V3PinnedFinetunedClassifier(epochs=1, model_version=ModelVersion.V2_6)
+        clf = V3PinnedFinetunedClassifier(epochs=1)
+        clf._pinned_model_version = ModelVersion.V2_6  # per-instance override
         assert clf._pinned_model_version == ModelVersion.V2_6
+        assert V3PinnedFinetunedClassifier(epochs=1)._pinned_model_version == ModelVersion.V3
+
+    def test_pins_keep_sklearn_parameters(self):
+        from sklearn.base import clone
+
+        from tabtune.models.tabpfnv3.finetuning._tabtune_v3_pin import V3PinnedFinetunedClassifier
+        clf = V3PinnedFinetunedClassifier(epochs=3)
+        assert clf.get_params()["epochs"] == 3
+        assert clone(clf).epochs == 3
 
     def test_pin_overrides_use_pinned_version(self):
         """AST-level: both override bodies use self._pinned_model_version and
@@ -269,6 +279,7 @@ class TestPipelineConstruction:
 @pytest.mark.finetuning
 @requires_torch
 class TestEndToEndInference:
+    @requires_tabpfn_token
     def test_classification_inference(self, cls_data):
         from tabtune import TabularPipeline
         Xtr, Xte, ytr, yte = cls_data
@@ -281,6 +292,7 @@ class TestEndToEndInference:
         assert proba.shape == (len(yte), len(np.unique(ytr)))
         assert np.allclose(proba.sum(axis=1), 1.0, atol=1e-3)
 
+    @requires_tabpfn_token
     def test_regression_inference(self, reg_data):
         from tabtune import TabularPipeline
         Xtr, Xte, ytr, yte = reg_data
@@ -296,6 +308,7 @@ class TestEndToEndInference:
 @pytest.mark.finetuning
 @requires_torch
 class TestClassificationFineTuning:
+    @requires_tabpfn_token
     @pytest.mark.parametrize("mode", ["meta-learning", "sft", "native"])
     def test_finetune_modes_fit_and_predict(self, cls_data, fast_ft_params, mode):
         from tabtune import TabularPipeline
@@ -309,6 +322,7 @@ class TestClassificationFineTuning:
         assert p._is_fitted
         assert p.predict(Xte).shape[0] == len(yte)
 
+    @requires_tabpfn_token
     def test_peft_lora_finetune(self, cls_data, fast_ft_params, peft_config):
         from tabtune import TabularPipeline
         Xtr, Xte, ytr, yte = cls_data
@@ -328,6 +342,7 @@ class TestClassificationFineTuning:
 @pytest.mark.finetuning
 @requires_torch
 class TestRegressionFineTuning:
+    @requires_tabpfn_token
     @pytest.mark.parametrize("mode", ["native", "turn_by_turn"])
     def test_regression_finetune_modes(self, reg_data, fast_ft_params, mode):
         from tabtune import TabularPipeline

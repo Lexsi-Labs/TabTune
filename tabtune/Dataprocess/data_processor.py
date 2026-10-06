@@ -29,6 +29,8 @@ from .tabfm_preprocessor import TabFMPreprocessor
 from .xrfm_preprocessor import XRFMPreprocessor
 from .iltm_preprocessor import ILTMPreprocessor
 from .exaone_preprocessor import EXAONEPreprocessor
+from .causilo_preprocessor import CausiloPreprocessor
+from .tabldm_preprocessor import TabLDMPreprocessor
 from .regression.base_processor import RegressionDataProcessor
 from .regression.tabpfn_processor import TabPFNRegressionProcessor
 from .regression.contexttab_processor import ContextTabRegressionProcessor
@@ -64,16 +66,23 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         'OrionMSPv1.5': {'categorical_encoding': 'orion_msp_special'},
         'ContextTab': {'categorical_encoding': 'contexttab_special'},
         'Mitra': {'categorical_encoding': 'mitra_special'},
+        # v2 is the same architecture and the same preprocessing; only the
+        # checkpoint differs.
+        'MitraV2': {'categorical_encoding': 'mitra_special'},
         'OrionBix': {'categorical_encoding': 'orion_bix_special'},
         'TabDPT': {'categorical_encoding': 'tabdpt_special'},
         'Limix': {'categorical_encoding': 'limix_special'},
         'TabICLv2': {'categorical_encoding': 'tabiclv2_special'},
         'TabPFNv26': {'categorical_encoding': 'tabpfn_special'},
         'TabPFNv3': {'categorical_encoding': 'tabpfn_special'},
+        'TabPFNv35': {'categorical_encoding': 'tabpfn_special'},
+        'TabPFNv35Fast': {'categorical_encoding': 'tabpfn_special'},
         'TabFM': {'categorical_encoding': 'tabfm_special'},
         'XRFM': {'categorical_encoding': 'xrfm_special'},
         'ILTM': {'categorical_encoding': 'iltm_special'},
         'EXAONETabular': {'categorical_encoding': 'exaone_special'},
+        'Causilo': {'categorical_encoding': 'causilo_special'},
+        'TabLDM': {'categorical_encoding': 'tabldm_special'},
     }
 
     def __init__(
@@ -232,12 +241,20 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'xrfm_special': XRFMPreprocessor,
             'iltm_special': ILTMPreprocessor,
             'exaone_special': EXAONEPreprocessor,
+            'causilo_special': CausiloPreprocessor,
+            'tabldm_special': TabLDMPreprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
             PreprocessorClass = special_encoders[self.categorical_encoding]
             if self.categorical_encoding == 'tabfm_special':
                 # TabFM preprocessor needs task_type (label-encode target for classification).
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding == 'causilo_special':
+                # Causilo needs task_type to decide whether to label-encode the target.
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding == 'tabldm_special':
+                # TabLDM needs task_type to decide whether to label-encode the target.
                 return PreprocessorClass(task_type=self.task_type)
             if self.categorical_encoding == 'xrfm_special':
                 # XRFM preprocessor needs task_type (label-encode target for classification).
@@ -299,7 +316,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return TabDPTRegressionProcessor(target_scaling_strategy=target_scaling)
-        elif self.model_name == 'Mitra':
+        elif self.model_name in ('Mitra', 'MitraV2'):
             # Mitra handles normalization internally, default to 'none'
             if target_scaling is None:
                 target_scaling = 'none'
@@ -309,7 +326,7 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return LimixRegressionProcessor(target_scaling_strategy=target_scaling)
-        elif self.model_name in ('TabPFNv26', 'TabPFNv3'):
+        elif self.model_name in ('TabPFNv26', 'TabPFNv3', 'TabPFNv35', 'TabPFNv35Fast'):
             # TabPFN v2.6 / v3 handle target normalization internally -> default 'none'.
             if target_scaling is None:
                 target_scaling = 'none'
@@ -336,6 +353,22 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return EXAONERegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'TabLDM':
+            # TabLDM standardises the target with its own y_scaler_ and
+            # predict() returns the ORIGINAL space. The pipeline never
+            # inverse-transforms regression predictions, so scaling here would
+            # leave predictions in a space the caller never undoes.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'Causilo':
+            # Causilo normalises the target inside PreparedDataset, per ensemble
+            # member, and predict() returns the ORIGINAL space. The pipeline never
+            # inverse-transforms regression predictions, so any scaling applied
+            # here would leave predictions in a space the caller never undoes.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
 
         # Fallback to generic processor (use 'standard' for unknown models)
         if target_scaling is None:

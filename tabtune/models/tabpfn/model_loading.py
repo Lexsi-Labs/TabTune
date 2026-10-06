@@ -604,6 +604,24 @@ def get_loss_criterion(
     return FullSupportBarDistribution(borders, ignore_nan_targets=True)
 
 
+# The upstream ``tabpfn`` defaults for the config keys this tree sets to their v2.5
+# values. TabPFN v2 checkpoints predate thinking rows and leave some of these keys
+# out, so they were built with the upstream values.
+_PRE_THINKING_ROWS_DEFAULTS = {
+    "num_thinking_rows": 0,
+    "nlayers": 12,
+    "features_per_group": 2,
+    "seed": 0,
+}
+
+
+def _complete_checkpoint_config(config: dict, state_dict: dict) -> dict:
+    """Fill the keys a checkpoint without thinking-row weights leaves out."""
+    if any(key.startswith("add_thinking_tokens.") for key in state_dict):
+        return config
+    return {**_PRE_THINKING_ROWS_DEFAULTS, **config}
+
+
 def load_model(
     *,
     path: Path,
@@ -632,7 +650,9 @@ def load_model(
         architecture_name = "base"
     architecture = ARCHITECTURES[architecture_name]
     state_dict = checkpoint["state_dict"]
-    config, unused_config = architecture.parse_config(checkpoint["config"])
+    config, unused_config = architecture.parse_config(
+        _complete_checkpoint_config(checkpoint["config"], state_dict)
+    )
     logger.debug(
         "[ModelLoader] Keys in config that were not parsed by architecture config: "
         f"{', '.join(unused_config.keys())}"

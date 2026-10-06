@@ -45,6 +45,13 @@ def _collect_linear_items(model: torch.nn.Module) -> List[Tuple[nn.Module, str, 
 class LoraTargetConfig:
     target_substrings: Sequence[str]
     task_type: str = "FEATURE_EXTRACTION"
+    #: Substrings of target leaves whose weight is read as a tensor rather than
+    #: applied by calling the module -- typically an attention ``out_proj``
+    #: handed to a functional attention call. ``LoRALinear`` adds its delta
+    #: inside ``forward``, which such a caller never runs, so those leaves need
+    #: :class:`FunctionalWeightLoRALinear` instead or the adapters are a silent
+    #: no-op: allocated, reported as trainable, and never affecting an output.
+    functional_weight_substrings: Sequence[str] = ()
 
 
 # --- Per-model defaults -----------------------------------------------------
@@ -59,6 +66,17 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
             "feature_positional_embedding_embeddings",
         ),
     ),
+    # NOTE (unchanged behaviour, measured): `col_embedder.tf_col`,
+    # `row_interactor` and `icl_predictor.tf_icl` each also match that block's
+    # `attn.out_proj`, and model/layers.py passes `self.out_proj.weight` to a
+    # functional attention call - so those four wrappers currently have no
+    # effect. Perturbing only their adapters moves the output by exactly 0,
+    # while perturbing three others moves it by 3.3e-07. Adding
+    # `functional_weight_substrings=("out_proj",)` here (and to TabICLv2,
+    # OrionMSP, OrionMSPv1.5 and OrionBix, which copy these targets) makes them
+    # real. It is left off because turning it on changes the PEFT numerics of
+    # five shipped models, which is a decision for whoever owns their tuned
+    # hyperparameters - not a side effect of adding a new model.
     "TabICL": LoraTargetConfig(
         target_substrings=(
             "col_embedder.tf_col",
@@ -111,12 +129,104 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
             "final_layer",
         ),
     ),
+    # Mitra v2 is the same Tab2D architecture as v1 -- the checkpoint differs,
+    # the module names do not -- so the targets are identical. The entry exists
+    # rather than letting "MitraV2" fall through to `resolve_lora_targets`'
+    # "no table -> adapt every linear layer" default, which would quietly give
+    # v2 a different (and larger) adapter set than v1 and make the two
+    # incomparable in a benchmark.
+    "MitraV2": LoraTargetConfig(
+        target_substrings=(
+            "x_embedding",
+            "layers",
+            "final_layer",
+        ),
+    ),
     "ConTextTab": LoraTargetConfig(
         target_substrings=(
             "in_context_encoder",
             "dense",
             "output_head",
             "embeddings",
+        ),
+    ),
+
+    # Causilo packs Q/K/V into one `projection` Linear per attention block and
+    # keeps `output`; its SwiGLU feedforward holds `value`/`gate`/`output`.
+    # Verified against models/causilo/nn/layers/{attention,feedforward}.py.
+    #
+    # `projection` needs FunctionalWeightLoRALinear. Attention.forward routes
+    # through prepare_query/prepare_context, which slice the packed weight -
+    # `F.linear(rows, self.projection.weight[: self.width], ...)` - rather than
+    # calling the module, and FeatureEmbedding does the same in nn/embeddings.py.
+    # Measured on a stub before this was declared: perturbing the adapters on
+    # all eight attention/embedding `projection` leaves moved the output by
+    # exactly 0, so PEFT was silently adapting only `feature_target.projection`
+    # and `row_target.projection`, which are called normally. Slicing the merged
+    # weight works and stays differentiable in the adapters.
+    "Causilo": LoraTargetConfig(
+        target_substrings=(
+            "projection",
+            "output",
+            "value",
+            "gate",
+        ),
+        functional_weight_substrings=("projection",),
+    ),
+
+    # Xiaomi TabLDM: the VENDORED tree (tabtune/models/tabldm/_model/).
+    # Names below are the model's real nn.Linear leaves: `linear1`/`linear2` are
+    # the FFN in the column, row and ICL blocks AND both the routed and shared
+    # MoE experts (moe.py::FeedForwardExpert); `attn_res_projs` are the AttnRes
+    # residual projections; `in_linear` is the column cell embedder
+    # (a SkippableLinear); `ssmax_layer` holds the qassmax attention-scaling
+    # MLPs; `decoder` is the ICL head, whose width is the FIXED `max_classes`
+    # hyperparam / quantile count, not the dataset's class count, so it is safe
+    # to adapt (same reasoning as TabFM).
+    #
+    # `out_proj` needs FunctionalWeightLoRALinear, hence
+    # functional_weight_substrings below: MultiheadAttention.forward hands
+    # `self.out_proj.weight` / `.bias` to a functional attention call
+    # (_model/layers.py), and a plain LoRALinear - which adds its delta inside
+    # forward() - would be a silent no-op there.
+    #
+    # `in_proj_weight` (the packed QKV) is a raw nn.Parameter, not an nn.Linear
+    # submodule, so module-replacement LoRA cannot reach it at all - the same
+    # limitation documented for EXAONE below.
+    "TabLDM": LoraTargetConfig(
+        target_substrings=(
+            "linear1",
+            "linear2",
+            "attn_res_projs",
+            "in_linear",
+            "ssmax_layer",
+            "decoder",
+            "out_proj",
+        ),
+        functional_weight_substrings=("out_proj",),
+    ),
+
+    # v3.5 shares the v3 attention module names (q/k/v/out_projection), so the
+    # same targets apply; verified against architectures/tabpfn_v3_5.py.
+    "TabPFNv35Fast": LoraTargetConfig(
+        target_substrings=(
+            "q_projection",
+            "k_projection",
+            "v_projection",
+            "out_projection",
+            "x_embed",
+            "icl_blocks",
+        ),
+    ),
+
+    "TabPFNv35": LoraTargetConfig(
+        target_substrings=(
+            "q_projection",
+            "k_projection",
+            "v_projection",
+            "out_projection",
+            "x_embed",
+            "icl_blocks",
         ),
     ),
 
@@ -253,6 +363,27 @@ class LoRALinear(nn.Module):
         return self.base.bias
 
 
+class FunctionalWeightLoRALinear(LoRALinear):
+    """LoRA wrapper for leaves read as ``layer.weight`` instead of called.
+
+    ``LoRALinear`` adds its delta in ``forward``. A caller that only takes the
+    weight tensor - ``F.linear(x, self.out_proj.weight, self.out_proj.bias)``,
+    or a functional attention call - never runs that, so the adapters would
+    have no effect at all. Merging the delta into ``weight`` covers both
+    consumption styles and stays differentiable in the adapters.
+
+    The merge is recomputed per read, which is an ``r x out x in`` matmul: cheap
+    next to the attention it feeds.
+    """
+
+    @property
+    def weight(self):  # type: ignore[override]
+        if self.r <= 0 or self.lora_A is None or self.lora_B is None:
+            return self.base.weight
+        delta = (self.lora_B.weight @ self.lora_A.weight) * self.scaling
+        return self.base.weight + delta.to(self.base.weight.dtype)
+
+
 def _should_wrap(name: str, targets: Sequence[str]) -> bool:
     lowered = name.lower()
     return any(tok.lower() in lowered for tok in targets)
@@ -265,11 +396,18 @@ def inject_custom_lora_into_linear_layers(
     alpha: int = 16,
     dropout: float = 0.0,
     exclude_patterns: Optional[Sequence[str]] = None,
+    functional_weight_patterns: Optional[Sequence[str]] = None,
 ) -> nn.Module:
-    """Inject LoRA adapters into linear layers, optionally excluding certain patterns."""
+    """Inject LoRA adapters into linear layers, optionally excluding certain patterns.
+
+    Leaves matching ``functional_weight_patterns`` get
+    :class:`FunctionalWeightLoRALinear` instead of :class:`LoRALinear`, for
+    modules whose weight is consumed as a tensor rather than by calling them.
+    """
     items = _collect_linear_items(model)
     tokens = [t.lower() for t in target_names or ()]
     exclude_tokens = [e.lower() for e in exclude_patterns or ()]
+    functional_tokens = [f.lower() for f in functional_weight_patterns or ()]
 
     wrapped_count = 0
     for parent, attr, dotted in items:
@@ -280,7 +418,12 @@ def inject_custom_lora_into_linear_layers(
         if exclude_tokens and _should_wrap(dotted, exclude_tokens):
             continue
         base_linear = getattr(parent, attr)
-        setattr(parent, attr, LoRALinear(base_linear, r=r, alpha=alpha, dropout=dropout))
+        wrapper = (
+            FunctionalWeightLoRALinear
+            if functional_tokens and _should_wrap(dotted, functional_tokens)
+            else LoRALinear
+        )
+        setattr(parent, attr, wrapper(base_linear, r=r, alpha=alpha, dropout=dropout))
         wrapped_count += 1
 
     return model
@@ -343,17 +486,37 @@ def apply_tabular_lora(
     alpha = peft_config.get("lora_alpha", 16)
     dropout = peft_config.get("lora_dropout", 0.05)
     target_modules = resolve_lora_targets(model_name, model, peft_config.get("target_modules"))
+    functional_weight_patterns = peft_config.get("functional_weight_modules")
+    if functional_weight_patterns is None:
+        table_entry = MODEL_LORA_TARGETS.get(model_name)
+        functional_weight_patterns = (
+            table_entry.functional_weight_substrings if table_entry else ()
+        )
     
     # Model-specific exclusions for modules with dynamic dimensions
     exclude_patterns = []
     if model_name in ["TabICL", "OrionMSP", "OrionBix"]:
         exclude_patterns = ["y_encoder"]
-    elif model_name == "TabPFNv3":
+    elif model_name == "Causilo":
+        # The prediction head's width is the class capacity, and above ten
+        # classes Causilo drives it through error-correcting output codes;
+        # adapting it would change what those codes decode.
+        exclude_patterns = ["head"]
+    elif model_name in ("TabPFNv3", "TabPFNv35", "TabPFNv35Fast"):
         # y-encoders can be class-count dependent; keep them full-rank.
         exclude_patterns = ["col_y_encoder", "icl_y_encoder", "y_encoder"]
     # TabFM needs no exclusions: its y-encoder / decoder head widths depend on the
     # fixed `max_classes` model hyperparam (not the dataset class count), so they
     # are safe to adapt with LoRA.
+    elif model_name == "TabLDM":
+        # `y_encoder` is a OneHotAndLinear whose rows are class slots, and
+        # TabLDM permutes class ids per ensemble member
+        # (class_shuffle_method="shift"), so those rows are deliberately
+        # interchangeable -- an adapter fitted under one permutation does not
+        # hold under another. `router` picks which MoE experts fire; it was
+        # trained jointly with expert specialisation, so a delta on it re-routes
+        # tokens to experts the adapters were never fitted against.
+        exclude_patterns = ["y_encoder", "router"]
     elif model_name == "EXAONETabular":
         # Exclude the task head. Its output width is the architectural class
         # capacity (classification) / quantile count (regression), and it is the
@@ -372,5 +535,6 @@ def apply_tabular_lora(
         alpha=alpha,
         dropout=dropout,
         exclude_patterns=exclude_patterns,
+        functional_weight_patterns=functional_weight_patterns,
     )
 

@@ -1,0 +1,1 @@
+"""Shared neural network layers."""

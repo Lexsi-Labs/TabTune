@@ -41,6 +41,8 @@ from typing import Any, Literal
 
 import numpy as np
 
+from ..logger import log_event
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["PredictionCache", "CacheStats", "fingerprint_data", "make_cache"]
@@ -262,9 +264,10 @@ class PredictionCache:
 
         cached = self.get(key)
         if cached is not None:
-            logger.debug("[Cache] hit for %s (%s)", method, fingerprint[:8])
+            log_event(logger, "cache_hit", "Prediction cache hit", level=logging.DEBUG, method=method)
             return cached
 
+        log_event(logger, "cache_miss", "Prediction cache miss", level=logging.DEBUG, method=method)
         value = compute()
         if value is not None:
             self.set(key, value)

@@ -60,6 +60,7 @@ class TabPFNv3RegressorWrapper(TabPFNv3Regressor):
         y = np.asarray(y).flatten()
         return super().fit(X, y)
 
-    def predict(self, X):
+    def predict(self, X, output_type="mean", quantiles=None):
+        """Predict (``output_type="mean"`` by default); ``"quantiles"``/``"main"`` pass through."""
         X = self._densify(X)
-        return super().predict(X)
+        return super().predict(X, output_type=output_type, quantiles=quantiles)

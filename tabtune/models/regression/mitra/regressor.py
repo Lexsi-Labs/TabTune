@@ -13,6 +13,7 @@ import torch
 import logging
 from pathlib import Path
 from tabtune.models.mitra.tab2d import Tab2D
+from tabtune.models.mitra.model_loading import MITRA_REGRESSOR_REPO
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class MitraRegressorWrapper:
     
     def __init__(self, tuning_strategy='inference', dim=512, n_layers=12, n_heads=4,
                  use_pretrained_weights='auto', path_to_weights='', device=None,
-                 cache_dir=None, **kwargs):
+                 cache_dir=None, pretrained_repo_id=None, **kwargs):
         """
         Initialize MitraRegressorWrapper.
         
@@ -57,6 +58,11 @@ class MitraRegressorWrapper:
                 - True: Use pretrained weights from path_to_weights
                 - False: Use randomly initialized weights
             path_to_weights: Path to pretrained weights file (local path or HuggingFace repo ID)
+            pretrained_repo_id: Which checkpoint the ``'auto'`` path pulls. Defaults
+                to the Mitra v1 regressor; the pipeline passes the v2 repo for
+                ``model_name='MitraV2'``. ``Tab2D.from_pretrained`` builds the
+                module from that checkpoint's own config, so ``dim`` / ``n_layers``
+                / ``n_heads`` above only shape the random-init fallback.
             device: Device to use ('cuda' or 'cpu')
             cache_dir: Directory to cache downloaded models (default: ~/.cache/mitra)
             **kwargs: Additional arguments (filtered for Tab2D compatibility)
@@ -72,21 +78,29 @@ class MitraRegressorWrapper:
         if device is None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
         
+        repo_id = pretrained_repo_id or MITRA_REGRESSOR_REPO
+
         # Handle pretrained weights loading
         if use_pretrained_weights == 'auto':
             # Try to load from HuggingFace using Tab2D.from_pretrained directly
             try:
-                logger.info("[MitraRegressorWrapper] Loading pretrained weights from HuggingFace...")
+                logger.info(
+                    "[MitraRegressorWrapper] Loading pretrained weights from HuggingFace (%s)...",
+                    repo_id,
+                )
                 # Use Tab2D.from_pretrained which now supports HuggingFace repo IDs
-                self.model = Tab2D.from_pretrained("autogluon/mitra-regressor", device=device)
+                self.model = Tab2D.from_pretrained(repo_id, device=device)
                 self.tuning_strategy = tuning_strategy
                 self.device = device
                 self._is_fitted = False
-                logger.info("[MitraRegressorWrapper] Successfully loaded pretrained Mitra regressor from HuggingFace")
+                logger.info(
+                    "[MitraRegressorWrapper] Successfully loaded pretrained Mitra regressor from %s",
+                    repo_id,
+                )
                 return
             except Exception as e:
                 logger.warning(
-                    f"[MitraRegressorWrapper] Failed to load from HuggingFace: {e}. "
+                    f"[MitraRegressorWrapper] Failed to load from {repo_id}: {e}. "
                     "Falling back to randomly initialized weights."
                 )
                 use_pretrained_weights = False

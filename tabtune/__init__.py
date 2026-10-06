@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING, Any
 # pyproject.toml. The literal below is the single fallback for an uninstalled
 # source tree; setup.py and this module previously carried their own copies and
 # disagreed with pyproject.toml, giving three different answers for __version__.
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 try:
     __version__ = _pkg_version("tabtune")
 except PackageNotFoundError:  # running from a source checkout
@@ -70,11 +70,15 @@ if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
     from .evaluation import GroupedSplit, ShiftEvaluator, StratifiedGroupedSplit, TemporalSplit
     from .TabularLeaderboard.leaderboard import LeaderboardEntry, TabularLeaderboard
     from .TabularPipeline.pipeline import TabularPipeline
+    from .TimeSeries.ensemble import TimeSeriesEnsemble
+    from .TimeSeries.leaderboard import TimeSeriesLeaderboard
+    from .TimeSeries.pipeline import TimeSeriesPipeline
     from .TuningManager.tuning import TuningManager
 
 # name -> (module path, attribute). Resolved on first access by __getattr__.
 _LAZY_ATTRS: dict[str, tuple[str, str]] = {
     "TabularPipeline": (".TabularPipeline.pipeline", "TabularPipeline"),
+    "TimeSeriesPipeline": (".TimeSeries.pipeline", "TimeSeriesPipeline"),
     "TabularLeaderboard": (".TabularLeaderboard.leaderboard", "TabularLeaderboard"),
     "LeaderboardEntry": (".TabularLeaderboard.leaderboard", "LeaderboardEntry"),
     "DataProcessor": (".Dataprocess.data_processor", "DataProcessor"),
@@ -85,10 +89,14 @@ _LAZY_ATTRS: dict[str, tuple[str, str]] = {
     "TemporalSplit": (".evaluation", "TemporalSplit"),
     "GroupedSplit": (".evaluation", "GroupedSplit"),
     "StratifiedGroupedSplit": (".evaluation", "StratifiedGroupedSplit"),
+    "TimeSeriesLeaderboard": (".TimeSeries.leaderboard", "TimeSeriesLeaderboard"),
+    "TimeSeriesEnsemble": (".TimeSeries.ensemble", "TimeSeriesEnsemble"),
 }
 
 __all__ = [
+    "setup_logger",
     "TabularPipeline",
+    "TimeSeriesPipeline",
     "TabularLeaderboard",
     "LeaderboardEntry",
     "DataProcessor",
@@ -102,6 +110,10 @@ __all__ = [
     "registry",
     "config",
     "uncertainty",
+    "TimeSeries",
+    "TimeSeriesLeaderboard",
+    "TimeSeriesEnsemble",
+    "bridge",
     # errors
     "TabTuneError",
     "ConfigError",
@@ -135,6 +147,10 @@ _LAZY_SUBMODULES = frozenset(
         # Conformal prediction + recalibration. Pure numpy/scipy over
         # predict_proba, but lazy for symmetry and import-time hygiene.
         "uncertainty",
+        # Time series models. pandas/numpy only until a model is fitted.
+        "TimeSeries",
+        # Time series histories as tabular features.
+        "bridge",
     }
 )
 

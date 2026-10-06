@@ -416,19 +416,32 @@ def check_license(
 
     flag = spec.license.commercial_use_ok
     if flag is False:
+        from .TimeSeriesSpec import TimeSeriesModelSpec
+
         raise LicenseError(
             spec.name,
             spec.license.name,
             url=spec.license.url,
             alternatives=spec.commercial_alternatives,
             notes=spec.license.notes,
+            # TabDistiller distils tabular teachers; it does not apply to forecasters.
+            distill_hint=not isinstance(spec, TimeSeriesModelSpec),
         )
     if flag is None:
+        notes = spec.license.notes or ""
+        if notes.lower().startswith("conditional"):
+            lead = (
+                f"{spec.name} weights ({spec.license.name}) permit commercial use only under "
+                f"conditions. {notes}"
+            )
+        else:
+            lead = (
+                f"TabTune has not verified whether {spec.name} weights "
+                f"({spec.license.name}) permit commercial use. "
+                f"{notes or 'Confirm the terms upstream before deploying.'}"
+            )
         warnings.warn(
-            f"TabTune has not verified whether {spec.name} weights "
-            f"({spec.license.name}) permit commercial use. "
-            f"{spec.license.notes or 'Confirm the terms upstream before deploying.'}"
-            + (f" See {spec.license.url}" if spec.license.url else ""),
+            lead + (f" See {spec.license.url}" if spec.license.url else ""),
             UserWarning,
             stacklevel=3,
         )

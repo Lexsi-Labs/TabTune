@@ -14,7 +14,7 @@ The upstream PriorLabs fine-tuning wrappers hardcode ``ModelVersion.V2_5`` insid
 So using ``FinetunedTabPFNClassifier`` / ``FinetunedTabPFNRegressor`` as-is would
 fine-tune the **v2.5** checkpoint even though TabTune registered the model as
 ``TabPFNv3``. These subclasses override ``_create_estimator`` to pin
-``ModelVersion.V3`` (configurable), so the native fine-tuning path actually
+``ModelVersion.V3`` (a class attribute), so the native fine-tuning path actually
 fine-tunes v3 weights.
 
 The override mirrors the upstream method exactly except for the pinned version,
@@ -38,13 +38,14 @@ from tabtune.models.tabpfnv3.finetuning.finetuned_regressor import (
 class V3PinnedFinetunedClassifier(FinetunedTabPFNClassifier):
     """``FinetunedTabPFNClassifier`` that fine-tunes the v3 checkpoint.
 
-    Pass ``model_version`` to override (defaults to ``ModelVersion.V3``); any other
-    kwargs are forwarded to ``FinetunedTabPFNClassifier``.
+    The version is the class attribute ``_pinned_model_version``
+    (``ModelVersion.V3``); set it on an instance to override. Constructor
+    arguments are ``FinetunedTabPFNClassifier``'s, unchanged.
     """
 
-    def __init__(self, *args, model_version: ModelVersion = ModelVersion.V3, **kwargs):
-        self._pinned_model_version = model_version
-        super().__init__(*args, **kwargs)
+    # A class attribute, not an __init__ argument: sklearn's get_params/clone
+    # need the upstream __init__ signature unchanged (no varargs).
+    _pinned_model_version = ModelVersion.V3
 
     def _create_estimator(self, config: dict[str, Any]) -> TabPFNClassifier:
         # Mirror upstream _create_estimator but pin the requested version.
@@ -59,9 +60,9 @@ class V3PinnedFinetunedClassifier(FinetunedTabPFNClassifier):
 class V3PinnedFinetunedRegressor(FinetunedTabPFNRegressor):
     """``FinetunedTabPFNRegressor`` that fine-tunes the v3 checkpoint."""
 
-    def __init__(self, *args, model_version: ModelVersion = ModelVersion.V3, **kwargs):
-        self._pinned_model_version = model_version
-        super().__init__(*args, **kwargs)
+    # A class attribute, not an __init__ argument: sklearn's get_params/clone
+    # need the upstream __init__ signature unchanged (no varargs).
+    _pinned_model_version = ModelVersion.V3
 
     def _create_estimator(self, config: dict[str, Any]) -> TabPFNRegressor:
         return TabPFNRegressor.create_default_for_version(

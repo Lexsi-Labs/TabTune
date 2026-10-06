@@ -1,0 +1,779 @@
+#  Copyright (c) Prior Labs GmbH 2026.
+
+"""Reshape the feature distributions using different transformations."""
+
+from __future__ import annotations
+
+import contextlib
+import dataclasses
+from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing_extensions import override
+
+import numpy as np
+from scipy.stats import shapiro
+from sklearn.compose import ColumnTransformer, make_column_selector
+from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.preprocessing import (
+    FunctionTransformer,
+    MinMaxScaler,
+    PowerTransformer,
+    RobustScaler,
+)
+
+from tabtune.models.tabpfnv35.preprocessing.datamodel import (
+    FeatureModality,
+    FeatureSchema,
+    GPUTransformType,
+    make_names_unique,
+)
+from tabtune.models.tabpfnv35.preprocessing.pipeline_interface import (
+    PreprocessingStep,
+    PreprocessingStepResult,
+)
+from tabtune.models.tabpfnv35.preprocessing.steps.adaptive_quantile_transformer import (
+    AdaptiveQuantileTransformer,
+    get_extrapolate_ratio_for_preset,
+    get_user_n_quantiles_for_preset,
+)
+from tabtune.models.tabpfnv35.preprocessing.steps.kdi_transformer import (
+    KDITransformerWithNaN,
+    get_all_kdi_transformers,
+)
+from tabtune.models.tabpfnv35.preprocessing.steps.safe_power_transformer import SafePowerTransformer
+from tabtune.models.tabpfnv35.preprocessing.steps.squashing_scaler_transformer import SquashingScaler
+from tabtune.models.tabpfnv35.preprocessing.steps.utils import (
+    is_identity_transformer,
+    wrap_with_safe_standard_scaler,
+)
+from tabtune.models.tabpfnv35.utils import infer_random_state
+
+if TYPE_CHECKING:
+    from sklearn.base import TransformerMixin
+
+
+class _ReshapeColumn(NamedTuple):
+    """One output column of the reshape step.
+
+    Attributes:
+        source_ix: Index of the input feature this column comes from / derives from.
+        is_passthrough: ``True`` if the input column is carried over unchanged (so
+            it keeps the input name and needs no ancestor); ``False`` if it is a
+            distribution-transformed column (gets a generated ``reshape_{k}`` name
+            and records its source via ``ancestor``).
+    """
+
+    source_ix: int
+    is_passthrough: bool
+
+
+def _build_reshape_output_layout(
+    *,
+    n_features: int,
+    trans_ixs: list[int],
+    categorical_features: list[int],
+    n_transformed: int,
+    append_to_original: bool,
+    apply_to_categorical: bool,
+) -> list[_ReshapeColumn]:
+    """Describe the reshape step's output columns, in output order.
+
+    Single source of truth for the output column layout, mirroring the
+    ``ColumnTransformer`` assembled in ``_create_transformers_and_new_schema``;
+    names (`_build_reshape_output_names`) and ancestors
+    (part 1 of `set_ancestors`) are both derived from it so they can't drift
+    apart. The passthrough block always precedes the transformed block.
+
+    The transformed block holds ``output_multiplier`` columns per transformed
+    input. ``ColumnTransformer``/``FeatureUnion`` lays these out sub-transform
+    major (e.g. ``[norm(c0), norm(c1), kdi(c0), kdi(c1)]``), so the ``p``-th
+    transformed column derives from input ``trans_ixs[p % len(trans_ixs)]``;
+    this also holds for single-output transforms where ``p % len == p``.
+    """
+    transformed = [
+        _ReshapeColumn(trans_ixs[p % len(trans_ixs)], is_passthrough=False)
+        for p in range(n_transformed)
+    ]
+    if append_to_original:
+        # Output: [original_all, transformed_copies]
+        passthrough_ixs = range(n_features)
+    elif apply_to_categorical:
+        # Output: [transformed (cats + nums)]
+        passthrough_ixs = range(0)
+    else:
+        # Output: [cats_passthrough, transformed_nums]
+        passthrough_ixs = categorical_features
+    passthrough = [_ReshapeColumn(i, is_passthrough=True) for i in passthrough_ixs]
+    return passthrough + transformed
+
+
+def _build_reshape_output_names(
+    feature_schema: FeatureSchema,
+    layout: list[_ReshapeColumn],
+) -> list[str]:
+    """Unique, output-order names for the reshape layout.
+
+    Passthrough columns keep their input names; distribution-transformed columns
+    get generated ``reshape_{k}`` names (a derived feature is named from the
+    transform, not its source).
+    """
+    # Every feature is named by the time it reaches this step, so ``name`` is
+    # non-None (input features named from columns/positionally; added features
+    # named from their transform).
+    input_names = [f.name for f in feature_schema.features]
+    names: list[str] = []
+    n_transformed = 0
+    for col in layout:
+        if col.is_passthrough:
+            names.append(input_names[col.source_ix])
+        else:
+            names.append(f"reshape_{n_transformed}")
+            n_transformed += 1
+    return make_names_unique(names)
+
+
+def _exp_minus_1(x: np.ndarray) -> np.ndarray:
+    return np.exp(x) - 1  # type: ignore
+
+
+def _make_box_cox_safe(input_transformer: TransformerMixin | Pipeline) -> Pipeline:
+    """Make box cox save.
+
+    The Box-Cox transformation can only be applied to strictly positive data.
+    With first MinMax scaling, we achieve this without loss of function.
+    Additionally, for test data, we also need clipping.
+    """
+    return Pipeline(
+        steps=[
+            ("mm", MinMaxScaler(feature_range=(0.1, 1), clip=True)),
+            ("box_cox", input_transformer),
+        ],
+    )
+
+
+def _skew(x: np.ndarray) -> float:
+    """skewness: 3 * (mean - median) / std."""
+    return float(3 * (np.nanmean(x, 0) - np.nanmedian(x, 0)) / np.std(x, 0))
+
+
+class ReshapeFeatureDistributionsStep(PreprocessingStep):
+    """Reshape feature distributions using various transformations.
+
+    This step should receive ALL columns (not modality-sliced) because it:
+    1. Applies different logic based on `apply_to_categorical` flag
+    2. Can append transformed features to originals (`append_to_original`)
+
+    When using with PreprocessingPipeline, register as a bare step (no modalities):
+        pipeline = PreprocessingPipeline(steps=[ReshapeFeatureDistributionsStep()])
+
+    Configuration options:
+        - transform_name: The transformation to apply (e.g., "squashing_scaler_default",
+            "quantile_uni_coarse")
+        - apply_to_categorical: Whether to transform categorical columns too
+        - append_to_original: If True, keep original and append transformed as new
+            columns
+        - max_features_per_estimator: Subsample features if above this threshold
+        - global_transformer_name: Optional global transform like "svd" that adds
+            features
+
+    Output column ordering:
+        - With append_to_original=True: [original_cols, transformed_cols, (svd_cols)]
+        - With append_to_original=False, apply_to_categorical=False:
+            [categorical_passthrough, numerical_transformed, (svd_cols)]
+        - With append_to_original=False, apply_to_categorical=True:
+            [all_transformed, (svd_cols)]
+    """
+
+    APPEND_TO_ORIGINAL_THRESHOLD = 500
+    """Threshold to allow appending the original features if append_to_original is
+    auto. This is used to reduce computational cost."""
+
+    @staticmethod
+    def get_column_types(X: np.ndarray) -> list[str]:
+        """Returns a list of column types for the given data, that indicate how
+        the data should be preprocessed.
+        """
+        # TODO(eddiebergman): Bad to keep calling skew again and again here...
+        column_types = []
+        for col in range(X.shape[1]):
+            if np.unique(X[:, col]).size < 10:
+                column_types.append(f"ordinal_{col}")
+            elif (
+                _skew(X[:, col]) > 1.1
+                and np.min(X[:, col]) >= 0
+                and np.max(X[:, col]) <= 1
+            ):
+                column_types.append(f"skewed_pos_1_0_{col}")
+            elif _skew(X[:, col]) > 1.1 and np.min(X[:, col]) > 0:
+                column_types.append(f"skewed_pos_{col}")
+            elif _skew(X[:, col]) > 1.1:
+                column_types.append(f"skewed_{col}")
+            elif shapiro(X[0:3000, col]).statistic > 0.95:
+                column_types.append(f"normal_{col}")
+            else:
+                column_types.append(f"other_{col}")
+        return column_types
+
+    def __init__(
+        self,
+        *,
+        transform_name: str = "safepower",
+        apply_to_categorical: bool = False,
+        append_to_original: bool | Literal["auto"] = False,
+        max_features_per_estimator: int = 500,
+        random_state: int | np.random.Generator | None = None,
+        schedule_gpu_transform: GPUTransformType | None = None,
+    ):
+        """Initialize the step.
+
+        Args:
+            transform_name: Key into
+                :func:`get_all_reshape_feature_distribution_preprocessors`
+                selecting the transform to apply (e.g. ``"safepower"``,
+                ``"quantile_uni_coarse"``, ``"squashing_scaler_default"``).
+                Use ``"none"`` to disable the transform itself while still
+                running this step's schema logic (e.g. when the actual
+                transform will run on GPU — see ``schedule_gpu_transform``).
+            apply_to_categorical: If True, the transform is applied to
+                categorical columns as well as numerical ones. If False,
+                categorical columns pass through unchanged.
+            append_to_original: If True, transformed columns are appended to
+                the original columns instead of replacing them. If
+                ``"auto"``, this is decided based on the number of features
+                (see :attr:`APPEND_TO_ORIGINAL_THRESHOLD` and
+                ``max_features_per_estimator``).
+            max_features_per_estimator: Upper bound on the number of
+                features the downstream estimator should see. Used by the
+                ``"auto"`` decision for ``append_to_original``.
+            random_state: Random state used by stochastic transforms (e.g.
+                quantile transformers).
+            schedule_gpu_transform: When set, marks the output numerical
+                columns with this :class:`GPUTransformType` so the GPU
+                preprocessing pipeline picks them up. The CPU transform
+                itself is not skipped — pass ``transform_name="none"`` to
+                let the GPU side do the actual work.
+        """
+        super().__init__()
+
+        if max_features_per_estimator <= 0:
+            raise ValueError("max_features_per_estimator must be a positive integer.")
+
+        self.transform_name = transform_name
+        self.apply_to_categorical = apply_to_categorical
+        self.append_to_original = append_to_original
+        self.random_state = random_state
+        self.max_features_per_estimator = max_features_per_estimator
+        self.schedule_gpu_transform = schedule_gpu_transform
+        self.transformer_: Pipeline | ColumnTransformer | None = None
+        self.data_is_unchanged_: bool | None = None
+        """Whether this step's transformer would hand the data back untouched, in which
+        case it is not built and the data pass is skipped. ``None`` until fitted, so
+        "not fitted yet" stays distinguishable from "fitted to a no-op"."""
+        self.column_order_: list[int] | None = None
+        """Input columns in output order, when this step only reorders them."""
+
+    def _create_transformers_and_new_schema(
+        self,
+        n_samples: int,
+        n_features: int,
+        feature_schema: FeatureSchema,
+    ) -> tuple[Pipeline | ColumnTransformer | None, FeatureSchema]:
+        """Build the transformer for this step, and the schema its output has.
+
+        Returns ``None`` for the transformer when the assembled one would not change
+        the data at all -- see `data_is_unchanged_`. The schema is built the same way
+        either way.
+        """
+        if "adaptive" in self.transform_name:
+            raise NotImplementedError("Adaptive preprocessing raw removed.")
+
+        static_seed, _ = infer_random_state(self.random_state)
+        categorical_features = feature_schema.indices_for(FeatureModality.CATEGORICAL)
+
+        all_preprocessors = get_all_reshape_feature_distribution_preprocessors(
+            n_samples,
+            random_state=static_seed,
+        )
+        all_feats_ix = list(range(n_features))
+        transformers = []
+
+        numerical_ix = [i for i in range(n_features) if i not in categorical_features]
+
+        self.append_to_original_decision_ = self._get_append_to_original_decision(
+            n_features=n_features,
+            max_features_per_estimator=self.max_features_per_estimator,
+        )
+
+        # -------- Append to original ------
+        # If we append to original, all the categorical indices are kept in place
+        # as the first transform is a passthrough on the whole X as it is above
+        if self.append_to_original_decision_ and self.apply_to_categorical:
+            trans_ixs = categorical_features + numerical_ix
+            transformers.append(("original", "passthrough", all_feats_ix))
+            cat_ix = categorical_features  # Exist as they are in original
+
+        elif self.append_to_original_decision_ and not self.apply_to_categorical:
+            trans_ixs = numerical_ix
+            # Includes the categoricals passed through
+            transformers.append(("original", "passthrough", all_feats_ix))
+            cat_ix = categorical_features  # Exist as they are in original
+
+        # -------- Don't append to original ------
+        # We only have categorical indices if we don't transform them
+        # The first transformer will be a passthrough on the categorical indices
+        # Making them the first
+        elif not self.append_to_original_decision_ and self.apply_to_categorical:
+            trans_ixs = categorical_features + numerical_ix
+            cat_ix = []  # We have none left, they've been transformed
+
+        elif not self.append_to_original_decision_ and not self.apply_to_categorical:
+            trans_ixs = numerical_ix
+            transformers.append(("cats", "passthrough", categorical_features))
+            cat_ix = list(range(len(categorical_features)))  # They are at start
+
+        else:
+            raise ValueError(
+                f"Unrecognized combination of {self.apply_to_categorical=}"
+                f" and {self.append_to_original_decision_=}",
+            )
+
+        # NOTE: No need to keep track of categoricals here, already done above
+        output_multiplier = _output_columns_per_input_column(self.transform_name)
+        _transformer = all_preprocessors[self.transform_name]
+        transformers.append(("feat_transform", _transformer, trans_ixs))
+
+        transformer = ColumnTransformer(
+            transformers,
+            remainder="drop",
+            sparse_threshold=0.0,  # No sparse
+        )
+
+        # Compute output feature count for modality update
+        # Include: base features + appended transformed (if append_to_original).
+        # Multi-output transforms (e.g. the "norm_and_kdi" FeatureUnion) emit
+        # several columns per transformed input column.
+        n_output_features = (
+            n_features + output_multiplier * len(trans_ixs)
+            if self.append_to_original_decision_
+            else n_features + (output_multiplier - 1) * len(trans_ixs)
+        )
+
+        # Build the new metadata with updated categorical indices
+        # Non-categorical indices become numerical. Names and ancestors are both
+        # derived from one layout so they stay consistent.
+        layout = _build_reshape_output_layout(
+            n_features=n_features,
+            trans_ixs=trans_ixs,
+            categorical_features=categorical_features,
+            n_transformed=output_multiplier * len(trans_ixs),
+            append_to_original=self.append_to_original_decision_,
+            apply_to_categorical=self.apply_to_categorical,
+        )
+        new_schema = FeatureSchema.from_only_categorical_indices(
+            categorical_indices=sorted(cat_ix),
+            num_columns=n_output_features,
+            names=_build_reshape_output_names(feature_schema, layout),
+        )
+        self._set_ancestors(new_schema, feature_schema, layout)
+
+        # A transform scheduled onto the GPU leaves "none" behind on this side, which
+        # the registry maps to the identity `FunctionTransformer`. Then the only thing
+        # the ColumnTransformer still does to the data is move columns, and it pays two
+        # full-size arrays to do it: one for the blocks, one for the hstack.
+        passes_values_through = is_identity_transformer(_transformer)
+        source_order = [column.source_ix for column in layout]
+        self.data_is_unchanged_ = passes_values_through and source_order == all_feats_ix
+        # Every input column used exactly once, only in a different place: one gather
+        # gets there in a single array. Anything else -- a column dropped, duplicated
+        # by append_to_original, or a multi-output transform -- fails the sort and
+        # keeps the ColumnTransformer.
+        self.column_order_ = (
+            source_order
+            if passes_values_through
+            and not self.data_is_unchanged_
+            and sorted(source_order) == all_feats_ix
+            else None
+        )
+        self.transformer_ = (
+            None
+            if self.data_is_unchanged_ or self.column_order_ is not None
+            else transformer
+        )
+
+        if self.schedule_gpu_transform is not None:
+            if self.append_to_original_decision_:
+                # Output: [original_all, transformed_copies]
+                # The appended copies are the GPU transform targets.
+                gpu_target = range(n_features, n_output_features)
+            else:
+                # All NUMERICAL columns in the output are the targets.
+                # (Using schema indices rather than trans_ixs because the
+                # ColumnTransformer may reorder columns, e.g. cats first.)
+                gpu_target = new_schema.indices_for(FeatureModality.NUMERICAL)
+            for idx in gpu_target:
+                f = new_schema.features[idx]
+                new_schema.features[idx] = dataclasses.replace(
+                    f, scheduled_gpu_transform=self.schedule_gpu_transform
+                )
+
+        return self.transformer_, new_schema
+
+    def _set_ancestors(
+        self,
+        new_schema: FeatureSchema,
+        old_schema: FeatureSchema,
+        layout: list[_ReshapeColumn],
+    ) -> None:
+        """Point distribution-transformed columns back at their source feature.
+
+        Lets per-feature state recorded on the input (e.g. the +/-inf positions
+        tracked for ``passthrough_inf``) be mapped onto the renamed ``reshape_{k}``
+        outputs, even when one input expands into several columns.
+
+        Args:
+            new_schema (FeatureSchema): Output feature schema to modify in-place.
+            old_schema (FeatureSchema): Input feature schema.
+            layout (list[_ReshapeColumn]): Metadata for reshape step's output
+                columns, in output order.
+        """
+        # part 1: Map each output column back to the input feature it derives from
+        # An ancestor is the *name* of the source input feature for distribution-
+        # transformed columns, or ``None`` for passthrough columns, which already
+        # carry their source name directly.
+        input_names = [f.name for f in old_schema.features]
+        ancestors = [
+            None if col.is_passthrough else input_names[col.source_ix] for col in layout
+        ]
+        # part 2: Point distribution-transformed columns back at their source feature
+        for idx, ancestor in enumerate(ancestors):
+            if ancestor is not None:
+                f = new_schema.features[idx]
+                new_schema.features[idx] = dataclasses.replace(f, ancestor=ancestor)
+
+    @override
+    def _fit(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> FeatureSchema:
+        n_samples, n_features = X.shape
+        transformer, output_schema = self._create_transformers_and_new_schema(
+            n_samples,
+            n_features,
+            feature_schema,
+        )
+        if transformer is not None:
+            transformer.fit(X)
+        self.transformer_ = transformer
+        return output_schema
+
+    @override
+    def _transform(
+        self, X: np.ndarray, *, is_test: bool = False
+    ) -> tuple[np.ndarray, np.ndarray | None, FeatureModality | None]:
+        # Read through `getattr`: an estimator pickled by a version that predates
+        # `data_is_unchanged_` has no such attribute, and always carries a transformer,
+        # so the skip is off for it and the assert below is what reports "not fitted".
+        if getattr(self, "data_is_unchanged_", False):
+            return X, None, None
+        column_order = getattr(self, "column_order_", None)
+        if column_order is not None:
+            return X[:, column_order], None, None
+        assert self.transformer_ is not None, "You must call fit first"
+        return self.transformer_.transform(X), None, None
+
+    @override
+    def fit_transform(
+        self,
+        X: np.ndarray,
+        feature_schema: FeatureSchema,
+    ) -> PreprocessingStepResult:
+        # The default base-class implementation calls ``_fit`` then
+        # ``_transform``. ``_fit`` here calls ``ColumnTransformer.fit(X)``,
+        # whose sklearn implementation runs ``fit_transform(X)`` internally and
+        # discards the result. ``_transform`` then runs the transform a second
+        # time. For a 100k x 100 squashing-scaler workload that doubled pass
+        # costs ~675 ms.  Doing the fit and transform in one call avoids it.
+        if hasattr(self, "n_added_columns_"):
+            del self.n_added_columns_
+        if hasattr(self, "modality_added_"):
+            del self.modality_added_
+
+        n_samples, n_features = X.shape
+        transformer, output_schema = self._create_transformers_and_new_schema(
+            n_samples,
+            n_features,
+            feature_schema,
+        )
+        if transformer is not None:
+            x_transformed = transformer.fit_transform(X)
+        elif self.column_order_ is not None:
+            x_transformed = X[:, self.column_order_]
+        else:
+            x_transformed = X
+        self.transformer_ = transformer
+        self.feature_schema_updated_ = output_schema
+
+        self._validate_added_data(X_added=None, modality_added=None)
+
+        return PreprocessingStepResult(
+            X=x_transformed,
+            feature_schema=output_schema,
+            X_added=None,
+            modality_added=None,
+        )  # type: ignore
+
+    def _get_append_to_original_decision(
+        self,
+        n_features: int,
+        max_features_per_estimator: int,
+    ) -> bool:
+        append_decision = (
+            n_features < self.APPEND_TO_ORIGINAL_THRESHOLD
+            and n_features <= (max_features_per_estimator / 2)
+        )
+        return bool(
+            append_decision
+            if self.append_to_original == "auto"
+            else self.append_to_original
+        )
+
+    @override
+    def num_added_features(
+        self,
+        n_samples: int,
+        feature_schema: FeatureSchema,
+    ) -> int:
+        """Return the number of added features."""
+        del n_samples
+        n_features = feature_schema.num_columns
+        append = self._get_append_to_original_decision(
+            n_features=n_features,
+            max_features_per_estimator=self.max_features_per_estimator,
+        )
+        n_transformed = (
+            n_features
+            if self.apply_to_categorical
+            else len(feature_schema.indices_for(FeatureModality.NUMERICAL))
+        )
+        output_multiplier = _output_columns_per_input_column(self.transform_name)
+        if append:
+            return output_multiplier * n_transformed
+        return (output_multiplier - 1) * n_transformed
+
+
+def _output_columns_per_input_column(transform_name: str) -> int:
+    """Output columns a registry preprocessor emits per transformed input column.
+
+    Every preprocessor in
+    :func:`get_all_reshape_feature_distribution_preprocessors` maps one input
+    column to one output column, except FeatureUnion-based ones, which emit
+    one block of columns per sub-transformer. The registry-wide schema
+    invariant test guards this mapping against new multi-output presets.
+    """
+    if transform_name == "norm_and_kdi":
+        return 2
+    return 1
+
+
+def get_adaptive_preprocessors(
+    num_examples: int = 100,
+    random_state: int | None = None,
+) -> dict[str, ColumnTransformer]:
+    """Returns a dictionary of adaptive column transformers that can be used to
+    preprocess the data. Adaptive column transformers are used to preprocess the
+    data based on the column type, they receive a pandas dataframe with column
+    names, that indicate the column type. Column types are not datatypes,
+    but rather a string that indicates how the data should be preprocessed.
+
+    Args:
+        num_examples: The number of examples in the dataset.
+        random_state: The random state to use for the transformers.
+    """
+    return {
+        "adaptive": ColumnTransformer(
+            [
+                (
+                    "skewed_pos_1_0",
+                    FunctionTransformer(
+                        func=np.exp,
+                        inverse_func=np.log,
+                        check_inverse=False,
+                    ),
+                    make_column_selector("skewed_pos_1_0*"),
+                ),
+                (
+                    "skewed_pos",
+                    _make_box_cox_safe(
+                        wrap_with_safe_standard_scaler(
+                            SafePowerTransformer(
+                                standardize=False,
+                                method="box-cox",
+                            ),
+                        ),
+                    ),
+                    make_column_selector("skewed_pos*"),
+                ),
+                (
+                    "skewed",
+                    wrap_with_safe_standard_scaler(
+                        SafePowerTransformer(
+                            standardize=False,
+                            method="yeo-johnson",
+                        ),
+                    ),
+                    make_column_selector("skewed*"),
+                ),
+                (
+                    "other",
+                    AdaptiveQuantileTransformer(
+                        output_distribution="normal",
+                        n_quantiles=max(num_examples // 10, 2),
+                        random_state=random_state,
+                    ),
+                    # "other" or "ordinal"
+                    make_column_selector("other*"),
+                ),
+                (
+                    "ordinal",
+                    # default FunctionTransformer yields the identity function
+                    FunctionTransformer(),
+                    # "other" or "ordinal"
+                    make_column_selector("ordinal*"),
+                ),
+                (
+                    "normal",
+                    # default FunctionTransformer yields the identity function
+                    FunctionTransformer(),
+                    make_column_selector("normal*"),
+                ),
+            ],
+            remainder="passthrough",
+        ),
+    }
+
+
+def get_all_reshape_feature_distribution_preprocessors(
+    num_examples: int,
+    random_state: int | None = None,
+) -> dict[str, TransformerMixin | Pipeline]:
+    """Returns a dictionary of preprocessing to preprocess the data."""
+    all_preprocessors = {
+        "power": wrap_with_safe_standard_scaler(
+            PowerTransformer(standardize=False),
+        ),
+        "safepower": wrap_with_safe_standard_scaler(
+            SafePowerTransformer(standardize=False),
+        ),
+        "power_box": _make_box_cox_safe(
+            wrap_with_safe_standard_scaler(
+                PowerTransformer(standardize=False, method="box-cox"),
+            ),
+        ),
+        "safepower_box": _make_box_cox_safe(
+            wrap_with_safe_standard_scaler(
+                SafePowerTransformer(standardize=False, method="box-cox"),
+            ),
+        ),
+        "log": FunctionTransformer(
+            func=np.log,
+            inverse_func=np.exp,
+            check_inverse=False,
+        ),
+        "1_plus_log": FunctionTransformer(
+            func=np.log1p,
+            inverse_func=_exp_minus_1,
+            check_inverse=False,
+        ),
+        "exp": FunctionTransformer(
+            func=np.exp,
+            inverse_func=np.log,
+            check_inverse=False,
+        ),
+        "quantile_uni_coarse": AdaptiveQuantileTransformer(
+            output_distribution="uniform",
+            n_quantiles=get_user_n_quantiles_for_preset(
+                "quantile_uni_coarse", num_examples
+            ),
+            random_state=random_state,
+        ),
+        "quantile_norm_coarse": AdaptiveQuantileTransformer(
+            output_distribution="normal",
+            n_quantiles=get_user_n_quantiles_for_preset(
+                "quantile_norm_coarse", num_examples
+            ),
+            random_state=random_state,
+        ),
+        "quantile_uni": AdaptiveQuantileTransformer(
+            output_distribution="uniform",
+            n_quantiles=get_user_n_quantiles_for_preset("quantile_uni", num_examples),
+            random_state=random_state,
+        ),
+        "quantile_norm": AdaptiveQuantileTransformer(
+            output_distribution="normal",
+            n_quantiles=get_user_n_quantiles_for_preset("quantile_norm", num_examples),
+            random_state=random_state,
+        ),
+        "quantile_uni_fine": AdaptiveQuantileTransformer(
+            output_distribution="uniform",
+            n_quantiles=get_user_n_quantiles_for_preset(
+                "quantile_uni_fine", num_examples
+            ),
+            random_state=random_state,
+        ),
+        "quantile_norm_fine": AdaptiveQuantileTransformer(
+            output_distribution="normal",
+            n_quantiles=get_user_n_quantiles_for_preset(
+                "quantile_norm_fine", num_examples
+            ),
+            random_state=random_state,
+        ),
+        "quantile_uni_extrapolate": AdaptiveQuantileTransformer(
+            output_distribution="uniform",
+            n_quantiles=get_user_n_quantiles_for_preset(
+                "quantile_uni_extrapolate", num_examples
+            ),
+            extrapolate_ratio=get_extrapolate_ratio_for_preset(
+                "quantile_uni_extrapolate"
+            ),
+            random_state=random_state,
+        ),
+        "squashing_scaler_default": SquashingScaler(),
+        "squashing_scaler_max10": SquashingScaler(max_absolute_value=10.0),
+        "robust": RobustScaler(unit_variance=True),
+        # default FunctionTransformer yields the identity function
+        "none": FunctionTransformer(),
+        **get_all_kdi_transformers(),
+    }
+
+    with contextlib.suppress(Exception):
+        all_preprocessors["norm_and_kdi"] = FeatureUnion(
+            [
+                (
+                    "norm",
+                    AdaptiveQuantileTransformer(
+                        output_distribution="normal",
+                        n_quantiles=max(num_examples // 10, 2),
+                        random_state=random_state,
+                    ),
+                ),
+                (
+                    "kdi",
+                    KDITransformerWithNaN(alpha=1.0, output_distribution="uniform"),
+                ),
+            ],
+        )
+
+    all_preprocessors.update(
+        get_adaptive_preprocessors(
+            num_examples,
+            random_state=random_state,
+        ),
+    )
+
+    return all_preprocessors
+
+
+__all__ = [
+    "ReshapeFeatureDistributionsStep",
+    "get_all_reshape_feature_distribution_preprocessors",
+]

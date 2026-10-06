@@ -34,6 +34,7 @@ __all__ = [
     "TuningConfig",
     "ProcessorConfig",
     "ContextSamplingConfig",
+    "ForecastConfig",
     "PipelineConfig",
     "TaskType",
     "TuningStrategy",
@@ -346,6 +347,40 @@ class ContextSamplingConfig(_Base):
             "min_pos": self.min_pos,
             "oversample_weight": self.oversample_weight,
         }
+
+
+class ForecastConfig(_Base):
+    """What a ``TimeSeriesPipeline`` is asked to forecast.
+
+    Only model-agnostic settings live here. Backend knobs (Chronos's sample
+    count, for example) belong in ``model_params``, so this schema means the
+    same thing for every time series model.
+
+    Attributes:
+        prediction_length: Forecast horizon, in steps of the series frequency.
+        quantile_levels: Quantiles to return alongside the point forecast,
+            strictly inside ``(0, 1)``. Sorted and de-duplicated on input.
+        context_length: Most recent observations to condition on. ``None``
+            uses the model's maximum context.
+
+    Example:
+        >>> ForecastConfig(prediction_length=24).quantile_levels
+        [0.1, 0.5, 0.9]
+    """
+
+    prediction_length: int = Field(ge=1)
+    quantile_levels: list[float] = Field(default_factory=lambda: [0.1, 0.5, 0.9])
+    context_length: int | None = Field(default=None, ge=1)
+
+    @field_validator("quantile_levels", mode="after")
+    @classmethod
+    def _check_quantiles(cls, value: list[float]) -> list[float]:
+        for level in value:
+            if not 0.0 < level < 1.0:
+                raise ValueError(
+                    f"quantile_levels must lie strictly between 0 and 1, got {level}"
+                )
+        return sorted(set(value))
 
 
 class PipelineConfig(_Base):

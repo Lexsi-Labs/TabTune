@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import urllib.request
 from pathlib import Path
 from urllib.error import URLError
@@ -28,6 +29,95 @@ MITRA_REGRESSOR_FILES = ["model.safetensors", "config.json"]
 # initialised weights.
 MITRA_CLASSIFIER_REPO = "autogluon/mitra-classifier"
 MITRA_CLASSIFIER_FILES = ["model.safetensors", "config.json"]
+
+# ---------------------------------------------------------------------------
+# Mitra v2
+#
+# v2 is a CHECKPOINT, not a new architecture, and the same vendored ``Tab2D``
+# loads it. That is a property of the format rather than a guess:
+# ``Tab2D.save_pretrained`` writes exactly five keys -- dim, dim_output,
+# n_layers, n_heads, task -- ``from_pretrained`` reads exactly those five and
+# builds the module from them, and ``Tab2D.__init__`` takes no other
+# architectural argument. So there is no shape-neutral difference a v2
+# checkpoint could carry that would load silently wrong, and anything
+# structural is caught by the strict ``load_state_dict`` below.
+#
+# Because the class is shared, a v2 model IS a ``Tab2D``, so every
+# ``isinstance(model, Tab2D)`` branch in the pipeline and the TuningManager --
+# fine-tuning, PEFT, predict, predict_proba -- covers it with no second
+# dispatch arm. Vendoring a second copy of the tree would duplicate 1,100
+# lines AND break those branches, since a second class object is not the same
+# class.
+#
+# The repo ids are overridable from the environment: they could not be
+# verified from the machine this was written on (huggingface.co is blocked by
+# its egress policy), so a rename must not require editing vendored source.
+MITRA_V2_CLASSIFIER_REPO = os.environ.get(
+    "TABTUNE_MITRA_V2_CLS_REPO", "autogluon/mitra-classifier-2"
+)
+MITRA_V2_REGRESSOR_REPO = os.environ.get(
+    "TABTUNE_MITRA_V2_REG_REPO", "autogluon/mitra-regressor-2"
+)
+
+#: A separate checkpoint AutoGluon publishes alongside the two above. What it
+#: is meant for is NOT documented in any source reachable from here -- the name
+#: suggests a fine-tuning starting point rather than a zero-shot predictor, but
+#: that is an inference from the name, not a verified fact. It is exposed so it
+#: can be selected, and deliberately not made anyone's default.
+MITRA_FINETUNE_REPO = os.environ.get(
+    "TABTUNE_MITRA_FINETUNE_REPO", "autogluon/mitra-finetune"
+)
+
+#: variant -> {task -> repo id}. ``resolve_mitra_repo`` is the single place
+#: that maps a TabTune model name onto a checkpoint.
+MITRA_REPOS: dict[str, dict[str, str]] = {
+    "v1": {
+        "classification": MITRA_CLASSIFIER_REPO,
+        "regression": MITRA_REGRESSOR_REPO,
+    },
+    "v2": {
+        "classification": MITRA_V2_CLASSIFIER_REPO,
+        "regression": MITRA_V2_REGRESSOR_REPO,
+    },
+    "finetune": {
+        "classification": MITRA_FINETUNE_REPO,
+        "regression": MITRA_FINETUNE_REPO,
+    },
+}
+
+#: TabTune model name -> variant key.
+MITRA_MODEL_VARIANTS: dict[str, str] = {"Mitra": "v1", "MitraV2": "v2"}
+
+
+def resolve_mitra_repo(model_name: str, task_type: str, variant: str | None = None) -> str:
+    """The HuggingFace repo id for a Mitra model name and task.
+
+    Args:
+        model_name: ``"Mitra"`` or ``"MitraV2"``.
+        task_type: ``"classification"`` or ``"regression"``.
+        variant: Overrides the variant the name implies. ``"finetune"`` selects
+            the separate fine-tuning checkpoint for either task.
+
+    Returns:
+        The repo id, which callers pass to ``Tab2D.from_pretrained``.
+
+    Raises:
+        ValueError: If the variant or task is unknown. Both are spelled out
+            rather than defaulted, because silently falling back to v1 is how a
+            v2 run would report v1 numbers.
+    """
+    key = variant or MITRA_MODEL_VARIANTS.get(model_name)
+    if key is None:
+        raise ValueError(
+            f"Unknown Mitra model name {model_name!r}. "
+            f"Known: {sorted(MITRA_MODEL_VARIANTS)}."
+        )
+    if key not in MITRA_REPOS:
+        raise ValueError(
+            f"Unknown Mitra variant {key!r}. Known: {sorted(MITRA_REPOS)}."
+        )
+    task = "regression" if str(task_type).lower().startswith("reg") else "classification"
+    return MITRA_REPOS[key][task]
 
 
 def _try_hf_hub_download(
@@ -218,3 +308,76 @@ def load_mitra_classifier_from_hf(
         getattr(model, "dim_output", "?"), repo_id,
     )
     return model
+
+def probe_mitra_checkpoint(repo_or_path: str, device: str = "cpu") -> dict:
+    """Report whether a Mitra checkpoint loads into the vendored ``Tab2D``.
+
+    Answers the only question a new Mitra release raises: is it a checkpoint the
+    existing code can load, or does it need new architecture code? The answer is
+    decidable because ``Tab2D``'s format is closed - ``save_pretrained`` writes
+    exactly ``dim``, ``dim_output``, ``n_layers``, ``n_heads`` and ``task``,
+    ``from_pretrained`` reads exactly those five, and ``load_state_dict`` is
+    strict - so a checkpoint either fits or raises.
+
+    Args:
+        repo_or_path: A HuggingFace repo id or a local directory holding
+            ``config.json`` + ``model.safetensors``.
+        device: Where to materialise the model for the load test.
+
+    Returns:
+        A dict with ``verdict``:
+
+        - ``"checkpoint_swap"``  the vendored Tab2D loaded it; nothing to do.
+        - ``"needs_new_code"``   it was fetched and did not fit the architecture.
+        - ``"unreachable"``      it could not be fetched at all, which says
+          nothing either way about the architecture and must not be read as if
+          it did.
+
+        plus the checkpoint's ``config``, any ``unexpected_config_keys`` beyond
+        the five the loader consumes, and ``error`` when something failed.
+    """
+    import json
+
+    from tabtune.models.mitra.tab2d import Tab2D
+
+    known = {"dim", "dim_output", "n_layers", "n_heads", "task"}
+    result: dict = {
+        "source": repo_or_path,
+        "verdict": "unreachable",
+        "config": None,
+        "unexpected_config_keys": [],
+        "error": None,
+    }
+
+    try:
+        if Path(repo_or_path).is_dir():
+            config_path = Path(repo_or_path) / "config.json"
+        else:
+            if not HF_HUB_AVAILABLE:
+                raise ImportError("huggingface_hub is required to probe a repo id.")
+            config_path = Path(hf_hub_download(repo_id=repo_or_path, filename="config.json"))
+        config = json.loads(Path(config_path).read_text())
+        result["config"] = config
+        # Extra keys are reported rather than treated as failure: the loader
+        # ignores them, so they are a signal to read the model card, not proof
+        # that anything is wrong.
+        result["unexpected_config_keys"] = sorted(set(config) - known)
+        missing = sorted(known - set(config))
+        if missing:
+            raise KeyError(f"config.json is missing {missing}, which from_pretrained requires")
+
+        # Everything from here is a statement about the architecture rather
+        # than about the network: the files are already local.
+        result["verdict"] = "needs_new_code"
+        model = Tab2D.from_pretrained(repo_or_path, device=device)
+        result["verdict"] = "checkpoint_swap"
+        result["loaded_shape"] = {
+            "dim": model.dim, "dim_output": model.dim_output,
+            "n_layers": model.n_layers, "n_heads": model.n_heads,
+            "task": str(model.task),
+        }
+        result["n_parameters"] = sum(p.numel() for p in model.parameters())
+    except Exception as exc:  # noqa: BLE001 - the exception text IS the finding
+        result["error"] = f"{type(exc).__name__}: {exc}"
+
+    return result
