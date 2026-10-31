@@ -58,7 +58,9 @@ def season_length(freq: str, *, natural: bool = False) -> int:
         offset = to_offset(freq)
     except ValueError:
         return 1
-    code = _BASE_CODES.get(offset.name.split("-")[0].lower())
+    name = offset.name.split("-")[0]
+    # pandas spells milliseconds "ms" and month start "MS"; lowering merges them.
+    code = None if name == "ms" else _BASE_CODES.get(name.lower())
     period = (_NATURAL_SEASONS if natural else _SEASONS).get(code, 1)
     n = max(int(getattr(offset, "n", 1) or 1), 1)
     return period // n if period % n == 0 else 1
