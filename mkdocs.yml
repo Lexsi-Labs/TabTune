@@ -47,6 +47,11 @@ nav:
       - Mitra: models/mitra.md
       - ConTextTab: models/contexttab.md
       - Limix: models/limix.md
+      - LimiX-2: models/limixv2.md
+      - NVIDIA Kumo Tabular: models/kumo-tabular.md
+      - TabAbax: models/tababax.md
+      - Timestral: models/timestral.md
+      - T0: models/t0.md
 
   - Regression:
       - Regression Overview: framework/regression/regression.md

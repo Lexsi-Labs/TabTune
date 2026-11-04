@@ -62,6 +62,9 @@ from ..models.tabpfnv3 import TabPFNv3Classifier
 from ..models.tabpfnv35 import TabPFNv35Classifier
 from ..models.causilo import CausiloTabTuneClassifier
 from ..models.tabldm import TabLDMTabTuneClassifier
+from ..models.limixv2 import LimiXV2Classifier
+from ..models.kumo import KumoTabularClassifier
+from ..models.tababax import TabAbaxTabTuneClassifier
 from ..models.tabpfnv26.regressor import TabPFNRegressor as TabPFNv26Regressor
 from ..models.regression.tabpfnv26.regressor import TabPFNv26RegressorWrapper
 from ..models.regression.tabpfnv3.regressor import TabPFNv3RegressorWrapper
@@ -71,6 +74,9 @@ from ..models.regression.tabpfnv35.regressor import (
 )
 from ..models.regression.causilo.regressor import CausiloRegressorWrapper
 from ..models.regression.tabldm.regressor import TabLDMRegressorWrapper
+from ..models.regression.limixv2.regressor import LimiXV2RegressorWrapper
+from ..models.regression.kumo.regressor import KumoTabularRegressorWrapper
+from ..models.regression.tababax.regressor import TabAbaxRegressorWrapper
 
 
 from ..models.contexttab.contexttab import to_device
@@ -259,7 +265,9 @@ class TuningManager:
         if isinstance(model, (TabPFNRegressorWrapper, ConTextTabRegressorWrapper,
                               TabDPTRegressorWrapper, MitraRegressorWrapper,LimixRegressorWrapper,TabPFNv26RegressorWrapper, TabPFNv3RegressorWrapper, TabICLv2Regressor, TabFMRegressorWrapper, XRFMRegressorWrapper, ILTMRegressorWrapper, EXAONETabularRegressorWrapper,
                               TabPFNv35RegressorWrapper, TabPFNv35FastRegressorWrapper,
-                              CausiloRegressorWrapper, TabLDMRegressorWrapper)):
+                              CausiloRegressorWrapper, TabLDMRegressorWrapper,
+                              LimiXV2RegressorWrapper, KumoTabularRegressorWrapper,
+                              TabAbaxRegressorWrapper)):
             if strategy == 'inference':
                 logger.info("[TuningManager] Regression model - inference path")
                 model.fit(X_train, y_train)
@@ -315,6 +323,24 @@ class TuningManager:
             if isinstance(model, CausiloRegressorWrapper) and strategy in ("finetune", "peft"):
                 params_copy.pop('peft_config', None)
                 return self._finetune_causilo(model, X_train, y_train, params_copy,
+                                              peft_config=regression_peft_config, task="regression")
+
+            # Kumo Tabular regression finetune (episodic; PEFT supported)
+            if isinstance(model, KumoTabularRegressorWrapper) and strategy in ("finetune", "peft"):
+                params_copy.pop('peft_config', None)
+                return self._finetune_kumo(model, X_train, y_train, params_copy,
+                                           peft_config=regression_peft_config, task="regression")
+
+            # LimiX-2 regression finetune (episodic; PEFT supported)
+            if isinstance(model, LimiXV2RegressorWrapper) and strategy in ("finetune", "peft"):
+                params_copy.pop('peft_config', None)
+                return self._finetune_limixv2(model, X_train, y_train, params_copy,
+                                              peft_config=regression_peft_config, task="regression")
+
+            # TabAbax regression finetune (episodic; PEFT supported)
+            if isinstance(model, TabAbaxRegressorWrapper) and strategy in ("finetune", "peft"):
+                params_copy.pop('peft_config', None)
+                return self._finetune_tababax(model, X_train, y_train, params_copy,
                                               peft_config=regression_peft_config, task="regression")
 
             # TabPFNv3.5 regression finetune (native default; turn-by-turn alternative)
@@ -476,6 +502,21 @@ class TuningManager:
                                            peft_config=peft_config, task="classification")
             is_finetuned = True
 
+        elif isinstance(model, KumoTabularClassifier) and selected_strategy in ('finetune', 'peft'):
+            model = self._finetune_kumo(model, X_train, y_train, params=params_copy,
+                                        peft_config=peft_config, task="classification")
+            is_finetuned = True
+
+        elif isinstance(model, LimiXV2Classifier) and selected_strategy in ('finetune', 'peft'):
+            model = self._finetune_limixv2(model, X_train, y_train, params=params_copy,
+                                           peft_config=peft_config, task="classification")
+            is_finetuned = True
+
+        elif isinstance(model, TabAbaxTabTuneClassifier) and selected_strategy in ('finetune', 'peft'):
+            model = self._finetune_tababax(model, X_train, y_train, params=params_copy,
+                                           peft_config=peft_config, task="classification")
+            is_finetuned = True
+
         elif isinstance(model, TabPFNv35Classifier) and selected_strategy in ('finetune', 'peft'):
             # Same loops as v3: the vendored trees expose identical fine-tuning
             # helpers and attention module names, so only the tree differs.
@@ -606,6 +647,15 @@ class TuningManager:
             model.fit(X_train, y_train)
         elif isinstance(model, CausiloTabTuneClassifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for Causilo (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, KumoTabularClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for KumoTabular (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, LimiXV2Classifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for LimiXv2 (inference mode)")
+            model.fit(X_train, y_train)
+        elif isinstance(model, TabAbaxTabTuneClassifier) and selected_strategy == 'inference':
+            logger.info("[TuningManager] Applying standard .fit() for TabAbax (inference mode)")
             model.fit(X_train, y_train)
         elif isinstance(model, TabFMClassifier) and selected_strategy == 'inference':
             logger.info("[TuningManager] Applying standard .fit() for TabFM (zero-shot inference mode)")
@@ -4033,6 +4083,66 @@ class TuningManager:
         # Weights changed, so the context prepared by the first fit is stale.
         model.fit(X_train, y_train)
         logger.info("[TuningManager] Causilo fine-tuning complete")
+        return model
+
+    def _finetune_kumo(self, model, X_train, y_train, params=None, peft_config=None,
+                       task="classification"):
+        """Validated episodic fine-tuning for Kumo Tabular, optionally with LoRA.
+
+        Fits the estimator (loads the weights and context), runs
+        ``tabtune.models.kumo.tabtune_support.finetune`` and leaves the outcome
+        on ``model.finetune_report_``. A second fine-tune of the same estimator
+        starts again from the checkpoint.
+        """
+        from ..models.kumo.tabtune_support import finetune as kumo_finetune
+
+        logger.info("[TuningManager] Starting KumoTabular episodic fine-tuning (%s)", task)
+        if getattr(model, "_tabtune_finetuned", False):
+            model.kumo_ = None
+            model._tabtune_finetuned = False
+        model.fit(X_train, y_train)
+        kumo_finetune(model, task=task, params=params, peft_config=peft_config)
+        logger.info("[TuningManager] KumoTabular fine-tuning complete")
+        return model
+
+    def _finetune_limixv2(self, model, X_train, y_train, params=None, peft_config=None,
+                          task="classification"):
+        """Validated episodic fine-tuning for LimiX-2, optionally with LoRA.
+
+        Fits the estimator (loads the checkpoint and context), runs
+        ``tabtune.models.limixv2.tabtune_support.finetune`` and leaves the
+        outcome on ``model.finetune_report_``. A second fine-tune of the same
+        estimator starts again from the checkpoint.
+        """
+        from ..models.limixv2.tabtune_support import finetune as limixv2_finetune
+
+        logger.info("[TuningManager] Starting LimiXv2 episodic fine-tuning (%s)", task)
+        if getattr(model, "_tabtune_finetuned", False):
+            model.predictor_ = None
+            model._tabtune_finetuned = False
+        model.fit(X_train, y_train)
+        limixv2_finetune(model, task=task, params=params, peft_config=peft_config)
+        logger.info("[TuningManager] LimiXv2 fine-tuning complete")
+        return model
+
+    def _finetune_tababax(self, model, X_train, y_train, params=None, peft_config=None,
+                          task="classification"):
+        """Validated episodic fine-tuning for TabAbax, optionally with LoRA.
+
+        Fits the estimator (loads the checkpoint and builds the ensemble views),
+        runs ``tabtune.models.tababax.tabtune_support.finetune`` and leaves the
+        outcome on ``model.finetune_report_``. A second fine-tune of the same
+        estimator starts again from the checkpoint.
+        """
+        from ..models.tababax.tabtune_support import finetune as tababax_finetune
+
+        logger.info("[TuningManager] Starting TabAbax episodic fine-tuning (%s)", task)
+        if getattr(model, "_tabtune_finetuned", False):
+            model.model_ = None
+            model._tabtune_finetuned = False
+        model.fit(X_train, y_train)
+        tababax_finetune(model, task=task, params=params, peft_config=peft_config)
+        logger.info("[TuningManager] TabAbax fine-tuning complete")
         return model
 
     def _finetune_tabpfnv35_native_classifier(self, model, X_train, y_train, params=None):

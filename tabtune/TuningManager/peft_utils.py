@@ -152,6 +152,28 @@ MODEL_LORA_TARGETS: Dict[str, LoraTargetConfig] = {
         functional_weight_substrings=("out_proj",),
     ),
 
+    # qkv_lin is sliced and applied with F.linear, so it needs the functional wrapper.
+    "KumoTabular": LoraTargetConfig(
+        target_substrings=("qkv_lin", "out_lin", "mlp"),
+        functional_weight_substrings=("qkv_lin",),
+    ),
+    "LimiXv2": LoraTargetConfig(
+        target_substrings=(
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "out_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ),
+    ),
+
+    "TabAbax": LoraTargetConfig(
+        target_substrings=("linear1", "linear2", "out_proj", "projection", "decoder"),
+        functional_weight_substrings=("out_proj", "projection"),
+    ),
+
     "TabPFNv35Fast": LoraTargetConfig(
         target_substrings=(
             "q_projection",
@@ -401,6 +423,15 @@ def apply_tabular_lora(
         exclude_patterns = ["col_y_encoder", "icl_y_encoder", "y_encoder"]
     elif model_name == "TabLDM":
         exclude_patterns = ["y_encoder", "router"]
+    elif model_name == "KumoTabular":
+        # cell embeddings are read as tensors; y_lin rows are class slots.
+        exclude_patterns = ["cell_embedding", "y_lin", "query_scaling"]
+    elif model_name == "LimiXv2":
+        # scale_linear.weight is read functionally.
+        exclude_patterns = ["scale_linear"]
+    elif model_name == "TabAbax":
+        # y_encoder rows are class slots the ensemble shifts; QASSMax gates scale attention.
+        exclude_patterns = ["y_encoder", "ssmax_layer"]
     elif model_name == "EXAONETabular":
         exclude_patterns = ["classification_heads"]
 

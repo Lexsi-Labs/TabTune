@@ -18,6 +18,9 @@ from ..models.tabpfnv3 import TabPFNv3Classifier
 from ..models.tabpfnv35 import TabPFNv35Classifier, TabPFNv35FastClassifier
 from ..models.causilo import CausiloTabTuneClassifier
 from ..models.tabldm import TabLDMTabTuneClassifier
+from ..models.limixv2 import LimiXV2Classifier
+from ..models.kumo import KumoTabularClassifier
+from ..models.tababax import TabAbaxTabTuneClassifier
 from ..models.tabicl.sklearn.classifier import TabICLClassifier
 from ..models.contexttab.contexttab import ConTextTabClassifier
 from ..models.mitra.tab2d import Tab2D
@@ -44,6 +47,9 @@ from ..models.regression.tabpfnv35.regressor import (
 )
 from ..models.regression.causilo.regressor import CausiloRegressorWrapper
 from ..models.regression.tabldm.regressor import TabLDMRegressorWrapper
+from ..models.regression.limixv2.regressor import LimiXV2RegressorWrapper
+from ..models.regression.kumo.regressor import KumoTabularRegressorWrapper
+from ..models.regression.tababax.regressor import TabAbaxRegressorWrapper
 from ..models.regression.contexttab.regressor import ConTextTabRegressorWrapper
 from ..models.regression.tabdpt.regressor import TabDPTRegressorWrapper
 from ..models.regression.mitra.regressor import MitraRegressorWrapper
@@ -237,6 +243,14 @@ class TabularPipeline:
                 self.finetune_mode = 'turn_by_turn'
             else:
                 self.finetune_mode = 'meta-learning'
+            # Models that train regression episodically only (Kumo, LimiX-2,
+            # TabAbax, Causilo, TabLDM) register no turn_by_turn mode.
+            try:
+                registered = get_model_spec(model_name).finetune_modes
+            except Exception:
+                registered = frozenset()
+            if registered and self.finetune_mode not in registered and 'meta-learning' in registered:
+                self.finetune_mode = 'meta-learning'
         else:
             self.finetune_mode = finetune_mode
         if validate:
@@ -344,6 +358,30 @@ class TabularPipeline:
                 logger.debug(f"[Pipeline] TabLDM Config: {config}")
                 self.model = TabLDMRegressorWrapper(**config)
 
+            elif self.model_name == 'LimiXv2':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] LimiXv2 Config: {config}")
+                self.model = LimiXV2RegressorWrapper(**config)
+
+            elif self.model_name == 'KumoTabular':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] KumoTabular Config: {config}")
+                self.model = KumoTabularRegressorWrapper(**config)
+
+            elif self.model_name == 'TabAbax':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] TabAbax Config: {config}")
+                self.model = TabAbaxRegressorWrapper(**config)
+
             elif self.model_name == 'ContextTab':
                 config = {'tuning_strategy': self.tuning_strategy}
                 config.update(self.model_params)
@@ -430,7 +468,7 @@ class TabularPipeline:
                 if self.tuning_strategy in ['finetune', 'peft'] and hasattr(self.model, '_initialize_model_variables'):
                     self.model._initialize_model_variables()
             else:
-                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, TabPFNv35, TabPFNv35Fast, Causilo, TabLDM, ContextTab, TabDPT, Mitra, Limix, TabICLv2, TabFM, XRFM, ILTM, EXAONETabular")
+                raise ValueError(f"Model '{self.model_name}' does not support regression. Supported models: TabPFN, TabPFNv26, TabPFNv3, TabPFNv35, TabPFNv35Fast, Causilo, TabLDM, LimiXv2, KumoTabular, TabAbax, ContextTab, TabDPT, Mitra, Limix, TabICLv2, TabFM, XRFM, ILTM, EXAONETabular")
         else:
             
             if self.model_name in ['TabPFN']:
@@ -490,6 +528,30 @@ class TabularPipeline:
                 config['device'] = device
                 logger.debug(f"[Pipeline] TabLDM Config: {config}")
                 self.model = TabLDMTabTuneClassifier(**config)
+
+            elif self.model_name == 'LimiXv2':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] LimiXv2 Config: {config}")
+                self.model = LimiXV2Classifier(**config)
+
+            elif self.model_name == 'KumoTabular':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] KumoTabular Config: {config}")
+                self.model = KumoTabularClassifier(**config)
+
+            elif self.model_name == 'TabAbax':
+                device = resolve_device(self.tuning_params.get('device', self.model_params.get('device', None)))
+                config = {'tuning_strategy': self.tuning_strategy}
+                config.update(self.model_params)
+                config['device'] = device
+                logger.debug(f"[Pipeline] TabAbax Config: {config}")
+                self.model = TabAbaxTabTuneClassifier(**config)
 
             elif self.model_name == 'ContextTab':
                 self.model = ConTextTabClassifier(**self.model_params)
@@ -1386,7 +1448,7 @@ class TabularPipeline:
             return predictions
             
 
-        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier)):
+        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier, LimiXV2Classifier, KumoTabularClassifier, TabAbaxTabTuneClassifier)):
             logger.debug(f"[Pipeline] Using model's native in-context prediction for {type(self.model).__name__}")
             X_processed = self.processor.transform(X)
             predictions = self.model.predict(X_processed)
@@ -1643,7 +1705,7 @@ class TabularPipeline:
             return self.model.predict_proba(self.processor.transform(X))
             
         
-        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier)):
+        if isinstance(self.model, (CausiloTabTuneClassifier, TabLDMTabTuneClassifier, LimiXV2Classifier, KumoTabularClassifier, TabAbaxTabTuneClassifier)):
             logger.debug(f"[Pipeline] Using model's native predict_proba for {type(self.model).__name__}")
             return self.model.predict_proba(self.processor.transform(X))
 

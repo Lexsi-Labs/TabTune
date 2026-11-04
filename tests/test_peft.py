@@ -216,4 +216,4 @@ class TestFunctionalWeightLoRA:
             name for name, config in MODEL_LORA_TARGETS.items()
             if config.functional_weight_substrings
         }
-        assert opted_in == {"Causilo", "TabLDM"}
+        assert opted_in == {"Causilo", "TabLDM", "KumoTabular", "TabAbax"}
