@@ -1,7 +1,5 @@
 # xRFM: Recursive Feature Machine
 
-*New in TabTune 0.2.0.*
-
 **xRFM** is the odd one out among TabTune's models: it is not a transformer, it has **no
 pretrained weights**, and it trains from scratch on every dataset. It is a *kernel method*
 that learns features via the **Average Gradient Outer Product (AGOP)**, partitions the input
@@ -22,12 +20,10 @@ print(pipeline.evaluate(X_test, y_test))
 ```
 
 !!! success "The only bundled model that works air-gapped out of the box"
-    There are no weights to download and nothing to pre-stage. If your environment has no
-    network access, xRFM runs anyway.
+ There are no weights to download and nothing to pre-stage. If your environment has no
+ network access, xRFM runs anyway.
 
----
-
-## 1. How it works
+## How it works
 
 ```mermaid
 flowchart LR
@@ -47,29 +43,25 @@ the directions that matter.
 | Property | Value |
 |---|---|
 | Family | Kernel / feature learning |
-| Pretrained weights | **none** — trains from scratch |
+| Pretrained weights | **none**, trains from scratch |
 | Native categorical handling | Yes |
 | Licence | MIT (Copyright © 2025 Daniel Beaglehole) |
 | Paper | <https://arxiv.org/abs/2508.10053> |
 | Source | <https://github.com/dmbeaglehole/xRFM> |
 
----
-
-## 2. Envelope
+## Envelope
 
 There is **no hard row or feature cap**. The practical ceiling is GPU memory per tree leaf.
 
 !!! warning "Results can differ across hardware"
-    `max_leaf_size` (default `60,000`) is auto-rescaled from the device's memory, so the
-    same script on a different GPU may produce a different partition — and therefore
-    slightly different numbers. Pin it explicitly if you need reproducibility across
-    machines.
+ `max_leaf_size` (default `60,000`) is auto-rescaled from the device's memory, so the
+ same script on a different GPU may produce a different partition, and therefore
+ slightly different numbers. Pin it explicitly if you need reproducibility across
+ machines.
 
 Upstream reports xRFM becomes competitive from roughly **60k rows** upward.
 
----
-
-## 3. Model parameters
+## Model parameters
 
 ```python
 model_params = {
@@ -96,7 +88,7 @@ model_params = {
 | `kernel` | str | `'l2'` | Kernel family used per leaf |
 | `bandwidth` | float | `10.0` | Kernel bandwidth |
 | `exponent` | float | `1.0` | Kernel exponent |
-| `diag` | bool | `False` | Restrict **M** to its diagonal — much cheaper on wide data |
+| `diag` | bool | `False` | Restrict **M** to its diagonal, much cheaper on wide data |
 | `bandwidth_mode` | str | `'constant'` | Fixed or adaptive bandwidth |
 | `reg` | float | `1e-3` | Ridge term in the EigenPro solve |
 | `iters` | int | `4` | AGOP iterations; more = more feature learning, more time |
@@ -111,14 +103,12 @@ model_params = {
 ### Tuning guidance
 
 - **`iters`**: `2-4` is usually enough. Past `~6` the M matrix stops moving and you are just
-  paying for solves.
-- **`diag=True`**: try it first on wide tables — a full M matrix is `d x d`.
+ paying for solves.
+- **`diag=True`**: try it first on wide tables, a full M matrix is `d x d`.
 - **`bandwidth`**: the single most impactful knob. Sweep it before anything else.
 - **`n_trees > 1`**: helps on heterogeneous data at linear cost.
 
----
-
-## 4. Strategies: `refit` and `refine`, not gradient descent
+## Strategies: `refit` and `refine`, not gradient descent
 
 xRFM has **no gradient-descent fine-tuning**, so its `finetune_modes` are different from
 every other model:
@@ -138,20 +128,18 @@ pipeline = TabularPipeline(
 ```
 
 !!! danger "`peft` on xRFM is not LoRA"
-    xRFM's `peft` performs **low-rank adaptation of the learned M matrix**, not LoRA over
-    linear layers. There is no LoRA target table, and `peft_config['target_modules']` does
-    not apply.
+ xRFM's `peft` performs **low-rank adaptation of the learned M matrix**, not LoRA over
+ linear layers. There is no LoRA target table, and `peft_config['target_modules']` does
+ not apply.
 
 Regression is supported through `inference` and `finetune`.
 
----
-
-## 5. When to use xRFM
+## When to use xRFM
 
 **Good fit**
 
-- **Air-gapped or offline environments** — nothing to download
-- **Licence-constrained deployments** — MIT, and there are no weights to license
+- **Air-gapped or offline environments**, nothing to download
+- **Licence-constrained deployments**, MIT, and there are no weights to license
 - Datasets from ~60k rows upward, where upstream reports it becomes competitive
 - A genuinely different inductive bias to ensemble against transformer TFMs
 
@@ -160,11 +148,9 @@ Regression is supported through `inference` and `finetune`.
 - Very small datasets where an ICL model's synthetic prior is worth more than learned features
 - Text-heavy tables (use ContextTab)
 - Cases where you need reproducibility across heterogeneous hardware without pinning
-  `max_leaf_size`
+ `max_leaf_size`
 
----
-
-## 6. Ensembling with a transformer
+## Ensembling with a transformer
 
 xRFM's errors are structurally different from an ICL model's, which is exactly what a
 stacking ensemble wants:
@@ -184,10 +170,8 @@ ensemble = TabularEnsemble(
 ensemble.fit(X_train, y_train)
 ```
 
----
+## See also
 
-## See Also
-
-- [iLTM](iltm.md) — the other non-transformer model added in 0.2.0
+- [iLTM](iltm.md), the other non-transformer model added in 0.2.0
 - [Model Overview](overview.md)
 - [Ensembling Strategies](../user-guide/ensembling.md)

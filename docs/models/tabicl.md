@@ -1,31 +1,27 @@
-# TabICL & TabICLv2: In-Context Learning for Tabular Data
+# TabICL
 
-TabTune supports two generations of TabICL: the original **TabICL** for classification, and the improved **TabICLv2** which adds regression support and an enhanced architecture. This document covers both.
+TabICL (Inria Soda) is the default answer to "which model do I try first": column-then-row attention, fast, BSD-licensed, and strong on tables up to hundreds of thousands of rows. This page covers the original, classification-only TabICL. [TabICL v2](tabiclv2.md) adds regression and has its own page.
 
----
+## Introduction
 
-## 1. Introduction
+**TabICL**
 
-**What is TabICL?**
-
-TabICL (Tabular In-Context Learning) is a neural model that leverages in-context learning principles adapted for tabular data. Unlike traditional models, TabICL learns to:
+In-context learning adapted to tables. TabICL learns to:
 
 - Process feature relationships dynamically
 - Adapt to task-specific patterns via fine-tuning
-- Generate robust predictions via ensemble methods
+- Generate reliable predictions via ensemble methods
 - Handle mixed data types naturally
 
-**Key Innovation**: Two-stage attention mechanism (column → row) enabling efficient feature processing and interaction modeling.
+The idea: two-stage attention, columns first, then rows, so feature interactions are modelled before sample interactions.
 
 ### TabICLv2
 
 TabICLv2 is the second generation of TabICL with an improved architecture. It extends support to **both classification and regression** with inference and episodic fine-tuning for both tasks.
 
----
+## Architecture
 
-## 2. Architecture
-
-### 2.1 High-Level Design
+### High-level design
 
 ```mermaid
 flowchart LR
@@ -38,30 +34,30 @@ flowchart LR
     G --> H[Ensemble Aggregation]
     H --> I[Final Output]
 ```
-<!-- 
-### 2.2 Core Components
+<!--
+### Core components
 
 1. **Column Embedder** (`col_embedder`)
-   - Processes individual features independently
-   - Learns feature-specific representations
-   - Generates per-feature embeddings
+ - Processes individual features independently
+ - Learns feature-specific representations
+ - Generates per-feature embeddings
 
 2. **Row Interactor** (`row_interactor`)
-   - Models relationships between features
-   - Cross-feature attention mechanisms
-   - Captures feature interactions
+ - Models relationships between features
+ - Cross-feature attention mechanisms
+ - Captures feature interactions
 
 3. **ICL Predictor** (`icl_predictor`)
-   - Context-aware prediction head
-   - Leverages support/query sets
-   - Generates class logits
+ - Context-aware prediction head
+ - Leverages support/query sets
+ - Generates class logits
 
 4. **Ensemble Aggregation**
-   - Multiple feature permutations
-   - Voting across permutations
-   - Robustness via diversity
+ - Multiple feature permutations
+ - Voting across permutations
+ - Robustness via diversity
  -->
-### 2.3 Two-Stage Attention
+### Two-stage attention
 
 ```
 Stage 1: Column Attention (Feature-wise)
@@ -75,11 +71,9 @@ Stage 2: Row Attention (Sample-wise)
   Context modeling
 ```
 
----
+## Inference parameters
 
-## 3. Inference Parameters
-
-### 3.1 Complete Parameter Reference
+### Complete parameter reference
 
 ```python
 model_params = {
@@ -93,11 +87,11 @@ model_params = {
 }
 ```
 
-### 3.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| `n_estimators` | int | 32 | 4-128 | Number of ensemble members; more = robust but slower |
+| `n_estimators` | int | 32 | 4-128 | Number of ensemble members; more = reliable but slower |
 | `softmax_temperature` | float | 0.9 | 0.1-2.0 | Scaling before softmax; lower = sharper predictions |
 | `average_logits` | bool | True | True/False | Average logits vs probabilities |
 | `norm_methods` | list | ['none', 'power'] | Varies | Feature normalization techniques |
@@ -105,15 +99,15 @@ model_params = {
 | `batch_size` | int | 8 | 1-32 | Ensemble members per batch |
 | `seed` | int | 42 | 0+ | Random seed for reproducibility |
 
-### 3.3 Ensemble Size Effects
+### Ensemble size effects
 
 | n_estimators | Speed | Robustness | Memory |
 |-------------|-------|-----------|--------|
-| 4-8 | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐ |
-| 16-32 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| 64-128 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| 4-8 | | | |
+| 16-32 | | | |
+| 64-128 | | | |
 
-### 3.4 Feature Normalization Methods
+### Feature normalization methods
 
 ```python
 norm_methods = [
@@ -125,7 +119,7 @@ norm_methods = [
 ]
 ```
 
-### 3.5 Feature Shuffle Methods
+### Feature shuffle methods
 
 ```python
 feat_shuffle_methods = {
@@ -135,13 +129,11 @@ feat_shuffle_methods = {
 }
 ```
 
----
-
-## 4. Fine-Tuning with TabICL
+## Fine-tuning with TabICL
 
 TabICL supports **episodic fine-tuning** where training occurs via task-like episodes.
 
-### 4.1 Episodic Training Parameters
+### Episodic training parameters
 
 ```python
 tuning_params = {
@@ -158,7 +150,7 @@ tuning_params = {
 }
 ```
 
-### 4.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -167,7 +159,7 @@ tuning_params = {
 | `n_episodes` | int | 1000 | Total episodes for training |
 | `batch_size` | int | 8 | Episodes per batch gradient update |
 
-### 4.3 Episodic Training Concept
+### Episodic training concept
 
 ```
 One Episode:
@@ -180,7 +172,7 @@ One Episode:
 Epoch = 1000 episodes with gradient updates
 ```
 
-### 4.4 Fine-Tuning Guidelines
+### Fine-tuning guidelines
 
 **Support/Query Size Balance**:
 - Larger support → more context but slower
@@ -197,13 +189,11 @@ Epoch = 1000 episodes with gradient updates
 - 2e-5: Balanced (default)
 - 5e-5: Aggressive, higher variance
 
----
-
-## 5. Fine-Tuning — TabICLv2 (Regression)
+## Fine-Tuning, TabICLv2 (regression)
 
 TabICLv2 supports **episodic regression fine-tuning** using turn-by-turn MSE training. It samples random (support, query) episodes, feeds them through the transformer, and backpropagates MSE loss on query predictions.
 
-### 5.1 Regression Inference
+### Regression inference
 
 ```python
 pipeline = TabularPipeline(
@@ -216,7 +206,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 # Returns: mse, rmse, mae, r2_score, medae, explained_variance, ...
 ```
 
-### 5.2 Regression Fine-Tuning
+### Regression fine-tuning
 
 ```python
 pipeline = TabularPipeline(
@@ -238,7 +228,7 @@ pipeline.fit(X_train, y_train)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 5.3 Regression Fine-Tuning Parameters
+### Regression fine-tuning parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -251,7 +241,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 | `weight_decay` | float | 0.01 | AdamW weight decay |
 | `show_progress` | bool | True | Show tqdm progress bar |
 
-### 5.4 How TabICLv2 Regression Fine-Tuning Works
+### How TabICLv2 regression fine-tuning works
 
 ```
 One step:
@@ -265,11 +255,9 @@ One step:
 Post-finetune: model.fit(X_train, y_train) re-caches for inference
 ```
 
----
+## Usage patterns
 
-## 6. Usage Patterns
-
-### 6.1 Inference Only
+### Inference only
 
 ```python
 from tabtune import TabularPipeline
@@ -285,12 +273,12 @@ pipeline.fit(X_train, y_train)  # Only preprocesses
 predictions = pipeline.predict(X_test)
 ```
 
-### 6.2 Base Fine-Tuning (Full Parameters)
+### Base fine-tuning (full parameters)
 
 ```python
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -304,7 +292,7 @@ pipeline.fit(X_train, y_train)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 6.3 PEFT Fine-Tuning (LoRA Adapters)
+### PEFT fine-tuning (LoRA adapters)
 
 ```python
 pipeline = TabularPipeline(
@@ -327,7 +315,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 6.4 Ensemble Configuration
+### Ensemble configuration
 
 ```python
 # Increase ensemble for robustness
@@ -341,9 +329,7 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-## 7. LoRA Target Modules
+## LoRA target modules
 
 When using PEFT, TabICL automatically targets these modules:
 
@@ -367,11 +353,9 @@ peft_config = {
 }
 ```
 
----
+## Complete examples
 
-## 8. Complete Examples
-
-### 8.1 Basic Workflow
+### Basic workflow
 
 ```python
 from tabtune import TabularPipeline
@@ -391,7 +375,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Create and train
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -407,7 +391,7 @@ print(f"Accuracy: {metrics['accuracy']:.4f}")
 print(f"F1 Score: {metrics['f1_score']:.4f}")
 ```
 
-### 8.2 PEFT for Memory-Constrained Environments
+### PEFT for memory-constrained environments
 
 ```python
 # Fit large model in limited memory with PEFT
@@ -432,7 +416,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 8.3 Hyperparameter Tuning
+### Hyperparameter tuning
 
 ```python
 from tabtune import TabularLeaderboard
@@ -465,11 +449,9 @@ lb.run(rank_by='accuracy')
 
 ```
 
----
-
 <!-- ## 8. Performance Characteristics
 
-### 8.1 Speed Benchmarks
+### Speed benchmarks
 
 | Operation | Time | Notes |
 |-----------|------|-------|
@@ -478,7 +460,7 @@ lb.run(rank_by='accuracy')
 | PEFT (5 epochs) | 10-15m | For 100K samples |
 | Prediction latency | 10-50ms | Per sample |
 
-### 8.2 Memory Usage
+### Memory usage
 
 | Scenario | Memory | GPU VRAM |
 |----------|--------|---------|
@@ -487,7 +469,7 @@ lb.run(rank_by='accuracy')
 | PEFT | 6-8 GB | 4GB sufficient |
 | Large batch | Up to 20 GB | 12GB+ needed |
 
-### 8.3 Accuracy Profile
+### Accuracy profile
 
 | Dataset Size | Inference | Base-FT | PEFT |
 |--------------|-----------|---------|------|
@@ -495,11 +477,10 @@ lb.run(rank_by='accuracy')
 | 100K | 85% | 90% | 89% |
 | 1M | 87% | 92% | 91% |
 
----
  -->
-## 9. Troubleshooting
+## Troubleshooting
 
-### Issue: "Out of memory during training"
+### "Out of memory during training"
 **Solution 1**: Reduce support/query sizes
 ```python
 tuning_params = {
@@ -508,12 +489,12 @@ tuning_params = {
 }
 ```
 
-**Solution 2**: Use PEFT instead of base-ft
+**Solution 2**: Use PEFT instead of finetune
 ```python
 tuning_strategy = 'peft'  # Lower memory
 ```
 
-### Issue: "Model not converging"
+### "Model not converging"
 **Solution**: Adjust learning rate and epochs
 ```python
 tuning_params = {
@@ -523,7 +504,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Inference too slow"
+### "Inference too slow"
 **Solution**: Reduce ensemble size
 ```python
 model_params = {
@@ -531,7 +512,7 @@ model_params = {
 }
 ```
 
-### Issue: "Low accuracy on small datasets"
+### "Low accuracy on small datasets"
 **Solution**: Use larger support set
 ```python
 tuning_params = {
@@ -540,18 +521,15 @@ tuning_params = {
 }
 ```
 
----
-
-## 10. Quick Reference
+## Quick reference
 
 | Use Case | Model | Strategy | Config | Notes |
 |----------|-------|----------|--------|-------|
 | Quick classification | TabICL | inference | n_est=16 | <1s |
 | Classification FT | TabICL | finetune | epochs=5 | Episodic |
 | Classification PEFT | TabICL | peft | r=8, epochs=5 | Memory efficient |
-| Regression inference | TabICLv2 | inference | — | |
+| Regression inference | TabICLv2 | inference |, | |
 | Regression FT | TabICLv2 | finetune | lr=2e-6, epochs=5 | Turn-by-turn MSE |
-
 
 <!-- ## 11. Comparison with Other Models
 
@@ -561,17 +539,5 @@ tuning_params = {
 | Large data | Excellent | Poor | Excellent | Okay |
 | Speed | Fast | Fastest | Slow | Slowest |
 | Memory | Moderate | Low | High | Very High |
-| PEFT | ✅ Full | ⚠️ Exp | ✅ Full | ✅ Full |
+| PEFT | Full | Exp | Full | Full |
  -->
----
-
-## 12. Next Steps
-
-- [Model Selection](../user-guide/model-selection.md) - Compare with other models
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Deep dive into strategies
-- [Advanced PEFT](../advanced/peft-lora.md) - LoRA deep dive
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Benchmark TabICL
-
----
-
-TabICL offers an excellent balance of speed, accuracy, and scalability. Use it for most tabular classification tasks! Use TabICLv2 when you need regression support or an improved architecture.

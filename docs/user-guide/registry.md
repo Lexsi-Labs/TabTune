@@ -1,24 +1,20 @@
-# Model Registry: Envelopes and Licensing
-
-*New in TabTune 0.2.0.*
+# Model Registry
 
 The registry is a **torch-free** description of every model TabTune ships. It exists to answer
 two questions that previously required downloading a multi-gigabyte checkpoint first:
 
-1. **Will this model accept my data?** — capability envelopes encode the architectural limits
-   of each pretrained checkpoint (TabFM's ten-class output head, TabPFN-v3's cell budget,
-   Mitra's practical row ceiling), so a mismatch raises a clear message in milliseconds
-   instead of an out-of-memory error after a long download.
-2. **Can I actually deploy this?** — weight licenses vary sharply, from MIT through CC-BY to
-   research-only. The registry records them and can fail fast when the intended use is
-   commercial.
+1. **Will this model accept my data?**, capability envelopes encode the architectural limits
+ of each pretrained checkpoint (TabFM's ten-class output head, TabPFN-v3's cell budget,
+ Mitra's practical row ceiling), so a mismatch raises a clear message in milliseconds
+ instead of an out-of-memory error after a long download.
+2. **Can I actually deploy this?**, weight licenses vary sharply, from MIT through CC-BY to
+ research-only. The registry records them and can fail fast when the intended use is
+ commercial.
 
 Because it pulls in nothing beyond the standard library, `import tabtune` and
 `from tabtune.registry import list_models` cost milliseconds and never load torch.
 
----
-
-## 1. Discovery
+## Discovery
 
 ```python
 from tabtune.registry import list_models, list_model_names, models_dataframe
@@ -46,9 +42,7 @@ models_dataframe()[["Model", "Tasks", "Max classes", "License", "Commercial"]]
 | `family` | `str` | e.g. `'pfn'`, `'icl'`, `'hypernetwork'` |
 | `include_unverified_licenses` | `bool` | Include tri-state `None` licences when filtering on `commercial_ok=True` |
 
----
-
-## 2. Name resolution is forgiving
+## Name resolution is forgiving
 
 Lookup ignores case, hyphens, underscores, dots and whitespace, because people copy model
 names out of papers, READMEs and Slack messages.
@@ -66,12 +60,10 @@ resolve_model_name("Tab2D")          # 'Mitra'
 An unknown name raises `ModelNotFoundError` with a suggested match rather than a bare
 `KeyError`.
 
----
-
-## 3. Capability envelopes
+## Capability envelopes
 
 A `CapabilityEnvelope` records the limits of a **pretrained checkpoint**. `None` means "no
-declared limit" and is deliberately distinct from a large number — TabTune does not invent
+declared limit" and is deliberately distinct from a large number, TabTune does not invent
 limits it has not verified.
 
 ```python
@@ -82,7 +74,7 @@ spec.envelope.describe()
 # '<=10 classes; <=500 features'
 ```
 
-### 3.1 Fields
+### Fields
 
 | Field | Meaning | Severity when exceeded |
 |---|---|---|
@@ -91,21 +83,21 @@ spec.envelope.describe()
 | `max_features` | Documented feature ceiling | warn |
 | `max_rows` | Documented row ceiling | warn |
 | `max_cells` | `rows × features` budget | warn |
-| `native_nan` / `native_text` / `native_categorical` | First-class handling, no encoding needed | — |
-| `notes` | Free-text caveats | — |
+| `native_nan` / `native_text` / `native_categorical` | First-class handling, no encoding needed |, |
+| `notes` | Free-text caveats |, |
 
 `max_cells` is checked *in addition to* `max_rows` and `max_features`, not instead of them:
 several recent checkpoints (TabPFN-v3 in particular) advertise a budget that trades rows
 against features, so a single scalar row cap would misrepresent them.
 
-### 3.2 Checking a dataset
+### Checking a dataset
 
 ```python
-# Hard limit — raises EnvelopeError in microseconds, before any weights are fetched
+# Hard limit - raises EnvelopeError in microseconds, before any weights are fetched
 check_envelope("TabFM", n_rows=1_000, n_features=20, n_classes=14)
 # EnvelopeError: TabFM supports at most 10 classes (found 14)
 
-# Soft limit — warns, run still meaningful
+# Soft limit - warns, run still meaningful
 for v in check_envelope("Mitra", n_rows=50_000, n_features=10, mode="warn"):
     print(f"[{v.severity}] {v.message}")
 # [warn] is documented up to 10,000 rows (found 50,000); consider context sampling ...
@@ -115,12 +107,10 @@ Each violation is an `EnvelopeViolation` with `constraint`, `limit`, `actual`, `
 and a human-readable `message`. Hard violations are sorted first.
 
 !!! warning "Hard constraints raise even under `mode='warn'`"
-    `max_classes` and `min_rows` are architectural: no amount of extra memory fixes them.
-    They raise unless `envelope_mode='ignore'`.
+ `max_classes` and `min_rows` are architectural: no amount of extra memory fixes them.
+ They raise unless `envelope_mode='ignore'`.
 
----
-
-## 4. Weight licensing
+## Weight licensing
 
 `LicenseSpec.commercial_use_ok` is **tri-state** on purpose:
 
@@ -143,7 +133,7 @@ get_model_spec("TabPFN").license.badge     # 'unverified'
 check_license("TabPFNv3", "commercial")    # raises LicenseError, suggests alternatives
 ```
 
-### 4.1 Licence summary
+### Licence summary
 
 | Model | Weight licence | Commercial |
 |---|---|---|
@@ -161,13 +151,11 @@ check_license("TabPFNv3", "commercial")    # raises LicenseError, suggests alter
 | EXAONE Tabular | EXAONE AI Model License 1.1 - NC | **no** (code is BSD-3-Clause-LG, weights are not) |
 
 When a check fails, `commercial_alternatives` on the spec names models you can ship instead
-— by default Mitra, TabICLv2, OrionMSP, OrionMSPv1.5 and OrionBix.
+, by default Mitra, TabICLv2, OrionMSP, OrionMSPv1.5 and OrionBix.
 
----
+## Enforcement inside the pipeline
 
-## 5. Enforcement inside the pipeline
-
-`TabularPipeline` runs all three checks — task/strategy validity, envelope, licence — before
+`TabularPipeline` runs all three checks, task/strategy validity, envelope, licence, before
 loading any weights.
 
 ```python
@@ -188,9 +176,7 @@ pipeline = TabularPipeline(
 | `license_mode` | `'research'`, `'commercial'`, `'ignore'` | `'commercial'` fails fast on weights that forbid commercial use. |
 | `validate` | `bool` | Check model / task / strategy against the registry before loading weights. |
 
----
-
-## 6. Exceptions
+## Exceptions
 
 All registry errors derive from `TabTuneError`:
 
@@ -215,11 +201,9 @@ from tabtune.registry import (
 | `LicenseError` | Weight licence forbids the intended use under `license_mode` |
 | `ConfigError` | Invalid configuration |
 
----
+## Registering your own model
 
-## 7. Registering your own model
-
-Adding a model to TabTune starts with a `ModelSpec` — the registry, validation, error
+Adding a model to TabTune starts with a `ModelSpec`, the registry, validation, error
 messages, model cards and generated documentation tables all pick it up automatically.
 
 ```python
@@ -243,10 +227,8 @@ Or skip the registry entirely for a one-off:
 TabularPipeline("MyModel", validate=False)
 ```
 
----
+## See also
 
-## See Also
-
-- [Typed Configuration](configuration.md) — `validate_against_registry()` in CI
-- [Model Overview](../models/overview.md) — all 16 models compared
+- [Typed Configuration](configuration.md), `validate_against_registry()` in CI
+- [Model Overview](../models/overview.md), all 24 models compared
 - Runnable example: `examples/14_registry_and_licensing.py`

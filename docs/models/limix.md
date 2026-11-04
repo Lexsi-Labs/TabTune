@@ -1,43 +1,37 @@
-# LimiX: Large Structured-Data Model (LDM) for General-Purpose Tabular Intelligence
+# LimiX
 
-LimiX is a **tabular foundation model** designed to treat structured data as a **joint distribution over variables and missingness**, enabling a **single unified inference interface** for multiple tabular tasks—**classification, regression, missing-value imputation, embedding extraction, and more**—without task-specific architectures or bespoke per-dataset training.
+LimiX (v1) treats a table as a joint distribution over its variables and their missingness, which is why one model serves classification, regression, missing-value imputation and embedding extraction without a task-specific head. In TabTune it is `Limix`; its successor is [LimiX-2](limixv2.md).
 
-This document explains how LimiX works and how to use it inside **TabTune**.
+## Introduction
+### What is LimiX?
 
----
-
-## 1. Introduction
-### 1.1 What is LimiX?
-
-LimiX (Large structured-data Model, sometimes described as an LDM) is a generalist tabular model trained using **masked joint-distribution modeling** with an **episodic, context-conditional objective**. At inference time, it adapts rapidly through **in-context learning (ICL)** rather than requiring training.
+LimiX was trained with masked joint-distribution modelling under an episodic, context-conditional objective. At inference it adapts through in-context learning; no weights change.
 
 Key characteristics:
 
-- **Unified Interface**: One model API for classification, regression, and other structured-data tasks.
-- **Context-Conditional Prediction**: Learns to predict targets/variables conditional on a selected context window (episodes).
-- **Handles Missingness Naturally**: Missingness is part of the modeled joint distribution, not just a preprocessing afterthought.
-- **Retrieval-Enhanced Inference**: Uses attention-based retrieval to choose “best” in-context samples per query/test row.
-- **Strong Generalization**: Built to handle varying schema sizes, categorical/numerical mixes, and distribution shifts.
+- Unified Interface: One model API for classification, regression, and other structured-data tasks.
+- Context-Conditional Prediction: Learns to predict targets/variables conditional on a selected context window (episodes).
+- Handles Missingness Naturally: Missingness is part of the modeled joint distribution, not just a preprocessing afterthought.
+- Retrieval-Enhanced Inference: Uses attention-based retrieval to choose "best" in-context samples per query/test row.
+- Strong Generalization: Built to handle varying schema sizes, categorical/numerical mixes, and distribution shifts.
 
-### 1.2 Model Variants
+### Model variants
 
 LimiX commonly ships in two instantiations:
 
-- **LimiX-16M**: Higher capacity; best performance across most benchmarks.
-- **LimiX-2M**: Smaller footprint; strong performance under tight compute/memory.
+- LimiX-16M: Higher capacity; best performance across most benchmarks.
+- LimiX-2M: Smaller footprint; strong performance under tight compute/memory.
 
 In TabTune, you can treat these as **model variants** (e.g., via a `variant` or `checkpoint` field depending on your wrapper).
 
----
-
-## 2. High-Level Architecture
+## High-level architecture
 
 LimiX represents a dataset as a **2D table** (rows = samples, columns = features) plus an **outcome/target variable**. It embeds each cell value into a latent space and runs **axis-wise attention** over:
 
 - **Feature axis** (column-wise interactions)
 - **Sample axis** (row-wise interactions)
 
-### 2.1 End-to-End Data Flow
+### End-to-end data flow
 
 ```mermaid
 flowchart LR
@@ -50,11 +44,10 @@ flowchart LR
     G --> H[Task Head Classification or Regression]
     H --> I[Predictions and Optional Embeddings]
 ```
----
 
-## 4. Inference Parameters
+## Inference parameters
 
-### 4.1 Complete Parameter Reference (Regression)
+### Complete parameter reference (regression)
 
 In TabTune, the pipeline builds a default config for regression LimiX like:
 
@@ -83,9 +76,9 @@ model_params = {
 }
 ```
 
-> **Important:** the regression estimator loads the checkpoint first and, if present, uses the **checkpoint’s config** to override `nlayers/nhead/embed_dim/hid_dim/dropout` to match the official model initialization behavior.
+> **Important:** the regression estimator loads the checkpoint first and, if present, uses the **checkpoint's config** to override `nlayers/nhead/embed_dim/hid_dim/dropout` to match the official model initialization behavior.
 
-### 4.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default (TabTune) | Description |
 |---|---:|---:|---|
@@ -102,11 +95,7 @@ model_params = {
 | `inference_config` | dict/list/str | `None` | Preprocess pipeline configs; can be a JSON path or Python object |
 | `features_per_group` | int | `2` | Controls feature grouping inside `FeaturesTransformer` |
 
----
-
----
-
-## 6. Tasks Supported in TabTune
+## Tasks supported in TabTune
 
 Within TabTune, LimiX is typically used for:
 
@@ -120,15 +109,13 @@ Advanced capabilities (depending on wrapper exposure):
 - Out-of-distribution evaluation
 - Representation learning
 
----
-
-## 6. Fine-Tuning with LimiX in TabTune (Regression)
+## Fine-tuning with LimiX in TabTune (regression)
 
 The LimiX paper notes retrieval can also support **efficient inference-time ensemble and fine-tuning**. fileciteturn1file2L9-L12
 
 In TabTune, **regression fine-tuning is implemented as episodic training** in `TuningManager._finetune_limix_regression`:
 
-### 6.1 Fine-Tuning Parameters (TabTune)
+### Fine-tuning parameters (TabTune)
 
 ```python
 tuning_params = {
@@ -151,7 +138,7 @@ tuning_params = {
 }
 ```
 
-### 6.2 How episodic fine-tuning works
+### How episodic fine-tuning works
 
 For each episode:
 1. Randomly sample `support_size + query_size` rows.
@@ -162,11 +149,9 @@ For each episode:
 
 After fine-tuning, TabTune calls `model.fit(X_train, y_train)` again to refresh ensemble state for inference.
 
----
+## Usage patterns
 
-## 7. Usage Patterns
-
-### 7.1 Regression: Inference (Default)
+### Regression: inference (default)
 
 ```python
 from tabtune import TabularPipeline
@@ -186,7 +171,7 @@ pipeline.fit(X_train, y_train)
 preds = pipeline.predict(X_test)
 ```
 
-### 7.2 Regression: Episodic Fine-Tuning
+### Regression: episodic fine-tuning
 
 ```python
 pipeline = TabularPipeline(

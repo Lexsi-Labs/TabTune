@@ -1,38 +1,34 @@
 # Model Selection
 
-Choosing the right model for your tabular task is crucial for achieving optimal performance. This guide helps you navigate TabTune's model ecosystem and select the best model for your specific use case.
+Twenty-four models is too many to try. This page narrows them by the questions that actually decide it: rows, columns, classes, text, missing values, licence and hardware. The [Models](../models/overview.md) page has the registry-generated tables; this one has the reasoning.
 
----
-
-## 1. Model Overview
+## Model overview
 
 | Model | Family | Best For | Dataset Size | PEFT Support | Training Speed |
 |-------|--------|----------|--------------|--------------|----------------|
-| **TabPFN** | PFN / ICL | Small datasets, quick experiments | <10K rows | ⚠️ Experimental | ⭐⭐⭐⭐⭐ |
-| **TabICL** | Scalable ICL | General tabular, balanced performance | 10K–1M rows | ✅ Full | ⭐⭐⭐⭐ |
-| **OrionMSP** | Scalable ICL | Balanced generalization | 50K–2M+ rows | ✅ Full | ⭐⭐⭐ |
-| **OrionMSP v1.5** | Scalable ICL | Improved stability and generalization | 50K–2M+ rows | ⚠️ Experimental | ⭐⭐⭐ |
-| **OrionBix** | Scalable ICL | High-accuracy scenarios | 10K–1M rows | ✅ Full | ⭐⭐⭐ |
-| **TabDPT** | Denoising Transformer | Large datasets, robust features | 100K–5M rows | ✅ Full | ⭐⭐⭐ |
-| **Mitra** | 2D Attention | Complex patterns, mixed data types | 10K–500K rows | ✅ Full | ⭐⭐ |
-| **ContextTab** | Semantic ICL | Text-heavy features, semantic enrichment | 10K–500K rows | ⚠️ Experimental | ⭐⭐ |
-| **LimiX** | Probabilistic / Likelihood-based | Uncertainty-aware inference, regression tasks | 10K–1M+ rows | ❌ Not Applicable | ⭐⭐⭐⭐ |
-| **TabPFN v2.6** | PFN / ICL | Small data with a native fine-tuning pipeline | <10K rows | ⚠️ Experimental | ⭐⭐⭐⭐⭐ |
-| **TabPFN v3** | PFN / ICL | Wide, many-class or very large tables | up to ~200M cells | ✅ Full | ⭐⭐⭐⭐ |
-| **TabICLv2** | Scalable ICL | General default; native quantile regression | 10K–500K rows | ❌ Not supported | ⭐⭐⭐⭐ |
-| **TabFM** | Hybrid-Attention ICL | Zero-shot baselines, PEFT experiments | ≤500 features, ≤10 classes | ✅ Full | ⭐⭐⭐⭐ |
-| **xRFM** | Kernel / AGOP | Air-gapped environments; no weights at all | ≥60K rows | † M-matrix LoRA | ⭐⭐⭐ |
-| **iLTM** | Hypernetwork | Commercial deployment; wide tables | ≤100 classes | ✅ Full | ⭐⭐⭐ |
-| **EXAONE Tabular** | Cross-Axis ICL | Small model, many-class via ECOC | ≤100K rows | ‡ runs as full FT | ⭐⭐⭐⭐ |
+| **TabPFN** | PFN / ICL | Small datasets, quick experiments | <10K rows | Experimental | |
+| **TabICL** | Scalable ICL | General tabular, balanced performance | 10K-1M rows | Full | |
+| **OrionMSP** | Scalable ICL | Balanced generalization | 50K-2M+ rows | Full | |
+| **OrionMSP v1.5** | Scalable ICL | Improved stability and generalization | 50K-2M+ rows | Experimental | |
+| **OrionBix** | Scalable ICL | High-accuracy scenarios | 10K-1M rows | Full | |
+| **TabDPT** | Denoising Transformer | Large datasets, reliable features | 100K-5M rows | Full | |
+| **Mitra** | 2D Attention | Complex patterns, mixed data types | 10K-500K rows | Full | |
+| **ContextTab** | Semantic ICL | Text-heavy features, semantic enrichment | 10K-500K rows | Experimental | |
+| **LimiX** | Probabilistic / Likelihood-based | Uncertainty-aware inference, regression tasks | 10K-1M+ rows | Not Applicable | |
+| **TabPFN v2.6** | PFN / ICL | Small data with a native fine-tuning pipeline | <10K rows | Experimental | |
+| **TabPFN v3** | PFN / ICL | Wide, many-class or very large tables | up to ~200M cells | Full | |
+| **TabICLv2** | Scalable ICL | General default; native quantile regression | 10K-500K rows | Not supported | |
+| **TabFM** | Hybrid-Attention ICL | Zero-shot baselines, PEFT experiments | ≤500 features, ≤10 classes | Full | |
+| **xRFM** | Kernel / AGOP | Air-gapped environments; no weights at all | ≥60K rows | † M-matrix LoRA | |
+| **iLTM** | Hypernetwork | Commercial deployment; wide tables | ≤100 classes | Full | |
+| **EXAONE Tabular** | Cross-Axis ICL | Small model, many-class via ECOC | ≤100K rows | ‡ runs as full FT | |
 
 † xRFM's `peft` adapts the learned **M** matrix, not linear layers.
 ‡ EXAONE's LoRA injector finds nothing to wrap; the run proceeds as a full fine-tune.
 
----
+## Decision framework
 
-## 2. Decision Framework
-
-### 2.1 By Dataset Size
+### By Dataset size
 
 ```mermaid
 flowchart TD
@@ -48,100 +44,92 @@ flowchart TD
 ```
 
 **Small (<10K rows)**
-- **Recommended**: TabPFN, Mitra
-- **Alternative**: TabICL with small `n_estimators`
+- Recommended: TabPFN, Mitra
+- Alternative: TabICL with small `n_estimators`
 
 **Medium (10K-100K rows)**
-- **Recommended**: TabICL
-- **Alternatives**: Mitra, OrionMSP, OrionBix
+- Recommended: TabICL
+- Alternatives: Mitra, OrionMSP, OrionBix
 
 **Large (100K-1M rows)**
-- **Recommended**: OrionMSP, OrionBix, TabDPT
-- **Alternative**: TabICL with larger `n_estimators`
+- Recommended: OrionMSP, OrionBix, TabDPT
+- Alternative: TabICL with larger `n_estimators`
 
 **Very Large (>1M rows)**
-- **Recommended**: TabDPT
-- **Alternative**: OrionBix with chunked training
+- Recommended: TabDPT
+- Alternative: OrionBix with chunked training
 
----
-
-### 2.2 By Feature Types
+### By feature types
 
 **Primarily Numerical**
-- **Best**: TabDPT, TabICL
-- **Reason**: Efficient scaling and normalization pipelines
+- Best: TabDPT, TabICL
+- Reason: Efficient scaling and normalization pipelines
 
 **Primarily Categorical**
-- **Best**: TabPFN (if small), ContextTab
-- **Reason**: Specialized categorical encoding
+- Best: TabPFN (if small), ContextTab
+- Reason: Specialized categorical encoding
 
 **Mixed (Numerical + Categorical)**
-- **Best**: TabICL, OrionMSP, OrionBix, Mitra
-- **Reason**: Balanced handling of both types
+- Best: TabICL, OrionMSP, OrionBix, Mitra
+- Reason: Balanced handling of both types
 
 **Text/Semantic Features**
-- **Best**: ContextTab
-- **Reason**: Built-in text embedding support
+- Best: ContextTab
+- Reason: Built-in text embedding support
 
----
-
-### 2.3 By Computational Budget
+### By computational budget
 
 **Limited Resources (<8GB GPU)**
-- **Recommended**: TabPFN (inference), TabICL (PEFT)
-- **Strategy**: Use `peft` tuning strategy
+- Recommended: TabPFN (inference), TabICL (PEFT)
+- Strategy: Use `peft` tuning strategy
 
 **Moderate Resources (8-16GB GPU)**
-- **Recommended**: TabICL, OrionMSP, OrionBix
-- **Strategy**: `base-ft` or `peft`
+- Recommended: TabICL, OrionMSP, OrionBix
+- Strategy: `finetune` or `peft`
 
 **Ample Resources (>16GB GPU)**
-- **Recommended**: TabDPT, Mitra, OrionBix
-- **Strategy**: `base-ft` with mixed precision
+- Recommended: TabDPT, Mitra, OrionBix
+- Strategy: `finetune` with mixed precision
 
----
-
-### 2.4 By Use Case
+### By use case
 
 **Quick Prototyping**
-- **Model**: TabPFN, TabICL
-- **Strategy**: `inference`
-- **Reason**: Zero-shot predictions, instant results
+- Model: TabPFN, TabICL
+- Strategy: `inference`
+- Reason: Zero-shot predictions, instant results
 
 **Production Deployment**
-- **Model**: OrionMSP, OrionBix, TabDPT
-- **Strategy**: `base-ft`
-- **Reason**: Highest accuracy, stable performance
+- Model: OrionMSP, OrionBix, TabDPT
+- Strategy: `finetune`
+- Reason: Highest accuracy, stable performance
 
 **Research/Experimentation**
-- **Model**: Any with `peft`
-- **Strategy**: `peft`
-- **Reason**: Fast iteration, low cost
+- Model: Any with `peft`
+- Strategy: `peft`
+- Reason: Fast iteration, low cost
 
 **High Accuracy Priority**
-- **Model**: OrionMSP, OrionBix, TabDPT
-- **Strategy**: `base-ft` with extensive tuning
-- **Reason**: State-of-the-art performance
+- Model: OrionMSP, OrionBix, TabDPT
+- Strategy: `finetune` with extensive tuning
+- Reason: Current best performance
 
----
+## Detailed model profiles
 
-## 3. Detailed Model Profiles
-
-### 3.1 TabPFN
+### TabPFN
 
 **Architecture**: Prior-Fitted Network with approximate Bayesian inference
 
 **Strengths**:
-- ⭐ Extremely fast inference
-- ⭐ No training required for small datasets
-- ⭐ Robust to hyperparameter choices
-- ⭐ Good uncertainty estimates
+- Extremely fast inference
+- No training required for small datasets
+- Reliable to hyperparameter choices
+- Good uncertainty estimates
 
 **Limitations**:
-- ⚠️ Limited to ~10K training samples
-- ⚠️ Maximum ~100 features
-- ⚠️ PEFT support experimental
-- ⚠️ Binary and multi-class classification only
+- Limited to ~10K training samples
+- Maximum ~100 features
+- PEFT support experimental
+- Binary and multi-class classification only
 
 **Ideal Use Cases**:
 - Quick baseline comparisons
@@ -155,32 +143,30 @@ from tabtune import TabularPipeline
 
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='inference',  # or 'base-ft' for adaptation
+    tuning_strategy='inference',  # or 'finetune' for adaptation
 )
 ```
 
----
-
-### 3.2 TabICL
+### TabICL
 
 **Architecture**: Two-stage in-context learning (column → row attention)
 
 **Strengths**:
-- ⭐ Balanced speed and accuracy
-- ⭐ Scales to 1M+ rows
-- ⭐ Full PEFT support
-- ⭐ Ensemble-based robustness
+- Balanced speed and accuracy
+- Scales to 1M+ rows
+- Full PEFT support
+- Ensemble-based reliability
 
 **Limitations**:
-- ⚠️ Requires episodic training for fine-tuning
-- ⚠️ More memory than TabPFN
-- ⚠️ Slower inference with high `n_estimators`
+- Requires episodic training for fine-tuning
+- More memory than TabPFN
+- Slower inference with high `n_estimators`
 
 **Ideal Use Cases**:
 - General-purpose tabular classification
 - Medium to large datasets
 - Tasks requiring model adaptation
-- Ensemble predictions for robustness
+- Ensemble predictions for reliability
 
 **Example Configuration**:
 ```python
@@ -202,22 +188,20 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-### 3.3 OrionMSP
+### OrionMSP
 
 **Architecture**: Multi-scale sparse attention for scalable in-context learning
 
 **Strengths**:
-- ⭐ Strong generalization with multi-scale priors
-- ⭐ Balanced performance across dataset sizes
-- ⭐ Full PEFT support
-- ⭐ Efficient column-then-row attention
+- Strong generalization with multi-scale priors
+- Balanced performance across dataset sizes
+- Full PEFT support
+- Efficient column-then-row attention
 
 **Limitations**:
-- ⚠️ Requires larger datasets for best performance (≥50K rows)
-- ⚠️ Moderate memory requirements
-- ⚠️ Slower than TabICL for small datasets
+- Requires larger datasets for best performance (≥50K rows)
+- Moderate memory requirements
+- Slower than TabICL for small datasets
 
 **Ideal Use Cases**:
 - Medium to large datasets (50K-2M+ rows)
@@ -229,7 +213,7 @@ pipeline = TabularPipeline(
 ```python
 pipeline = TabularPipeline(
     model_name='OrionMSP',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     model_params={
         'n_estimators': 16,
         'softmax_temperature': 0.9
@@ -244,27 +228,25 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-### 3.4 OrionMSP v1.5
+### OrionMSP v1.5
 
 **Architecture**: Enhanced Multi-Scale Sparse Attention with stabilized prototype refinement
 
 **Strengths**:
-- ⭐ Improved training stability over v1.0
-- ⭐ Better prototype refinement and gradient flow
-- ⭐ Strong generalization on medium-to-large datasets
-- ⭐ PEFT support (experimental)
-- ⭐ More robust episodic meta-learning
+- Improved training stability over v1.0
+- Better prototype refinement and gradient flow
+- Strong generalization on medium-to-large datasets
+- PEFT support (experimental)
+- More reliable episodic meta-learning
 
 **Limitations**:
-- ⚠️ Requires ≥50K rows for best performance
-- ⚠️ Slightly higher compute than TabICL
-- ⚠️ PEFT support currently experimental
+- Requires ≥50K rows for best performance
+- Slightly higher compute than TabICL
+- PEFT support currently experimental
 
 **Ideal Use Cases**:
 - Production systems needing stable training
-- Medium to large datasets (50K–2M+ rows)
+- Medium to large datasets (50K-2M+ rows)
 - Tasks requiring improved generalization
 - When OrionMSP v1.0 shows instability
 
@@ -272,7 +254,7 @@ pipeline = TabularPipeline(
 ```python
 pipeline = TabularPipeline(
     model_name='OrionMSPv1.5',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -282,22 +264,21 @@ pipeline = TabularPipeline(
     }
 )
 ```
----
 
-### 3.5 OrionBix
+### OrionBix
 
 **Architecture**: Custom variant of TabICL with biaxial attention mechanisms
 
 **Strengths**:
-<!-- - ⭐ Higher accuracy than TabICL
-- ⭐ Better feature interaction modeling
-- ⭐ Full PEFT support
-- ⭐ Handles complex patterns -->
+<!-- - Higher accuracy than TabICL
+- Better feature interaction modeling
+- Full PEFT support
+- Handles complex patterns -->
 
 **Limitations**:
-<!-- - ⚠️ Slower training than TabICL
-- ⚠️ Higher memory requirements
-- ⚠️ More hyperparameters to tune -->
+<!-- - Slower training than TabICL
+- Higher memory requirements
+- More hyperparameters to tune -->
 
 **Ideal Use Cases**:
 - High-stakes applications (finance, healthcare)
@@ -309,7 +290,7 @@ pipeline = TabularPipeline(
 ```python
 pipeline = TabularPipeline(
     model_name='OrionBix',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     model_params={
         'n_estimators': 32
     },
@@ -323,22 +304,20 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-### 3.6 TabDPT
+### TabDPT
 
 **Architecture**: Denoising pre-trained transformer with k-NN context selection
 
 **Strengths**:
-- ⭐ Scales to very large datasets (5M+ rows)
-- ⭐ Robust to noisy features
-- ⭐ Strong generalization
-- ⭐ Full PEFT support
+- Scales to very large datasets (5M+ rows)
+- Reliable to noisy features
+- Strong generalization
+- Full PEFT support
 
 **Limitations**:
-- ⚠️ Requires large training sets for best performance
-- ⚠️ Longer training time
-- ⚠️ Memory-intensive for large context sizes
+- Requires large training sets for best performance
+- Longer training time
+- Memory-intensive for large context sizes
 
 **Ideal Use Cases**:
 - Large-scale production systems
@@ -350,7 +329,7 @@ pipeline = TabularPipeline(
 ```python
 pipeline = TabularPipeline(
     model_name='TabDPT',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     model_params={
         'n_ensembles': 8,
         'temperature': 0.3,
@@ -366,23 +345,21 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-### 3.7 Mitra
+### Mitra
 
 **Architecture**: 2D cross-attention (Tab2D) with synthetic priors
 
 **Strengths**:
-- ⭐ Excellent for mixed-type features
-- ⭐ Captures row and column dependencies
-- ⭐ Full PEFT support
-- ⭐ Strong on structured data
+- Excellent for mixed-type features
+- Captures row and column dependencies
+- Full PEFT support
+- Strong on structured data
 
 **Limitations**:
-- ⚠️ Slowest training among ICL models
-- ⚠️ High memory usage
-- ⚠️ Requires careful hyperparameter tuning
-- ⚠️ Small batch sizes needed
+- Slowest training among ICL models
+- High memory usage
+- Requires careful hyperparameter tuning
+- Small batch sizes needed
 
 **Ideal Use Cases**:
 - Structured databases (SQL-like tables)
@@ -407,23 +384,21 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-### 3.8 ContextTab
+### ContextTab
 
 **Architecture**: Semantics-aware ICL with modality-specific embeddings
 
 **Strengths**:
-- ⭐ Best for text-heavy features
-- ⭐ Semantic understanding of column names
-- ⭐ Handles heterogeneous data types
-- ⭐ Pre-trained on diverse tabular corpora
+- Best for text-heavy features
+- Semantic understanding of column names
+- Handles heterogeneous data types
+- Pre-trained on diverse tabular corpora
 
 **Limitations**:
-- ⚠️ Requires HuggingFace Hub access
-- ⚠️ PEFT support experimental
-- ⚠️ Slower inference due to embedding computation
-- ⚠️ Limited to specific feature types
+- Requires HuggingFace Hub access
+- PEFT support experimental
+- Slower inference due to embedding computation
+- Limited to specific feature types
 
 **Ideal Use Cases**:
 - Datasets with free-text columns
@@ -436,7 +411,7 @@ pipeline = TabularPipeline(
 # Requires HF_TOKEN environment variable
 pipeline = TabularPipeline(
     model_name='ContextTab',
-    tuning_strategy='base-ft',  # Use base-ft, not peft
+    tuning_strategy='finetune',  # Use finetune, not peft
     tuning_params={
         'device': 'cuda',
         'epochs': 10,
@@ -446,24 +421,21 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-
-### 3.9 LimiX
+### LimiX
 
 **Architecture**: Likelihood-based probabilistic mixture modeling with discriminative feature encoding and bi-level attention retrieval
 
 **Strengths**:
-- ⭐ Native regression support
-- ⭐ Uncertainty-aware predictions
-- ⭐ Strong performance on structured tabular regression
-- ⭐ Two-pass attention with adaptive context refinement
-- ⭐ Stable optimization dynamics
+- Native regression support
+- Uncertainty-aware predictions
+- Strong performance on structured tabular regression
+- Two-pass attention with adaptive context refinement
+- Stable optimization dynamics
 
 **Limitations**:
-- ⚠️ No PEFT/LoRA (not transformer-adapter based)
-- ⚠️ Slightly slower than TabICL on small datasets
-- ⚠️ Best performance with moderate-to-large datasets
+- No PEFT/LoRA (not transformer-adapter based)
+- Slightly slower than TabICL on small datasets
+- Best performance with moderate-to-large datasets
 
 **Ideal Use Cases**:
 - Regression-heavy workflows
@@ -476,7 +448,7 @@ pipeline = TabularPipeline(
 pipeline = TabularPipeline(
     model_name='LimiX',
     task_type='regression',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -484,61 +456,49 @@ pipeline = TabularPipeline(
     }
 )
 ```
----
 
-
-### 3.10 TabPFN v2.6 / v3
+### TabPFN v2.6 / v3
 
 `TabPFNv26` keeps v2's envelope (10 classes, 500 features, 10k rows) and adds Prior Labs'
 **native** fine-tuning loop. `TabPFNv3` re-architects the model: **160 classes, 20,000
-features, ~200M cell budget**, and full PEFT support — but its weights are **research-only**.
+features, ~200M cell budget**, and full PEFT support, but its weights are **research-only**.
 
 Full pages: [TabPFN v2.6](../models/tabpfnv26.md) · [TabPFN v3](../models/tabpfnv3.md)
 
----
-
-### 3.11 TabICLv2
+### TabICLv2
 
 The best general-purpose default in 0.2.0: BSD-3-Clause weights, both tasks, a native
-quantile regression head, and KV-cache offloading to reach 500k rows. **No PEFT** — use
+quantile regression head, and KV-cache offloading to reach 500k rows. **No PEFT**, use
 `finetune`.
 
 Full page: [TabICL v2](../models/tabiclv2.md)
 
----
-
-### 3.12 TabFM (Google)
+### TabFM (Google)
 
 Hybrid attention with full PEFT support, but a hard **ten-class** head and a
 **non-commercial** weight licence. Needs `pip install "tabfm[pytorch]"`.
 
 Full page: [TabFM](../models/tabfm.md)
 
----
+### xRFM
 
-### 3.13 xRFM
-
-A kernel method, not a transformer. **No pretrained weights** — it trains from scratch, so
+A kernel method, not a transformer. **No pretrained weights**, it trains from scratch, so
 it is the only bundled model that runs air-gapped out of the box, and MIT-licensed with no
 weights to license. Upstream reports it becomes competitive from roughly 60k rows. Its
 strategies are `refit` and `refine`, not gradient-descent fine-tuning.
 
 Full page: [xRFM](../models/xrfm.md)
 
----
-
-### 3.14 iLTM
+### iLTM
 
 A hypernetwork generates MLP ensembles from dataset embeddings. **Apache-2.0 weights,
-ungated** — one of the easiest models to ship commercially. Dimensionality-agnostic, but
+ungated**, one of the easiest models to ship commercially. Dimensionality-agnostic, but
 capped at **100 classes** (architectural, enforced by the registry) and an 8,192-row
 retrieval context. Pretrained on classification; regression needs light fine-tuning.
 
 Full page: [iLTM](../models/iltm.md)
 
----
-
-### 3.15 EXAONE Tabular
+### EXAONE tabular
 
 At ~21M parameters the smallest bundled foundation model. All three of its ceilings are
 **soft**: >100k rows subsample, >100 features get attention-based selection, >10 classes go
@@ -547,9 +507,7 @@ the classification checkpoint is published.
 
 Full page: [EXAONE Tabular](../models/exaone.md)
 
----
-
-## 4. Model Selection Checklist
+## Model selection checklist
 
 Use this checklist to guide your decision:
 
@@ -581,7 +539,7 @@ If speed critical → TabPFN or EXAONE (inference)
 If accuracy critical → OrionBix or TabDPT (inference)
 ```
 
-**Deployment constraints (new in 0.2.0)**
+**Deployment constraints**
 
 ```
 If you must ship commercially  → TabICLv2, OrionMSP/v1.5, OrionBix, Mitra, iLTM, xRFM
@@ -610,14 +568,12 @@ Both checks run **before** any weights download. See
 [Model Registry](registry.md).
 
 **Do not select on the IID score alone.** A model scoring 0.87 with a 0.004 shift gap is a
-better production bet than one scoring 0.89 with a 0.06 gap — measure it with
+better production bet than one scoring 0.89 with a 0.06 gap, measure it with
 [`ShiftEvaluator`](shift-evaluation.md).
 
----
+## Hybrid approaches
 
-## 5. Hybrid Approaches
-
-### Ensemble Multiple Models
+### Ensemble multiple models
 
 ```python
 from tabtune import TabularLeaderboard
@@ -638,35 +594,21 @@ from sklearn.ensemble import VotingClassifier
 # Use predictions from top 3 models for ensemble
 ```
 
----
+## Advanced selection criteria
 
-## 6. Advanced Selection Criteria
+### Explainability requirements
 
-### 6.1 Explainability Requirements
+- High Explainability: TabPFN (inherent uncertainty), TabICL (attention weights)
+- Moderate Explainability: TabDPT (feature importance)
+- Low Explainability: Mitra, ContextTab (complex architectures)
 
-- **High Explainability**: TabPFN (inherent uncertainty), TabICL (attention weights)
-- **Moderate Explainability**: TabDPT (feature importance)
-- **Low Explainability**: Mitra, ContextTab (complex architectures)
+### Regulatory compliance
 
-### 6.2 Regulatory Compliance
+- Medical/Financial: OrionMSPv1.5, OrionBix, TabDPT (reproducible, auditable)
+- General: Any model with saved checkpoints and logged hyperparameters
 
-- **Medical/Financial**: OrionMSPv1.5, OrionBix, TabDPT (reproducible, auditable)
-- **General**: Any model with saved checkpoints and logged hyperparameters
+### Transfer learning
 
-### 6.3 Transfer Learning
-
-- **Best for Transfer**: TabDPT (large pre-training corpus)
-- **Moderate Transfer**: TabICL, ContextTab
-- **Limited Transfer**: TabPFN (task-specific priors)
-
----
-
-## 7. Next Steps
-
-- [Pipeline Overview](pipeline-overview.md) - Learn the TabularPipeline API
-- [Model Documentation](../models/overview.md) - Detailed model specifications
-- [TabularLeaderboard](leaderboard.md) - Compare models systematically
-
----
-
-Select your model wisely, and iterate based on your specific requirements and constraints!
+- Best for Transfer: TabDPT (large pre-training corpus)
+- Moderate Transfer: TabICL, ContextTab
+- Limited Transfer: TabPFN (task-specific priors)

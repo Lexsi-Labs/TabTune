@@ -1,19 +1,15 @@
 # Data Processing
 
-The `DataProcessor` is TabTune's intelligent, model-aware data preparation engine. It automatically handles imputation, scaling, categorical encoding, feature selection, and resampling based on your chosen model's requirements.
+`DataProcessor` prepares your frame the way the chosen model expects it: imputation, scaling, categorical encoding, feature selection and resampling, decided per model. You pass the same DataFrame every time.
 
----
-
-## 1. Overview
+## Overview
 
 The `DataProcessor` integrates two preprocessing pathways:
 
-1. **Custom Model-Specific Preprocessing**: For models requiring specialized transformations (TabPFN, TabICL, ContextTab, Mitra, TabDPT, OrionMSP, OrionBix).
-2. **Standard Preprocessing Pipeline**: For general tabular models using scikit-learn-compatible transformations.
+1. Custom Model-Specific Preprocessing: For models requiring specialized transformations (TabPFN, TabICL, ContextTab, Mitra, TabDPT, OrionMSP, OrionBix).
+2. Standard Preprocessing Pipeline: For general tabular models using scikit-learn-compatible transformations.
 
----
-
-## 2. Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -29,9 +25,7 @@ flowchart TD
     J --> E
 ```
 
----
-
-## 3. Initialization Parameters
+## Initialization parameters
 
 ```python
 DataProcessor(
@@ -47,7 +41,7 @@ DataProcessor(
 )
 ```
 
-### Parameter Reference
+### Parameter reference
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -61,9 +55,7 @@ DataProcessor(
 | `feature_selection_k` | int | 10 | Number of features to select |
 | `model_params` | dict | None | Additional model-specific parameters |
 
----
-
-## 4. Model-Aware Defaults
+## Model-aware defaults
 
 When `model_name` is specified, the processor automatically configures optimal preprocessing:
 
@@ -77,58 +69,56 @@ When `model_name` is specified, the processor automatically configures optimal p
 | **Mitra** | `mitra_special` | 2D attention preprocessing |
 | **ContextTab** | `contexttab_special` | Text embedding integration |
 
----
+## Standard preprocessing pipeline
 
-## 5. Standard Preprocessing Pipeline
-
-### 5.1 Missing Value Imputation
+### Missing value imputation
 
 Available strategies:
 
-- **mean**: Replace with column mean (default)
-- **median**: Replace with column median
-- **iterative**: Multivariate imputation using IterativeImputer
-- **knn**: K-Nearest Neighbors imputation
+- mean: Replace with column mean (default)
+- median: Replace with column median
+- iterative: Multivariate imputation using IterativeImputer
+- knn: K-Nearest Neighbors imputation
 
 ```python
 processor = DataProcessor(imputation_strategy='median')
 ```
 
-### 5.2 Categorical Encoding
+### Categorical encoding
 
 Supported methods:
 
-- **onehot**: One-hot encoding (default, handles unknown categories)
-- **ordinal**: Ordinal encoding with unknown value handling
-- **target**: Target encoding (uses target statistics)
-- **hashing**: Hashing encoder for high-cardinality features
-- **binary**: Binary encoding for memory efficiency
+- onehot: One-hot encoding (default, handles unknown categories)
+- ordinal: Ordinal encoding with unknown value handling
+- target: Target encoding (uses target statistics)
+- hashing: Hashing encoder for high-cardinality features
+- binary: Binary encoding for memory efficiency
 
 ```python
 processor = DataProcessor(categorical_encoding='target')
 ```
 
-### 5.3 Numerical Scaling
+### Numerical scaling
 
 Available scalers:
 
-- **standard**: Standardization (zero mean, unit variance)
-- **minmax**: Min-max normalization to [0, 1]
-- **robust**: Robust scaling using median and IQR
-- **power_transform**: Power transformation for normality
+- standard: Standardization (zero mean, unit variance)
+- minmax: Min-max normalization to [0, 1]
+- reliable: Reliable scaling using median and IQR
+- power_transform: Power transformation for normality
 
 ```python
 processor = DataProcessor(scaling_strategy='robust')
 ```
 
-### 5.4 Feature Selection
+### Feature selection
 
 Methods:
 
-- **variance**: Remove low-variance features
-- **select_k_best_anova**: ANOVA F-test for classification
-- **select_k_best_chi2**: Chi-squared test (requires non-negative features)
-- **correlation**: Remove highly correlated features (threshold=0.9)
+- variance: Remove low-variance features
+- select_k_best_anova: ANOVA F-test for classification
+- select_k_best_chi2: Chi-squared test (requires non-negative features)
+- correlation: Remove highly correlated features (threshold=0.9)
 
 ```python
 processor = DataProcessor(
@@ -137,27 +127,22 @@ processor = DataProcessor(
 )
 ```
 
-### 5.5 Class Resampling
+### Class resampling
 
 Imbalanced data handling:
 
-- **smote**: Synthetic Minority Over-sampling Technique
-- **random_over**: Random oversampling of minority class
-- **random_under**: Random undersampling of majority class
-- **tomek**: Tomek links removal
-- **kmeans**: Cluster centroids undersampling
-- **knn**: Neighborhood cleaning rule
+- smote: Synthetic Minority Over-sampling Technique
+- random_over: Random oversampling of minority class
+- random_under: Random undersampling of majority class
+- tomek: Tomek links removal
+- kmeans: Cluster centroids undersampling
+- knn: Neighborhood cleaning rule
 
 ```python
 processor = DataProcessor(resampling_strategy='smote')
 ```
 
----
-
-
-
-
-### 6. get_processing_summary() function
+### get_processing_summary() function
 
 Returns a detailed report of all applied transformations.
 
@@ -188,52 +173,48 @@ print(summary)
  - Strategy: 'smote' applied to the training data.
 ```
 
----
-
-## 7. Custom Model Preprocessing
+## Custom model preprocessing
 
 For models with special requirements, TabTune automatically loads the appropriate custom preprocessor:
 
-### TabPFN Preprocessing
+### TabPFN preprocessing
 - Converts all features to integer codes
 - Limits feature count (max 100)
 - Handles categorical and numerical separately
 
-### TabICL Preprocessing
+### TabICL preprocessing
 - Applies multiple normalization methods
 - Supports feature shuffling strategies
 - Prepares data for episodic training
 
-### OrionMSP Preprocessing
+### OrionMSP preprocessing
 - Multi-scale prior transformations
 - Column-then-row attention preparation
 - Ensemble view transformations
 
-### OrionBix Preprocessing
+### OrionBix preprocessing
 - Biaxial attention preprocessing
 - Custom feature interaction handling
 - Similar to TabICL with enhanced interactions
 
-### ContextTab Preprocessing
+### ContextTab preprocessing
 - Generates text embeddings for categorical features
 - Integrates semantic information
 - Handles mixed-type features
 
-### TabDPT Preprocessing
+### TabDPT preprocessing
 - Context-based transformations
 - Supports k-NN context selection
 - Prepares permuted features
 
-### Mitra Preprocessing
+### Mitra preprocessing
 - 2D attention-compatible format
 - Row and column embeddings
 - Synthetic prior integration
 
----
+## Usage examples
 
-## 8. Usage Examples
-
-### Example 1: Basic Standard Pipeline
+### Basic standard pipeline
 
 ```python
 from tabtune import DataProcessor
@@ -252,8 +233,7 @@ X_train_processed, y_train_processed = processor.transform(X_train, y_train)
 X_test_processed = processor.transform(X_test)
 ```
 
-
-### Example 3: Handling Imbalanced Data
+### Handling imbalanced data
 
 ```python
 processor = DataProcessor(
@@ -267,42 +247,16 @@ processor = DataProcessor(
 X_resampled, y_resampled = processor.fit_transform(X_train, y_train)
 ```
 
+## Troubleshooting
 
----
+### "Must call fit() before calling transform()"
+**Solution**: Make sure `.fit()` is called on training data before `.transform()`.
 
-## 9. Best Practices
+### Feature count mismatch after encoding
+**Solution**: Use `handle_unknown='ignore'` in encoder or make sure test data has same categories.
 
-1. **Always fit on training data only**: Never fit on test data to avoid data leakage.
-2. **Use model-specific preprocessing**: Let `model_name` trigger optimal defaults.
-3. **Check processing summary**: Verify applied transformations before training.
-4. **Handle missing values explicitly**: Choose imputation strategy based on data distribution.
-5. **Scale after encoding**: Standard pipeline handles this automatically.
-6. **Test resampling impact**: Compare with and without resampling for imbalanced tasks.
-
----
-
-## 10. Troubleshooting
-
-### Issue: "Must call fit() before calling transform()"
-**Solution**: Ensure `.fit()` is called on training data before `.transform()`.
-
-### Issue: Feature count mismatch after encoding
-**Solution**: Use `handle_unknown='ignore'` in encoder or ensure test data has same categories.
-
-### Issue: NaN values after transformation
+### NaN values after transformation
 **Solution**: Check imputation strategy; use `'iterative'` for complex missing patterns.
 
-### Issue: Memory errors with large datasets
+### Memory errors with large datasets
 **Solution**: Use `'hashing'` or `'binary'` encoding; avoid one-hot for high cardinality.
-
----
-
-## 11. Next Steps
-
-- [Tuning Strategies](tuning-strategies.md) - Learn about training workflows
-- [Model Selection](model-selection.md) - Choose the right model
-- [API Reference](../api/data-processor.md) - Complete DataProcessor API
-
----
-
-The `DataProcessor` ensures your data is optimally prepared for any TabTune model with minimal configuration.

@@ -1,22 +1,18 @@
-# TabTune Ensemble Module
+# Ensembling
 
-## 1. Overview
+## Overview
 
-The TabTune Ensemble module provides a unified, production-ready API for combining predictions from multiple tabular foundation models (TFMs). It implements **six ensemble strategies**, ranging from simple weighted averaging to AutoGluon-style multi-level cascade stacking and deep ensembles with epistemic uncertainty estimation.
+`TabularEnsemble` combines the predictions of several pipelines.
 
-The module is designed to integrate seamlessly with TabTune's `TabularPipeline` and follows TabTune's conventions for configuration, fitting, prediction, and evaluation.
+### What it does
 
-### Key Features
+- **Six strategies** from a plain average to cascade stacking and deep ensembles.
+- **Unified API**, `TabularEnsemble` class handles all strategies with a consistent interface.
+- **Hybrid TFM+GBDT ensembles**, optionally include XGBoost / LightGBM / sklearn GBTs as base models.
+- **Epistemic uncertainty**, free uncertainty estimates from the deep ensembles strategy.
+- **Production-grade**, complete input validation, try/catch error handling, verbose logging, and serialisable summaries.
 
-- **Six strategies** covering the full spectrum from simple to state-of-the-art.
-- **Unified API** — `TabularEnsemble` class handles all strategies with a consistent interface.
-- **Hybrid TFM+GBDT ensembles** — optionally include XGBoost / LightGBM / sklearn GBTs as base models.
-- **Epistemic uncertainty** — free uncertainty estimates from the deep ensembles strategy.
-- **Production-grade** — comprehensive input validation, try/catch error handling, verbose logging, and serialisable summaries.
-
----
-
-## 2. Installation & Setup
+## Installation & setup
 
 The ensemble module lives under `tabtune/ensemble/` and is imported as:
 
@@ -36,7 +32,7 @@ from tabtune.ensemble import TabularEnsemble
 | `xgboost` | Optional | GBDT baselines |
 | `tabtune` | Yes (for integration) | Strategy-only tests run without it |
 
-### File Structure
+### File structure
 
 ```
 tabtune/ensemble/
@@ -47,11 +43,9 @@ tests/
 └── test_ensemble.py         # Unit + integration tests
 ```
 
----
+## Quick start
 
-## 3. Quick Start
-
-### Classification with Greedy Selection (Recommended Default)
+### Classification with greedy selection (recommended default)
 
 ```python
 from tabtune.ensemble import TabularEnsemble
@@ -79,7 +73,7 @@ print(results["ensemble"])
 print(ensemble.get_leaderboard()) 
 ```
 
-### Regression with Weighted Averaging
+### Regression with Weighted averaging
 
 ```python
 ensemble = TabularEnsemble(
@@ -96,9 +90,7 @@ ensemble.fit(X_train, y_train)
 predictions = ensemble.predict(X_test)
 ```
 
----
-
-## 4. Architecture
+## Architecture
 
 ```
 TabularEnsemble (orchestrator)
@@ -119,17 +111,15 @@ TabularEnsemble (orchestrator)
 ```
 
 Internally, each strategy class follows the same interface:
-- `fit(model_outputs, y_val, ...)` — learn combination weights/parameters
-- `predict(model_outputs)` — return combined predictions
-- `predict_proba(model_outputs)` — return combined probabilities
+- `fit(model_outputs, y_val, ...)`, learn combination weights/parameters
+- `predict(model_outputs)`, return combined predictions
+- `predict_proba(model_outputs)`, return combined probabilities
 
----
+## Strategy reference
 
-## 5. Strategy Reference
+### Weighted averaging
 
-### 5.1 Weighted Averaging
-
-**Class:** `WeightedAveraging`  
+**Class:** `WeightedAveraging`
 **Strategy key:** `"weighted_averaging"`
 
 Combines model probability matrices (or point predictions for regression) via a weighted sum normalised to 1.
@@ -141,18 +131,18 @@ Combines model probability matrices (or point predictions for regression) via a 
 | `task_type` | str | `"classification"` | `"classification"` or `"regression"` |
 | `weight_scheme` | str | `"performance"` | One of `"uniform"`, `"performance"`, `"inverse_error"` |
 
-#### TabularEnsemble Parameters
+#### TabularEnsemble parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `weight_scheme` | str | `"performance"` | Passed through to `WeightedAveraging` |
 | `metric` | str | `"accuracy"` | Metric used to compute performance-based weights |
 
-#### Weight Schemes
+#### Weight schemes
 
-- **`"uniform"`** — All models get equal weight `1/K`.
-- **`"performance"`** — Weight proportional to validation score. For "lower-is-better" metrics (MSE, log_loss), scores are inverted.
-- **`"inverse_error"`** — Weight `= 1 / (1 - score + ε)` for "higher-is-better" metrics, concentrating mass on the very best models.
+- **`"uniform"`**, All models get equal weight `1/K`.
+- **`"performance"`**, Weight proportional to validation score. For "lower-is-better" metrics (MSE, log_loss), scores are inverted.
+- **`"inverse_error"`**, Weight `= 1 / (1 - score + ε)` for "higher-is-better" metrics, concentrating mass on the very best models.
 
 #### Manual Weights
 
@@ -176,13 +166,10 @@ $$\hat{p} = \sum_{k=1}^{K} w_k \cdot p_k \quad \text{where} \quad \sum_k w_k = 1
 
 The final prediction $\hat{p}$ is computed as the weighted sum of predictions $p_k$ from $K$ models, where $w_k$ is the weight assigned to the $k$-th model and all weights sum to 1.
 
----
+### Greedy ensemble selection
 
-### 5.2 Greedy Ensemble Selection
-
-**Class:** `GreedyEnsembleSelection`  
-**Strategy key:** `"greedy_selection"`  
-
+**Class:** `GreedyEnsembleSelection`
+**Strategy key:** `"greedy_selection"`
 
 Iteratively builds an ensemble by adding the model that maximises validation performance at each step. Selection is with replacement, so a model can be picked multiple times (earning proportionally higher weight). This is the same algorithm used by **AutoGluon's WeightedEnsembleModel**.
 
@@ -195,7 +182,7 @@ Iteratively builds an ensemble by adding the model that maximises validation per
 | `metric` | str | `"accuracy"` | Metric to optimise |
 | `with_replacement` | bool | `True` | Allow repeated selection |
 
-#### TabularEnsemble Parameters
+#### TabularEnsemble parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -209,18 +196,15 @@ Iteratively builds an ensemble by adding the model that maximises validation per
 3. Add it (with replacement).
 4. Final weight = selection count / total selections.
 
-#### Attributes After Fit
+#### Attributes after fit
 
-- `weights_` — `dict[str, float]`: normalised selection-count-based weights.
-- `selection_history_` — `list[tuple[str, float]]`: `(model_name, score)` per iteration.
+- `weights_`, `dict[str, float]`: normalised selection-count-based weights.
+- `selection_history_`, `list[tuple[str, float]]`: `(model_name, score)` per iteration.
 
----
+### Stacking (meta-learning)
 
-### 5.3 Stacking (Meta-Learning)
-
-**Class:** `StackingEnsemble`  
-**Strategy key:** `"stacking"`  
-
+**Class:** `StackingEnsemble`
+**Strategy key:** `"stacking"`
 
 Trains a second-level meta-learner on cross-validated out-of-fold (OOF) predictions from base models.
 
@@ -233,14 +217,14 @@ Trains a second-level meta-learner on cross-validated out-of-fold (OOF) predicti
 | `n_folds` | int | `5` | CV folds for OOF generation (used externally) |
 | `use_original_features` | bool | `False` | Append raw features to meta-feature matrix |
 
-#### TabularEnsemble Parameters
+#### TabularEnsemble parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `meta_learner` | str | `"lr"` | Forwarded to `StackingEnsemble` |
 | `cv_folds` | int | `5` | K-fold splits for stacking OOF |
 
-#### Meta-Learner Details
+#### Meta-Learner details
 
 | `meta_learner` | Classification | Regression |
 |----------------|---------------|------------|
@@ -248,19 +232,14 @@ Trains a second-level meta-learner on cross-validated out-of-fold (OOF) predicti
 | `"gbdt"` | `LGBMClassifier(n_estimators=100, max_depth=3)` | `LGBMRegressor(...)` |
 | `"mlp"` | `MLPClassifier(hidden_layer_sizes=(64,32), max_iter=500)` | `MLPRegressor(...)` |
 
-
-
-#### How OOF Prevents Leakage
+#### How OOF prevents leakage
 
 The meta-learner never sees the same data the base models trained on. During K-fold CV, each fold's held-out predictions become the meta-features for those samples.
 
----
+### Temperature-scaled blending
 
-### 5.4 Temperature-Scaled Blending
-
-**Class:** `TemperatureScaledBlending`  
-**Strategy key:** `"temperature_scaled"`  
-
+**Class:** `TemperatureScaledBlending`
+**Strategy key:** `"temperature_scaled"`
 
 Calibrates each model's predictions using a single temperature parameter `T`, then combines with uniform weights. This is particularly valuable for TabTune models since different TFMs have varying calibration quality.
 
@@ -270,7 +249,7 @@ Calibrates each model's predictions using a single temperature parameter `T`, th
 |-----------|------|---------|-------------|
 | `task_type` | str | `"classification"` | Task type |
 
-#### How Temperature Scaling Works
+#### How temperature scaling works
 
 For each model, learn `T` by minimising NLL on the validation set:
 
@@ -278,30 +257,27 @@ $$\hat{p} = \text{softmax}(\log(p) / T)$$
 
 Here, $p$ represents the original predicted probabilities, $\log(p)$ converts them to logits, $T$ is the temperature scaling parameter, and $\hat{p}$ is the calibrated probability after applying softmax. Dividing by $T$ adjusts the confidence of predictions without changing their relative ordering.
 
-- **T < 1** — Model was overconfident → sharpen predictions.
-- **T > 1** — Model was underconfident → soften predictions.
-- **T = 1** — Already well-calibrated.
+- **T < 1**, Model was overconfident → sharpen predictions.
+- **T > 1**, Model was underconfident → soften predictions.
+- **T = 1**, Already well-calibrated.
 
 #### Optimisation
 
-Temperature is optimised  in log-space (to enforce `T > 0`), clamped to `[0.01, 20.0]`.
+Temperature is optimised in log-space (to enforce `T > 0`), clamped to `[0.01, 20.0]`.
 
-#### Attributes After Fit
+#### Attributes after fit
 
-- `temperatures_` — `dict[str, float]`: learned temperature per model.
-- `weights_` — `dict[str, float]`: uniform weights `1/K`.
+- `temperatures_`, `dict[str, float]`: learned temperature per model.
+- `weights_`, `dict[str, float]`: uniform weights `1/K`.
 
-#### When To Use
+#### When to use
 
 When calibrated probabilities matter (risk-sensitive applications, expected calibration error evaluation). Pairs well with reliability diagrams and ECE analysis.
 
----
+### Cascade stacking
 
-### 5.5 Cascade Stacking
-
-**Class:** `CascadeStackingEnsemble`  
-**Strategy key:** `"cascade_stacking"`  
-
+**Class:** `CascadeStackingEnsemble`
+**Strategy key:** `"cascade_stacking"`
 
 Multi-level stacking with skip connections, mirroring AutoGluon's `best_quality` architecture. At each level, K-fold OOF predictions are concatenated with the original features and fed to the next level. A final Greedy Ensemble Selection (GES) layer picks the optimal combination across all level outputs.
 
@@ -315,7 +291,7 @@ Multi-level stacking with skip connections, mirroring AutoGluon's `best_quality`
 | `task_type` | str | `"classification"` | Task type |
 | `random_state` | int | `42` | Seed for reproducibility |
 
-#### TabularEnsemble Parameters
+#### TabularEnsemble parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -341,11 +317,11 @@ Final Layer:
   → Weighted combination
 ```
 
-#### Key Design Choices
+#### Key design choices
 
-- **Skip connections** — Higher levels always see the original features, preventing information loss.
-- **OrdinalEncoder for skip features** — Categorical columns are encoded to float arrays (fitted on train only) so skip-connection hstacking always succeeds.
-- **GES final layer** — Instead of training yet another meta-learner, GES picks the optimal weighted mix across all stacker outputs.
+- **Skip connections**, Higher levels always see the original features, preventing information loss.
+- **OrdinalEncoder for skip features**, Categorical columns are encoded to float arrays (fitted on train only) so skip-connection hstacking always succeeds.
+- **GES final layer**, Instead of training yet another meta-learner, GES picks the optimal weighted mix across all stacker outputs.
 
 #### Example
 
@@ -365,13 +341,10 @@ ensemble = TabularEnsemble(
 ensemble.fit(X_train, y_train)
 ```
 
----
+### Random-init ensemble (deep ensembles)
 
-### 5.6 Random-Init Ensemble (Deep Ensembles)
-
-**Class:** `RandomInitEnsemble`  
-**Strategy key:** `"random_init"`  
-
+**Class:** `RandomInitEnsemble`
+**Strategy key:** `"random_init"`
 
 Trains each model `M` times with different random seeds, producing diverse predictions from different local minima. Per-model predictions are averaged across seeds, then cross-model averaging uses performance-based weights.
 
@@ -383,20 +356,20 @@ Trains each model `M` times with different random seeds, producing diverse predi
 | `base_seed` | int | `42` | Starting seed (seeds: base, base+1, ..., base+M-1) |
 | `task_type` | str | `"classification"` | Task type |
 
-#### TabularEnsemble Parameters
+#### TabularEnsemble parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `n_seeds` | int | `5` | Forwarded to `RandomInitEnsemble` |
 | `base_seed` | int | `42` | Forwarded |
 
-#### Epistemic Uncertainty
+#### Epistemic uncertainty
 
 The variance across ensemble members provides a free epistemic uncertainty estimate per sample:
 
 $$\text{uncertainty}(x) = \frac{1}{M \cdot K} \sum_{m=1}^{M} \sum_{c=1}^{K} \left( p_{m,c}(x) - \bar{p}_c(x) \right)^2$$
 
-The uncertainty for input $x$ is computed as the average squared deviation between each model’s predicted probability $p_{m,c}(x)$ (for model $m$ and class $c$) and the mean prediction $\bar{p}_c(x)$ across all $M$ models, averaged over all $K$ classes—capturing how much the models disagree.
+The uncertainty for input $x$ is computed as the average squared deviation between each model's predicted probability $p_{m,c}(x)$ (for model $m$ and class $c$) and the mean prediction $\bar{p}_c(x)$ across all $M$ models, averaged over all $K$ classes, capturing how much the models disagree.
 
 Access via:
 
@@ -429,9 +402,7 @@ most_uncertain = np.argsort(uncertainty)[-10:][::-1]
 print(f"Most uncertain test indices: {most_uncertain}")
 ```
 
----
-
-## 6. TabularEnsemble API Reference
+## TabularEnsemble API reference
 
 ### Constructor
 
@@ -454,7 +425,7 @@ TabularEnsemble(
 )
 ```
 
-### Model Configuration Dict
+### Model configuration dict
 
 Each entry in `models` is a dict:
 
@@ -480,9 +451,7 @@ Each entry in `models` is a dict:
 | `get_uncertainty()` | `ndarray (n,)` or `None` | Epistemic uncertainty (deep ensembles only) |
 | `summary()` | `dict` | JSON-serialisable ensemble summary |
 
----
-
-## 7. Strategy Selection Guide
+## Strategy selection guide
 
 | Strategy | Best For | Speed | Complexity |
 |----------|----------|-------|------------|
@@ -491,9 +460,9 @@ Each entry in `models` is a dict:
 | **Stacking** | Diverse model errors; large datasets | Medium | Medium |
 | **Temperature Scaled** | Risk-sensitive; calibrated probabilities | Fast | Low |
 | **Cascade Stacking** | Maximum accuracy; competition settings | Slow | High |
-| **Random-Init** | Uncertainty estimation; robust predictions | Slow | Medium |
+| **Random-Init** | Uncertainty estimation; reliable predictions | Slow | Medium |
 
-### Decision Flowchart
+### Decision flowchart
 
 ```mermaid
 flowchart LR
@@ -510,9 +479,7 @@ flowchart LR
     J -->|No| L[weighted_averaging\nperformance]
 ```
 
----
-
-## 8. References
+## References
 
 | # | Paper | Strategy |
 |---|-------|----------|
@@ -523,8 +490,6 @@ flowchart LR
 | 5 | Erickson, N. et al. (2020). *AutoGluon-Tabular.* arXiv:2003.06505. | Cascade Stacking |
 | 6 | Ting, K. M. & Witten, I. H. (1999). *Issues in Stacked Generalization.* JAIR. | Cascade Stacking |
 | 7 | Lakshminarayanan, B. et al. (2017). *Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles.* NeurIPS. | Deep Ensembles |
-
----
 
 <!-- ## Appendix: Strategy Factory
 

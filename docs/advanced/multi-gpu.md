@@ -1,25 +1,19 @@
-# Multi-GPU Training: Scaling TabTune Across Multiple GPUs
+# Multi-GPU Training
 
-This document provides comprehensive guidance on leveraging multiple GPUs for distributed training with TabTune, enabling faster training and handling of larger models and datasets.
+## Introduction
 
----
+TabTune's training loops are single-process. Spreading a run over several GPUs is still possible, in three ways:
 
-## 1. Introduction
+- Data Parallelism: Distribute data across GPUs
+- Model Parallelism: Distribute model across GPUs
+- Distributed Optimization: Synchronized gradient updates
+- Scaling: Near-linear speedup with multiple GPUs
 
-Multi-GPU training accelerates TabTune workflows through:
 
-- **Data Parallelism**: Distribute data across GPUs
-- **Model Parallelism**: Distribute model across GPUs
-- **Distributed Optimization**: Synchronized gradient updates
-- **Scaling**: Near-linear speedup with multiple GPUs
 
-This guide covers setup, strategies, and best practices.
+## Multi-GPU fundamentals
 
----
-
-## 2. Multi-GPU Fundamentals
-
-### 2.1 Parallelism Strategies
+### Parallelism strategies
 
 ```mermaid
 flowchart TD
@@ -40,7 +34,7 @@ flowchart TD
     D --> D3["Micro-batching for efficiency"]
 ```
 
-### 2.2 Data Parallelism (Most Common)
+### Data parallelism (most common)
 
 **Recommended for TabTune** - simplest and most effective:
 
@@ -56,11 +50,9 @@ model = TabularPipeline(model_name='TabICL')
 # Gradients averaged
 ```
 
----
+## Setup requirements
 
-## 3. Setup Requirements
-
-### 3.1 Hardware Prerequisites
+### Hardware prerequisites
 
 ```python
 import torch
@@ -79,7 +71,7 @@ print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"NCCL available: {torch.distributed.is_nccl_available()}")
 ```
 
-### 3.2 Software Stack
+### Software stack
 
 ```bash
 # Install required packages
@@ -89,11 +81,9 @@ pip install horovod  # Optional: for advanced distributed training
 pip install pytorch-lightning  # Optional: simplified multi-GPU setup
 ```
 
----
+## Data parallel training
 
-## 4. Data Parallel Training
-
-### 4.1 DataParallel (Simpler, Single-Machine)
+### DataParallel (simpler, single-machine)
 
 ```python
 import torch
@@ -127,7 +117,7 @@ else:
 model.fit(X_train, y_train)
 ```
 
-### 4.2 DistributedDataParallel (Recommended)
+### DistributedDataParallel (recommended)
 
 More efficient than DataParallel:
 
@@ -160,7 +150,7 @@ def train_distributed():
     
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params={'device': device}
     )
     
@@ -175,11 +165,9 @@ def train_distributed():
 # Launch with: python -m torch.distributed.launch --nproc_per_node=4 script.py
 ```
 
----
+## Launch methods
 
-## 5. Launch Methods
-
-### 5.1 torchrun (PyTorch 1.10+)
+### torchrun (PyTorch 1.10+)
 
 **Recommended method**:
 
@@ -197,7 +185,7 @@ torchrun \
   train_script.py
 ```
 
-### 5.2 torch.distributed.launch (Legacy)
+### torch.distributed.launch (legacy)
 
 ```bash
 # Single-machine, 4 GPUs
@@ -213,7 +201,7 @@ python -m torch.distributed.launch \
   --epochs 5
 ```
 
-### 5.3 Manual Launch
+### Manual launch
 
 ```bash
 # Terminal 1: GPU 0
@@ -229,11 +217,9 @@ CUDA_VISIBLE_DEVICES=2 python train_script.py
 CUDA_VISIBLE_DEVICES=3 python train_script.py
 ```
 
----
+## Training scripts
 
-## 6. Training Scripts
-
-### 6.1 Complete Distributed Training Script
+### Complete distributed training script
 
 ```python
 import os
@@ -280,7 +266,7 @@ def main():
     # Create model
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params={
             'device': device,
             'epochs': 5,
@@ -312,7 +298,7 @@ if __name__ == '__main__':
     main()
 ```
 
-### 6.2 Synchronization Across Ranks
+### Synchronization across ranks
 
 ```python
 def train_with_sync():
@@ -348,11 +334,9 @@ def train_with_sync():
     dist.destroy_process_group()
 ```
 
----
+## Performance optimization
 
-## 7. Performance Optimization
-
-### 7.1 Gradient Accumulation
+### Gradient accumulation
 
 Increase effective batch size without memory increase:
 
@@ -376,7 +360,7 @@ def train_with_accumulation(num_accumulation_steps=4):
                 optimizer.zero_grad()
 ```
 
-### 7.2 Overlapping Computation & Communication
+### Overlapping computation & communication
 
 ```python
 def train_with_overlap():
@@ -404,7 +388,7 @@ def train_with_overlap():
             optimizer.step()
 ```
 
-### 7.3 Mixed Precision with Distributed Training
+### Mixed precision with distributed training
 
 ```python
 from torch.cuda.amp import autocast, GradScaler
@@ -433,11 +417,9 @@ def train_mixed_precision():
             scaler.update()
 ```
 
----
+## Scaling efficiency
 
-## 8. Scaling Efficiency
-
-### 8.1 Linear Scaling Rule
+### Linear scaling rule
 
 ```python
 # Optimal learning rate for N GPUs
@@ -451,7 +433,7 @@ optimal_learning_rate = base_learning_rate * num_gpus
 optimal_learning_rate = base_learning_rate * (num_gpus ** 0.5)
 ```
 
-### 8.2 Speedup Analysis
+### Speedup analysis
 
 ```python
 def analyze_scaling(times_single_gpu, times_multi_gpu):
@@ -475,11 +457,9 @@ def analyze_scaling(times_single_gpu, times_multi_gpu):
 # 8 GPUs: 6.5x speedup (81% efficiency)
 ```
 
----
+## Distributed challenges & solutions
 
-## 9. Distributed Challenges & Solutions
-
-### 9.1 Communication Overhead
+### Communication overhead
 
 ```python
 # Problem: Communication becomes bottleneck
@@ -498,7 +478,7 @@ tuning_params = {
 # Communicate every N steps instead of every step
 ```
 
-### 9.2 Load Imbalance
+### Load imbalance
 
 ```python
 # Problem: Some GPUs finish before others
@@ -522,7 +502,7 @@ def balanced_sampler(dataset, num_replicas, rank):
     )
 ```
 
-### 9.3 Gradient Divergence
+### Gradient divergence
 
 ```python
 # Problem: Different GPUs compute different gradients
@@ -545,9 +525,7 @@ def synchronized_training():
         optimizer.step()
 ```
 
----
-
-## 10. Complete Multi-GPU Example
+## Complete multi-GPU example
 
 ```python
 #!/usr/bin/env python
@@ -585,7 +563,7 @@ def main():
     # Create pipeline
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params={
             'device': device,
             'epochs': args.epochs,
@@ -625,11 +603,9 @@ if __name__ == '__main__':
 torchrun --nproc_per_node=4 train_distributed.py --epochs 5 --batch_size 32
 ```
 
----
+## Debugging multi-GPU issues
 
-## 11. Debugging Multi-GPU Issues
-
-### 11.1 Common Problems
+### Common problems
 
 ```python
 # Problem: Hanging/deadlock
@@ -653,32 +629,7 @@ if rank == 0:
 dist.barrier()  # Wait for all ranks
 ```
 
----
-
-## 12. Best Practices
-
-### ✅ Do's
-
-- ✅ Use DistributedDataParallel over DataParallel
-- ✅ Scale learning rate with batch size
-- ✅ Use proper samplers (DistributedSampler)
-- ✅ Synchronize at checkpoints
-- ✅ Evaluate on rank 0 only
-- ✅ Monitor all GPU memory usage
-- ✅ Test on fewer GPUs first
-
-### ❌ Don'ts
-
-- ❌ Don't use DataParallel for multi-machine
-- ❌ Don't forget to set environment variables
-- ❌ Don't run inference on all ranks
-- ❌ Don't ignore communication overhead
-- ❌ Don't over-subscribe GPU memory
-- ❌ Don't change data on different ranks
-
----
-
-## 13. Performance Benchmarks
+## Performance benchmarks
 
 ```
 Dataset: 500K samples, TabICL model
@@ -703,9 +654,7 @@ Dataset: 500K samples, TabICL model
   Efficiency: 75%
 ```
 
----
-
-## 14. Quick Reference
+## Quick reference
 
 | Aspect | Single GPU | Multi-GPU DDP |
 |--------|-----------|---------------|
@@ -714,16 +663,3 @@ Dataset: 500K samples, TabICL model
 | Speedup | 1x | ~(GPUs-0.3) |
 | Memory/GPU | Full | Full/GPUs |
 | Best Use | Development | Production |
-
----
-
-## 15. Next Steps
-
-- [Memory Optimization](memory-optimization.md) - Memory management with DDP
-- [Hyperparameter Tuning](hyperparameter-tuning.md) - Scaling learning rates
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - PEFT with DDP
-- [Examples](../examples/benchmarking.md) - Multi-GPU benchmarks
-
----
-
-Scale TabTune efficiently across multiple GPUs for production-grade training!

@@ -1,292 +1,183 @@
-<div style="text-align: center;">
-  <img src="assets/tabtune.svg" alt="TabTune Logo" style="width: 600px; height: auto;" />
+---
+hide:
+  - navigation
+  - toc
+---
+
+<div class="tt-hero" markdown>
+
+<img class="tt-hero-mark tt-hero-mark--light" src="assets/tabtune-logo-on-light.svg" alt="TabTune">
+<img class="tt-hero-mark tt-hero-mark--dark" src="assets/tabtune-logo-on-dark.svg" alt="TabTune">
+
+# One API for <em>tabular</em> foundation models { .tt-hero-title }
+
+<p class="tt-tagline">
+TabTune runs and fine-tunes 24 tabular foundation models and 11 time series foundation
+models behind one scikit-learn style pipeline: <code>fit</code>, <code>predict</code>,
+<code>evaluate</code>, <code>save</code>, <code>load</code>. Preprocessing, training loops
+and licence checks are the library's job, not yours.
+</p>
+
+[Get started](getting-started/installation.md){ .md-button .md-button--primary }
+[View on GitHub](https://github.com/Lexsi-Labs/TabTune){ .md-button }
+
+<p class="tt-chips">
+<span>v0.2.2</span>
+<span>Python 3.10+</span>
+<span>PyTorch 2.7+</span>
+<span>24 tabular models</span>
+<span>11 time series models</span>
+<span>MIT code, per-checkpoint weight licences</span>
+</p>
+
 </div>
-<div style="text-align: center;">
-<a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg"/></a>
-<a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.6+-red.svg"/></a>
-<a href="https://github.com/Lexsi-Labs/TabTune"><img src="https://img.shields.io/badge/docs-available-green.svg"/></a>
-<a href="https://arxiv.org/abs/2511.02802"><img src="https://img.shields.io/badge/arXiv-2511.02802-b31b1b.svg"/></a>
-<a href="https://discord.gg/dSB62Q7A"><img src="https://img.shields.io/badge/Discord-%235865F2.svg?&amp;logo=discord&amp;logoColor=white"/></a>
+
+```mermaid
+flowchart LR
+    X[(DataFrame)] --> DP[DataProcessor<br/>model-aware preprocessing]
+    DP --> TM[TuningManager<br/>inference · finetune · peft]
+    TM --> M[Model<br/>one of 24 vendored TFMs]
+    M --> P[predict · predict_proba<br/>evaluate · uncertainty]
+    R[(Registry<br/>envelopes + licences)] -. checked before any download .-> TM
+    LB[TabularLeaderboard] -. runs many pipelines .-> TM
+    TS[(Long time series frame)] --> TSP[TimeSeriesPipeline<br/>forecast · anomalies · impute · embed]
+```
+
+A tabular foundation model (TFM) is a network pretrained on synthetic tables that predicts a
+new table's targets in context, with no gradient step. TabTune vendors the model code of every
+supported checkpoint, so one `pip install -e .` gives you TabPFN, TabICL, Mitra, Orion, Kumo
+and the rest without installing their packages, and the same `TabularPipeline` call drives
+all of them.
+
+There are two parts:
+
+1. **The tabular pipeline.** `DataProcessor` prepares the frame the way the chosen model
+   expects it, `TuningManager` runs zero-shot inference, full fine-tuning or LoRA, and the
+   torch-free registry checks class counts, feature counts and weight licences before a
+   checkpoint is downloaded. Around it sit a leaderboard, six ensembling strategies,
+   distillation into GBDT or MLP students, conformal uncertainty, shift-aware evaluation
+   and a causal inference module.
+2. **The time series pipeline**, added in 0.2.1. Same pattern, eleven vendored forecasters
+   plus every tabular model as a forecaster and five statistical baselines. Forecasting,
+   anomaly detection, imputation and embeddings from one fitted model.
+
+<div class="grid cards" markdown>
+
+-   :material-table-large:{ .lg .middle } **24 tabular models, one call**
+
+    ---
+
+    TabPFN v2 to v3.5, TabICL, Orion-MSP, Orion-BiX, Mitra, ConTextTab, TabDPT,
+    LimiX, TabFM, xRFM, iLTM, EXAONE, Causilo, TabLDM, Kumo. See [Models](models/overview.md).
+
+-   :material-tune-vertical:{ .lg .middle } **Three tuning strategies**
+
+    ---
+
+    `inference` (zero-shot), `finetune` (episodic, SFT or native) and `peft` (LoRA on the
+    layers that matter). See [Tuning Strategies](user-guide/tuning-strategies.md).
+
+-   :material-shield-check-outline:{ .lg .middle } **Checks before downloads**
+
+    ---
+
+    A capability envelope and a weight licence per checkpoint, queried in milliseconds.
+    `license_mode="commercial"` refuses research-only weights. See
+    [Model Registry](user-guide/registry.md).
+
+-   :material-chart-timeline-variant:{ .lg .middle } **Time series**
+
+    ---
+
+    Chronos, Chronos-Bolt, Chronos-2, TimesFM 3, Toto 1 and 2, TiRex, TiRex-2, Time-MoE,
+    Timestral and T0, with conformal intervals, covariates and backtesting. See
+    [Time Series](timeseries/overview.md).
+
+-   :material-chart-bell-curve-cumulative:{ .lg .middle } **Uncertainty you can ship**
+
+    ---
+
+    Split conformal prediction sets and intervals, temperature recalibration and one
+    report with ECE, coverage and set sizes. See [Uncertainty](user-guide/uncertainty.md).
+
+-   :material-scale-balance:{ .lg .middle } **Compare, combine, compress**
+
+    ---
+
+    `TabularLeaderboard` ranks models and strategies, `TabularEnsemble` combines them,
+    `TabDistiller` turns a teacher into a LightGBM or MLP student.
+
 </div>
 
----
+## Start here
 
-**TabTune** is a powerful and flexible Python library designed to simplify the training and fine-tuning of modern foundation models on tabular data.  
-It provides a high-level, scikit-learn-compatible API that abstracts away the complexities of data preprocessing, model-specific training loops, and benchmarking, letting you focus on delivering results.
+- **[Installation](getting-started/installation.md)**: one clone and one `pip install`,
+  plus the optional extras.
+- **[Quick Start](getting-started/quickstart.md)**: fit, evaluate, save and reload a
+  pipeline on an OpenML dataset.
+- **[Basic Concepts](getting-started/basic-concepts.md)**: the four objects every page
+  assumes you know.
+- **[Features](features.md)**: every capability on one page, each linked to the guide
+  and the example that runs it.
+- **[Models](models/overview.md)**: the capability matrix, the licence table and a page
+  per model.
+- **[Known Issues](community/known-issues.md)**: what does not work yet, in plain words.
+  Read it before assuming a documented path runs end to end on your hardware.
 
-Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced architectures, TabTune streamlines your workflow for tabular deep learning.
+## Installation and first run
 
----
-
-## 🚀 Welcome to TabTune
-
-**This documentation provides a complete, production-ready framework for tabular foundation models.**
-
-**Core Components:**
-
-- **Unified API (`TabularPipeline`):** Single, scikit-learn-compatible interface for all models with `.fit()`, `.predict()`, `.save()`, and `.load()` methods.
-- **Smart Data Processing (`DataProcessor`):** Model-aware preprocessing that automatically handles imputation, scaling, categorical encoding, and feature transformations for each model.
-- **Flexible Tuning (`TuningManager`):** Three tuning strategies—zero-shot `inference`, supervised fine-tuning (`base-ft`) with full parameter updates, and memory-efficient `peft` (LoRA) adapters. Supports episodic meta-learning for ICL models.
-- **Model Comparison (`TabularLeaderboard`):** Systematic benchmarking tool for comparing multiple models and strategies on your datasets.
-- **Ensembling Module (`TabularEnsemble`):** Unified framework to combine multiple tabular foundation models using six strategies, including weighted averaging, stacking, and deep ensembles for improved accuracy and uncertainty estimation.
-- **🆕 Model Registry (`tabtune.registry`):** A torch-free record of every checkpoint's **capability envelope** and **weight licence**, checked before any weights load. Answers "will this model accept my data?" and "can I actually deploy this?" in milliseconds.
-- **🆕 Uncertainty (`tabtune.uncertainty`):** Split conformal prediction and post-hoc recalibration, with a distribution-free marginal coverage guarantee.
-- **🆕 Shift-Aware Evaluation (`tabtune.evaluation`):** Temporal and grouped splits plus a `ShiftEvaluator` that reports the IID-to-shift gap.
-- **🆕 Typed Configuration (`tabtune.config`):** Pydantic schemas for every knob, so an experiment is a YAML file you can commit.
-
-
-**Key Capabilities:**
-
-- ✅ **Multiple Training Paradigms:** Supports supervised fine-tuning (SFT) with full parameter updates, episodic meta-learning for in-context learning models, and parameter-efficient PEFT strategies.
-- ✅ **PEFT (LoRA) Support:** Full parameter-efficient fine-tuning for TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM; experimental for TabPFN, TabPFNv2.6 and ContextTab.
-- ✅ **Meta-Learning Integration:** Episodic training with support/query sets for ICL models (TabICL, TabICLv2, OrionMSP, OrionBix, Mitra, TabDPT, TabFM, iLTM, EXAONE) enabling fast task adaptation.
-- ✅ **Deployment Awareness:** Capability envelopes and weight licences are enforced before a multi-gigabyte download, not after.
-- ✅ **Lazy Imports:** `import tabtune` costs milliseconds and pulls in neither torch nor transformers; heavy modules load on first attribute access.
-- ✅ **Comprehensive Documentation:** Extensive guides, API references, troubleshooting, and model-specific documentation.
-- ✅ **Production Ready:** Model serialization, reproducible training, and deployment-ready pipelines.
-- ✅ **Extensible Architecture:** Modular design for easy integration of custom processors and models.
-
----
-
-## ⭐ Core Features
-
-- **Unified API:** Single interface for model training, inference, and evaluation across multiple tabular model families.
-- **Automated Preprocessing:** Model-aware data processing for feature scaling, encoding, imputation, and transformation.
-- **Flexible Fine-Tuning:** Choose between zero-shot inference, full fine-tuning, or memory-efficient PEFT strategies.
-- **Model Comparison:** Built-in leaderboard for systematic benchmarking and strategy evaluation.
-- **Extensible Design:** Modular codebase for easy integration of custom data processors and models.
-
----
-## 🚀 What's New in v0.2.0
-
--   ✅ **EXAONE Tabular (LG AI Research)** — Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for >10 classes, the attention-based feature selector and the CUDA execution planner.
-
--   ✅ **xRFM and iLTM — two non-transformer models.** **xRFM** is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. **iLTM** uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.
-
--   ✅ **TabFM (Google Research)** — Hybrid attention: alternating row/column blocks, row compression to CLS tokens, then a causal ICL transformer. Full PEFT support.
-
--   ✅ **Model Registry** — A torch-free registry recording each checkpoint's **capability envelope** (class, feature, row and cell limits) and **weight licence**. Both are checked before any weights load. See [Model Registry](user-guide/registry.md).
-
--   ✅ **Uncertainty Quantification** — Split conformal prediction (`ConformalClassifier`, `ConformalRegressor`) with a distribution-free marginal coverage guarantee, post-hoc `Recalibrator`, and a one-call `uncertainty_report()` covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage. See [Uncertainty](user-guide/uncertainty.md).
-
--   ✅ **Shift-Aware Evaluation** — `TemporalSplit`, `GroupedSplit` and `StratifiedGroupedSplit`, plus a `ShiftEvaluator` that reports the **IID-to-shift gap** — the number that predicts production behaviour, rather than the IID score that does not. See [Shift-Aware Evaluation](user-guide/shift-evaluation.md).
-
--   ✅ **Typed Configuration** — Pydantic schemas for every knob, with YAML round-tripping and `validate_against_registry()` for CI. Plain dicts still work; a typo now warns instead of vanishing. See [Configuration](user-guide/configuration.md).
-
--   ✅ **Prediction Caching** — `cache='memory'` or `'disk'` collapses `evaluate()`'s three redundant forward passes into one. See [Caching](user-guide/caching.md).
-
--   ✅ **Causal Inference Module** — Treatment effect estimation through a unified `CausalAnalysis` API with six estimators (DML, S/T/X/R-Learner, Causal Forest), formal identification, refutation, proxy-attribute auditing and counterfactual fairness. See [Causal Inference](user-guide/causal.md).
-
--   ✅ **Distillation** — `TabDistiller` compresses any TFM teacher into a LightGBM, XGBoost, CatBoost or MLP student, with single- and multi-teacher support. See [Distillation](user-guide/distillation.md).
-
----
-
-## 📊 Supported Models
-
-**16 models across seven architectural families.** The registry is the source of truth —
-call `tabtune.registry.list_model_names()` rather than hardcoding this list.
-
-| Model | Family / Paradigm | Key Innovation | Supported Strategies |
-|-------|------------------|----------------|----------------------|
-| **TabPFN-v2** | PFN / ICL | Approximates Bayesian inference on synthetic data | Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT |
-| **TabPFN-v2.6** | PFN / ICL | Prior Labs release with native finetuning API | Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT |
-| **TabPFN-v3** | PFN / ICL | Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features | Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT |
-| **TabICL** | Scalable ICL | Two-stage column-then-row attention | Inference, Meta-Learning FT, SFT, PEFT |
-| **TabICLv2** | Scalable ICL | QASSMax normalisation + native quantile regression head | Inference, FT, Regression, Regression FT |
-| **OrionMSP v1.0** | Scalable ICL | Multi-Scale Sparse Attention | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionMSP v1.5** | Scalable ICL | Stabilized prototype refinement | Inference, Meta-Learning FT, SFT, PEFT |
-| **OrionBix** | Scalable ICL | Tabular Bi-Axial In-Context Learning | Inference, Meta-Learning FT, SFT, PEFT |
-| **Mitra** | Scalable ICL | 2D attention (row & column), mixed synthetic priors | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
-| **ContextTab** | Semantics-Aware ICL | Modality-specific embeddings; first-class text and datetime | Inference, Full FT, PEFT*, Regression, Regression FT |
-| **TabDPT** | Denoising Transformer | Denoising pretraining + retrieval-based context | Inference, Meta-Learning FT, SFT, Regression, Regression FT |
-| **LimiX** | Probabilistic / ICL | Likelihood-based mixture modelling; uncertainty-aware | Inference, Regression, Regression FT |
-| **TabFM** | Hybrid-Attention ICL (Google) | Alternating row/column attention → CLS compression → causal ICL | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
-| **xRFM** | Kernel / Feature Learning | AGOP feature learning, tree-partitioned EigenPro. **No pretrained weights** | Inference, Refit, Refine, PEFT†, Regression |
-| **iLTM** | Hypernetwork | Hypernetwork generates MLP ensembles from dataset embeddings | Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT |
-| **EXAONE Tabular** | Cross-Axis ICL (LG AI Research) | CAST; ~21M params, 8-member ensemble, ECOC for >10 classes | Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡ |
-
-\* PEFT is experimental for TabPFN, TabPFN-v2.6 and ContextTab; `inference` is fully supported.
-† xRFM's `peft` is low-rank adaptation of the learned **M** matrix, not LoRA over linear layers.
-‡ EXAONE's projections are raw `nn.Parameter` tensors, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
-‡‡ EXAONE regression needs a locally supplied checkpoint — LG AI Research publishes only the classification weights.
-
-See [Model Overview](models/overview.md) for envelopes, licences and selection guidance.
-
----
-
-### 🧭 Deployment awareness
+```bash
+git clone https://github.com/Lexsi-Labs/TabTune.git
+cd TabTune
+pip install -r requirements.txt
+pip install -e .
+```
 
 ```python
 from tabtune import TabularPipeline
 
-pipeline = TabularPipeline(
-    model_name="TabFM",
-    task_type="classification",
-    envelope_mode="error",        # 'error' | 'warn' (default) | 'ignore'
-    license_mode="commercial",    # 'research' (default) | 'commercial' | 'ignore'
-    cache="memory",               # 'memory' | 'disk' | None
-)
+pipe = TabularPipeline(model_name="TabICL", task_type="classification", tuning_strategy="inference")
+pipe.fit(X_train, y_train)
+print(pipe.evaluate(X_test, y_test))
 ```
 
----
+Swap `"TabICL"` for any name in `tabtune.registry.list_model_names()` and nothing else
+changes.
 
-## ⚡ Quick Start
+## Support
 
-```python
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import openml
-from tabtune import TabularPipeline
+- **GitHub Issues**: [report bugs and request features](https://github.com/Lexsi-Labs/TabTune/issues)
+- **Discord**: [Lexsi Labs](https://discord.gg/dSB62Q7A)
+- **Security**: see [Security](community/security.md) for how to report a vulnerability
+- **Email**: [hello@lexsi.ai](mailto:hello@lexsi.ai)
 
-# Load dataset
-dataset = openml.datasets.get_dataset(42178)
-X, y, _, _ = dataset.get_data(target=dataset.default_target_attribute)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+## Citation
 
-# Init and fit pipeline
-pipeline = TabularPipeline(
-    model_name="TabPFN",
-    task_type="classification",
-    tuning_strategy="finetune",
-    tuning_params={"device": "cpu"}
-)
-pipeline.fit(X_train, y_train)
-
-# Save and load pipeline for prediction
-pipeline.save("churn_pipeline.joblib")
-loaded_pipeline = TabularPipeline.load("churn_pipeline.joblib")
-predictions = loaded_pipeline.predict(X_test)
-metrics = pipeline.evaluate(X_test, y_test)
-print(metrics)
-```
-
----
-
-## 📝 Why TabTune?
-
-- **No Boilerplate:** Avoids repetitive code for model-specific data loading, training, and inference.
-- **Consistent Results:** Automates best practices for tabular DL research and model selection.
-- **Fast Iteration:** Easily compare new models with your data, using the same consistent API.
-- **Production Ready:** Model and config serialization for robust deployment and reproducibility.
-- **Community-Driven:** Extensible design and open contribution policy.
-
----
-
-### Google Colab Support
-
-- TabTune auto-detects Colab sessions, skipping optional IPython-heavy integrations (e.g., rich leaderboard display) so installs succeed with Colab’s preinstalled packages.
-- In Colab, install with `pip install "tabtune[colab]"` to keep core runtime packages (NumPy, pandas, scikit-learn, IPython) on the versions Colab expects.
-- For richer notebook display helpers outside Colab, opt into `pip install "tabtune[interactive]"`.
-
----
-
-## 📑 Explore the Documentation
-
-- **[Getting Started](getting-started/installation.md):** Installation, setup, and basic usage.
-- **[User Guide](user-guide/pipeline-overview.md):** In-depth tutorials for each component.
-- **[Model Registry](user-guide/registry.md):** Capability envelopes and weight licensing.
-- **[Uncertainty](user-guide/uncertainty.md):** Conformal prediction and recalibration.
-- **[Shift-Aware Evaluation](user-guide/shift-evaluation.md):** Temporal and grouped splits, and the shift gap.
-- **[Configuration](user-guide/configuration.md):** Typed YAML configs.
-- **[Supported Models](models/overview.md):** Model details and design notes.
-- **[Advanced Topics](advanced/peft-lora.md):** PEFT/LoRA, custom preprocessing, and more.
-- **[API Reference](api/pipeline.md):** Complete Python API and class/method details.
-- **[Examples & Benchmarks](examples/classification.md):** End-to-end code notebooks.
-
----
-
-## 🏆 Example Notebooks
-
-Example notebooks showcasing the library's features in depth.
-
-| Serial No. | Name | Task Performed | Link To Notebook |
-|---|------|------|------|
-| 1 | Unified API | Showcasing A Unified API Across Multiple Models |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KcaSdYRjZnMlb0MLmQ5IlnbPDiuEr1Ld?usp=sharing) |
-| 2 |  Automated Model-Aware Preprocessing | The Automated preprocessing system explained |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/12BQ12VJrxtTDslgjnjm26yi3a0PYXqZT?usp=sharing) |
-| 3 | Fine-Tuning Strategies | TabTune's four fine-tuning strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1QixfiNCjF1IQV9NooMipPpnH4ETcEQwg?usp=sharing) |
-| 4 | Model Comparison | Model Comparison with TabularLeaderboard |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1PZW3iPQOvwh0kroGytMzYTGc6ZVUzuvg?usp=sharing) |
-| 5 | Checkpoint Management | Checkpoint Management - Save/Load Pipelines |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1DBTGEPpYLJjU9Aj7lzHoX3JtwaNOC0jn?usp=sharing) |
-| 6 | Advanced Usage | PEFT Configuration and Hybrid Strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1V3XGLeKrXSJwavaULMncZiM7uVE8sz0h?usp=sharing) |
-| 7 |  Resampling |  Resampling Strategies |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1EHGrrSm7EalVRvzkH1RUHsNSLzmn10lM?usp=sharing) |
-| 8 | Regression - 1| Introduction to Regression - Inference |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lBt0QZWqlwhEg2ul_nVPAeC-w3Are0At) |
-| 9 | Regression - 2| Introduction to Regression - Finetune |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing) |
-| 10 | Evaluation Metrics | Evaluation Metrics involved |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing) |
-| 11 | Benchmarking | Standard Benchmarking Techniques |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing) |
-| 12 | TabPFNv2.6 | TabPFNv2.6 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M) |
-| 13 | TabICLv2 | TabICLv2 — Classification and Regression |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q) |
-| 14 | Ensembling Strategies| TabTune's 6 Ensembling Strategies  |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8) |
-| 15 | Distillation | With Single and Multi Teachers |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH)| 
-| 16 | Causal Inference | Estimate Treatment Effect using TFMs |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing)| 
-| 17 | EXAONE Model | End-to-end usecase of the EXAONE Model |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1RR-mhJkGW0xpAU0si76ru-1NuggPKDNH#scrollTo=89s93vNcnSk0)| 
-
----
-
-## 📂 Project Structure
-
-```
-tabtune/
-├── Dataprocess/          # model-aware preprocessing (+ regression/ subpackage)
-├── models/               # 16 vendored model families
-├── TabularPipeline/      # the unified .fit/.predict/.evaluate API
-├── TuningManager/        # inference / finetune / peft strategies
-├── TabularLeaderboard/   # model comparison (+ HTML & Pareto reports)
-├── registry/             # 🆕 capability envelopes + weight licences (torch-free)
-├── config/               # 🆕 pydantic schemas, YAML load/save
-├── uncertainty/          # 🆕 conformal prediction + recalibration
-├── evaluation/           # 🆕 shared metrics, shift-aware splits, ShiftEvaluator
-├── caching/              # 🆕 prediction cache (memory / disk)
-├── resampling/           # context / support-query sampling
-├── ensemble/             # six ensembling strategies
-├── distillation/         # TabDistiller + students & exporters
-├── causal/               # CausalAnalysis, estimators, refutation, audit
-├── benchmarking/         # benchmark suites and result handling
-├── data/                 # dataset loaders (OpenML, TabArena, TabZilla, TALENT)
-├── _internal/            # device, sklearn compat, deprecation helpers
-├── logger.py
-└── run.py
-```
-
-See [User Guide](user-guide/pipeline-overview.md) for a full file/module breakdown.
-
----
-
-## 🏢 Developed by Lexsi Labs
-
-<div style="text-align: center; margin: 30px 0;">
-  <img src="assets/lexsi-labs-logo.svg" alt="Lexsi Labs Logo" style="height: 390px; width: auto; margin-bottom: 20px; position: relative;" />
-  <p style="font-size: 1.1em; color: #666; margin-top: 10px;">
-    Created by the team at <strong>Lexsi Labs</strong>, TabTune extends frontier AI research into the tabular domain.
-  </p>
-</div>
-
----
-
-## 🗃️ License
-
-This project is released under the MIT License.  
-Please cite appropriately if used in academic or production projects.
-
-**BibTeX Citation:**
+If you use TabTune in your research, please cite:
 
 ```bibtex
 @misc{tanna2025tabtuneunifiedlibraryinference,
-      title={TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}, 
+      title={TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models},
       author={Aditya Tanna and Pratinav Seth and Mohamed Bouadi and Utsav Avaiya and Vinay Kumar Sankarapu},
       year={2025},
       eprint={2511.02802},
       archivePrefix={arXiv},
       primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2511.02802}, 
+      url={https://arxiv.org/abs/2511.02802},
 }
 ```
 
----
+## Contact
 
-## 📫 Join Community / Contribute
+<div align="center" markdown>
 
-- Issues and discussions are welcomed on the [GitHub issue tracker](https://github.com/Lexsi-Labs/TabTune/issues).
-- Please see the **Contributing** section for contribution standards, code reviews, and documentation tips.
+<a href="https://lexsi.ai/">
+<img class="tt-on-light" src="assets/lexsilogodark.png" width="300" alt="Lexsi Labs">
+<img class="tt-on-dark" src="assets/lexsilogowhite.png" width="300" alt="Lexsi Labs">
+</a>
 
----
+<https://www.lexsi.ai>
 
-**Get started with TabTune and accelerate your tabular deep learning workflows today!**
+Paris 🇫🇷 · Mumbai 🇮🇳 · London 🇬🇧
+
+</div>

@@ -1,287 +1,112 @@
 # Installation
 
-This guide will walk you through installing TabTune and its dependencies for optimal performance across different environments.
-
----
-
-## System Requirements
-
-
-### **Python Version**
-- **Python 3.10+** (required)
-- Python 3.12+ (recommended for best performance)
-
-### **Hardware**
-- **Minimum**: 8GB RAM, 2GB free disk space
-- **Recommended**: 16GB+ RAM, NVIDIA GPU with 8GB+ VRAM
-- **For Large Datasets**: 32GB+ RAM, multiple GPUs
-
----
-
-## Installation Methods
-
-### **Method 1: Install from Source (Recommended)**
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Lexsi-Labs/TabTune.git
-   pip install -r requirements.txt
-   cd TabTune
-   pip install -e .
-   ```
-
-2. **Create virtual environment**
-   ```bash
-   # Using venv
-   python -m venv tabtune-env
-   source tabtune-env/bin/activate  # Linux/macOS
-   # tabtune-env\Scripts\activate   # Windows
-   
-   # Or using conda
-   conda create -n tabtune python=3.11
-   conda activate tabtune
-   ```
-
-### **Method 2: Optional extras**
-
-TabTune's core install is deliberately lean. Feature subsystems are opt-in:
+TabTune needs **Python 3.10 or newer** and PyTorch 2.7 or newer. A GPU is optional for
+inference and strongly recommended for fine-tuning.
 
 ```bash
-pip install "tabtune[causal]"         # CausalAnalysis: doubleml, econml, dowhy, causal-learn
+git clone https://github.com/Lexsi-Labs/TabTune.git
+cd TabTune
+pip install -r requirements.txt
+pip install -e .
+```
+
+That is the whole install. The model code for all 24 tabular models and all eleven time series
+models is vendored under `tabtune/models/`, so there is no second package to install per
+model. Checkpoints download from the Hugging Face Hub the first time you call `fit()` and
+land in the usual Hugging Face cache.
+
+## Optional extras
+
+```bash
 pip install "tabtune[distillation]"   # LightGBM students for tabtune.distillation
 pip install "tabtune[serving]"        # ONNX export of distilled students
 pip install "tabtune[interactive]"    # rich notebook display helpers
-pip install "tabtune[colab]"          # pin core packages to Colab's versions
-pip install "tabtune[docs]"           # mkdocs toolchain
+pip install "tabtune[colab]"          # pin core packages to the versions Colab ships
+pip install "tabtune[docs]"           # build this site
 pip install "tabtune[dev]"            # pytest, ruff, black, pre-commit
-pip install "tabtune[strict]"         # pinned torch/transformers/scikit-learn
-pip install "tabtune[all]"            # interactive + causal + distillation + serving + docs
+pip install "tabtune[toto2]"          # the Toto 2 time series model (Python 3.12+)
 ```
 
----
+`toto2` is deliberately not part of the default install: its dependencies declare
+`requires-python >= 3.12`, and installing them on 3.11 needs `--ignore-requires-python`.
 
-## Model-Specific Setup
+## GPU
 
-Most models auto-download their weights from the Hugging Face Hub on first use. Three need
-something extra:
+Install the PyTorch build that matches your CUDA version before TabTune, following the
+[PyTorch instructions](https://pytorch.org/get-started/locally/). TabTune resolves the
+device itself: `model_params={"device": "cuda"}` or `tuning_params={"device": "cuda"}`
+when you want to be explicit, otherwise CUDA is used when it is available.
 
-### TabFM (Google)
-
-Requires the optional upstream package with the PyTorch backend:
-
-```bash
-pip install "tabfm[pytorch]"
-```
-
-Weights (`google/tabfm-1.0.0-pytorch`) download automatically on first use.
-
-### EXAONE Tabular
-
-Only the **classification** checkpoint is published. For regression, supply a local weights
-file:
-
-```bash
-export EXAONETABULAR_REGRESSOR_WEIGHTS=/path/to/exaone-tabular-regressor.safetensors
-export EXAONETABULAR_CLASSIFIER_WEIGHTS=/path/to/classifier.safetensors   # optional override
-```
-
-### xRFM
-
-Nothing to install and nothing to download — xRFM trains from scratch, which makes it the
-only bundled model that works in an **air-gapped** environment out of the box.
-
-!!! tip "Verify what a model needs before you download it"
-    ```python
-    from tabtune.registry import get_model_spec
-    spec = get_model_spec("TabFM")
-    spec.weights          # 'google/tabfm-1.0.0-pytorch'
-    spec.envelope.describe()
-    spec.license.badge
-    ```
-    The registry is torch-free, so this costs milliseconds and downloads nothing. See
-    [Model Registry](../user-guide/registry.md).
-
----
-
-
-!!! tip "GPU Support"
-    For optimal performance with large models, install CUDA-enabled PyTorch. Check your CUDA version with `nvidia-smi`.
-
----
-
-## Core Dependencies
-
-The following packages are automatically installed with TabTune:
-
-### **Essential Packages**
-```bash
-# Core ML libraries
-torch>=2.0.0
-numpy>=1.21.0
-pandas>=1.3.0
-scikit-learn>=1.0.0
-
-# Data handling
-openml>=0.12.0
-datasets>=2.0.0
-
-# PEFT support
-peft>=0.4.0
-accelerate>=0.20.0
-transformers>=4.30.0
-
-# Utilities
-joblib>=1.0.0
-tqdm>=4.60.0
-```
-
-### **Model-Specific Dependencies**
-```bash
-# For ContextTab (requires HuggingFace Hub access)
-huggingface-hub>=0.15.0
-sentence-transformers>=2.2.0
-
-# For advanced preprocessing
-category-encoders>=2.5.0
-```
-
-
----
-
-## Verify Installation
-
-### **Quick Verification**
 ```python
 import torch
-print(f"PyTorch version: {torch.__version__}")
-print(f"CUDA available: {torch.cuda.is_available()}")
+print(torch.cuda.is_available())
+```
 
-# Test TabTune import (lazy: this pulls in neither torch nor transformers)
+## Gated and licensed weights
+
+Some checkpoints need a Hugging Face token (ConTextTab is gated; TabPFN v2.6 and later
+require accepting Prior Labs' terms). Log in once:
+
+```bash
+huggingface-cli login      # or: export HF_TOKEN=hf_...
+```
+
+Three models have particular setup needs, documented on their pages:
+
+- [TabFM](../models/tabfm.md) is non-commercial and downloads from Google's release.
+- [EXAONE Tabular](../models/exaone.md) ships classification weights only; regression needs
+  a locally supplied checkpoint.
+- [xRFM](../models/xrfm.md) has no pretrained weights and trains from scratch, which makes it
+  the one model that works with no network at all.
+
+Weight licences differ from code licences. The registry records each checkpoint's licence,
+and `license_mode="commercial"` refuses the non-commercial ones before anything is
+downloaded. See [Model Registry](../user-guide/registry.md).
+
+## Verify it worked
+
+```bash
+python -c "import tabtune; print(tabtune.__version__)"
+```
+
+`import tabtune` is lazy and pulls in neither torch nor transformers, so this takes
+milliseconds. A real smoke test:
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
 from tabtune import TabularPipeline
-print("✅ TabTune successfully installed!")
+
+data = load_breast_cancer(as_frame=True)
+X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, random_state=0)
+
+pipe = TabularPipeline(model_name="TabICL", task_type="classification", tuning_strategy="inference")
+pipe.fit(X_train, y_train)
+print(pipe.evaluate(X_test, y_test))
 ```
 
-### **GPU Verification**
-```python
-import torch
+The first run downloads the TabICL checkpoint (about 100 MB). Everything after that is
+cached.
 
-if torch.cuda.is_available():
-    print(f"✅ CUDA available: {torch.cuda.get_device_name(0)}")
-    print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
-else:
-    print("ℹ️ CUDA not available, using CPU")
-```
+## Google Colab
 
-### **Model Loading Test**
-```python
-from tabtune import TabularPipeline
-import pandas as pd
+TabTune detects Colab and skips the optional IPython-heavy integrations so the install
+succeeds with Colab's preinstalled packages. Use `pip install "tabtune[colab]"` to keep
+NumPy, pandas and scikit-learn on the versions Colab expects.
 
-# Quick smoke test
-df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
-y = pd.Series([0, 1, 0])
+## Environment variables
 
-pipeline = TabularPipeline(
-    model_name="TabPFN",
-    tuning_strategy="inference"
-)
+| Variable | Effect |
+|---|---|
+| `HF_TOKEN` | Hugging Face token for gated checkpoints. |
+| `HF_HOME` | Where checkpoints are cached. |
+| `TOKENIZERS_PARALLELISM=false` | Silences the tokenizer fork warning from ConTextTab's text encoder. |
+| `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` | Reduces fragmentation on long fine-tuning runs. |
+| `TABTUNE_MITRA_V2_CLS_REPO`, `TABTUNE_MITRA_V2_REG_REPO` | Override the Mitra v2 checkpoint repositories. |
 
-print("✅ Pipeline creation successful!")
-```
+## Next steps
 
----
-
-## Troubleshooting
-
-### **Common Installation Issues**
-
-#### **Issue: ModuleNotFoundError for torch**
-```bash
-# Solution: Reinstall PyTorch with correct CUDA version
-pip uninstall torch torchvision torchaudio
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/check_version_in_requirements
-```
-
-#### **Issue: CUDA out of memory during model loading**
-```python
-# Solution: Use smaller batch sizes or CPU fallback
-pipeline = TabularPipeline(
-    model_name="TabPFN",
-    tuning_strategy="inference",
-    tuning_params={"device": "cpu", "batch_size": 16}
-)
-```
-
-#### **Issue: ContextTab model access denied**
-```bash
-# Solution: Set up HuggingFace token
-export HF_TOKEN="your_huggingface_token"
-# Or login interactively
-huggingface-cli login
-```
-
-#### **Issue: Permission denied on Windows**
-```bash
-# Solution: Run as administrator or use --user flag
-pip install --user -e .
-```
-
-### **Memory Issues**
-
-#### **Large Dataset Handling**
-```python
-# Use chunked processing for large datasets
-tuning_params = {
-    "batch_size": 8,  # Reduce batch size
-    "gradient_accumulation_steps": 4,  # Maintain effective batch size
-    "device": "cuda"
-}
-```
-
-#### **PEFT Memory Optimization**
-```python
-# Use PEFT for memory-efficient fine-tuning
-pipeline = TabularPipeline(
-    model_name="TabICL",
-    tuning_strategy="peft",
-    tuning_params={
-        "peft_config": {"r": 4}  # Lower rank for less memory
-    }
-)
-```
-
----
-
-## Environment Variables
-
-Set these environment variables for optimal performance:
-
-```bash
-# HuggingFace token for gated models
-export HF_TOKEN="your_token_here"
-
-# Disable tokenizers parallelism warnings
-export TOKENIZERS_PARALLELISM=false
-
-# CUDA memory management
-export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-
-# For debugging
-export CUDA_LAUNCH_BLOCKING=1
-```
-
----
-
-
-## Next Steps
-
-After successful installation:
-
-1. **[Quick Start Guide](../getting-started/quick-start.md)** - Run your first tabtune example
-2. **[Basic Concepts](../getting-started/basic-concepts.md)** - Understand the core architecture
-3. **[Model Selection](../user-guide/model-selection.md)** - Choose the right model for your task
-
----
-
-!!! success "Installation Complete"
-    You're now ready to start using TabTune! If you encounter any issues, please check our [FAQ](../about/faq.md) or open an issue on [GitHub](https://github.com/Lexsi-Labs/TabTune/issues).
+- **[Quick Start](quickstart.md)**: fit, evaluate, save and reload a pipeline on a real
+  dataset.
+- **[Basic Concepts](basic-concepts.md)**: `TabularPipeline`, `DataProcessor`,
+  `TuningManager` and the registry, before the User Guide starts assuming them.

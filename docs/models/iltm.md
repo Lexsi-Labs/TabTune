@@ -1,7 +1,5 @@
 # iLTM: Integrated Large Tabular Model
 
-*New in TabTune 0.2.0.*
-
 **iLTM** takes a different route to tabular transfer: instead of running in-context
 attention over your rows, a **hypernetwork** *generates* an ensemble of MLPs conditioned on
 an embedding of your dataset. It combines GBDT tree embeddings with retrieval over the
@@ -21,9 +19,7 @@ pipeline.fit(X_train, y_train)
 print(pipeline.evaluate(X_test, y_test))
 ```
 
----
-
-## 1. Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -49,21 +45,19 @@ flowchart LR
 TabTune vendors a modified copy; the licence text and change notices are retained under
 Apache-2.0 sections 4(b) and 4(c).
 
----
-
-## 2. Envelope
+## Envelope
 
 | Constraint | Value | Severity |
 |---|---:|---|
 | `max_classes` | `100` | **error** |
-| Features | dimensionality-agnostic (evaluated from 4 to ~20,000) | — |
+| Features | dimensionality-agnostic (evaluated from 4 to ~20,000) |, |
 | Retrieval context | 8,192 rows | internal cap |
 
 !!! warning "The 100-class limit is architectural, and TabTune enforces it"
-    The hypernetwork's first linear layer is sized from `n_classes_limit`, so the released
-    checkpoints are frozen at 100 classes. **Upstream does not guard it** — a 101-class
-    target fails inside `F.one_hot` with a bare torch error deep in the forward pass, after
-    the checkpoint has already downloaded. TabTune checks it in the registry instead.
+ The hypernetwork's first linear layer is sized from `n_classes_limit`, so the released
+ checkpoints are frozen at 100 classes. **Upstream does not guard it**, a 101-class
+ target fails inside `F.one_hot` with a bare torch error deep in the forward pass, after
+ the checkpoint has already downloaded. TabTune checks it in the registry instead.
 
 ```python
 from tabtune.registry import check_envelope
@@ -72,12 +66,10 @@ check_envelope("iLTM", n_rows=5_000, n_features=50, n_classes=101)
 ```
 
 !!! note "Pretrained on classification only"
-    Regression is reached by transfer plus light fine-tuning rather than a pretrained
-    regression head. Expect to fine-tune for competitive regression numbers.
+ Regression is reached by transfer plus light fine-tuning rather than a pretrained
+ regression head. Expect to fine-tune for competitive regression numbers.
 
----
-
-## 3. Model parameters
+## Model parameters
 
 ```python
 model_params = {
@@ -100,13 +92,11 @@ model_params = {
 Unknown keys are filtered against the vendored engine's signature and logged at debug level
 rather than silently forwarded.
 
----
-
-## 4. Supported strategies
+## Supported strategies
 
 | Task | Strategy | Modes |
 |---|---|---|
-| Classification | `inference` | — |
+| Classification | `inference` |, |
 | Classification | `finetune` | `meta-learning` (default), `sft`, `turn_by_turn` |
 | Classification | `peft` | LoRA over the generated MLPs |
 | Regression | `inference`, `finetune` | `turn_by_turn` (default) |
@@ -124,11 +114,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Licensing
 
-## 5. Licensing
-
-Apache-2.0 for both code and weights, and the Hugging Face repository is **ungated** — no
+Apache-2.0 for both code and weights, and the Hugging Face repository is **ungated**, no
 token, no access request. Attribution is required.
 
 ```python
@@ -140,14 +128,12 @@ This makes iLTM one of the few bundled models you can ship commercially without 
 alongside TabICL / TabICLv2 (BSD-3), the Orion family (MIT), Mitra (CC-BY, attribution) and
 xRFM (MIT).
 
----
-
-## 6. When to use iLTM
+## When to use iLTM
 
 **Good fit**
 
-- **Commercial deployment** — Apache-2.0 weights, ungated download
-- Wide tables — dimensionality-agnostic by construction
+- **Commercial deployment**, Apache-2.0 weights, ungated download
+- Wide tables, dimensionality-agnostic by construction
 - Many-class classification up to 100 classes
 - Ensembling: a hypernetwork's errors differ from an ICL model's
 
@@ -155,12 +141,10 @@ xRFM (MIT).
 
 - More than 100 classes (hard limit)
 - Regression without fine-tuning budget
-- Very large retrieval contexts — the context is capped at 8,192 rows
+- Very large retrieval contexts, the context is capped at 8,192 rows
 
----
+## See also
 
-## See Also
-
-- [xRFM](xrfm.md) — the other non-transformer model added in 0.2.0
+- [xRFM](xrfm.md), the other non-transformer model added in 0.2.0
 - [Model Overview](overview.md)
 - [Model Registry](../user-guide/registry.md)

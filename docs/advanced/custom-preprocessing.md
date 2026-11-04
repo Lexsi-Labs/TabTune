@@ -1,12 +1,8 @@
-# Custom Preprocessing: Extending TabTune's Data Pipeline
+# Custom Preprocessing
 
-This document explains how to create custom preprocessors, extend the data pipeline, and integrate domain-specific transformations with TabTune.
+## Introduction
 
----
-
-## 1. Introduction
-
-While TabTune provides comprehensive automatic preprocessing, you may need custom transformations for:
+The default `DataProcessor` is right most of the time. When it is not, you can replace any step or add your own transformer. The usual reasons:
 
 - Domain-specific feature engineering
 - Specialized encoding for your data
@@ -14,13 +10,11 @@ While TabTune provides comprehensive automatic preprocessing, you may need custo
 - Research and experimentation
 - Non-standard data types
 
-This guide shows how to extend TabTune's preprocessing architecture.
 
----
 
-## 2. Preprocessing Architecture
+## Preprocessing architecture
 
-### 2.1 Class Hierarchy
+### Class hierarchy
 
 ```
 BasePreprocessor (Abstract)
@@ -35,7 +29,7 @@ BasePreprocessor (Abstract)
     └── YourCustomPreprocessor
 ```
 
-### 2.2 Base Class Interface
+### Base class interface
 
 ```python
 from abc import ABC, abstractmethod
@@ -67,11 +61,9 @@ class BasePreprocessor(ABC):
         return self.config
 ```
 
----
+## Creating custom preprocessors
 
-## 3. Creating Custom Preprocessors
-
-### 3.1 Simple Custom Preprocessor
+### Simple custom preprocessor
 
 Create a basic preprocessor for specialized transformations:
 
@@ -134,7 +126,7 @@ class CustomFeatureEngineeringPreprocessor(BasePreprocessor):
         return X
 ```
 
-### 3.2 Domain-Specific Preprocessor (Finance Example)
+### Domain-specific preprocessor (finance example)
 
 ```python
 import pandas as pd
@@ -207,11 +199,9 @@ class FinancialDataPreprocessor(BasePreprocessor):
         return X_transformed
 ```
 
----
+## Integrating custom preprocessors
 
-## 4. Integrating Custom Preprocessors
-
-### 4.1 Register Custom Preprocessor
+### Register custom preprocessor
 
 ```python
 # In your codebase or configuration file
@@ -225,7 +215,7 @@ DataProcessor.register_preprocessor(
 )
 ```
 
-### 4.2 Use Custom Preprocessor with Pipeline
+### Use custom preprocessor with pipeline
 
 ```python
 from tabtune import TabularPipeline
@@ -233,7 +223,7 @@ from tabtune import TabularPipeline
 # Use custom preprocessor
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     processor_params={
         'preprocessor_type': 'custom_features',
         'scale_numericals': True,
@@ -244,7 +234,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 4.3 Chaining Preprocessors
+### Chaining preprocessors
 
 Combine multiple preprocessors:
 
@@ -279,11 +269,9 @@ chained = ChainedPreprocessor(preprocessors)
 X_transformed = chained.fit_transform(X_train, y_train)
 ```
 
----
+## Feature engineering examples
 
-## 5. Feature Engineering Examples
-
-### 5.1 Polynomial Features
+### Polynomial features
 
 ```python
 from sklearn.preprocessing import PolynomialFeatures
@@ -319,7 +307,7 @@ class PolynomialPreprocessor(BasePreprocessor):
         )
 ```
 
-### 5.2 Statistical Features
+### Statistical features
 
 ```python
 class StatisticalFeaturePreprocessor(BasePreprocessor):
@@ -353,7 +341,7 @@ class StatisticalFeaturePreprocessor(BasePreprocessor):
         return X_transformed
 ```
 
-### 5.3 Text Feature Extraction
+### Text feature extraction
 
 ```python
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -399,11 +387,9 @@ class TextFeaturePreprocessor(BasePreprocessor):
         return X_transformed
 ```
 
----
+## Integration with scikit-learn
 
-## 6. Integration with scikit-learn
-
-### 6.1 Use scikit-learn Transformers
+### Use scikit-learn transformers
 
 ```python
 from sklearn.pipeline import Pipeline
@@ -441,11 +427,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Validation and monitoring
 
-## 7. Validation and Monitoring
-
-### 7.1 Validation Framework
+### Validation framework
 
 ```python
 class ValidatingPreprocessor(BasePreprocessor):
@@ -470,10 +454,10 @@ class ValidatingPreprocessor(BasePreprocessor):
         
         for name, passed in validation_results.items():
             if not passed:
-                print(f"⚠️ Validation failed: {name}")
+                print(f"Validation failed: {name}")
 ```
 
-### 7.2 Data Quality Checks
+### Data quality checks
 
 ```python
 class DataQualityValidator:
@@ -504,11 +488,9 @@ numeric_columns_exist = DataQualityValidator(
 )
 ```
 
----
+## Performance optimization
 
-## 8. Performance Optimization
-
-### 8.1 Caching Transformed Data
+### Caching transformed data
 
 ```python
 from functools import lru_cache
@@ -550,7 +532,7 @@ class CachedPreprocessor(BasePreprocessor):
         return X
 ```
 
-### 8.2 Parallel Processing
+### Parallel processing
 
 ```python
 from joblib import Parallel, delayed
@@ -585,11 +567,9 @@ class ParallelPreprocessor(BasePreprocessor):
         return batch
 ```
 
----
+## Testing custom preprocessors
 
-## 9. Testing Custom Preprocessors
-
-### 9.1 Unit Tests
+### Unit tests
 
 ```python
 import unittest
@@ -641,34 +621,7 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
----
-
-## 10. Best Practices
-
-### ✅ Do's
-
-- ✅ Inherit from `BasePreprocessor`
-- ✅ Implement `fit()` and `transform()`
-- ✅ Prevent data leakage (fit on train only)
-- ✅ Return DataFrames with proper indices
-- ✅ Document configuration parameters
-- ✅ Handle edge cases (empty data, NaNs)
-- ✅ Test thoroughly
-- ✅ Cache expensive computations
-
-### ❌ Don'ts
-
-- ❌ Don't modify input data in-place
-- ❌ Don't fit on test data
-- ❌ Don't hardcode column names
-- ❌ Don't ignore NaN values silently
-- ❌ Don't create state in `transform()`
-- ❌ Don't forget to preserve index
-- ❌ Don't skip error handling
-
----
-
-## 11. Real-World Example: Complete Custom Pipeline
+## Real-world example: complete custom pipeline
 
 ```python
 class ComprehensivePreprocessor(BasePreprocessor):
@@ -732,15 +685,3 @@ pipeline = TabularPipeline(
     processor_params={'custom_preprocessor': preprocessor}
 )
 ```
-
----
-
-## 12. Next Steps
-
-- [Data Processing](../user-guide/data-processing.md) - Standard preprocessing
-- [API Reference](../api/data-processor.md) - DataProcessor API
-- [Examples](../examples/classification.md) - Full examples with custom preprocessing
-
----
-
-Extend TabTune's preprocessing with custom transformers tailored to your domain!

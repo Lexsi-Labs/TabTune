@@ -1,12 +1,8 @@
-# Memory Optimization: Techniques for Training Large Models
+# Memory Optimization
 
-This document provides comprehensive strategies for optimizing memory usage when training TabTune models, enabling efficient use of limited GPU/CPU resources.
+## Introduction
 
----
-
-## 1. Introduction
-
-Memory optimization is critical for:
+Where the memory goes in a TabTune run, and what to do when it runs out. This matters when you are:
 
 - Training on GPUs with limited VRAM (< 8GB)
 - Processing large datasets (100K+ rows)
@@ -14,13 +10,11 @@ Memory optimization is critical for:
 - Running multiple experiments simultaneously
 - Deploying in resource-constrained environments
 
-This guide covers techniques, tools, and trade-offs for memory efficiency.
 
----
 
-## 2. Memory Profiling
+## Memory profiling
 
-### 2.1 Understanding Memory Usage
+### Understanding memory usage
 
 **Memory Breakdown** (typical forward/backward pass):
 
@@ -34,9 +28,9 @@ DataLoader buffers:   5-10%
 Total:               100%
 ```
 
-### 2.2 Profiling Tools
+### Profiling tools
 
-#### PyTorch Memory Profiler
+#### PyTorch memory profiler
 
 ```python
 import torch
@@ -63,7 +57,7 @@ with profile(
 print(prof.key_averages().table(sort_by="cuda_memory_usage"))
 ```
 
-#### Memory Monitoring Script
+#### Memory monitoring script
 
 ```python
 import psutil
@@ -111,11 +105,9 @@ for epoch in range(num_epochs):
 monitor.report()
 ```
 
----
+## Optimization techniques
 
-## 3. Optimization Techniques
-
-### 3.1 PEFT (LoRA) - Primary Technique
+### PEFT (LoRA) - primary technique
 
 **Impact**: 60-90% memory reduction
 
@@ -123,7 +115,7 @@ monitor.report()
 # Base fine-tuning: high memory
 pipeline_base = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={'device': 'cuda', 'epochs': 5}
 )
 # Memory: ~12 GB for 100K samples
@@ -166,7 +158,7 @@ peft_config = {
 }
 ```
 
-### 3.2 Batch Size Reduction
+### Batch size reduction
 
 **Impact**: 20-40% memory reduction per halving
 
@@ -197,7 +189,7 @@ tuning_params = {
 - Smaller batch: More gradient noise, longer convergence
 - Larger batch: Faster convergence, higher memory
 
-### 3.3 Gradient Accumulation
+### Gradient accumulation
 
 Simulate larger batch without increased memory:
 
@@ -213,7 +205,7 @@ tuning_params = {
 # Effective batch size benefit: batch_size=32
 ```
 
-### 3.4 Mixed Precision Training
+### Mixed precision training
 
 **Impact**: 20-30% memory reduction
 
@@ -255,7 +247,7 @@ scaler.step(optimizer)
 scaler.update()
 ```
 
-### 3.5 Gradient Checkpointing
+### Gradient checkpointing
 
 Trade computation for memory:
 
@@ -269,7 +261,7 @@ tuning_params = {
 # Computation increase: ~20-30% (recompute activations)
 ```
 
-### 3.6 Data Loading Optimization
+### Data loading optimization
 
 ```python
 # Efficient data loading
@@ -289,7 +281,7 @@ tuning_params = {
 }
 ```
 
-### 3.7 Model Architecture Reduction
+### Model architecture reduction
 
 Reduce model complexity:
 
@@ -316,11 +308,9 @@ model_params = {
 }
 ```
 
----
+## Optimization strategies by constraint
 
-## 4. Optimization Strategies by Constraint
-
-### 4.1 Severe Constraint (2GB GPU)
+### Severe constraint (2GB GPU)
 
 ```python
 pipeline = TabularPipeline(
@@ -348,7 +338,7 @@ pipeline = TabularPipeline(
 )
 ```
 
-### 4.2 Moderate Constraint (4GB GPU)
+### Moderate constraint (4GB GPU)
 
 ```python
 pipeline = TabularPipeline(
@@ -372,12 +362,12 @@ pipeline = TabularPipeline(
 )
 ```
 
-### 4.3 Comfortable (8GB+ GPU)
+### Comfortable (8GB+ GPU)
 
 ```python
 pipeline = TabularPipeline(
     model_name='TabICL',
-    tuning_strategy='base-ft',  # Full fine-tuning possible
+    tuning_strategy='finetune',  # Full fine-tuning possible
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -391,11 +381,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Advanced techniques
 
-## 5. Advanced Techniques
-
-### 5.1 Activation Checkpointing
+### Activation checkpointing
 
 ```python
 import torch.utils.checkpoint as checkpoint
@@ -416,7 +404,7 @@ class CheckpointedModel(torch.nn.Module):
         )
 ```
 
-### 5.2 Quantization
+### Quantization
 
 Reduce model precision:
 
@@ -435,7 +423,7 @@ def quantize_model(model, backend='fbgemm'):
 quantized_pipeline = quantize_model(pipeline.model)
 ```
 
-### 5.3 Parameter Sharing
+### Parameter sharing
 
 Share weights across layers:
 
@@ -454,13 +442,13 @@ class ParameterSharingModel(torch.nn.Module):
         return x
 ```
 
-### 5.4 Knowledge Distillation
+### Knowledge distillation
 
 Train smaller student model from larger teacher:
 
 ```python
 # Large teacher model (high accuracy)
-teacher = TabularPipeline(model_name='TabDPT', tuning_strategy='base-ft')
+teacher = TabularPipeline(model_name='TabDPT', tuning_strategy='finetune')
 teacher.fit(X_train, y_train)
 
 # Small student model (low memory)
@@ -479,11 +467,9 @@ for batch in dataloader:
     # ... optimize ...
 ```
 
----
+## Memory-time trade-offs
 
-## 6. Memory-Time Trade-offs
-
-### 6.1 Time-Memory Pareto Frontier
+### Time-memory Pareto frontier
 
 ```python
 configurations = [
@@ -519,7 +505,7 @@ configurations = [
 ]
 ```
 
-### 6.2 Choosing Configuration
+### Choosing configuration
 
 ```python
 def choose_config(gpu_memory_gb, time_budget_hours):
@@ -538,11 +524,9 @@ def choose_config(gpu_memory_gb, time_budget_hours):
 config = choose_config(gpu_memory_gb=6, time_budget=4)
 ```
 
----
+## Monitoring during training
 
-## 7. Monitoring During Training
-
-### 7.1 Real-time Memory Tracking
+### Real-time memory tracking
 
 ```python
 import logging
@@ -596,11 +580,9 @@ for batch in dataloader:
 tracker.plot()
 ```
 
----
+## Debugging memory issues
 
-## 8. Debugging Memory Issues
-
-### 8.1 OOM (Out of Memory) Error Handling
+### OOM (out of memory) error handling
 
 ```python
 def safe_train(model, dataloader, max_retries=3):
@@ -637,7 +619,7 @@ def safe_train(model, dataloader, max_retries=3):
     raise RuntimeError(f"Failed after {max_retries} attempts")
 ```
 
-### 8.2 Memory Leak Detection
+### Memory leak detection
 
 ```python
 import tracemalloc
@@ -659,9 +641,7 @@ for stat in top_stats[:10]:
     print(stat)
 ```
 
----
-
-## 9. Complete Example: Memory-Optimized Training
+## Complete example: memory-optimized training
 
 ```python
 from tabtune import TabularPipeline
@@ -694,7 +674,7 @@ def memory_optimized_training(
         rank = 8
     
     # Create pipeline
-    strategy = 'peft' if use_peft else 'base-ft'
+    strategy = 'peft' if use_peft else 'finetune'
     
     tuning_params = {
         'device': 'cuda',
@@ -739,11 +719,9 @@ pipeline = memory_optimized_training(
 )
 ```
 
----
+## Quick reference
 
-## 10. Quick Reference
-
-### Memory Reduction Techniques (by impact)
+### Memory reduction techniques (by impact)
 
 | Technique | Memory Saving | Time Overhead | Effort |
 |-----------|---------------|---------------|--------|
@@ -753,38 +731,3 @@ pipeline = memory_optimized_training(
 | Gradient accumulation | 0% | 0% | Low |
 | Gradient checkpoint | 30-50% | 20-30% | Medium |
 | Quantization | 75% | 5-10% | High |
-
----
-
-## 11. Best Practices
-
-### ✅ Do's
-
-- ✅ Profile memory before optimization
-- ✅ Use PEFT for memory-constrained environments
-- ✅ Start with small batch sizes
-- ✅ Use mixed precision when possible
-- ✅ Monitor memory during training
-- ✅ Empty cache between experiments
-- ✅ Use gradient accumulation for large effective batches
-
-### ❌ Don'ts
-
-- ❌ Don't forget to clear cache between runs
-- ❌ Don't use full precision when half works
-- ❌ Don't load entire dataset to memory
-- ❌ Don't tune without monitoring memory
-- ❌ Don't ignore OOM errors
-
----
-
-## 12. Next Steps
-
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - PEFT details
-- [PEFT & LoRA](peft-lora.md) - Memory-efficient fine-tuning
-- [Advanced Topics](peft-lora.md) - Advanced optimizations
-- [Multi-GPU](multi-gpu.md) - Distributed training
-
----
-
-Optimize memory strategically to train powerful models on limited resources!

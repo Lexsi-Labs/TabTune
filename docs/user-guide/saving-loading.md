@@ -1,12 +1,8 @@
-# Saving and Loading Pipelines
+# Saving and Loading
 
-This guide explains how to persist TabTune pipelines for production deployment, reproducibility, and continued training.
+## Overview
 
----
-
-## 1. Overview
-
-TabTune supports multiple serialization formats for different use cases:
+`pipe.save(path)` writes the fitted preprocessor, the weights (or the LoRA adapters) and the configuration; `TabularPipeline.load(path)` brings it back without refitting. Three formats:
 
 | Format | Extension | Use Case | Size | Compatibility |
 |--------|-----------|----------|------|---------------|
@@ -14,11 +10,9 @@ TabTune supports multiple serialization formats for different use cases:
 | **PyTorch** | `.pt` | Model weights only | ~50-200MB | PyTorch ecosystems |
 | **Checkpoint** | `.pt` | Training resume, intermediate states | ~50-200MB | Development |
 
----
+## Pipeline serialization (joblib)
 
-## 2. Pipeline Serialization (joblib)
-
-### 2.1 Saving a Pipeline
+### Saving a pipeline
 
 Save the complete fitted pipeline including model, preprocessor, and configuration:
 
@@ -38,15 +32,14 @@ pipeline.save('my_pipeline.joblib')
 ```
 
 **What Gets Saved**:
-- ✅ Trained model weights
-- ✅ DataProcessor state (imputer, encoder, scaler)
-- ✅ Model configuration
-- ✅ Tuning parameters
-- ✅ Label encoder for target variable
-- ✅ PEFT adapter weights (if applicable)
+- Trained model weights
+- DataProcessor state (imputer, encoder, scaler)
+- Model configuration
+- Tuning parameters
+- Label encoder for target variable
+- PEFT adapter weights (if applicable)
 
-
-### 2.2 Loading a Pipeline
+### Loading a pipeline
 
 Load a saved pipeline for inference or continued training:
 
@@ -63,7 +56,7 @@ predictions = loaded_pipeline.predict(X_test)
 loaded_pipeline.fit(X_new_train, y_new_train)
 ```
 
-### 2.3 Size Optimization
+### Size optimization
 
 If pipeline file is too large, compress it:
 
@@ -77,13 +70,11 @@ joblib.dump(pipeline, 'my_pipeline.joblib', compress=3)  # compression=0-9
 pipeline = joblib.load('my_pipeline.joblib')
 ```
 
----
-
-## 3. Model-Only Serialization (PyTorch)
+## Model-only serialization (PyTorch)
 
 For minimal storage or deployment, save only model weights:
 
-### 3.1 Saving Model Weights
+### Saving model Weights
 
 ```python
 import torch
@@ -92,7 +83,7 @@ import torch
 torch.save(pipeline.model.state_dict(), 'model_weights.pt')
 ```
 
-### 3.2 Loading Model Weights
+### Loading model Weights
 
 ```python
 import torch
@@ -113,27 +104,25 @@ predictions = new_pipeline.predict(X_test)
 ```
 
 **Advantages**:
-- ✅ Smaller file size (50-200MB)
-- ✅ Faster loading
-- ✅ Cross-platform compatible
+- Smaller file size (50-200MB)
+- Faster loading
+- Cross-platform compatible
 
 **Disadvantages**:
-- ❌ Requires manual DataProcessor setup
-- ❌ Must know original configuration
-- ❌ No automatic version compatibility
+- Requires manual DataProcessor setup
+- Must know original configuration
+- No automatic version compatibility
 
----
-
-## 4. Checkpoint Management
+## Checkpoint management
 
 For long training runs, save intermediate checkpoints:
 
-### 4.1 Automatic Checkpointing During Training
+### Automatic checkpointing during training
 
 ```python
 pipeline = TabularPipeline(
     model_name='TabDPT',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 20,
@@ -152,8 +141,7 @@ pipeline.fit(X_train, y_train)
 # checkpoints/checkpoint_epoch_20.pt
 ```
 
-
-### 4.2 Best Checkpoint Tracking
+### Best checkpoint tracking
 
 ```python
 import os
@@ -177,13 +165,11 @@ for checkpoint_file in checkpoint_dir.glob('*.pt'):
 print(f"Best checkpoint: {best_checkpoint} with score {best_score:.4f}")
 ```
 
----
-
-## 5. PEFT-Specific Serialization
+## PEFT-specific serialization
 
 When using PEFT (LoRA), save and manage adapter weights:
 
-### 5.1 Save with PEFT Adapters
+### Save with PEFT adapters
 
 ```python
 # Train with PEFT
@@ -202,7 +188,7 @@ pipeline.fit(X_train, y_train)
 pipeline.save('peft_pipeline.joblib')
 ```
 
-### 5.2 Load PEFT Pipeline
+### Load PEFT pipeline
 
 ```python
 # Load includes automatic adapter reconstruction
@@ -212,7 +198,7 @@ pipeline = TabularPipeline.load('peft_pipeline.joblib')
 predictions = pipeline.predict(X_test)
 ```
 
-### 5.3 Extract LoRA Adapters Only
+### Extract LoRA adapters only
 
 ```python
 import torch
@@ -226,13 +212,11 @@ if hasattr(pipeline.model, 'lora_A') and hasattr(pipeline.model, 'lora_B'):
     torch.save(adapter_state, 'adapters.pt')
 ```
 
----
-
-## 6. Configuration Serialization
+## Configuration serialization
 
 Save pipeline configuration for reproducibility:
 
-### 6.1 Save Configuration to YAML
+### Save configuration to YAML
 
 ```python
 import yaml
@@ -271,7 +255,7 @@ model_params:
   n_estimators: 16
 ```
 
-### 6.2 Load Pipeline from Configuration
+### Load pipeline from configuration
 
 ```python
 import yaml
@@ -285,41 +269,16 @@ with open('pipeline_config.yaml', 'r') as f:
 pipeline = TabularPipeline(**config)
 ```
 
----
+## Troubleshooting
 
-
-## 7. Best Practices
-
-### ✅ Do's
-
-- ✅ Save full pipelines for production deployment
-- ✅ Use checkpoints for long training runs
-- ✅ Store configuration separately for reproducibility
-- ✅ Version control YAML/JSON configs
-- ✅ Keep multiple backups at different timestamps
-- ✅ Document model metadata and creation date
-- ✅ Test loading on different systems
-
-### ❌ Don'ts
-
-- ❌ Don't save only model weights without config
-- ❌ Don't overwrite checkpoints without backup
-- ❌ Don't forget to compress large pipelines
-- ❌ Don't hardcode paths in production code
-- ❌ Don't commit large `.joblib` files to git (use git-lfs)
-
----
-
-## 8. Troubleshooting
-
-### Issue: "ModuleNotFoundError when loading pipeline"
-**Solution**: Ensure TabTune is installed in the target environment
+### "ModuleNotFoundError when loading pipeline"
+**Solution**: Make sure TabTune is installed in the target environment
 
 ```bash
 pip install tabtune
 ```
 
-### Issue: "Pickle protocol version mismatch"
+### "Pickle protocol version mismatch"
 **Solution**: Use compatible Python and PyTorch versions
 
 ```python
@@ -328,7 +287,7 @@ import joblib
 joblib.dump(pipeline, 'compatible.joblib', protocol=2)
 ```
 
-### Issue: "CUDA error when loading on CPU"
+### "CUDA error when loading on CPU"
 **Solution**: Specify device when loading
 
 ```python
@@ -336,16 +295,14 @@ pipeline = TabularPipeline.load('pipeline.joblib')
 pipeline.model = pipeline.model.to('cpu')
 ```
 
-### Issue: "Pipeline file corrupted or incomplete"
+### "Pipeline file corrupted or incomplete"
 **Solution**: Restore from backup
 
 ```python
 restored = TabularPipeline.load('backups/pipeline_backup_20250101_120000.joblib')
 ```
 
----
-
-## 9. Summary Table
+## Summary table
 
 | Task | Method | File Size | Compatibility |
 |------|--------|-----------|---|
@@ -354,15 +311,3 @@ restored = TabularPipeline.load('backups/pipeline_backup_20250101_120000.joblib'
 | Configuration only | YAML/JSON | <1MB | Any language |
 | Training checkpoint | `.pt` | ~150MB | Development |
 | Production package | `.joblib` + config | ~300MB+ | Python |
-
----
-
-## 10. Next Steps
-
-- [Advanced Topics](../advanced/memory-optimization.md) - Optimize for deployment
-- [API Reference](../api/pipeline.md) - Complete API documentation
-- [Examples](../examples/classification.md) - Real-world examples
-
----
-
-Properly saving and loading pipelines ensures reproducibility, enables production deployment, and protects your trained models!

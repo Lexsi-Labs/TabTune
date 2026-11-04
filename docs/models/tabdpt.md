@@ -1,28 +1,24 @@
-# TabDPT: Tabular Denoising Pre-trained Transformer
+# TabDPT
 
-TabDPT is a large-scale tabular model pre-trained via denoising objectives on diverse datasets. This document provides comprehensive guidance for using TabDPT with TabTune for maximum scalability and robustness.
+TabDPT (Layer 6) was pretrained with a denoising objective on real datasets rather than synthetic ones, and at inference it retrieves the nearest training rows as context instead of reading the whole table. That retrieval is why it scales to millions of rows.
 
----
+## Introduction
 
-## 1. Introduction
+**TabDPT**
 
-**What is TabDPT?**
+It is built for:
 
-TabDPT (Tabular Denoising Pre-trained Transformer) is a state-of-the-art model designed for:
+- Large-Scale Learning: Scales to datasets with millions of samples
+- Reliable Feature Learning: Pre-trained on denoising objectives
+- Noise Resilience: Handles missing and corrupted features
+- Context-Aware Predictions: k-NN based context selection
+- Strong Generalization: Pre-trained on diverse tabular corpora
 
-- **Large-Scale Learning**: Scales to datasets with millions of samples
-- **Robust Feature Learning**: Pre-trained on denoising objectives
-- **Noise Resilience**: Handles missing and corrupted features
-- **Context-Aware Predictions**: k-NN based context selection
-- **Strong Generalization**: Pre-trained on diverse tabular corpora
+The idea: pretraining by masked feature prediction on real tables, which gives feature representations that carry over to new tasks.
 
-**Key Innovation**: Pre-training via masked feature prediction (denoising) enables robust feature representations and strong generalization to new tasks.
+## Architecture
 
----
-
-## 2. Architecture
-
-### 2.1 High-Level Design
+### High-level design
 
 ```mermaid
 flowchart LR
@@ -41,31 +37,31 @@ flowchart LR
 <!-- ### 2.2 Core Components
 
 1. **Masking/Noising Layer**
-   - Masks random features during training
-   - Simulates missing data
-   - Improves robustness
+ - Masks random features during training
+ - Simulates missing data
+ - Improves reliability
 
 2. **Transformer Encoder** (`transformer_encoder`)
-   - Encodes input features
-   - Multi-head self-attention
-   - Position-wise feedforward
+ - Encodes input features
+ - Multi-head self-attention
+ - Position-wise feedforward
 
 3. **Context Retrieval** (k-NN)
-   - Finds k nearest neighbors in training data
-   - Provides contextual information
-   - Improves predictions
+ - Finds k nearest neighbors in training data
+ - Provides contextual information
+ - Improves predictions
 
 4. **Transformer Decoder** (`decoder`)
-   - Reconstructs features from context
-   - Attention over context
-   - Feature-level modeling
+ - Reconstructs features from context
+ - Attention over context
+ - Feature-level modeling
 
 5. **Prediction Head** (`head`)
-   - Aggregates representations
-   - Outputs class logits
-   - Task-specific predictions -->
+ - Aggregates representations
+ - Outputs class logits
+ - Task-specific predictions -->
 
-### 2.3 Pre-training Strategy
+### Pre-training strategy
 
 ```
 Pre-training Phase (on diverse data):
@@ -81,11 +77,9 @@ Fine-tuning Phase (on your task):
   3. Use pre-trained encoder
 ```
 
----
+## Inference parameters
 
-## 3. Inference Parameters
-
-### 3.1 Complete Parameter Reference
+### Complete parameter reference
 
 ```python
 model_params = {
@@ -111,7 +105,7 @@ model_params = {
 }
 ```
 
-### 3.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -126,15 +120,15 @@ model_params = {
 | `temperature` | float | 0.3 | 0.1-1.0 | Output temperature |
 | `use_pretrain` | bool | True | True/False | Use pre-trained weights |
 
-### 3.3 Architecture Tuning
+### Architecture tuning
 
 | Config | Speed | Accuracy | Memory | Best For |
 |--------|-------|----------|--------|----------|
-| Small: d=128, layers=2 | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐ | Quick baseline |
-| Medium: d=256, layers=4 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | Balanced |
-| Large: d=512, layers=8 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Max accuracy |
+| Small: d=128, layers=2 | | | | Quick baseline |
+| Medium: d=256, layers=4 | | | | Balanced |
+| Large: d=512, layers=8 | | | | Max accuracy |
 
-### 3.4 Context Modes
+### Context modes
 
 ```python
 context_modes = {
@@ -146,13 +140,11 @@ context_modes = {
 model_params = {'context_mode': 'mixed'}
 ```
 
----
-
-## 4. Fine-Tuning with TabDPT
+## Fine-tuning with TabDPT
 
 TabDPT uses **episodic fine-tuning** with large context windows.
 
-### 4.1 Fine-Tuning Parameters
+### Fine-tuning parameters
 
 ```python
 tuning_params = {
@@ -175,7 +167,7 @@ tuning_params = {
 }
 ```
 
-### 4.2 Key Parameters
+### Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -184,7 +176,7 @@ tuning_params = {
 | `steps_per_epoch` | int | 15 | Optimization steps |
 | `batch_size` | int | 32 | Samples per batch |
 
-### 4.3 Fine-Tuning Guidelines
+### Fine-tuning guidelines
 
 **Large Context Windows**:
 ```python
@@ -206,7 +198,7 @@ tuning_params = {
 - Typically 3-5 epochs sufficient
 - Convergence faster than TabICL
 
-### 4.4 Dataset Recommendations
+### Dataset recommendations
 
 ```python
 # TabDPT shines with large datasets
@@ -218,9 +210,7 @@ dataset_sizes = {
 }
 ```
 
----
-
-## 5. LoRA Target Modules
+## LoRA target modules
 
 When using PEFT, TabDPT targets these modules:
 
@@ -233,7 +223,7 @@ target_modules = [
 ]
 ```
 
-### 5.1 Default PEFT Configuration
+### Default PEFT configuration
 
 ```python
 peft_config = {
@@ -244,7 +234,7 @@ peft_config = {
 }
 ```
 
-### 5.2 PEFT for Large Models
+### PEFT for large models
 
 ```python
 # PEFT works well with TabDPT's large architecture
@@ -261,11 +251,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Usage patterns
 
-## 6. Usage Patterns
-
-### 6.1 Inference Only
+### Inference only
 
 ```python
 from tabtune import TabularPipeline
@@ -279,13 +267,13 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-### 6.2 Base Fine-Tuning on Large Dataset
+### Base fine-tuning on large Dataset
 
 ```python
 # TabDPT excels with large datasets
 pipeline = TabularPipeline(
     model_name='TabDPT',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,
@@ -302,7 +290,7 @@ pipeline.fit(X_train, y_train)  # 100K+ samples ideal
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 6.3 PEFT Fine-Tuning
+### PEFT fine-tuning
 
 ```python
 pipeline = TabularPipeline(
@@ -325,11 +313,9 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
----
+## Complete examples
 
-## 7. Complete Examples
-
-### 7.1 Large Dataset Workflow
+### Large Dataset workflow
 
 ```python
 from tabtune import TabularPipeline
@@ -349,7 +335,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Train TabDPT
 pipeline = TabularPipeline(
     model_name='TabDPT',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,
@@ -368,7 +354,7 @@ print(f"Accuracy: {metrics['accuracy']:.4f}")
 print(f"Training completed on {len(X_train)} samples")
 ```
 
-### 7.2 Production Model with PEFT - Saving using joblib
+### Production model with PEFT - saving using joblib
 
 ```python
 # PEFT for production deployment
@@ -391,7 +377,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 pipeline.save('tabdpt_production.joblib')
 ```
 
-### 7.3 Architecture Comparison
+### Architecture comparison
 
 ```python
 from tabtune import TabularLeaderboard
@@ -402,7 +388,7 @@ lb = TabularLeaderboard(X_train, X_test, y_train, y_test)
 # Small
 lb.add_model(
     'TabDPT',
-    'base-ft',
+    'finetune',
     name='TabDPT-Small',
     model_params={'d_model': 128, 'num_layers': 2},
     tuning_params={'epochs': 3}
@@ -411,7 +397,7 @@ lb.add_model(
 # Medium
 lb.add_model(
     'TabDPT',
-    'base-ft',
+    'finetune',
     name='TabDPT-Medium',
     model_params={'d_model': 256, 'num_layers': 4},
     tuning_params={'epochs': 3}
@@ -420,7 +406,7 @@ lb.add_model(
 # Large
 lb.add_model(
     'TabDPT',
-    'base-ft',
+    'finetune',
     name='TabDPT-Large',
     model_params={'d_model': 512, 'num_layers': 8},
     tuning_params={'epochs': 3}
@@ -428,8 +414,6 @@ lb.add_model(
 
 lb.run(rank_by='accuracy')
 ```
-
----
 
 <!-- ## 8. Performance Characteristics -->
 
@@ -442,7 +426,7 @@ lb.run(rank_by='accuracy')
 | Fine-tuning (PEFT, 1M) | 30-45m | Better efficiency |
 | Prediction latency | 50-200ms | Per sample with context |
 
-### 8.2 Memory Usage
+### Memory usage
 
 | Scenario | Memory | GPU VRAM |
 |----------|--------|---------|
@@ -451,7 +435,7 @@ lb.run(rank_by='accuracy')
 | PEFT | 10-14 GB | 8GB sufficient |
 | Large model | Up to 32 GB | 16GB+ needed |
 
-### 8.3 Scalability
+### Scalability
 
 | Dataset Size | Training Time | Memory |
 |--------------|---------------|--------|
@@ -460,42 +444,20 @@ lb.run(rank_by='accuracy')
 | 5M | 200-300m | 24-32GB |
 | 10M+ | 500m+ | 32GB+ |
 
-### 8.4 Accuracy Profile
+### Accuracy profile
 
 | Dataset Size | Accuracy |
 |--------------|----------|
 | Small (10K) | 82% (not optimal) |
 | Medium (100K) | 90% (good) |
-| Large (1M) | 92% (excellent) |
+| Large (1M) | 92% |
 | Very Large (5M+) | 93%+ (best) |
 
 --- -->
 
-## 9. Best Practices
+## Troubleshooting
 
-### ✅ Do's
-
-- ✅ Use large context windows (support_size >= 512)
-- ✅ Use on datasets with 100K+ samples
-- ✅ Leverage pre-trained weights
-- ✅ Use few epochs (3-5) due to pre-training
-- ✅ Monitor for overfitting with regularization
-- ✅ Use PEFT for faster training
-- ✅ Include k-NN context
-
-### ❌ Don'ts
-
-- ❌ Don't use on small datasets (<10K)
-- ❌ Don't use without pre-training
-- ❌ Don't train for too many epochs
-- ❌ Don't use small context windows
-- ❌ Don't disable masking (helps robustness)
-
----
-
-## 10. Troubleshooting
-
-### Issue: "Context retrieval slow"
+### "Context retrieval slow"
 **Solution**: Reduce k_neighbors or use approximate k-NN
 ```python
 model_params = {
@@ -504,7 +466,7 @@ model_params = {
 }
 ```
 
-### Issue: "Out of memory with large support_size"
+### "Out of memory with large support_size"
 **Solution**: Use PEFT or reduce support size
 ```python
 tuning_params = {
@@ -513,7 +475,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Accuracy plateauing"
+### "Accuracy plateauing"
 **Solution**: Increase training budget
 ```python
 tuning_params = {
@@ -523,7 +485,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Prediction latency too high"
+### "Prediction latency too high"
 **Solution**: Use smaller ensemble
 ```python
 model_params = {
@@ -532,9 +494,7 @@ model_params = {
 }
 ```
 
----
-
-## 11. Comparison with Other Models
+## Comparison with other models
 
 | Aspect | TabDPT | TabICL | Mitra | TabPFN |
 |--------|--------|--------|-------|--------|
@@ -544,31 +504,29 @@ model_params = {
 | Speed | Slow | Fast | Slow | Fastest |
 | Memory | High | Moderate | Very High | Low |
 | Pre-training | Yes | No | No | Yes |
-| PEFT | ✅ Full | ✅ Full | ✅ Full | ⚠️ Exp |
+| PEFT | Full | Full | Full | Exp |
 
----
-
-## 12. When to Use TabDPT
+## When to use TabDPT
 
 **Use TabDPT when**:
-- ✅ Dataset has 100K+ samples
-- ✅ Maximum accuracy is priority
-- ✅ Data has missing/noisy values
-- ✅ You have sufficient memory
-- ✅ Training time is not critical
-- ✅ Deployment can handle context retrieval
+- Dataset has 100K+ samples
+- Maximum accuracy is priority
+- Data has missing/noisy values
+- You have sufficient memory
+- Training time is not critical
+- Deployment can handle context retrieval
 
 **Don't use TabDPT for**:
-- ❌ Small datasets (<50K)
-- ❌ When prediction speed critical
-- ❌ Very memory-constrained systems
-- ❌ When training time is limited
+- Small datasets (<50K)
+- When prediction speed critical
+- Very memory-constrained systems
+- When training time is limited
 
 <!-- ---
 
-## 13. Advanced Topics
+## Advanced topics
 
-### 13.1 k-NN Optimization
+### k-NN optimization
 
 ```python
 # Experiment with k_neighbors
@@ -580,7 +538,7 @@ for k in [1, 3, 5, 10]:
     # Evaluate...
 ```
 
-### 13.2 Masking Strategy Tuning
+### Masking strategy tuning
 
 ```python
 # Adjust masking ratio for robustness
@@ -590,7 +548,7 @@ model_params = {
 }
 ```
 
-### 13.3 Feature Importance
+### Feature importance
 
 ```python
 # Use attention weights for feature importance
@@ -601,27 +559,13 @@ top_features = np.argsort(feature_importance)[-10:]
 ```
 
 --- -->
----
 
-## 14. Quick Reference
+## Quick reference
 
 | Use Case | Strategy | Config | Support |
 |----------|----------|--------|---------|
 | Baseline | inference | default | 1024 |
-| Production (1M data) | base-ft | default | 1024 |
+| Production (1M data) | finetune | default | 1024 |
 | Memory limited | peft | r=8 | 512 |
-| Max accuracy | base-ft | large model | 2048 |
+| Max accuracy | finetune | large model | 2048 |
 | Fast inference | peft | r=4 | 256 |
-
----
-
-## 15. Next Steps
-
-- [Model Selection](../user-guide/model-selection.md) - Compare with other models
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Fine-tuning details
-- [Advanced PEFT](../advanced/peft-lora.md) - LoRA optimization
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Benchmark TabDPT
-
----
-
-TabDPT excels at large-scale tabular learning with pre-trained robustness. Use it for production systems with millions of samples!

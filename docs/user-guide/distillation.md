@@ -1,27 +1,23 @@
-# TabTune Distillation Module
+# Distillation
 
-## 1. Overview
+## Overview
 
-The TabTune Distillation module compresses any tabular foundation model (TFM) into a lightweight, production-deployable student using **model-agnostic soft-label knowledge distillation**. It requires only `predict_proba()` — no access to model internals, gradients, or architecture details.
+`TabDistiller` compresses a tabular foundation model into a student you can serve without a GPU: LightGBM, XGBoost, CatBoost or an MLP, trained on the teacher's soft labels.
 
-The core algorithm uses **k-fold cross-prediction** to generate out-of-fold soft labels, which prevents *ICL identity leakage* — the failure mode where in-context learning models label their own training data, producing artificially overconfident soft targets that mislead the student.
+The core algorithm uses **k-fold cross-prediction** to generate out-of-fold soft labels, which prevents *ICL identity leakage*, the failure mode where in-context learning models label their own training data, producing artificially overconfident soft targets that mislead the student.
 
-The module integrates seamlessly with TabTune's `TabularPipeline` and follows TabTune's conventions for configuration, fitting, prediction, and evaluation.
+### What it does
 
-### Key Features
+- **Model-agnostic**, works with any TFM that exposes `predict_proba()`: TabPFNv2.6, TabICLv2, TabDPT, Mitra, and others.
+- **Four student backends**, `mlp`, `lgbm`, `xgb`/`xgboost`, `catboost`/`cb`.
+- **K-fold cross-prediction**, eliminates ICL identity leakage by making sure teachers never label their own training samples.
+- **Adaptive temperature**, per-sample temperature scaling based on teacher entropy, rather than a single global `T`.
+- **Confidence weighting**, bell-shaped sample weighting that focuses student training on the clearest teacher signals.
+- **Multi-teacher distillation**, averages soft labels across multiple TFMs before training the student.
+- **Deployment-ready**, `save()` strips the teacher entirely; the serialised student has no TFM dependency.
+- **Advanced strategies**, progressive/curriculum distillation, post-hoc calibration, and self-distillation available via `tabtune.distillation.strategies`.
 
-- **Model-agnostic** — works with any TFM that exposes `predict_proba()`: TabPFNv2.6, TabICLv2, TabDPT, Mitra, and others.
-- **Four student backends** — `mlp`, `lgbm`, `xgb`/`xgboost`, `catboost`/`cb`.
-- **K-fold cross-prediction** — eliminates ICL identity leakage by ensuring teachers never label their own training samples.
-- **Adaptive temperature** — per-sample temperature scaling based on teacher entropy, rather than a single global `T`.
-- **Confidence weighting** — bell-shaped sample weighting that focuses student training on the clearest teacher signals.
-- **Multi-teacher distillation** — averages soft labels across multiple TFMs before training the student.
-- **Deployment-ready** — `save()` strips the teacher entirely; the serialised student has no TFM dependency.
-- **Advanced strategies** — progressive/curriculum distillation, post-hoc calibration, and self-distillation available via `tabtune.distillation.strategies`.
-
----
-
-## 2. Installation & Setup
+## Installation & setup
 
 The distillation module lives under `tabtune/distillation/` and is imported as:
 
@@ -44,7 +40,7 @@ from tabtune.distillation import TabDistiller
 | `torch` | Optional | `student="mlp"` backend |
 | `tabtune` | Yes (for integration) | Strategy-only tests run without it |
 
-### File Structure
+### File structure
 
 ```
 tabtune/distillation/
@@ -60,11 +56,9 @@ tests/
 └── test_distillation.py     # Unit + integration tests
 ```
 
----
+## Quick start
 
-## 3. Quick Start
-
-### Classification — TabICLv2 → LightGBM (Example) 
+### Classification, TabICLv2 → LightGBM (example)
 
 ```python
 from tabtune.distillation import TabDistiller
@@ -92,10 +86,7 @@ results = distiller.compare(X_test, y_test)
 
 ```
 
-
----
-
-## 4. Architecture
+## Architecture
 
 ```
 TabDistiller (orchestrator)
@@ -124,20 +115,18 @@ TabDistiller (orchestrator)
 ```
 
 Internally, `_collect_soft_labels` routes each teacher through either:
-- **K-fold cross-prediction** (ICL inference-mode teachers) — teacher never labels its own training samples
-- **Direct prediction** (fine-tuned or pre-fitted teachers) — teacher predicts on full training set
+- **K-fold cross-prediction** (ICL inference-mode teachers), teacher never labels its own training samples
+- **Direct prediction** (fine-tuned or pre-fitted teachers), teacher predicts on full training set
 
----
+## Strategy reference
 
-## 5. Strategy Reference
-
-### 5.1 Soft Labels (Default)
+### Soft labels (default)
 
 **Strategy:** Standard Hinton knowledge distillation via soft label targets.
 
 The teacher's probability distribution over classes contains richer information than the hard one-hot label. A temperature parameter `T` smooths the distribution: high `T` flattens it (more information transfer), low `T` sharpens it (closer to hard labels).
 
-#### Loss Function
+#### Loss function
 
 $$\mathcal{L} = \alpha \cdot T^2 \cdot \text{KL}(p_\text{teacher}^{(T)} \| p_\text{student}^{(T)}) + (1 - \alpha) \cdot \text{CE}(y_\text{hard}, p_\text{student})$$
 
@@ -151,19 +140,17 @@ $$\mathcal{L} = \alpha \cdot T^2 \cdot \text{KL}(p_\text{teacher}^{(T)} \| p_\te
 | `temperature` | float | `3.0` | Base temperature `T` for soft label smoothing |
 | `alpha` | float | `0.7` | Soft-label loss weight (1-alpha = hard-label loss weight) |
 
-#### When To Use
+#### When to use
 
 Default for all classification distillation tasks. Works with any GBDT or MLP student.
 
----
-
-### 5.2 Adaptive Temperature
+### Adaptive temperature
 
 **Strategy:** Per-sample temperature scaling based on teacher entropy.
 
 Instead of a single global `T`, each training sample gets a temperature proportional to the teacher's local uncertainty (entropy). High-entropy samples (teacher unsure) get a higher temperature, preventing oversmoothing on already-uncertain samples.
 
-#### How It Works
+#### How it works
 
 ```
 entropy(x) = -Σ p_i log(p_i)
@@ -180,23 +167,21 @@ The resulting per-sample temperatures are passed to the loss function, replacing
 | `adaptive_temperature` | bool | `True` | Enable adaptive per-sample temperature |
 | `temperature` | float | `3.0` | Base temperature used as anchor |
 
-#### Attributes After Fit
+#### Attributes after fit
 
-- `distiller.soft_labels_` — the collected soft label matrix `(n, n_classes)`.
+- `distiller.soft_labels_`, the collected soft label matrix `(n, n_classes)`.
 
-#### When To Use
+#### When to use
 
-Recommended when the teacher has uneven confidence across samples — common with small datasets or near-boundary regions. Enabled by default alongside `confidence_weighting`.
+Recommended when the teacher has uneven confidence across samples, common with small datasets or near-boundary regions. Enabled by default alongside `confidence_weighting`.
 
----
-
-### 5.3 Confidence Weighting
+### Confidence weighting
 
 **Strategy:** Bell-shaped sample weighting that upweights high-confidence teacher predictions.
 
 Each training sample receives a scalar weight based on the teacher's peak probability (max soft label value). Samples where the teacher is most confident receive higher weight; ambiguous near-boundary samples receive lower weight. This prevents noisy, uncertain teacher predictions from dominating the student's training signal.
 
-#### How It Works
+#### How it works
 
 ```
 confidence(x) = max(soft_labels(x))
@@ -211,17 +196,15 @@ Weights are passed as `sample_weight` to the student's `fit()` call.
 |-----------|------|---------|-------------|
 | `confidence_weighting` | bool | `True` | Enable bell-shaped confidence weighting |
 
-#### When To Use
+#### When to use
 
 Recommended for small datasets where teacher errors have an outsized effect. Enabled by default. Can be disabled if teacher quality is high and confidence is uniformly distributed.
 
----
-
-### 5.4 K-Fold Cross-Prediction
+### K-fold cross-prediction
 
 **Strategy:** Out-of-fold soft label generation to prevent ICL identity leakage.
 
-In-context learning models (TabPFN, TabICLv2) condition their predictions on the training set passed at inference time. If the full training set is passed and the model labels *its own* training examples, the soft labels are artificially sharp and overconfident — inflated by memorization rather than generalization. K-fold cross-prediction eliminates this by ensuring each sample's soft label is generated by a model that was **not** trained on it.
+In-context learning models (TabPFN, TabICLv2) condition their predictions on the training set passed at inference time. If the full training set is passed and the model labels *its own* training examples, the soft labels are artificially sharp and overconfident, inflated by memorization rather than generalization. K-fold cross-prediction eliminates this by making sure each sample's soft label is generated by a model that was **not** trained on it.
 
 #### Algorithm
 
@@ -236,13 +219,11 @@ In-context learning models (TabPFN, TabICLv2) condition their predictions on the
 |-----------|------|---------|-------------|
 | `n_folds` | int | `5` | Number of CV folds for cross-prediction |
 
-#### When To Use
+#### When to use
 
 **Always enabled for inference-mode ICL teachers.** Automatically skipped for fine-tuned teachers (where the model doesn't memorize training data via in-context conditioning). Increasing `n_folds` reduces variance in soft labels at the cost of `n_folds` teacher fits.
 
----
-
-### 5.5 Multi-Teacher Distillation
+### Multi-teacher distillation
 
 **Strategy:** Average soft labels across multiple TFM teachers before training the student.
 
@@ -266,13 +247,11 @@ distiller.fit(X_train, y_train)
 |-----------|------|---------|-------------|
 | `teachers` | str or list[str] | `"TabDPT"` | Single teacher name or list for multi-teacher |
 
-#### When To Use
+#### When to use
 
 When two or more TFMs are available and their predictions are complementary. Compute cost scales linearly with the number of teachers × `n_folds`.
 
----
-
-### 5.6 Data Augmentation
+### Data augmentation
 
 **Strategy:** Gaussian noise augmentation to expand the soft-label training set.
 
@@ -284,17 +263,15 @@ If `augment_factor` is set, the distiller creates `augment_factor × n` syntheti
 |-----------|------|---------|-------------|
 | `augment_factor` | float or None | `None` | Fraction of original dataset to augment (e.g. `0.5` adds 50% more samples) |
 
-#### When To Use
+#### When to use
 
 Primarily useful for very small datasets (<200 samples). Disabled by default. Note: augmentation occurs *after* soft label collection, so teacher predictions are not re-run on synthetic samples.
 
----
-
-## 6. Advanced Strategies
+## Advanced strategies
 
 Available via `tabtune.distillation.strategies`:
 
-### 6.1 Cross-Validation Distillation
+### Cross-validation distillation
 
 Standalone function for generating OOF soft labels without instantiating a full `TabDistiller`. Useful when you want to experiment with different student architectures on pre-computed soft labels.
 
@@ -309,12 +286,10 @@ soft_labels = cross_validate_soft_labels(
     n_folds=5,
     random_state=42,
 )
-# soft_labels: ndarray (n, n_classes) — OOF predictions for every training sample
+# soft_labels: ndarray (n, n_classes) - OOF predictions for every training sample
 ```
 
----
-
-### 6.2 Progressive / Curriculum Distillation
+### Progressive / curriculum distillation
 
 Curriculum-based training: student first learns on the teacher's most confident predictions, then progressively expands to harder, more ambiguous samples.
 
@@ -334,16 +309,14 @@ student = progressive_distillation(
 
 **Stage breakdown (3 stages, default):**
 1. Top 33% most confident samples only
-2. Top 66% — includes medium-confidence samples
+2. Top 66%, includes medium-confidence samples
 3. Full dataset
 
-#### When To Use
+#### When to use
 
 Useful for MLP students on datasets with significant class imbalance or ambiguous boundary regions. GBDT students are less sensitive to curriculum ordering due to boosting's built-in focus on hard samples.
 
----
-
-### 6.3 Probability Calibration
+### Probability calibration
 
 Post-hoc calibration of the distilled student's output probabilities via temperature scaling (Platt) or isotonic regression.
 
@@ -367,11 +340,9 @@ T_star = calibrate_student(
 | `"temperature"` | Learn scalar `T*` minimising NLL on calibration set via L-BFGS-B | General purpose; low data |
 | `"isotonic"` | Per-class isotonic regression calibration | Larger calibration sets (>500 samples) |
 
----
+### Self-distillation
 
-### 6.4 Self-Distillation
-
-Train a model on its own soft predictions for additional generalization improvement — no larger teacher required.
+Train a model on its own soft predictions for additional generalization improvement, no larger teacher required.
 
 ```python
 from tabtune.distillation.strategies import self_distill
@@ -386,12 +357,10 @@ distiller = self_distill(
 )
 ```
 
-**Round 1:** Standard distillation from TFM teacher.  
+**Round 1:** Standard distillation from TFM teacher.
 **Round 2:** Previous student's predictions used as soft targets for a fresh student.
 
----
-
-## 7. TabDistiller API Reference
+## TabDistiller API reference
 
 ### Constructor
 
@@ -413,7 +382,7 @@ TabDistiller(
 )
 ```
 
-### Teacher Configuration
+### Teacher configuration
 
 `teachers` accepts a string, list of strings, or list of pre-fitted `TabularPipeline` objects:
 
@@ -430,11 +399,11 @@ pipe.fit(X_train, y_train)
 TabDistiller(teachers=[pipe], ...)
 ```
 
-### Student Backends
+### Student backends
 
 | `student` value | Backend | Notes |
 |-----------------|---------|-------|
-| `"lgbm"` | LightGBM | Recommended default: fast, robust, near-teacher accuracy |
+| `"lgbm"` | LightGBM | Recommended default: fast, reliable, near-teacher accuracy |
 | `"xgb"` / `"xgboost"` | XGBoost | Strong alternative; slightly slower than LightGBM |
 | `"catboost"` / `"cb"` | CatBoost | Best on datasets with categorical features |
 | `"mlp"` | PyTorch MLP | Use only when neural student is required; collapses on small/hard datasets |
@@ -448,12 +417,10 @@ TabDistiller(teachers=[pipe], ...)
 | `predict_proba(X_test)` | `ndarray (n, k)` | Student probability matrix (classification only) |
 | `evaluate(X_test, y_test)` | `dict` | Student metrics only |
 | `compare(X_test, y_test)` | `dict` | Student + teacher metrics + retention percentage |
-| `save(path)` | — | Serialize student to disk (teacher stripped) |
+| `save(path)` |, | Serialize student to disk (teacher stripped) |
 | `TabDistiller.load(path)` | `TabDistiller` | Restore fitted distiller from disk |
 
-
-
-### Fitted Attributes
+### Fitted attributes
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
@@ -464,20 +431,18 @@ TabDistiller(teachers=[pipe], ...)
 | `label_encoder_` | LabelEncoder | Extracted from teacher pipeline |
 | `_fit_time` | float | Wall-clock time of `fit()` in seconds |
 
----
-
-## 8. Strategy Selection Guide
+## Strategy selection guide
 
 | Strategy | Best For | Compute | Typical Retention |
 |----------|----------|---------|-------------------|
-| **Soft Labels + Adaptive T** | General purpose; recommended default | Medium (n_folds × teacher fits) | 97–99% |
-| **Soft Labels (fixed T)** | When adaptive T adds no benefit; fast iteration | Medium | 96–98% |
-| **Multi-Teacher** | Two+ available TFMs; noisy datasets | High (n_teachers × n_folds) | 98–99% |
-| **Confidence Weighting** | Small datasets; high teacher variance | +0 overhead | +1–2% on hard samples |
-| **Progressive/Curriculum** | Large datasets; MLP students; class imbalance | Medium + staging overhead | +1–3% on boundary samples |
-| **Self-Distillation** | No larger teacher available | Low (student-only) | +1–2% generalisation |
+| **Soft Labels + Adaptive T** | General purpose; recommended default | Medium (n_folds × teacher fits) | 97-99% |
+| **Soft Labels (fixed T)** | When adaptive T adds no benefit; fast iteration | Medium | 96-98% |
+| **Multi-Teacher** | Two+ available TFMs; noisy datasets | High (n_teachers × n_folds) | 98-99% |
+| **Confidence Weighting** | Small datasets; high teacher variance | +0 overhead | +1-2% on hard samples |
+| **Progressive/Curriculum** | Large datasets; MLP students; class imbalance | Medium + staging overhead | +1-3% on boundary samples |
+| **Self-Distillation** | No larger teacher available | Low (student-only) | +1-2% generalisation |
 
-### Student Selection
+### Student selection
 
 ```
 Need fast inference + near-teacher accuracy?
@@ -489,17 +454,15 @@ Need fast inference + near-teacher accuracy?
         Use GBDT students for robustness.
 ```
 
----
+## Save & deployment
 
-## 9. Save & Deployment
-
-After distillation, `save()` strips the teacher and serialises only the student. The loaded student runs inference with no TFM dependency — suitable for production environments without GPU.
+After distillation, `save()` strips the teacher and serialises only the student. The loaded student runs inference with no TFM dependency, suitable for production environments without GPU.
 
 ```python
 # Save (teacher stripped)
 distiller.save("student_lgbm_v1.joblib")
 
-# Reload & predict — no TFM dependency at runtime
+# Reload & predict - no TFM dependency at runtime
 distiller_prod = TabDistiller.load("student_lgbm_v1.joblib")
 predictions = distiller_prod.predict(X_new)
 probabilities = distiller_prod.predict_proba(X_new)
@@ -509,14 +472,12 @@ probabilities = distiller_prod.predict_proba(X_new)
 
 | Student | Serialised Size |
 |---------|----------------|
-| LightGBM | ~50–500 KB |
-| XGBoost | ~100–800 KB |
-| CatBoost | ~200 KB – 2 MB |
-| MLP | ~1–5 MB |
+| LightGBM | ~50-500 KB |
+| XGBoost | ~100-800 KB |
+| CatBoost | ~200 KB - 2 MB |
+| MLP | ~1-5 MB |
 
----
-
-## 10. Error Handling & Logging
+## Error handling & logging
 
 ### Logging
 
@@ -527,17 +488,17 @@ import logging
 logging.basicConfig(level=logging.INFO)
 ```
 
-### Error Handling Design
+### Error handling design
 
 - **Invalid `student` string** raises `ValueError` with supported values listed.
 - **`predict()` / `predict_proba()` before `fit()`** raises `RuntimeError`.
 - **`predict_proba()` on regression** raises `ValueError`.
 - **`StratifiedKFold` failure** (too few samples per class) falls back automatically to `KFold` with a logged warning.
-- **Teacher `predict_proba()` failure** during `compare()` is caught per-teacher — one failed teacher does not abort the comparison; error is logged and `{"error": str(e)}` returned for that teacher.
-- **Soft label normalisation** — TabDPT floating-point bug produces rows that don't sum to 1. The distiller detects and renormalises automatically before student training.
-- **Label encoder extraction** — supports TabPFN, TabICL, TabICLv2, TabDPT, Mitra, OrionMSP, OrionBiX, ContextTab, Limix. Unsupported models log a warning and continue.
+- **Teacher `predict_proba()` failure** during `compare()` is caught per-teacher, one failed teacher does not abort the comparison; error is logged and `{"error": str(e)}` returned for that teacher.
+- **Soft label normalisation**, TabDPT floating-point bug produces rows that don't sum to 1. The distiller detects and renormalises automatically before student training.
+- **Label encoder extraction**, supports TabPFN, TabICL, TabICLv2, TabDPT, Mitra, OrionMSP, OrionBiX, ContextTab, Limix. Unsupported models log a warning and continue.
 
-### Verbose Logging Output
+### Verbose logging output
 
 When `logging.INFO` is set, `TabDistiller` logs:
 - Teacher fit start/complete per teacher
@@ -548,11 +509,9 @@ When `logging.INFO` is set, `TabDistiller` logs:
 - Augmentation summary (if enabled)
 - Distillation total time
 
----
+## Testing
 
-## 11. Testing
-
-### Running Tests
+### Running tests
 
 ```bash
 # Strategy unit tests (no GPU needed):
@@ -565,7 +524,7 @@ pytest tests/test_distillation.py::TestFullDistillation -v
 python tests/test_distillation.py
 ```
 
-### Test Coverage
+### Test coverage
 
 | Test Class | What It Tests | GPU Required |
 |------------|--------------|-------------|
@@ -577,9 +536,7 @@ python tests/test_distillation.py
 | `TestSaveLoad` | `save()` / `load()` roundtrip, student-only serialisation | No |
 | `TestFullDistillation` | End-to-end with real TabTune pipelines: TabPFN → lgbm/xgb, multi-teacher | Yes |
 
----
-
-## 12. References
+## References
 
 | # | Paper | Relevance |
 |---|-------|-----------|

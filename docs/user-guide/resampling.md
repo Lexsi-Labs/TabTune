@@ -1,18 +1,18 @@
-## 4. Resampling
+# Resampling
 
-TabTune includes a unified **context sampling / resampling** module:
+An in-context model reads a fixed number of training rows as context. When your table is larger than that, something has to choose which rows go in. `tabtune.resampling` is that something: context sampling strategies beyond random, and the support/query samplers the episodic fine-tuning loops use.
 
-**File:** `tabtune/resampling/context_sampling.py`  
+**File:** `tabtune/resampling/context_sampling.py`
 **Purpose:** choose a fixed-size **training subset (context)** for ICL-style / foundation models using strategies beyond simple random sampling.
 
-### 4.1 Why this module exists
+### Why this module exists
 
 The module exists because:
 - TabTune already has a generic `resampling_strategy` in some data processors (often aimed at imbalance resampling),
 - but model-specific preprocessors and ICL-style pipelines may not consistently apply those,
-- and for LimiX-like models the right abstraction is **context selection**, not just “rebalance the whole dataset”.
+- and for LimiX-like models the right abstraction is **context selection**, not just "rebalance the whole dataset".
 
-### 4.2 Public API
+### Public API
 
 ```python
 sample_context(
@@ -30,12 +30,12 @@ sample_context(
 ```
 
 **Key behavior:**
-- Returns `(X_ctx, y_ctx)` — a sampled context dataset.
+- Returns `(X_ctx, y_ctx)`, a sampled context dataset.
 - If `context_size > len(X)`:
-  - by default it **pads with replacement** (`allow_replacement=True`).
+ - by default it **pads with replacement** (`allow_replacement=True`).
 - Normalizes strategy names (e.g. notebook-style suffixes like `_10k` are stripped).
 
-### 4.3 Strategy Names and Behavior
+### Strategy names and behavior
 
 #### Core strategies (classification)
 - **`uniform`**: random subset of rows.
@@ -54,7 +54,7 @@ Regression uses binning of `y` into quantile bins (via `qcut` with safe fallback
 - **`diversity_kmeans`**
 - **`hybrid_stratified_diverse`**: stratified core + kmeans-diverse remainder.
 
-### 4.4 Strategy Aliases
+### Strategy aliases
 
 `normalize_sampling_strategy_name()` supports common aliases:
 - `random`, `rand` → `uniform`
@@ -63,11 +63,11 @@ Regression uses binning of `y` into quantile bins (via `qcut` with safe fallback
 - `hybrid`, `balanced_diverse` → `hybrid_balanced_diverse`
 - Notebook suffix stripping: `uniform_10k` → `uniform`, `hybrid_balanced_diverse_10k` → `hybrid_balanced_diverse`
 
-### 4.5 Important implementation details
+### Important implementation details
 
 #### (A) NaN handling (critical fix)
 
-Some strategies (SMOTE, KMeans clustering) do not handle NaNs.  
+Some strategies (SMOTE, KMeans clustering) do not handle NaNs.
 This module adds `_simple_impute_for_sampling(X)`:
 
 - Numerical columns → fill with **median** (or 0 if all-NaN)
@@ -88,23 +88,21 @@ Useful when:
 - you want **coverage** of different regions of feature space,
 - especially on large datasets where random sampling can miss minority modes.
 
-#### (C) Hybrid strategies
+#### (C) hybrid strategies
 
 Hybrid strategies split the context into:
-- **core sampler**: balanced (classification) or stratified (regression)
-- **diversity sampler**: kmeans-based diversity
+- core sampler: balanced (classification) or stratified (regression)
+- diversity sampler: kmeans-based diversity
 
 Allocation:
 - `k_core = round(context_size * hybrid_ratio)`
-- `k_div  = context_size - k_core`
+- `k_div = context_size - k_core`
 
 Overlaps are removed where possible; remaining slots are padded if needed.
 
----
+## How to use resampling in TabTune
 
-## 5. How to use Resampling in TabTune
-
-### 5.1 Recommended patterns
+### Recommended patterns
 
 **If you just want a fast baseline:**
 - `uniform` with a moderate `context_size`
@@ -112,14 +110,14 @@ Overlaps are removed where possible; remaining slots are padded if needed.
 **If you have class imbalance:**
 - `balanced` or `oversample_minority`
 
-**If you want broader coverage / robustness:**
+**If you want broader coverage / reliability:**
 - `diversity_kmeans` (or hybrid)
 
 **If you want both calibration + coverage:**
 - `hybrid_balanced_diverse` (classification)
 - `hybrid_stratified_diverse` (regression)
 
-### 5.2 Example: sample a context before fitting
+### sample a context before fitting
 
 ```python
 import pandas as pd
@@ -140,7 +138,7 @@ X_ctx, y_ctx = sample_context(
 # Then feed (X_ctx, y_ctx) to your TabTune pipeline/model
 ```
 
-### 5.3 Example: regression stratification by y-quantiles
+### regression stratification by y-quantiles
 
 ```python
 X_ctx, y_ctx = sample_context(
@@ -154,12 +152,12 @@ X_ctx, y_ctx = sample_context(
 )
 ```
 
-## 6. Troubleshooting
+## Troubleshooting
 
-### Issue: “KMeans sampling is slow”
+### "KMeans sampling is slow"
 **What to do:**
 - Lower `kmeans_centers` (e.g. from 2000 → 500)
-- Use `uniform` or `stratified` if diversity is not crucial
+- Use `uniform` or `stratified` if diversity is not important
 
 ```python
 X_ctx, y_ctx = sample_context(
@@ -171,17 +169,15 @@ X_ctx, y_ctx = sample_context(
 )
 ```
 
-### Issue: “SMOTE fails or imblearn not installed”
+### "SMOTE fails or imblearn not installed"
 **Behavior:**
-- The module automatically falls back to **balanced** sampling if `imblearn` isn’t available.
+- The module automatically falls back to **balanced** sampling if `imblearn` isn't available.
 
-### Issue: “NaNs break sampling”
+### "NaNs break sampling"
 **Expected:**
 - SMOTE and KMeans paths already apply a lightweight imputation via `_simple_impute_for_sampling()`.
 
----
-
-## 7. Quick Reference
+## Quick reference
 
 | Goal | Task | Suggested Strategy |
 |------|------|--------------------|
@@ -190,8 +186,5 @@ X_ctx, y_ctx = sample_context(
 | Fix imbalance | classification | `balanced` / `oversample_minority` |
 | Boost minority realism | classification | `smote` (if available) |
 | Cover diverse modes | cls/reg | `diversity_kmeans` |
-| Robust default | classification | `hybrid_balanced_diverse` |
-| Robust default | regression | `hybrid_stratified_diverse` |
-
----
-
+| Reliable default | classification | `hybrid_balanced_diverse` |
+| Reliable default | regression | `hybrid_stratified_diverse` |

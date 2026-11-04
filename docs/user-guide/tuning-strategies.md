@@ -1,10 +1,8 @@
 # Tuning Strategies
 
-TabTune provides three distinct tuning strategies to accommodate different use cases, computational budgets, and performance requirements. This guide explains each strategy in detail, including when to use them and their tradeoffs.
+Three strategies, one argument: `tuning_strategy`. `inference` trains nothing, `finetune` trains everything, `peft` trains LoRA adapters. Within `finetune` and `peft`, `finetune_mode` picks the algorithm. This page says what each does, what it costs, and when it is the wrong choice.
 
----
-
-## 1. Overview
+## Overview
 
 | Strategy | Training | Use Case | Memory | Speed | Accuracy |
 |----------|----------|----------|--------|-------|----------|
@@ -13,23 +11,21 @@ TabTune provides three distinct tuning strategies to accommodate different use c
 | **peft** | LoRA adapters | Memory-constrained, iteration | Low | Medium | High |
 
 !!! note "`tuning_strategy` vs `finetune_mode`"
-    `tuning_strategy` chooses **whether and how much** to train (`'inference'`,
-    `'finetune'`, `'peft'`). `finetune_mode` chooses the **algorithm** used when training
-    happens — `'meta-learning'`, `'sft'`, `'native'`, `'turn_by_turn'`, or xRFM's
-    `'refit'` / `'refine'`. It applies to both `finetune` and `peft`. See
-    [section 3.5](#35-fine-tuning-modes-finetune_mode).
+ `tuning_strategy` chooses **whether and how much** to train (`'inference'`,
+ `'finetune'`, `'peft'`). `finetune_mode` chooses the **algorithm** used when training
+ happens, `'meta-learning'`, `'sft'`, `'native'`, `'turn_by_turn'`, or xRFM's
+ `'refit'` / `'refine'`. It applies to both `finetune` and `peft`. See
+ [section 3.5](#fine-tuning-modes-finetune_mode).
 
-    Older docs and examples refer to the `finetune` strategy as `base-ft`; `'finetune'` is
-    the current spelling.
+ Older examples call this strategy `base-ft`; `'finetune'` is
+ the current spelling.
 
----
-
-## 2. Inference Strategy
+## Inference strategy
 
 ### Definition
-**Zero-shot inference** using pre-trained model weights without any training on your data.
+Zero-shot: the pretrained weights, your training rows as context, no gradient step.
 
-### Use Cases
+### Use cases
 - Quick baseline comparisons
 - Evaluating out-of-the-box model performance
 - Time-constrained scenarios
@@ -67,22 +63,22 @@ metrics = pipeline.evaluate(X_test, y_test)
 ```
 
 ### Advantages
-- ✅ No training time needed
-- ✅ Minimal memory footprint
-- ✅ Immediate results
-- ✅ Good for baseline comparisons
+- No training time needed
+- Minimal memory footprint
+- Immediate results
+- Good for baseline comparisons
 
 ### Disadvantages
-- ❌ Generic pre-trained weights may not fit your data
-- ❌ Typically lower accuracy than fine-tuned models
-- ❌ Cannot adapt to task-specific patterns
+- Generic pre-trained weights may not fit your data
+- Typically lower accuracy than fine-tuned models
+- Cannot adapt to task-specific patterns
 
-### Performance Profile
-- **Training time**: 0 seconds
-- **Memory usage**: 2-4 GB (model + data)
-- **Inference latency**: 10-50 ms per batch
+### Performance profile
+- Training time: 0 seconds
+- Memory usage: 2-4 GB (model + data)
+- Inference latency: 10-50 ms per batch
 
-### Example with All Models
+### Example with all models
 
 ```python
 from tabtune import TabularPipeline
@@ -99,14 +95,12 @@ for model in models:
     print(f"{model} - Accuracy: {metrics['accuracy']:.4f}")
 ```
 
----
-
-## 3. Base Fine-Tuning Strategy (`base-ft`)
+## Base fine-tuning strategy (`finetune`)
 
 ### Definition
 **Full-parameter fine-tuning** where all model weights are updated during training.
 
-### Use Cases
+### Use cases
 - Maximum accuracy is priority
 - Abundant computational resources (GPU, RAM)
 - Large training datasets (>100K samples)
@@ -133,7 +127,7 @@ from tabtune import TabularPipeline
 pipeline = TabularPipeline(
     model_name='OrionMSP',
     task_type='classification',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -153,7 +147,7 @@ predictions = pipeline.predict(X_test)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### Supported Parameters
+### Supported parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -165,43 +159,43 @@ metrics = pipeline.evaluate(X_test, y_test)
 | `show_progress` | bool | True | Display training progress bar |
 
 ### Advantages
-- ✅ Highest accuracy potential
-- ✅ Fully adapts to task-specific patterns
-- ✅ Works with any dataset size
-- ✅ Best for production models
-- ✅ Supports all hyperparameter tuning
+- Highest accuracy potential
+- Fully adapts to task-specific patterns
+- Works with any dataset size
+- Best for production models
+- Supports all hyperparameter tuning
 
 ### Disadvantages
-- ❌ High memory consumption (8-16GB+)
-- ❌ Long training time (hours for large models)
-- ❌ Risk of overfitting on small datasets
-- ❌ Requires careful hyperparameter tuning
-- ❌ GPU memory can become bottleneck
+- High memory consumption (8-16GB+)
+- Long training time (hours for large models)
+- Risk of overfitting on small datasets
+- Requires careful hyperparameter tuning
+- GPU memory can become bottleneck
 
-### Performance Profile
-- **Training time**: 30 minutes - 2 hours (depending on dataset)
-- **Memory usage**: 12-24 GB (full model + gradients + optimizer states)
-- **Inference latency**: 10-50 ms per batch
+### Performance profile
+- Training time: 30 minutes - 2 hours (depending on dataset)
+- Memory usage: 12-24 GB (full model + gradients + optimizer states)
+- Inference latency: 10-50 ms per batch
 
-### Training Loop Details
+### Training loop details
 
 The training process follows this pattern:
 
 1. **Initialize optimizer** (AdamW with weight decay)
-2. **For each epoch**:
-   - Shuffle training data
-   - **For each batch**:
-     - Forward pass through model
-     - Compute loss
-     - Backward pass (compute gradients)
-     - Clip gradients if specified
-     - Update weights
-     - Update learning rate scheduler
-   - Validate on development set (if available)
+2. For each epoch:
+ - Shuffle training data
+ - For each batch:
+ - Forward pass through model
+ - Compute loss
+ - Backward pass (compute gradients)
+ - Clip gradients if specified
+ - Update weights
+ - Update learning rate scheduler
+ - Validate on development set (if available)
 3. **Save best checkpoint** based on validation metric
 4. **Return fine-tuned model**
 
-### Example: Full Training Pipeline
+### Full training pipeline
 
 ```python
 from tabtune import TabularPipeline
@@ -215,7 +209,7 @@ X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
 pipeline = TabularPipeline(
     model_name='TabDPT',
     task_type='classification',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 10,
@@ -240,9 +234,7 @@ print(f"Validation Accuracy: {val_metrics['accuracy']:.4f}")
 pipeline.save('fintuned_pipeline.joblib')
 ```
 
----
-
-### 3.5 Fine-Tuning Modes (`finetune_mode`)
+### Fine-tuning modes (`finetune_mode`)
 
 `finetune_mode` selects the training algorithm. Pass it directly or inside `tuning_params`.
 
@@ -263,7 +255,7 @@ If left as `None`, TabTune picks a per-task default: **`turn_by_turn` for regres
 | `sft` | Standard supervised fine-tuning on minibatches | TabPFN, TabPFNv26, TabPFNv3, Mitra, TabDPT, TabFM, ContextTab, iLTM, EXAONE |
 | `native` | Prior Labs' own finetuner: bar-distribution loss, cosine LR with warmup, AMP, early stopping, validation-based model selection | **TabPFNv2.6 and TabPFNv3 only**, both tasks |
 | `turn_by_turn` (alias `tbt`) | Episodic turn-by-turn training; the default for regression | TabPFN, TabPFNv26, TabPFNv3, TabICLv2, Mitra, TabDPT, ContextTab, LimiX, TabFM, iLTM, EXAONE |
-| `refit` / `refine` | **xRFM only** — it has no gradient-descent fine-tuning. `refit` fits the RFM from scratch; `refine` warm-starts from the learned **M** matrix | xRFM |
+| `refit` / `refine` | **xRFM only**, it has no gradient-descent fine-tuning. `refit` fits the RFM from scratch; `refine` warm-starts from the learned **M** matrix | xRFM |
 
 Not every model implements every mode. Ask the registry rather than guessing:
 
@@ -302,28 +294,26 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-## 4. PEFT Fine-Tuning Strategy (`peft`)
+## PEFT fine-tuning strategy (`peft`)
 
 !!! warning "Two models where `peft` does not mean LoRA"
-    - **xRFM** has no gradient-descent fine-tuning at all. Its `peft` performs low-rank
-      adaptation of the learned **M** matrix, not LoRA over linear layers, so
-      `target_modules` does not apply.
-    - **EXAONE Tabular** applies its projections as raw `nn.Parameter` tensors through
-      `F.linear` rather than `nn.Linear` submodules. The injector finds nothing to wrap,
-      logs a warning, and the run proceeds as a **full fine-tune** — do not attribute a
-      memory saving to LoRA here.
+ - **xRFM** has no gradient-descent fine-tuning at all. Its `peft` performs low-rank
+ adaptation of the learned **M** matrix, not LoRA over linear layers, so
+ `target_modules` does not apply.
+ - **EXAONE Tabular** applies its projections as raw `nn.Parameter` tensors through
+ `F.linear` rather than `nn.Linear` submodules. The injector finds nothing to wrap,
+ logs a warning, and the run proceeds as a **full fine-tune**, do not attribute a
+ memory saving to LoRA here.
 
-    **TabICLv2 does not support `peft` at all.** Use `finetune`.
+ **TabICLv2 does not support `peft` at all.** Use `finetune`.
 
-    PEFT is **experimental** on TabPFN, TabPFNv2.6 and ContextTab, and **fully supported**
-    on TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM.
+ PEFT is **experimental** on TabPFN, TabPFNv2.6 and ContextTab, and **fully supported**
+ on TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM.
 
 ### Definition
 **Parameter-Efficient Fine-Tuning using LoRA (Low-Rank Adaptation)** where only small adapter weights are trained while base model is frozen.
 
-### How LoRA Works
+### How LoRA works
 
 <!-- Instead of updating all weights, LoRA adds trainable low-rank matrices:
 
@@ -338,7 +328,7 @@ Where:
 
 This reduces trainable parameters from millions to thousands. -->
 
-### Use Cases
+### Use cases
 - Limited GPU memory (< 8 GB)
 - Quick iteration cycles
 - Fine-tuning multiple models simultaneously
@@ -389,7 +379,7 @@ predictions = pipeline.predict(X_test)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### PEFT Parameters
+### PEFT parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -398,7 +388,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 | `lora_dropout` | float | 0.05 | Dropout applied to LoRA input |
 | `target_modules` | list | None | Which linear layers to adapt (None = use defaults) |
 
-### Model-Specific LoRA Targets
+### Model-specific LoRA targets
 
 TabTune pre-configures optimal target modules per model:
 
@@ -422,38 +412,38 @@ x_embedding, layers, final_layer
 in_context_encoder, dense, output_head, embeddings
 ```
 
-**TabPFN** (⚠️ Experimental):
+**TabPFN** (Experimental):
 ```
 encoder.5.layer, y_encoder.2.layer, transformer_encoder.layers, decoder_dict.standard
 ```
 
 ### Advantages
-- ✅ 90% memory reduction vs base-ft
-- ✅ 2-3x faster training
-- ✅ Only stores small adapter weights
-- ✅ Can run on 4GB GPUs
-- ✅ Fast iteration for experimentation
+- 90% memory reduction vs finetune
+- 2-3x faster training
+- Only stores small adapter weights
+- Can run on 4GB GPUs
+- Fast iteration for experimentation
 
 ### Disadvantages
-- ❌ Slightly lower accuracy than base-ft (~2-5% in practice)
-- ❌ Not all model layers adapted (frozen backbone limits flexibility)
-- ❌ May struggle with very different tasks
-- ❌ Experimental support on TabPFN and ContextTab
+- Slightly lower accuracy than finetune (~2-5% in practice)
+- Not all model layers adapted (frozen backbone limits flexibility)
+- May struggle with very different tasks
+- Experimental support on TabPFN and ContextTab
 
-### Performance Profile
-- **Training time**: 10-30 minutes
-- **Memory usage**: 3-6 GB (adapters + activations only)
-- **Inference latency**: 10-50 ms per batch
-- **Model size**: Original model size + 1-2% (adapters)
+### Performance profile
+- Training time: 10-30 minutes
+- Memory usage: 3-6 GB (adapters + activations only)
+- Inference latency: 10-50 ms per batch
+- Model size: Original model size + 1-2% (adapters)
 
-### Parameter Tuning Guidelines
+### Parameter tuning guidelines
 
 **Rank Selection**:
 ```
 r = 4   → Highest compression, faster, lower accuracy
 r = 8   → Good balance (default)
 r = 16  → More expressive, slower, higher accuracy
-r = 32  → Close to base-ft, but still compressed
+r = 32  → Close to finetune, but still compressed
 ```
 
 **Alpha Selection**:
@@ -470,7 +460,7 @@ lora_dropout=0.05 → Light regularization (default)
 lora_dropout=0.1  → Strong regularization
 ```
 
-### Example: PEFT Training with Hyperparameter Tuning
+### PEFT training with hyperparameter tuning
 
 ```python
 from tabtune import TabularPipeline
@@ -497,22 +487,20 @@ for r in [4, 8, 16]:
     print(f"Rank {r}: Accuracy = {metrics['accuracy']:.4f}")
 ```
 
----
+## Strategy comparison & decision tree
 
-## 5. Strategy Comparison & Decision Tree
+### Quick comparison table
 
-### Quick Comparison Table
-
-| Aspect | inference | base-ft | peft |
+| Aspect | inference | finetune | peft |
 |--------|-----------|---------|------|
 | Training | No | Yes, all params | Yes, adapters only |
-| Memory | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Speed | ⭐⭐⭐⭐⭐ | ⭐ | ⭐⭐⭐ |
-| Accuracy | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Memory | | | |
+| Speed | | | |
+| Accuracy | | | |
 | Cost | Free | High GPU cost | Low GPU cost |
-| Production | ❌ | ✅ | ✅ |
+| Production | | | |
 
-### Decision Tree
+### Decision tree
 
 ```
 Start: Which strategy?
@@ -523,48 +511,20 @@ Start: Which strategy?
 ├─ "I have limited resources (<8GB GPU)" → peft
 │  └─ Best for: Rapid iteration, memory-constrained
 │
-└─ "I need best accuracy, have resources" → base-ft
+└─ "I need best accuracy, have resources" → finetune
    └─ Best for: Production, large datasets, high accuracy
 ```
 
----
+## Troubleshooting
 
-
-
-## 6. Best Practices
-
-1. **Start with inference** to establish baseline
-2. **Use PEFT for exploration** when resources are limited
-3. **Switch to base-ft for production** models
-4. **Monitor for overfitting** on small datasets
-5. **Save checkpoints** for long training runs
-6. **Use validation set** to track progress
-8. **Start with default hyperparameters** then tune
-
----
-
-## 7. Troubleshooting
-
-### Issue: "CUDA out of memory"
+### "CUDA out of memory"
 **Solution**: Reduce batch size or use PEFT strategy
 
-### Issue: "Accuracy decreasing during training"
+### "Accuracy decreasing during training"
 **Solution**: Lower learning rate, reduce epochs, use regularization
 
-### Issue: "Model not improving after training"
+### "Model not improving after training"
 **Solution**: Increase learning rate, use different scheduler, increase epochs
 
-### Issue: "PEFT not significantly faster"
+### "PEFT is not much faster"
 **Solution**: Use lower rank (r=4), verify LoRA is actually applied
-
----
-
-## 8. Next Steps
-
-- [PEFT & LoRA Details](../advanced/peft-lora.md) - Deep dive into LoRA theory
-- [Hyperparameter Tuning](../advanced/hyperparameter-tuning.md) - Optimize model performance
-- [Model Selection](model-selection.md) - Choose right model for your task
-
----
-
-Choose the right strategy for your use case and resource constraints!

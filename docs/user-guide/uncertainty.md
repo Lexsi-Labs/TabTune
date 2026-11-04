@@ -1,6 +1,4 @@
-# Uncertainty Quantification: Conformal Prediction & Recalibration
-
-*New in TabTune 0.2.0.*
+# Uncertainty
 
 Tabular foundation models win benchmarks on accuracy and lose them on uncertainty: their
 probabilities come out of an in-context softmax that was never calibrated to *your* dataset.
@@ -22,9 +20,7 @@ from tabtune.uncertainty import (
 )
 ```
 
----
-
-## 1. The three-way split
+## The three-way split
 
 Conformal prediction needs a calibration set the model has **never trained on**. A two-way
 train/test split is not enough.
@@ -37,13 +33,11 @@ X_cal, X_test, y_cal, y_test = train_test_split(X_rest, y_rest, test_size=0.5, r
 ```
 
 !!! danger "In-context models: the training data *is* the support set"
-    For an ICL model, passing the pipeline's own training frame as `X_cal` would void the
-    guarantee silently. TabTune detects a re-used training frame by fingerprint and
-    **raises** instead.
+ For an ICL model, passing the pipeline's own training frame as `X_cal` would void the
+ guarantee silently. TabTune detects a re-used training frame by fingerprint and
+ **raises** instead.
 
----
-
-## 2. Prediction sets (classification)
+## Prediction sets (classification)
 
 Split conformal prediction is the engine. Score how *nonconforming* each calibration example
 is, take the $\lceil (n+1)(1-\alpha) \rceil$-th smallest score as a threshold, and a test
@@ -61,7 +55,7 @@ cp.n_cal_    # calibration set size
 cp.classes_  # class order matching the columns of `sets`
 ```
 
-### 2.1 Constructor
+### Constructor
 
 ```python
 ConformalClassifier(
@@ -86,9 +80,7 @@ sizes = aps.set_sizes(X_test)
 # mean set size on ambiguous rows (p_max < 0.6): 2.41
 ```
 
----
-
-## 3. What the guarantee actually is
+## What the guarantee actually is
 
 **Marginal** coverage under exchangeability:
 
@@ -96,9 +88,9 @@ $$P\big(y \in C(x)\big) \ge 1 - \alpha$$
 
 on average over exchangeable draws of the calibration and test data. It is **not**:
 
-- **conditional** coverage — no distribution-free method can promise 90% on every slice of
-  the input space;
-- **robust to distribution shift** — coverage degrades when the test distribution moves.
+- **conditional** coverage, no distribution-free method can promise 90% on every slice of
+ the input space;
+- **reliable to distribution shift**, coverage degrades when the test distribution moves.
 
 The report's **size-stratified coverage score (SSCS)** exists precisely to show how far
 conditional coverage falls short of the marginal number: it is the *worst* coverage over
@@ -111,17 +103,15 @@ size_stratified_coverage(set_sizes, covered, min_stratum=...)
 ```
 
 !!! note "An SSCS of 0.000 is not a bug"
-    LAC produces **empty** sets for points the model is very confident about, and an empty
-    set covers nothing by definition. The marginal guarantee still holds — those rows are
-    paid for by the rest — but a whole stratum sits at zero coverage, and no marginal number
-    can show you that. Use `'aps'` if you need non-empty sets.
+ LAC produces **empty** sets for points the model is very confident about, and an empty
+ set covers nothing by definition. The marginal guarantee still holds, those rows are
+ paid for by the rest, but a whole stratum sits at zero coverage, and no marginal number
+ can show you that. Use `'aps'` if you need non-empty sets.
 
----
-
-## 4. Recalibration
+## Recalibration
 
 `Recalibrator` reshapes the probabilities and exposes the same `predict` / `predict_proba` /
-`classes_` surface, so it can be dropped anywhere the pipeline was used — including as the
+`classes_` surface, so it can be dropped anywhere the pipeline was used, including as the
 input to a `ConformalClassifier`.
 
 ```python
@@ -139,9 +129,7 @@ recal   = Recalibrator(pipeline, method="temperature").fit(X_cal1, y_cal1)
 stacked = ConformalClassifier(recal, alpha=0.1).calibrate(X_cal2, y_cal2)
 ```
 
----
-
-## 5. Regression intervals
+## Regression intervals
 
 ```python
 cr = ConformalRegressor(pipeline, method="absolute", alpha=0.1).calibrate(X_cal, y_cal)
@@ -151,12 +139,10 @@ cr.coverage(X_test, y_test)
 
 | `method` | Requires | Interval width |
 |---|---|---|
-| `'absolute'` | `predict` only — works for **every** model | Constant across rows |
-| `'cqr'` | `predict_quantiles` — in TabTune, the TabPFN regressor family | Adapts per row |
+| `'absolute'` | `predict` only, works for **every** model | Constant across rows |
+| `'cqr'` | `predict_quantiles`, in TabTune, the TabPFN regressor family | Adapts per row |
 
----
-
-## 6. The one-call report
+## The one-call report
 
 ```python
 report = uncertainty_report(
@@ -179,13 +165,11 @@ pipeline.uncertainty_report(X_test, y_test, X_cal=X_cal, y_cal=y_cal)
 | `brier` | Brier score |
 | `coverage` | Empirical marginal coverage of the prediction sets |
 | `avg_set_size` | Mean set size (classification) / mean width (regression) |
-| `sscs` | Size-stratified coverage score — the worst stratum |
+| `sscs` | Size-stratified coverage score, the worst stratum |
 
 Omitting `X_cal` / `y_cal` gives the calibration metrics only, with no conformal section.
 
----
-
-## 7. End-to-end
+## End-to-end
 
 ```python
 from tabtune import TabularPipeline
@@ -205,10 +189,8 @@ cp = ConformalClassifier(pipe, method="aps", alpha=0.1).calibrate(X_cal2, y_cal2
 sets = cp.predict_set(X_test)
 ```
 
----
+## See also
 
-## See Also
-
-- [Shift-Aware Evaluation](shift-evaluation.md) — coverage degrades under shift; measure the gap
-- [Ensembling](ensembling.md) — `random_init` gives epistemic uncertainty
+- [Shift-Aware Evaluation](shift-evaluation.md), coverage degrades under shift; measure the gap
+- [Ensembling](ensembling.md), `random_init` gives epistemic uncertainty
 - Runnable example: `examples/18_uncertainty.py`

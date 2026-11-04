@@ -1,12 +1,10 @@
-# Troubleshooting Guide
+# Troubleshooting
 
-This guide addresses common errors, issues, and solutions when using TabTune.
+The errors people actually hit, each with its cause and its fix. If yours is not here, check [Known Issues](../community/known-issues.md), then open an [issue](https://github.com/Lexsi-Labs/TabTune/issues) with the traceback.
 
----
+## Common import errors
 
-## Common Import Errors
-
-### ModuleNotFoundError: No module named 'tabtune'
+### ModuleNotFoundError: no module named 'tabtune'
 
 **Cause**: TabTune is not installed or not in your Python path.
 
@@ -22,17 +20,17 @@ import tabtune
 print(tabtune.__version__)
 ```
 
-### ImportError: Cannot import TabularPipeline
+### ImportError: cannot import TabularPipeline
 
 **Cause**: Incorrect import path or installation issue.
 
 **Solution**: Use the correct import:
 ```python
-from tabtune import TabularPipeline  # ✅ Correct
-# NOT: from TabularPipeline.pipeline import TabularPipeline  # ❌ Old path
+from tabtune import TabularPipeline  # Correct
+# NOT: from TabularPipeline.pipeline import TabularPipeline  # Old path
 ```
 
-### ImportError: No module named 'torch'
+### ImportError: no module named 'torch'
 
 **Cause**: PyTorch is not installed.
 
@@ -45,9 +43,7 @@ pip install torch
 pip install torch --index-url https://download.pytorch.org/whl/cu118
 ```
 
----
-
-## CUDA/GPU Issues
+## CUDA/GPU issues
 
 ### CUDA out of memory
 
@@ -64,16 +60,16 @@ pip install torch --index-url https://download.pytorch.org/whl/cu118
    )
    ```
 
-2. **Reduce batch size**:
+2. Reduce batch size:
    ```python
    tuning_params={"batch_size": 4}  # Default is often 8 or 16
    ```
 
-3. **Use a smaller model**:
-   - Switch from TabDPT to TabICL
-   - Switch from OrionBix to TabICL
+3. Use a smaller model:
+ - Switch from TabDPT to TabICL
+ - Switch from OrionBix to TabICL
 
-4. **Process in chunks**:
+4. Process in chunks:
    ```python
    # Split dataset into smaller batches
    chunk_size = 10000
@@ -83,7 +79,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cu118
        # Process chunk
    ```
 
-5. **Clear GPU cache**:
+5. Clear GPU cache:
    ```python
    import torch
    torch.cuda.empty_cache()
@@ -127,9 +123,7 @@ print(f"Current device: {torch.cuda.current_device() if torch.cuda.is_available(
 tuning_params={"device": "cuda"}
 ```
 
----
-
-## Memory Errors
+## Memory errors
 
 ### Out of memory during training
 
@@ -144,7 +138,7 @@ tuning_params={"device": "cuda"}
        "gradient_accumulation_steps": 4  # Effective batch size = 16
    }
    ```
-3. Use PEFT instead of base-ft
+3. Use PEFT instead of finetune
 4. Reduce dataset size for testing
 
 ### Memory leak during training
@@ -164,9 +158,7 @@ for epoch in range(epochs):
         gc.collect()
 ```
 
----
-
-## Model Loading Failures
+## Model loading failures
 
 ### Model checkpoint not found
 
@@ -192,11 +184,9 @@ if not os.path.exists(checkpoint_path):
 - Use checkpoints saved from the same TabTune version
 - Or start fresh training without loading checkpoint
 
----
+## Preprocessing errors
 
-## Preprocessing Errors
-
-### ValueError: Found array with 0 sample(s)
+### ValueError: found array with 0 sample(s)
 
 **Cause**: Empty dataset after preprocessing/filtering.
 
@@ -220,7 +210,7 @@ print(f"Train samples: {len(X_train)}")
 **Cause**: Test set contains categories not seen during training.
 
 **Solution**:
-- Ensure train/test split preserves all categories
+- Make sure train/test split preserves all categories
 - Use `stratify=y` in train_test_split for classification
 - Check for new categories in test set:
   ```python
@@ -247,36 +237,34 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Training convergence issues
 
-## Training Convergence Issues
-
-### Model not converging / Loss not decreasing
+### Model not converging / loss not decreasing
 
 **Symptoms**: Loss plateaus or increases.
 
 **Solutions**:
 
-1. **Lower learning rate**:
+1. Lower learning rate:
    ```python
    tuning_params={"learning_rate": 1e-5}  # Default might be too high
    ```
 
-2. **Reduce epochs**:
+2. Reduce epochs:
    ```python
    tuning_params={"epochs": 3}  # Start small
    ```
 
-3. **Check data quality**:
-   - Ensure labels are correct
-   - Check for data leakage
-   - Verify train/test split
+3. Check data quality:
+ - Make sure labels are correct
+ - Check for data leakage
+ - Verify train/test split
 
-4. **Try different model**:
-   - Some models work better for certain datasets
-   - Use TabularLeaderboard to compare
+4. Try different model:
+ - Some models work better for certain datasets
+ - Use TabularLeaderboard to compare
 
-5. **Warmup learning rate**:
+5. Warmup learning rate:
    ```python
    tuning_params={
        "learning_rate": 2e-5,
@@ -289,28 +277,26 @@ pipeline = TabularPipeline(
 **Symptoms**: High training accuracy, low validation accuracy.
 
 **Solutions**:
-1. **Reduce epochs**: `tuning_params={"epochs": 3}`
-2. **Lower learning rate**: `tuning_params={"learning_rate": 1e-5}`
-3. **Use PEFT**: Often generalizes better than base-ft
-4. **More training data**: Collect or use data augmentation
-5. **Early stopping**: Implement callback to stop when validation loss increases
+1. Reduce epochs: `tuning_params={"epochs": 3}`
+2. Lower learning rate: `tuning_params={"learning_rate": 1e-5}`
+3. Use PEFT: Often generalizes better than finetune
+4. More training data: Collect or use data augmentation
+5. Early stopping: Implement callback to stop when validation loss increases
 
 ### Underfitting
 
 **Symptoms**: Both training and validation accuracy are low.
 
 **Solutions**:
-1. **Train longer**: Increase `epochs`
-2. **Higher learning rate**: `tuning_params={"learning_rate": 5e-4}`
-3. **Use base-ft**: Full fine-tuning may be needed
-4. **Larger model**: Try TabDPT or OrionBix instead of TabICL
-5. **Feature engineering**: Add relevant features
+1. Train longer: Increase `epochs`
+2. Higher learning rate: `tuning_params={"learning_rate": 5e-4}`
+3. Use finetune: Full fine-tuning may be needed
+4. Larger model: Try TabDPT or OrionBix instead of TabICL
+5. Feature engineering: Add relevant features
 
----
+## PEFT-specific problems
 
-## PEFT-Specific Problems
-
-### PEFT not working / Falling back to base-ft
+### PEFT not working / falling back to finetune
 
 **Symptoms**: Warning messages about PEFT compatibility.
 
@@ -318,7 +304,7 @@ pipeline = TabularPipeline(
 
 **Solution**:
 - TabPFN and ContextTab have experimental PEFT
-- Use `base-ft` strategy for these models
+- Use `finetune` strategy for these models
 - Or check PEFT configuration:
   ```python
   peft_config = {
@@ -345,11 +331,9 @@ trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Total: {total_params}, Trainable: {trainable}")
 ```
 
----
+## Data format errors
 
-## Data Format Errors
-
-### ValueError: Input must be pandas DataFrame
+### ValueError: input must be pandas DataFrame
 
 **Symptoms**: Error when passing numpy arrays.
 
@@ -382,13 +366,11 @@ assert X_train.columns.tolist() == X_test.columns.tolist()
 **Solution**:
 ```python
 # Ensure target is separate Series
-y = df['target']  # ✅ Correct
-# NOT: y = df[['target']]  # ❌ DataFrame instead of Series
+y = df['target']  # Correct
+# NOT: y = df[['target']]  # DataFrame instead of Series
 ```
 
----
-
-## Version Compatibility Issues
+## Version compatibility issues
 
 ### PyTorch version conflicts
 
@@ -426,9 +408,7 @@ conda create -n tabtune python=3.10
 conda activate tabtune
 ```
 
----
-
-## Evaluation & Prediction Errors
+## Evaluation & prediction errors
 
 ### predict_proba returns incorrect shape
 
@@ -453,70 +433,66 @@ print(f"Got shape: {probabilities.shape}")  # Should be (n_samples, n_classes)
 3. Data preprocessing issue
 
 **Solutions**:
-1. **Fine-tune the model**: Use `base-ft` or `peft`
-2. **Check class distribution**:
+1. Fine-tune the model: Use `finetune` or `peft`
+2. Check class distribution:
    ```python
    print(y_train.value_counts())
    ```
-3. **Use resampling**:
+3. Use resampling:
    ```python
    processor_params={"resampling_strategy": "smote"}
    ```
-4. **Inspect predictions**:
+4. Inspect predictions:
    ```python
    predictions = pipeline.predict(X_test)
    print(f"Unique predictions: {np.unique(predictions)}")
    print(f"Prediction distribution: {pd.Series(predictions).value_counts()}")
    ```
 
----
-
-## Performance Issues
+## Performance issues
 
 ### Training is very slow
 
 **Solutions**:
-1. **Use GPU**: `tuning_params={"device": "cuda"}`
-2. **Reduce dataset size**: Test with subset first
-3. **Use inference mode**: For quick baselines
-4. **Optimize batch size**: Larger batches (if memory allows)
-5. **Use PEFT**: Faster than base-ft
+1. Use GPU: `tuning_params={"device": "cuda"}`
+2. Reduce dataset size: Test with subset first
+3. Use inference mode: For quick baselines
+4. Optimize batch size: Larger batches (if memory allows)
+5. Use PEFT: Faster than finetune
 
 ### Inference is slow
 
 **Solutions**:
-1. **Batch predictions**: Process multiple samples at once
-2. **Use GPU**: `tuning_params={"device": "cuda"}`
+1. Batch predictions: Process multiple samples at once
+2. Use GPU: `tuning_params={"device": "cuda"}`
 3. **Reduce n_estimators** (for ensemble models):
    ```python
    model_params={"n_estimators": 8}  # Instead of default 16 or 32
    ```
-4. **Cache preprocessing**: Save and load preprocessed data
+4. Cache preprocessing: Save and load preprocessed data
 
----
-
-## Getting Help
+## Getting help
 
 If you encounter an issue not covered here:
 
-1. **Check the logs**: TabTune provides detailed logging
+1. Check the logs: TabTune provides detailed logging
    ```python
    import logging
    logging.basicConfig(level=logging.DEBUG)
    ```
 
-2. **Reproduce with minimal example**: Create smallest code that reproduces the issue
+2. Reproduce with minimal example: Create smallest code that reproduces the issue
 
-3. **Check GitHub Issues**: Search [TabTune_Internal Issues](https://github.com/Lexsi-Labs/TabTune_Internal/issues)
+3. Check GitHub Issues: Search [TabTune_Internal Issues](https://github.com/Lexsi-Labs/TabTune_Internal/issues)
 
-4. **Open new issue**: Include:
-   - TabTune version
-   - Python version
-   - Full error traceback
-   - Minimal reproducible code
-   - System information
+4. Open new issue: Include:
+ - TabTune version
+ - Python version
+ - Full error traceback
+ - Minimal reproducible code
+ - System information
 
-5. **Review documentation**: Check relevant guides:
-   - [Installation](../getting-started/installation.md)
-   - [User Guide](pipeline-overview.md)
-   - [FAQ](../about/faq.md)
+5. Review documentation: Check relevant guides:
+ - [Installation](../getting-started/installation.md)
+ - [User Guide](pipeline.md)
+ - [FAQ](../community/faq.md)

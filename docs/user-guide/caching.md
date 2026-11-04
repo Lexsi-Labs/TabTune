@@ -1,7 +1,5 @@
 # Prediction Caching
 
-*New in TabTune 0.2.0.*
-
 Tabular foundation models are expensive to query, and TabTune's own evaluation path used to
 run three full forward passes for one `evaluate()` call. Enabling a cache collapses that to
 one.
@@ -17,13 +15,11 @@ print(pipeline.cache.stats)
 # hits=2 misses=1 stores=1 hit_rate=67%
 ```
 
----
-
-## 1. Backends
+## Backends
 
 | `cache` value | Backend | Lifetime |
 |---|---|---|
-| `None` (default) | disabled | — |
+| `None` (default) | disabled |, |
 | `"memory"` | in-process LRU | the process |
 | `"disk"` | on-disk store | across processes |
 | a `PredictionCache` | your own instance | yours |
@@ -35,9 +31,7 @@ cache = PredictionCache("disk", max_entries=128, cache_dir="./.tabtune-cache")
 pipeline = TabularPipeline("TabICLv2", cache=cache)
 ```
 
----
-
-## 2. Invalidation is automatic
+## Invalidation is automatic
 
 Entries are keyed on a fingerprint covering the **fitted model** *and* the **input data**,
 so refitting or changing the data invalidates automatically. There is no stale-cache failure
@@ -49,9 +43,7 @@ from tabtune.caching import fingerprint_data
 fingerprint_data(X_test)   # stable hash of the frame
 ```
 
----
-
-## 3. Statistics
+## Statistics
 
 ```python
 pipeline.cache.stats
@@ -62,9 +54,7 @@ pipeline.cache.stats.hit_rate
 len(pipeline.cache)
 ```
 
----
-
-## 4. Clearing
+## Clearing
 
 ```python
 pipeline.clear_cache()             # entries removed for this pipeline, returns the count
@@ -72,33 +62,27 @@ pipeline.cache.invalidate()        # everything
 pipeline.cache.invalidate(scope)   # one scope
 ```
 
----
-
-## 5. Where it pays off
+## Where it pays off
 
 Disk caching pays off most where the same test rows are queried repeatedly:
 
-- **Leaderboard runs** — many configurations, one test set
-- **Shift-evaluation sweeps** — folds re-query overlapping rows
-- **Uncertainty work** — `uncertainty_report`, recalibration and conformal calibration all
-  read `predict_proba` on the same frames
-- **Notebook iteration** — re-running a cell after a `predict` costs nothing
+- **Leaderboard runs**, many configurations, one test set
+- **Shift-evaluation sweeps**, folds re-query overlapping rows
+- **Uncertainty work**, `uncertainty_report`, recalibration and conformal calibration all
+ read `predict_proba` on the same frames
+- **Notebook iteration**, re-running a cell after a `predict` costs nothing
 
 ```python
 pipeline = TabularPipeline("TabICLv2", cache="disk")
 ```
 
----
-
-## 6. Serialization
+## Serialization
 
 `PredictionCache` implements `__getstate__` / `__setstate__`, so a pipeline carrying a cache
-still pickles. In-memory entries are not written into the pipeline artefact — `save()` stays
+still pickles. In-memory entries are not written into the pipeline artefact, `save()` stays
 the size it was.
 
----
-
-## 7. Lower-level API
+## Lower-level API
 
 ```python
 from tabtune.caching import PredictionCache, make_cache, CacheStats
@@ -117,10 +101,8 @@ cache.get(key)
 cache.set(key, value)
 ```
 
----
-
-## See Also
+## See also
 
 - [Shift-Aware Evaluation](shift-evaluation.md)
 - [Model Comparison](leaderboard.md)
-- [API: TabularPipeline](../api/pipeline.md)
+- [API: TabularPipeline](../reference/pipeline.md)

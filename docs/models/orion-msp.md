@@ -1,8 +1,8 @@
-# OrionMSP
+# Orion-MSP
 
-OrionMSP is a scalable in-context learning model that leverages multi‑scale synthetic priors and episodic adaptation for robust tabular classification.
+Orion-MSP (Lexsi Labs) is a scalable in-context learner with multi-scale sparse attention over the rows and column-then-row attention over the table, pretrained on multi-scale synthetic priors. Classification only, MIT weights. [v1.5](orion-msp-v15.md) stabilises its prototype refinement.
 
-## Key ideas
+## What it does differently
 - Multi‑scale synthetic priors to initialize inductive biases
 - Column‑then‑row attention for efficient context reasoning
 - Ensemble over transformed views for stability
@@ -14,15 +14,15 @@ OrionMSP is a scalable in-context learning model that leverages multi‑scale sy
 
 ## Inference parameters
 - `n_estimators` (int): number of transformed views to ensemble
-- `softmax_temperature` (float): post‑logit scaling (0.5–1.5)
+- `softmax_temperature` (float): post‑logit scaling (0.5-1.5)
 - `average_logits` (bool): average logits vs. probabilities
 - `batch_size` (int): batch size for ensembling
 
 ## Fine‑tuning parameters (via TuningManager)
-- `epochs` (int): number of epochs (typ. 3–10)
-- `learning_rate` (float): AdamW LR (1e‑5 – 5e‑4)
-- `support_size` (int): context samples per episode (e.g., 512–4096)
-- `query_size` (int): query samples per episode (e.g., 128–512)
+- `epochs` (int): number of epochs (typ. 3-10)
+- `learning_rate` (float): AdamW LR (1e‑5 - 5e‑4)
+- `support_size` (int): context samples per episode (e.g., 512-4096)
+- `query_size` (int): query samples per episode (e.g., 128-512)
 - `n_episodes` (int): total adaptation episodes
 - `batch_size` (int): episode batch size
 
@@ -48,7 +48,7 @@ y_pred = pipe.predict(X_test)
 ft_pipe = TabularPipeline(
     model_name="OrionMSP",
     task_type="classification",
-    tuning_strategy="base-ft",
+    tuning_strategy="finetune",
     tuning_params={
         "epochs": 5,
         "learning_rate": 2e-5,
@@ -65,6 +65,6 @@ ft_pipe.fit(X_train, y_train)
 - Start with `r=8, lora_alpha=16, lora_dropout=0.05`.
 
 ## Notes & caveats
-- Ensure categorical encoding is consistent between train/test splits.
+- Make sure categorical encoding is consistent between train/test splits.
 - For very small datasets (<20K), consider TabPFN or TabICL instead.
 - Increase `n_estimators` for stability on noisy datasets.

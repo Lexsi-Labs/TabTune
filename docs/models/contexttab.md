@@ -1,28 +1,24 @@
-# ContextTab: Semantics-Aware In-Context Learning
+# ConTextTab
 
-ContextTab is a semantically-aware tabular model that integrates modality-specific embeddings to leverage semantic information from feature names, descriptions, and mixed data types. This document provides comprehensive guidance for using ContextTab with TabTune.
+ConTextTab (SAP's `sap-rpt-1-oss`) is the one model here that reads your column names and your text cells. It embeds them with a language model, so a column called `annual_income` means something to it before it sees a single value. Weights are research-use only.
 
----
+## Introduction
 
-## 1. Introduction
+**ContextTab**
 
-**What is ContextTab?**
+What it does differently:
 
-ContextTab (ConTextTabClassifier) is an advanced in-context learning model uniquely designed to:
+- Use Feature Semantics: Understands column names and semantic meaning
+- Text Integration: Handles free-text features naturally
+- Modality-Aware Processing: Different encoders for different data modalities
+- Semantic Embeddings: Uses pre-trained text embeddings for features
+- Heterogeneous Data: Mixed numerical, categorical, and text features
 
-- **Leverage Feature Semantics**: Understands column names and semantic meaning
-- **Text Integration**: Handles free-text features naturally
-- **Modality-Aware Processing**: Different encoders for different data modalities
-- **Semantic Embeddings**: Uses pre-trained text embeddings for features
-- **Heterogeneous Data**: Mixed numerical, categorical, and text features
+The idea: tabular features plus language-model embeddings of the column names and text cells, so the model knows what a feature represents before it sees its values.
 
-**Key Innovation**: Combines tabular features with semantic embeddings of feature names, enabling the model to understand what features represent semantically.
+## Architecture
 
----
-
-## 2. Architecture
-
-### 2.1 High-Level Design
+### High-level design
 
 ```mermaid
 flowchart LR
@@ -38,32 +34,32 @@ flowchart LR
     I --> J[Context Processing]
     J --> K[Predictions]
 ```
-<!-- 
-### 2.2 Core Components
+<!--
+### Core components
 
 1. **Text Encoder** (`in_context_encoder`)
-   - Encodes feature names and descriptions
-   - Uses sentence transformers/BERT
-   - Generates semantic embeddings
-   - Pre-trained on diverse text
+ - Encodes feature names and descriptions
+ - Uses sentence transformers/BERT
+ - Generates semantic embeddings
+ - Pre-trained on diverse text
 
 2. **Value Encoder** (`dense`)
-   - Encodes feature values
-   - Handles mixed modalities
-   - Per-feature type processing
-   - Numerical and categorical support
+ - Encodes feature values
+ - Handles mixed modalities
+ - Per-feature type processing
+ - Numerical and categorical support
 
 3. **Semantic Fusion** (implicit)
-   - Combines text and value embeddings
-   - Cross-modality attention
-   - Unified representation
+ - Combines text and value embeddings
+ - Cross-modality attention
+ - Unified representation
 
 4. **ICL Predictor** (`output_head`)
-   - In-context learning head
-   - Context-aware predictions
-   - Support/query set handling -->
+ - In-context learning head
+ - Context-aware predictions
+ - Support/query set handling -->
 
-### 2.3 Semantic Processing Pipeline
+### Semantic processing pipeline
 
 ```
 Feature Names         Feature Values
@@ -81,11 +77,9 @@ Semantic Vectors     Value Vectors
       Predictions
 ```
 
----
+## Inference parameters
 
-## 3. Inference Parameters
-
-### 3.1 Complete Parameter Reference
+### Complete parameter reference
 
 ```python
 model_params = {
@@ -107,7 +101,7 @@ model_params = {
 }
 ```
 
-### 3.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -120,7 +114,7 @@ model_params = {
 | `use_cache` | bool | True | Cache computed embeddings |
 | `seed` | int | 42 | Random seed |
 
-### 3.3 Text Encoder Options
+### Text encoder options
 
 ```python
 # Different pre-trained models (trade-off: speed vs quality)
@@ -143,13 +137,11 @@ text_encoders = {
 }
 ```
 
----
-
-## 4. Fine-Tuning with ContextTab
+## Fine-tuning with ContextTab
 
 ContextTab supports **base fine-tuning** via episodic training.
 
-### 4.1 Fine-Tuning Parameters
+### Fine-tuning parameters
 
 ```python
 tuning_params = {
@@ -163,15 +155,15 @@ tuning_params = {
 }
 ```
 
-### 4.2 Fine-Tuning Best Practices
+### Fine-tuning best practices
 
-- **Epochs**: 5-15 (longer than most models)
-- **Learning Rate**: 1e-4 to 5e-4 (higher than TabICL)
-- **Warmup**: Include warmup for stability
-- **Scheduler**: Use cosine decay for better convergence
-- **Early Stopping**: Important due to text embedding complexity
+- Epochs: 5-15 (longer than most models)
+- Learning Rate: 1e-4 to 5e-4 (higher than TabICL)
+- Warmup: Include warmup for stability
+- Scheduler: Use cosine decay for better convergence
+- Early Stopping: Important due to text embedding complexity
 
-### 4.3 Fine-Tuning Stability
+### Fine-tuning stability
 
 ContextTab training can be unstable due to:
 - Complex text-value fusion
@@ -188,11 +180,9 @@ tuning_params = {
 }
 ```
 
----
+## Setup requirements
 
-## 5. Setup Requirements
-
-### 5.1 HuggingFace Hub Access
+### HuggingFace hub access
 
 ContextTab requires access to gated models on Hugging Face:
 
@@ -207,7 +197,7 @@ huggingface-cli login
 export HF_TOKEN='your_token_here'
 ```
 
-### 5.2 Verify Setup
+### Verify setup
 
 ```python
 from huggingface_hub import login
@@ -217,12 +207,12 @@ import os
 hf_token = os.getenv('HF_TOKEN')
 if hf_token:
     login(hf_token)
-    print("✅ Logged into Hugging Face Hub")
+    print("Logged into Hugging Face Hub")
 else:
-    print("⚠️ HF_TOKEN not set - may fail for gated models")
+    print("HF_TOKEN not set - may fail for gated models")
 ```
 
-### 5.3 Model Download
+### Model download
 
 First-time usage downloads model (~2GB):
 ```python
@@ -231,11 +221,9 @@ pipeline = TabularPipeline(model_name='ContextTab', tuning_strategy='inference')
 # ... downloads and caches model
 ```
 
----
+## Usage patterns
 
-## 6. Usage Patterns
-
-### 6.1 Inference Only
+### Inference only
 
 ```python
 from tabtune import TabularPipeline
@@ -257,12 +245,12 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-### 6.2 Base Fine-Tuning
+### Base fine-tuning
 
 ```python
 pipeline = TabularPipeline(
     model_name='ContextTab',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 10,
@@ -277,10 +265,10 @@ pipeline.fit(X_train, y_train)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 6.3 PEFT Fine-Tuning (Experimental)
+### PEFT fine-tuning (experimental)
 
 ```python
-# ⚠️ PEFT support is experimental for ContextTab
+# PEFT support is experimental for ContextTab
 pipeline = TabularPipeline(
     model_name='ContextTab',
     tuning_strategy='peft',
@@ -296,13 +284,11 @@ pipeline = TabularPipeline(
     }
 )
 
-# May have issues - base-ft recommended
+# May have issues - finetune recommended
 pipeline.fit(X_train, y_train)
 ```
 
----
-
-## 7. LoRA Target Modules (Experimental)
+## LoRA target modules (experimental)
 
 When using PEFT, ContextTab targets:
 
@@ -315,20 +301,18 @@ target_modules = [
 ]
 ```
 
-### 7.1 PEFT Status
+### PEFT status
 
-**⚠️ Experimental**: PEFT support for ContextTab is experimental because:
+**Experimental**: PEFT support for ContextTab is experimental because:
 - Complex embedding pipeline
 - Cross-modality fusion issues
 - Potential prediction inconsistencies
 
-**Recommendation**: Use `base-ft` strategy instead of `peft`
+**Recommendation**: Use `finetune` strategy instead of `peft`
 
----
+## Complete examples
 
-## 8. Complete Examples
-
-### 8.1 Text-Heavy Dataset
+### Text-heavy Dataset
 
 ```python
 from tabtune import TabularPipeline
@@ -345,7 +329,7 @@ os.environ['HF_TOKEN'] = 'your_token'
 
 pipeline = TabularPipeline(
     model_name='ContextTab',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 10,
@@ -361,9 +345,9 @@ metrics = pipeline.evaluate(X_test, y_test)
 print(f"Accuracy: {metrics['accuracy']:.4f}")
 ```
 
-### 8.2 Semantic Feature Names
+### Semantic feature names
 
-ContextTab leverages meaningful feature names:
+ContextTab uses meaningful feature names:
 
 ```python
 # Good: Descriptive feature names (ContextTab works well)
@@ -383,7 +367,7 @@ X = pd.DataFrame({
 })
 ```
 
-### 8.3 Production Deployment - Saving using joblib
+### Production deployment - saving using joblib
 
 ```python
 import joblib
@@ -394,7 +378,7 @@ os.environ['HF_TOKEN'] = 'your_token'
 # Train
 pipeline = TabularPipeline(
     model_name='ContextTab',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'epochs': 10,
         'learning_rate': 1e-4
@@ -412,11 +396,9 @@ loaded = TabularPipeline.load('contexttab_production.joblib')
 predictions = loaded.predict(X_new)
 ```
 
----
+## Performance characteristics
 
-## 9. Performance Characteristics
-
-### 9.1 Speed Benchmarks
+### Speed benchmarks
 
 | Operation | Time | Notes |
 |-----------|------|-------|
@@ -425,7 +407,7 @@ predictions = loaded.predict(X_new)
 | Prediction latency | 20-100ms | Per sample |
 | Text embedding cache | 1-2s | One-time at startup |
 
-### 9.2 Memory Usage
+### Memory usage
 
 | Scenario | Memory | GPU VRAM |
 |----------|--------|---------|
@@ -443,11 +425,10 @@ predictions = loaded.predict(X_new)
 | Mixed + text | 90%+ | Excels here |
 | Semantic names | +2-3% | Better with meaningful names |
  -->
----
 
 <!-- ## 10. Special Handling
 
-### 10.1 Text Columns
+### Text columns
 
 ContextTab automatically detects and processes text columns:
 
@@ -465,7 +446,7 @@ X = pd.DataFrame({
 # 3. Handle 'category' as categorical
 ```
 
-### 10.2 Missing Values
+### Missing values
 
 ContextTab handles missing values naturally:
 
@@ -479,11 +460,10 @@ X = pd.DataFrame({
 pipeline.fit(X_train, y_train)  # Works seamlessly
 ```
  -->
----
 
-## 11. Troubleshooting
+## Troubleshooting
 
-### Issue: "HuggingFace login required"
+### "HuggingFace login required"
 **Solution**:
 ```bash
 export HF_TOKEN='hf_xxxxxxxxxxxx'
@@ -491,18 +471,18 @@ export HF_TOKEN='hf_xxxxxxxxxxxx'
 huggingface-cli login
 ```
 
-### Issue: "Model download fails"
+### "Model download fails"
 **Solution**: Check internet and token
 ```python
 from huggingface_hub import model_info
 try:
     info = model_info('sentence-transformers/all-MiniLM-L6-v2')
-    print("✅ Model accessible")
+    print("Model accessible")
 except Exception as e:
-    print(f"❌ Model access failed: {e}")
+    print(f"Model access failed: {e}")
 ```
 
-### Issue: "Slow inference due to text encoding"
+### "Slow inference due to text encoding"
 **Solution**: Use faster text encoder
 ```python
 model_params = {
@@ -511,7 +491,7 @@ model_params = {
 }
 ```
 
-### Issue: "Training unstable or diverging"
+### "Training unstable or diverging"
 **Solution**: Increase regularization
 ```python
 tuning_params = {
@@ -522,7 +502,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Out of memory during training"
+### "Out of memory during training"
 **Solution**: Reduce batch size
 ```python
 tuning_params = {
@@ -530,65 +510,37 @@ tuning_params = {
 }
 ```
 
----
-
-## 12. Best Practices
-
-### ✅ Do's
-
-- ✅ Use descriptive feature names
-- ✅ Include text columns when available
-- ✅ Set HF_TOKEN before use
-- ✅ Use base-ft strategy (not peft)
-- ✅ Include longer warmup phases
-- ✅ Cache embeddings for repeated use
-
-### ❌ Don'ts
-
-- ❌ Don't use PEFT (experimental)
-- ❌ Don't use on pure numerical data (use TabICL)
-- ❌ Don't forget to set HF_TOKEN
-- ❌ Don't use very large batch sizes
-- ❌ Don't skip gradient clipping
-- ❌ Don't use without semantic feature names
-
----
-
-## 13. When to Use ContextTab
+## When to use ContextTab
 
 **Use ContextTab when**:
-- ✅ Dataset has text columns/features
-- ✅ Feature names are semantic/meaningful
-- ✅ Mixed data types (numerical + categorical + text)
-- ✅ You have HuggingFace Hub access
-- ✅ Accuracy is priority over speed
+- Dataset has text columns/features
+- Feature names are semantic/meaningful
+- Mixed data types (numerical + categorical + text)
+- You have HuggingFace Hub access
+- Accuracy is priority over speed
 
 **Don't use ContextTab for**:
-- ❌ Pure numerical data (use TabDPT)
-- ❌ Generic feature names (limited benefit)
-- ❌ Memory-constrained environments
-- ❌ When you need fast training
-- ❌ Without HuggingFace access
+- Pure numerical data (use TabDPT)
+- Generic feature names (limited benefit)
+- Memory-constrained environments
+- When you need fast training
+- Without HuggingFace access
 
----
-
-## 14. Comparison with Other Models
+## Comparison with other models
 
 | Aspect | ContextTab | TabICL | TabDPT | Mitra |
 |--------|-----------|--------|--------|-------|
-| Text Support | ✅ Excellent | ❌ No | ❌ No | ❌ No |
-| Semantic Names | ✅ Uses | ❌ Ignores | ❌ Ignores | ❌ Ignores |
+| Text Support | Excellent | No | No | No |
+| Semantic Names | Uses | Ignores | Ignores | Ignores |
 | Speed | Medium | Fast | Slow | Slow |
 | Memory | Moderate | Moderate | High | Very High |
-| Mixed Data | ✅ Excellent | Good | Good | Good |
+| Mixed Data | Excellent | Good | Good | Good |
 | Accuracy | High | Good | Excellent | Excellent |
-| PEFT | ⚠️ Exp | ✅ Full | ✅ Full | ✅ Full |
-
----
+| PEFT | Exp | Full | Full | Full |
 
 <!-- ## 15. Advanced Topics
 
-### 15.1 Custom Text Encoders
+### Custom text encoders
 
 ```python
 from sentence_transformers import SentenceTransformer
@@ -602,7 +554,7 @@ model_params = {
 }
 ```
 
-### 15.2 Feature Description Enrichment
+### Feature description enrichment
 
 ```python
 # If feature names are generic, add descriptions
@@ -616,27 +568,12 @@ X_train = pd.DataFrame({
 X_train.columns = ['customer_age', 'purchase_amount', 'category']
 ``` -->
 
----
-
-## 15. Quick Reference
+## Quick reference
 
 | Task | Strategy | Config | Epochs |
 |------|----------|--------|--------|
 | Quick baseline | inference | default | 0 |
-| Mixed data | base-ft | learning_rate=1e-4 | 10 |
-| Text-heavy | base-ft | warmup=200 | 10 |
-| Memory limited | base-ft | batch_size=4 | 10 |
-| Max accuracy | base-ft | full tune | 15 |
-
----
-
-## 16. Next Steps
-
-- [Model Selection](../user-guide/model-selection.md) - Compare with other models
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Fine-tuning details
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Benchmark ContextTab
-- [HuggingFace Hub](https://huggingface.co) - Access gated models
-
----
-
-ContextTab excels with text-enriched tabular data and semantic feature understanding. Use it when your data includes text or has meaningful feature names!
+| Mixed data | finetune | learning_rate=1e-4 | 10 |
+| Text-heavy | finetune | warmup=200 | 10 |
+| Memory limited | finetune | batch_size=4 | 10 |
+| Max accuracy | finetune | full tune | 15 |

@@ -1,25 +1,21 @@
-# Model Comparison with TabularLeaderboard
+# Leaderboard
 
-The `TabularLeaderboard` is a powerful benchmarking tool that enables systematic comparison of multiple models and tuning strategies on your dataset. This guide shows how to use it effectively.
+`TabularLeaderboard` fits many model and strategy configurations on one split and ranks them. It is the fastest way to answer "which model, for my data", and it is what the [Models](../models/overview.md) page tells you to run when the tables there do not settle it.
 
----
+## Overview
 
-## 1. Overview
+What you get:
 
-`TabularLeaderboard` simplifies the process of comparing different TabTune models and strategies:
+- Compare multiple models simultaneously
+- Test different tuning strategies (inference, finetune, peft)
+- Rank results by any evaluation metric
+- Export results for analysis
+- Track experiment metadata
+- Visualize performance comparisons
 
-- ✅ Compare multiple models simultaneously
-- ✅ Test different tuning strategies (inference, base-ft, peft)
-- ✅ Rank results by any evaluation metric
-- ✅ Export results for analysis
-- ✅ Track experiment metadata
-- ✅ Visualize performance comparisons
+## Core concepts
 
----
-
-## 2. Core Concepts
-
-### 2.1 Workflow
+### Workflow
 
 ```mermaid
 flowchart LR
@@ -30,18 +26,16 @@ flowchart LR
     E --> F[Export Results]
 ```
 
-### 2.2 Key Components
+### Components
 
-- **Leaderboard**: Container for managing multiple model configurations
-- **Model Entry**: Single model + strategy + hyperparameter combination
-- **Benchmark**: Complete evaluation run across all added models
-- **Results**: Ranked comparison with metrics and metadata
+- Leaderboard: Container for managing multiple model configurations
+- Model Entry: Single model + strategy + hyperparameter combination
+- Benchmark: Complete evaluation run across all added models
+- Results: Ranked comparison with metrics and metadata
 
----
+## Basic usage
 
-## 3. Basic Usage
-
-### 3.1 Initialize Leaderboard
+### Initialize leaderboard
 
 ```python
 from tabtune import TabularLeaderboard
@@ -61,7 +55,7 @@ leaderboard = TabularLeaderboard(
 )
 ```
 
-### 3.2 Add Models to Leaderboard
+### Add models to leaderboard
 
 ```python
 # Add single model with default settings
@@ -73,7 +67,7 @@ leaderboard.add_model(
 # Add model with custom tuning parameters
 leaderboard.add_model(
     model_name='TabICL',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     model_params={'n_estimators': 16},
     tuning_params={'epochs': 5, 'learning_rate': 2e-5}
 )
@@ -91,7 +85,7 @@ leaderboard.add_model(
 )
 ```
 
-### 3.3 Run Benchmarks
+### Run benchmarks
 
 ```python
 # Run all added models
@@ -105,11 +99,9 @@ results = leaderboard.run(
 )
 ```
 
----
+## Complete example
 
-## 4. Complete Example
-
-### 4.1 Full Comparison Workflow
+### Full comparison workflow
 
 ```python
 from tabtune import TabularLeaderboard
@@ -145,7 +137,7 @@ for model in ['TabICL', 'OrionMSP', 'OrionBix', 'Mitra']:
 # 6. Add models - Base Fine-Tuning (for comparison)
 leaderboard.add_model(
     'TabICL',
-    'base-ft',
+    'finetune',
     name='TabICL-BaseFT',
     tuning_params={'epochs': 5, 'learning_rate': 2e-5}
 )
@@ -154,11 +146,9 @@ leaderboard.add_model(
 results = leaderboard.run(rank_by='accuracy', verbose=True)
 ```
 
----
+## Class reference
 
-## 5. Class Reference
-
-### 5.1 TabularLeaderboard Constructor
+### TabularLeaderboard constructor
 
 ```python
 TabularLeaderboard(
@@ -184,7 +174,7 @@ TabularLeaderboard(
 | `validation_split` | float | 0.1 | Fraction for validation |
 | `random_state` | int | 42 | Random seed for reproducibility |
 
-### 5.2 add_model() Method
+### add_model() method
 
 ```python
 leaderboard.add_model(
@@ -202,13 +192,13 @@ leaderboard.add_model(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `model_name` | str | Required | Model to add (TabPFN, TabICL, etc.) |
-| `tuning_strategy` | str | Required | 'inference', 'base-ft', or 'peft' |
+| `tuning_strategy` | str | Required | 'inference', 'finetune', or 'peft' |
 | `name` | str | None | Custom name for leaderboard (auto-generated if None) |
 | `model_params` | dict | None | Model-specific hyperparameters |
 | `tuning_params` | dict | None | Training hyperparameters |
 | `processor_params` | dict | None | Preprocessing parameters |
 
-### 5.3 run() Method
+### run() method
 
 ```python
 results = leaderboard.run(
@@ -228,12 +218,9 @@ results = leaderboard.run(
 
 **Return**: `LeaderboardResults` object with all benchmarks
 
+## Advanced usage
 
----
-
-## 6. Advanced Usage
-
-### 6.1 Custom Model Names
+### Custom model names
 
 ```python
 # Add with meaningful names
@@ -254,7 +241,7 @@ leaderboard.add_model(
 results = leaderboard.run(rank_by='accuracy')
 ```
 
-### 6.2 Hyperparameter Grid
+### Hyperparameter grid
 
 Test multiple hyperparameter combinations:
 
@@ -281,7 +268,7 @@ results = leaderboard.run(rank_by='f1_score', verbose=True)
 print(leaderboard.get_ranking())
 ```
 
-### 6.3 Strategy Comparison
+### Strategy comparison
 
 Compare all three strategies for a model:
 
@@ -293,7 +280,7 @@ leaderboard.add_model(model, 'inference', name=f'{model}-Inference')
 
 # Base fine-tuning
 leaderboard.add_model(
-    model, 'base-ft',
+    model, 'finetune',
     name=f'{model}-BaseFT',
     tuning_params={'epochs': 5}
 )
@@ -313,7 +300,7 @@ for name, score in results.items():
     print(f"{strategy}: {score['accuracy']:.4f}")
 ```
 
-### 6.4 Cross-Validation
+### Cross-validation
 
 Test stability across multiple folds:
 
@@ -332,7 +319,7 @@ for fold_idx, (train_idx, test_idx) in enumerate(kf.split(X)):
     
     # Add models
     lb.add_model('TabICL', 'peft')
-    lb.add_model('OrionBix', 'base-ft')
+    lb.add_model('OrionBix', 'finetune')
     
     # Run and store
     results = lb.run()
@@ -344,9 +331,7 @@ all_results = pd.concat(fold_results)
 print(all_results.groupby('model').mean())
 ```
 
----
-
-## 7. Evaluation Metrics
+## Evaluation metrics
 
 Supported metrics for ranking:
 
@@ -371,36 +356,7 @@ results_f1 = leaderboard.run(rank_by='f1_score')
 results_auc = leaderboard.run(rank_by='roc_auc_score')
 ```
 
----
-
-
----
-
-
-## 8. Best Practices
-
-### ✅ Do's
-
-- ✅ Use consistent data splits across all models
-- ✅ Fix random seed for reproducibility
-- ✅ Include inference baseline for comparison
-- ✅ Test multiple strategies for each model
-- ✅ Save results to disk
-- ✅ Use reasonable timeout values
-- ✅ Export results as CSV for further analysis
-
-### ❌ Don'ts
-
-- ❌ Don't change data between runs
-- ❌ Don't use training data for validation
-- ❌ Don't tune hyperparameters on test set
-- ❌ Don't mix different task types in one leaderboard
-- ❌ Don't run without timeout protection
-- ❌ Don't forget to save best model config
-
----
-
-## 9. Complete Workflow Example
+## Complete workflow example
 
 ```python
 from tabtune import TabularLeaderboard
@@ -434,17 +390,4 @@ for model in ['TabICL', 'OrionMSP', 'OrionBix', 'TabDPT']:
 print("Running benchmarks...")
 results = lb.run(rank_by='accuracy', verbose=True, n_jobs=-1)
 
-
 ```
-
----
-
-## 10. Next Steps
-
-- [Model Selection](model-selection.md) - Guide for choosing models
-- [Tuning Strategies](tuning-strategies.md) - Deep dive into strategies
-- [Examples](../examples/benchmarking.md) - More examples
-
----
-
-The `TabularLeaderboard` streamlines model selection by enabling systematic, reproducible benchmarking!

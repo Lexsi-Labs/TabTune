@@ -1,20 +1,16 @@
-# PEFT & LoRA: Parameter-Efficient Fine-Tuning for Tabular Models
+# PEFT & LoRA
 
-This document provides an in-depth guide to Parameter-Efficient Fine-Tuning (PEFT) using Low-Rank Adaptation (LoRA) for TabTune models. Learn the theory, implementation, and best practices for memory-efficient model adaptation.
+## What PEFT and LoRA are
 
----
+### What is PEFT?
 
-## 1. Introduction to PEFT and LoRA
-
-### 1.1 What is PEFT?
-
-**Parameter-Efficient Fine-Tuning (PEFT)** is a set of techniques to adapt large pre-trained models using only a small fraction of the total parameters, dramatically reducing:
+Parameter-efficient fine-tuning (PEFT) adapts a pretrained model by training a small fraction of its parameters. Compared with a full fine-tune it cuts:
 
 - Memory consumption (90% reduction)
 - Training time (2-3x speedup)
 - Storage requirements (only store small adapters)
 
-### 1.2 What is LoRA?
+### What is LoRA?
 
 **Low-Rank Adaptation (LoRA)** is a specific PEFT technique that:
 
@@ -23,7 +19,7 @@ This document provides an in-depth guide to Parameter-Efficient Fine-Tuning (PEF
 - Uses low-rank decomposition for efficiency
 - Trains only 1-10% of parameters
 
-### 1.3 Key Innovation
+### What is new
 
 Instead of updating all weights, LoRA learns a low-rank approximation of weight updates:
 
@@ -38,11 +34,9 @@ Where:
 - \(B\): Output projection (small)
 - \(r\): Rank (typically 4-16, much smaller than weight dimensions)
 
----
+## Mathematical foundation
 
-## 2. Mathematical Foundation
-
-### 2.1 Low-Rank Decomposition
+### Low-rank decomposition
 
 For a weight matrix \(W \in \mathbb{R}^{d_{out} \times d_{in}}\), LoRA represents updates as:
 
@@ -60,7 +54,7 @@ For a weight matrix \(W \in \mathbb{R}^{d_{out} \times d_{in}}\), LoRA represent
 - LoRA (r=8): 12,288 parameters
 - Compression: 98% reduction
 
-### 2.2 Scaling
+### Scaling
 
 To balance adaptation magnitude, LoRA scales the output:
 
@@ -74,7 +68,7 @@ Where \(\alpha\) (lora_alpha) controls the scaling factor \(\frac{\alpha}{r}\).
 - Higher alpha: Larger adaptation magnitude
 - Default: \(\alpha = 2r\) (empirically optimal)
 
-### 2.3 Dropout
+### Dropout
 
 Dropout is applied to the input before LoRA projection for regularization:
 
@@ -82,11 +76,9 @@ Dropout is applied to the input before LoRA projection for regularization:
 h = W_0 x + \alpha \frac{1}{r} B(\text{dropout}(Ax))
 \]
 
----
+## LoRA in TabTune
 
-## 3. LoRA in TabTune
-
-### 3.1 LoRA Configuration
+### LoRA configuration
 
 ```python
 peft_config = {
@@ -98,7 +90,7 @@ peft_config = {
 }
 ```
 
-### 3.2 LoRA Linear Layer
+### LoRA linear layer
 
 TabTune implements `LoRALinear` that wraps standard PyTorch linear layers:
 
@@ -120,40 +112,38 @@ class LoRALinear(nn.Module):
         return base_out + lora_out
 ```
 
-### 3.3 Weight Freezing
+### Weight freezing
 
 - Base model weights: `requires_grad=False`
 - LoRA adapters: `requires_grad=True`
 - Enables gradient computation only on adapters
 
----
+## LoRA hyperparameter tuning
 
-## 4. LoRA Hyperparameter Tuning
-
-### 4.1 Rank Selection
+### Rank selection
 
 The rank `r` is the most critical hyperparameter:
 
 | Rank | Parameters | Memory | Accuracy | Speed |
 |------|-----------|--------|----------|-------|
-| r=2 | Minimal | Very Low | Lower | ⭐⭐⭐⭐⭐ |
-| r=4 | Low | Low | Good | ⭐⭐⭐⭐⭐ |
-| r=8 | Moderate | Moderate | Better | ⭐⭐⭐⭐ |
-| r=16 | High | High | Best | ⭐⭐⭐ |
-| r=32 | Very High | Very High | Optimal | ⭐⭐ |
+| r=2 | Minimal | Very Low | Lower | |
+| r=4 | Low | Low | Good | |
+| r=8 | Moderate | Moderate | Better | |
+| r=16 | High | High | Best | |
+| r=32 | Very High | Very High | Optimal | |
 
 **Guidelines**:
-- **Small data (10K)**: r=4 (enough for adaptation)
-- **Medium data (100K)**: r=8 (balanced)
-- **Large data (1M)**: r=16 (more expressive)
-- **Very constrained**: r=2 (minimum viable)
+- Small data (10K): r=4 (enough for adaptation)
+- Medium data (100K): r=8 (balanced)
+- Large data (1M): r=16 (more expressive)
+- Very constrained: r=2 (minimum viable)
 
 **Rule of Thumb**:
 \[
 r = \max(4, \frac{\text{dataset\_size}}{50000})
 \]
 
-### 4.2 Alpha Selection
+### Alpha selection
 
 Alpha controls the magnitude of LoRA contribution:
 
@@ -167,11 +157,11 @@ peft_config = {
 ```
 
 **Effects**:
-- **Alpha too low**: Adaptation weak, training slow
-- **Alpha = 2r**: Empirically optimal
-- **Alpha too high**: Training unstable, may diverge
+- Alpha too low: Adaptation weak, training slow
+- Alpha = 2r: Empirically optimal
+- Alpha too high: Training unstable, may diverge
 
-### 4.3 Dropout Probability
+### Dropout probability
 
 LoRA dropout acts as regularization:
 
@@ -185,15 +175,13 @@ lora_dropout_values = {
 ```
 
 **Selection**:
-- **Large data**: 0.05 (default)
-- **Small data**: 0.1-0.2 (prevent overfitting)
-- **Already regularized model**: 0.0-0.05
+- Large data: 0.05 (default)
+- Small data: 0.1-0.2 (prevent overfitting)
+- Already regularized model: 0.0-0.05
 
----
+## Target module selection
 
-## 5. Target Module Selection
-
-### 5.1 Module Hierarchy
+### Module hierarchy
 
 TabTune identifies target modules via pattern matching:
 
@@ -207,7 +195,7 @@ target_modules = {
 }
 ```
 
-### 5.2 Model-Specific Defaults
+### Model-specific defaults
 
 Each model has pre-configured target modules optimized for LoRA:
 
@@ -240,7 +228,7 @@ target_modules = [
 ]
 ```
 
-### 5.3 Custom Target Selection
+### Custom target selection
 
 Override defaults for specific needs:
 
@@ -261,11 +249,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## LoRA training
 
-## 6. LoRA Training
-
-### 6.1 Typical Training Loop
+### Typical training loop
 
 ```python
 from tabtune import TabularPipeline
@@ -277,7 +263,7 @@ pipeline = TabularPipeline(
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
-        'learning_rate': 2e-4,  # Typically higher than base-ft
+        'learning_rate': 2e-4,  # Typically higher than finetune
         'peft_config': {'r': 8, 'lora_alpha': 16}
     }
 )
@@ -289,7 +275,7 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-### 6.2 Learning Rate Strategy
+### Learning rate strategy
 
 LoRA uses different learning rates than base fine-tuning:
 
@@ -303,7 +289,7 @@ learning_rate_peft = 2e-4  # 10x higher typical
 # Rationale: Smaller parameter updates need larger learning rates
 ```
 
-### 6.3 Optimizer Configuration
+### Optimizer configuration
 
 ```python
 # LoRA-specific optimizer settings
@@ -316,11 +302,9 @@ optimizer_config = {
 }
 ```
 
----
+## Memory analysis
 
-## 7. Memory Analysis
-
-### 7.1 Memory Breakdown
+### Memory breakdown
 
 **Base Fine-Tuning** (full model):
 ```
@@ -344,7 +328,7 @@ Total:             ~700 MB per forward/backward
 ~70% reduction
 ```
 
-### 7.2 Practical Memory Savings
+### Practical memory savings
 
 | Model | Base-FT | LoRA | Savings |
 |-------|---------|------|---------|
@@ -352,10 +336,10 @@ Total:             ~700 MB per forward/backward
 | TabDPT | 24 GB | 8 GB | 66% |
 | Mitra | 20 GB | 6 GB | 70% |
 
-<!-- 
-## 8. Performance Impact
+<!--
+## Performance impact
 
-### 8.1 Accuracy Trade-off
+### Accuracy trade-off
 
 LoRA typically shows minor accuracy loss compared to base fine-tuning:
 
@@ -371,7 +355,7 @@ loss = -0.7%  # Acceptable trade-off for 66% memory savings
 - r=8: 89.8% accuracy, 35% memory
 - r=16: 90.2% accuracy, 45% memory
 
-### 8.2 Training Speed
+### Training speed
 
 | Strategy | Time | Notes |
 |----------|------|-------|
@@ -379,17 +363,16 @@ loss = -0.7%  # Acceptable trade-off for 66% memory savings
 | LoRA | 40-60% | Faster due to fewer parameters |
 | PEFT+Mixed Precision | 25-35% | Optimal speed |
 
-### 8.3 Inference Speed
+### Inference speed
 
-- **Base-FT**: Baseline
-- **LoRA**: +5-10% overhead (LoRA forward pass)
-- **With caching**: Negligible difference
+- Base-FT: Baseline
+- LoRA: +5-10% overhead (LoRA forward pass)
+- With caching: Negligible difference
  -->
----
 
-## 9. Complete Example
+## Complete example
 
-### 9.1 Memory-Constrained Scenario
+### Memory-constrained scenario
 
 ```python
 from tabtune import TabularPipeline
@@ -420,7 +403,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 print(f"LoRA Accuracy: {metrics['accuracy']:.4f}")
 ```
 
-### 9.2 Rank Exploration
+### Rank exploration
 
 ```python
 from tabtune import TabularLeaderboard
@@ -443,7 +426,7 @@ results = lb.run(rank_by='accuracy')
 print(lb.get_ranking())
 ```
 
-### 9.3 Memory-Speed Trade-off
+### Memory-speed trade-off
 
 ```python
 # Explore memory-speed-accuracy trade-off
@@ -482,11 +465,9 @@ for config in configs:
           f"Accuracy: {metrics['accuracy']:.4f}")
 ```
 
----
+## Saving and loading LoRA models
 
-## 10. Saving and Loading LoRA Models
-
-### 10.1 Save LoRA Adapters Only
+### Save LoRA adapters only
 
 ```python
 import torch
@@ -502,7 +483,7 @@ lora_state = {
 torch.save(lora_state, 'lora_adapters.pt')  # ~1-5 MB
 ```
 
-### 10.2 Load and Merge
+### Load and merge
 
 ```python
 # Load adapters and merge with base model
@@ -512,7 +493,7 @@ lora_state = torch.load('lora_adapters.pt')
 merged_weights = base_weights + (lora_B @ lora_A) * alpha / r
 ```
 
-### 10.3 Full Pipeline Serialization
+### Full pipeline serialization
 
 ```python
 # Save complete pipeline with LoRA adapters
@@ -523,11 +504,9 @@ loaded = TabularPipeline.load('pipeline_with_lora.joblib')
 predictions = loaded.predict(X_test)
 ```
 
----
+## Troubleshooting
 
-## 11. Troubleshooting
-
-### Issue: "LoRA accuracy much lower than base-FT"
+### "LoRA accuracy much lower than base-FT"
 **Solution**: Increase rank
 ```python
 peft_config = {
@@ -536,7 +515,7 @@ peft_config = {
 }
 ```
 
-### Issue: "Training diverging with LoRA"
+### "Training diverging with LoRA"
 **Solution**: Reduce learning rate
 ```python
 tuning_params = {
@@ -545,7 +524,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Still out of memory with LoRA"
+### "Still out of memory with LoRA"
 **Solution**: Further reduce parameters
 ```python
 peft_config = {
@@ -558,18 +537,16 @@ tuning_params = {
 }
 ```
 
-### Issue: "LoRA inference slow"
+### "LoRA inference slow"
 **Solution**: Use merged weights
 ```python
 # Merge LoRA weights into base after training
 merged_model = merge_lora_weights(pipeline.model)
 ```
 
----
-
 <!-- ## 12. Advanced Topics
 
-### 12.1 LoRA+ Variant
+### LoRA+ variant
 
 Enhanced LoRA with different learning rates per layer:
 
@@ -582,7 +559,7 @@ lora_plus_config = {
 }
 ```
 
-### 12.2 QLoRA (Quantized LoRA)
+### QLoRA (quantized LoRA)
 
 Combine LoRA with quantization for extreme compression:
 
@@ -595,7 +572,7 @@ quantization_config = {
 # Reduces model size by 4x more
 ```
 
-### 12.3 Multi-LoRA (Mixture of Adapters)
+### Multi-LoRA (mixture of adapters)
 
 Multiple task-specific LoRA adapters:
 
@@ -611,31 +588,8 @@ task_loras = {
 selected_adapter = load_lora_adapter(task_loras['classification'])
 ```
  -->
----
 
-## 13. Best Practices
-
-### ✅ Do's
-
-- ✅ Start with r=8 (good default)
-- ✅ Use 2x learning rate for LoRA vs base-FT
-- ✅ Include warmup phase (prevent instability)
-- ✅ Monitor gradient norms
-- ✅ Use gradient clipping
-- ✅ Save adapter weights separately
-- ✅ Test rank selection with leaderboard
-
-### ❌ Don'ts
-
-- ❌ Don't use same learning rate as base-FT
-- ❌ Don't train very low ranks (r<2) without good reason
-- ❌ Don't skip regularization on small data
-- ❌ Don't forget to freeze base model
-- ❌ Don't use LoRA on tiny models (overhead not worth it)
-
----
-
-## 14. Comparison: Base-FT vs LoRA
+## Comparison: base-FT vs LoRA
 
 | Aspect | Base-FT | LoRA | Winner |
 |--------|---------|------|--------|
@@ -647,9 +601,7 @@ selected_adapter = load_lora_adapter(task_loras['classification'])
 | Production | Complex | Simple | LoRA |
 | Learning Curve | Medium | Low | LoRA |
 
----
-
-## 15. Quick Reference
+## Quick reference
 
 | Task | r | Alpha | Dropout | LR |
 |------|---|-------|---------|-----|
@@ -658,16 +610,3 @@ selected_adapter = load_lora_adapter(task_loras['classification'])
 | Large data (1M) | 16 | 32 | 0.02 | 1e-4 |
 | Memory limited | 2 | 4 | 0.2 | 1e-4 |
 | Max accuracy | 16 | 32 | 0.05 | 5e-5 |
-
----
-
-## 16. Next Steps
-
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Compare strategies
-- [Hyperparameter Tuning](hyperparameter-tuning.md) - Full optimization guide
-- [Models Overview](../models/overview.md) - PEFT support per model
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Compare configurations
-
----
-
-LoRA enables efficient fine-tuning of large tabular models. Use it for memory-constrained environments while maintaining strong performance!

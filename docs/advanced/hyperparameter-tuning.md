@@ -1,23 +1,17 @@
-# Hyperparameter Tuning: Optimizing TabTune Model Performance
+# Hyperparameter Tuning
 
-This document provides comprehensive guidance on hyperparameter tuning for TabTune models, including strategies, tools, and best practices for finding optimal configurations.
+## Introduction
 
----
+Most TabTune runs need no tuning: an in-context model has few knobs and sensible defaults. When you do tune, the knobs that matter are the learning rate, the number of epochs, the LoRA rank and the context size, and this page shows how to search them with grid, random and Bayesian strategies, with Optuna and friends. It covers:
 
-## 1. Introduction
+- Search Strategies: Grid search, random search, Bayesian optimization
+- Hyperparameter Spaces: Ranges and distributions for each model
+- Tuning Tools: Integration with Optuna, scikit-optimize, and hyperopt
+- Best Practices: Efficient tuning workflows and validation strategies
 
-Hyperparameter tuning is the process of systematically searching for the best model configuration to maximize performance on your specific task. This guide covers:
+## Which knobs exist
 
-- **Search Strategies**: Grid search, random search, Bayesian optimization
-- **Hyperparameter Spaces**: Ranges and distributions for each model
-- **Tuning Tools**: Integration with Optuna, scikit-optimize, and hyperopt
-- **Best Practices**: Efficient tuning workflows and validation strategies
-
----
-
-## 2. Hyperparameter Landscape
-
-### 2.1 Tunable Hyperparameters by Model
+### Tunable hyperparameters by model
 
 | Model | Critical | Important | Minor |
 |-------|----------|-----------|-------|
@@ -29,7 +23,7 @@ Hyperparameter tuning is the process of systematically searching for the best mo
 | **Mitra** | support_size, lr | batch_size, num_layers | d_model |
 | **ContextTab** | epochs, lr | warmup_steps | text_encoder |
 
-### 2.2 Shared Hyperparameters
+### Shared hyperparameters
 
 ```python
 shared_hparams = {
@@ -48,23 +42,21 @@ peft_hparams = {
 }
 ```
 
----
+## Search strategies
 
-## 3. Search Strategies
-
-### 3.1 Grid Search
+### Grid search
 
 Systematic evaluation of all parameter combinations.
 
 **Advantages**:
-- ✅ Exhaustive coverage
-- ✅ Parallelize easily
-- ✅ Reproducible
+- Exhaustive coverage
+- Parallelize easily
+- Reproducible
 
 **Disadvantages**:
-- ❌ Exponential complexity
-- ❌ Wasteful on large spaces
-- ❌ Poor scaling
+- Exponential complexity
+- Wasteful on large spaces
+- Poor scaling
 
 ```python
 from sklearn.model_selection import ParameterGrid
@@ -84,7 +76,7 @@ best_params = None
 for params in ParameterGrid(param_grid):
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params=params
     )
     
@@ -100,18 +92,18 @@ print(f"\nBest parameters: {best_params}")
 print(f"Best score: {best_score:.4f}")
 ```
 
-### 3.2 Random Search
+### Random search
 
 Random sampling from parameter distributions.
 
 **Advantages**:
-- ✅ Covers parameter space more uniformly
-- ✅ Scales well to large spaces
-- ✅ Simple parallelization
+- Covers parameter space more uniformly
+- Scales well to large spaces
+- Simple parallelization
 
 **Disadvantages**:
-- ❌ May miss optimal region
-- ❌ Less reproducible
+- May miss optimal region
+- Less reproducible
 
 ```python
 import numpy as np
@@ -143,7 +135,7 @@ for i in range(n_iter):
     
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params=params
     )
     
@@ -158,19 +150,19 @@ for i in range(n_iter):
 print(f"\nBest parameters: {best_params}")
 ```
 
-### 3.3 Bayesian Optimization with Optuna
+### Bayesian optimization with Optuna
 
 Intelligent search using Gaussian processes.
 
 **Advantages**:
-- ✅ Intelligent sampling
-- ✅ Few evaluations needed
-- ✅ Adaptively explores promising regions
+- Intelligent sampling
+- Few evaluations needed
+- Adaptively explores promising regions
 
 **Disadvantages**:
-- ❌ More complex
-- ❌ Slower per iteration
-- ❌ Requires more setup
+- More complex
+- Slower per iteration
+- Requires more setup
 
 ```python
 import optuna
@@ -196,7 +188,7 @@ def objective(trial):
     # Train and evaluate
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params=tuning_params
     )
     
@@ -219,13 +211,11 @@ print(f"Best score: {study.best_value:.4f}")
 print(f"Best parameters: {study.best_params}")
 ```
 
----
+## Model-specific tuning
 
-## 4. Model-Specific Tuning
+### TabPFN tuning
 
-### 4.1 TabPFN Tuning
-
-Focus on inference parameters since base-ft is not primary use case:
+Focus on inference parameters since finetune is not primary use case:
 
 ```python
 # Key hyperparameters
@@ -239,7 +229,7 @@ tabpfn_hparams = {
 # Fine-tune only if needed
 pipeline = TabularPipeline(
     model_name='TabPFN',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,
@@ -248,7 +238,7 @@ pipeline = TabularPipeline(
 )
 ```
 
-### 4.2 TabICL/OrionMSP/OrionBix Tuning
+### TabICL/OrionMSP/OrionBix tuning
 
 Optimize episodic training parameters:
 
@@ -272,9 +262,9 @@ best_config = {
 }
 ```
 
-### 4.3 TabDPT Tuning
+### TabDPT tuning
 
-Leverage pre-training and large context:
+Use pre-training and large context:
 
 ```python
 # Key hyperparameters
@@ -296,7 +286,7 @@ best_config = {
 }
 ```
 
-### 4.4 Mitra Tuning
+### Mitra tuning
 
 Optimize 2D attention parameters:
 
@@ -322,7 +312,7 @@ best_config = {
 }
 ```
 
-### 4.5 PEFT Tuning
+### PEFT tuning
 
 Optimize LoRA parameters:
 
@@ -332,7 +322,7 @@ peft_hparams = {
     'r': [2, 4, 8, 16],
     'lora_alpha': [4, 8, 16, 32],  # Usually 2x rank
     'lora_dropout': [0.05, 0.1, 0.2],
-    'learning_rate': [1e-4, 2e-4, 5e-4]  # Higher than base-ft
+    'learning_rate': [1e-4, 2e-4, 5e-4]  # Higher than finetune
 }
 
 # Recommended
@@ -340,15 +330,13 @@ best_peft_config = {
     'r': 8,
     'lora_alpha': 16,
     'lora_dropout': 0.05,
-    'learning_rate': 2e-4  # 10x base-ft
+    'learning_rate': 2e-4  # 10x finetune
 }
 ```
 
----
+## Cross-validation strategy
 
-## 5. Cross-Validation Strategy
-
-### 5.1 k-Fold Cross-Validation
+### k-fold cross-validation
 
 ```python
 from sklearn.model_selection import KFold
@@ -369,7 +357,7 @@ def cross_validate_hyperparams(X, y, model_name, params, k=5):
         # Train and evaluate
         pipeline = TabularPipeline(
             model_name=model_name,
-            tuning_strategy='base-ft',
+            tuning_strategy='finetune',
             tuning_params=params
         )
         
@@ -395,7 +383,7 @@ mean, std = cross_validate_hyperparams(
 )
 ```
 
-### 5.2 Stratified k-Fold
+### Stratified k-fold
 
 For imbalanced classification:
 
@@ -411,11 +399,9 @@ for train_idx, val_idx in skf.split(X, y):
     # ... training code
 ```
 
----
+## Efficient tuning workflows
 
-## 6. Efficient Tuning Workflows
-
-### 6.1 Cascading Search
+### Cascading search
 
 Start coarse, then fine-grained:
 
@@ -447,7 +433,7 @@ stage2_params = {
 best_params_stage2 = grid_search(stage2_params)
 ```
 
-### 6.2 Early Stopping During Tuning
+### Early stopping during tuning
 
 ```python
 class EarlyStoppingTuner:
@@ -479,11 +465,9 @@ for params in param_grid:
         break
 ```
 
----
+## Complete tuning examples
 
-## 7. Complete Tuning Examples
-
-### 7.1 Simple Grid Search with Leaderboard
+### Simple grid search with leaderboard
 
 ```python
 from tabtune import TabularLeaderboard
@@ -509,7 +493,7 @@ for i, params in enumerate(param_combinations):
     config_name = f"Config_{i+1}_{params['learning_rate']}_{params['epochs']}"
     leaderboard.add_model(
         'TabICL',
-        'base-ft',
+        'finetune',
         name=config_name,
         tuning_params=params
     )
@@ -518,7 +502,7 @@ results = leaderboard.run(rank_by='accuracy')
 print(leaderboard.get_ranking())
 ```
 
-### 7.2 Bayesian Optimization with Pruning
+### Bayesian optimization with pruning
 
 ```python
 import optuna
@@ -531,7 +515,7 @@ def objective_with_pruning(trial):
     
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params={
             'learning_rate': learning_rate,
             'epochs': epochs
@@ -563,7 +547,7 @@ study = optuna.create_study(
 study.optimize(objective_with_pruning, n_trials=30)
 ```
 
-### 7.3 Parallel Tuning with Ray
+### Parallel tuning with Ray
 
 ```python
 import ray
@@ -577,7 +561,7 @@ def train_model(config):
     
     pipeline = TabularPipeline(
         model_name='TabICL',
-        tuning_strategy='base-ft',
+        tuning_strategy='finetune',
         tuning_params=config
     )
     
@@ -601,11 +585,9 @@ results = tune.run(
 ray.shutdown()
 ```
 
----
+## Tuning summary & defaults
 
-## 8. Tuning Summary & Defaults
-
-### 8.1 Quick Reference Table
+### Quick reference table
 
 | Model | Learning Rate | Epochs | Support Size | Key Parameter |
 |-------|---------------|--------|--------------|----------------|
@@ -618,69 +600,31 @@ ray.shutdown()
 | ContextTab | 1e-4 | 10 | N/A | warmup_steps |
 | PEFT | 2e-4 | 5 | 48 | rank (r) |
 
-### 8.2 Tuning Priority
+### Tuning priority
 
-1. **Learning Rate**: 80% of impact
-2. **Epochs**: 10% of impact
-3. **Batch/Support Size**: 5% of impact
-4. **Other**: 5% of impact
+1. Learning Rate: 80% of impact
+2. Epochs: 10% of impact
+3. Batch/Support Size: 5% of impact
+4. Other: 5% of impact
 
----
+## Common pitfalls & solutions
 
-## 9. Best Practices
-
-### ✅ Do's
-
-- ✅ Start with default hyperparameters
-- ✅ Use cross-validation for robustness
-- ✅ Tune on validation set, evaluate on test set
-- ✅ Focus on high-impact hyperparameters first
-- ✅ Use multiple seeds for stability
-- ✅ Log all experiments
-- ✅ Parallelize when possible
-
-### ❌ Don'ts
-
-- ❌ Don't tune on test set
-- ❌ Don't use learning rate as only tunable parameter
-- ❌ Don't ignore data size when choosing ranges
-- ❌ Don't forget to freeze random seed
-- ❌ Don't tune without validation set
-- ❌ Don't skip early stopping
-
----
-
-## 10. Common Pitfalls & Solutions
-
-### Issue: "Tuning is too slow"
-**Solution**: 
+### "Tuning is too slow"
+**Solution**:
 - Use Bayesian optimization instead of grid search
 - Parallelize across cores
 - Use early stopping
 
-### Issue: "Best tuned model still overfits"
+### "Best tuned model still overfits"
 **Solution**:
 - Increase regularization (weight decay)
-- Use PEFT instead of base-ft
+- Use PEFT instead of finetune
 - Reduce learning rate
 - Add dropout
 
-### Issue: "Tuning results don't transfer to test set"
+### "Tuning results don't transfer to test set"
 **Solution**:
 - Use larger validation set
 - Use cross-validation
 - Don't overfit to validation set
 - Use proper hyperparameter ranges
-
----
-
-## 11. Next Steps
-
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Strategy details
-- [Model Selection](../user-guide/model-selection.md) - Choosing models
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Systematic comparison
-- [PEFT & LoRA](peft-lora.md) - PEFT-specific tuning
-
----
-
-Systematic hyperparameter tuning unlocks the full potential of TabTune models!

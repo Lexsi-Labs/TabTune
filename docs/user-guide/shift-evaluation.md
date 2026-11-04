@@ -1,13 +1,11 @@
 # Shift-Aware Evaluation
 
-*New in TabTune 0.2.0.*
-
 An IID cross-validation score answers *"how well does this model fit data drawn like the
 training data?"* A deployed model faces a different question: *"how well does it hold up on
 data from next quarter, or from a cohort it has never seen?"*
 
 `tabtune.evaluation` provides splitters that ask the right question and a `ShiftEvaluator`
-that reports the **gap** between the two — which is the number that predicts production
+that reports the **gap** between the two, which is the number that predicts production
 behaviour.
 
 ```python
@@ -17,25 +15,21 @@ from tabtune.evaluation import (
 )
 ```
 
----
-
-## 1. Why the gap, not the score
+## Why the gap, not the score
 
 > A model scoring **0.87 with a 0.004 gap** is a better production bet than one scoring
 > **0.89 with a 0.06 gap**.
 
 The model that wins on the IID split is not necessarily the one that holds up under drift.
 
----
-
-## 2. Splitters
+## Splitters
 
 All three are scikit-learn-compatible (`split()` / `get_n_splits()`) and enforce their own
 invariants.
 
-### 2.1 `TemporalSplit`
+### `TemporalSplit`
 
-Forward chaining — training data is always strictly older than test data. Never trains on
+Forward chaining, training data is always strictly older than test data. Never trains on
 the future.
 
 ```python
@@ -57,9 +51,9 @@ for train_idx, test_idx in temporal.split(X):
 
 Pass times explicitly instead of by column with `split(X, times=...)`.
 
-### 2.2 `GroupedSplit`
+### `GroupedSplit`
 
-Leave-groups-out — no group appears on both sides of a fold.
+Leave-groups-out, no group appears on both sides of a fold.
 
 ```python
 GroupedSplit(n_splits=5, *, group_col=None, shuffle=False, random_state=None)
@@ -71,9 +65,9 @@ for train_idx, test_idx in grouped.split(X):
     assert set(regions[train_idx]).isdisjoint(regions[test_idx])
 ```
 
-### 2.3 `StratifiedGroupedSplit`
+### `StratifiedGroupedSplit`
 
-Grouped **and** class-balanced — leave-groups-out while keeping the class distribution
+Grouped **and** class-balanced, leave-groups-out while keeping the class distribution
 comparable across folds.
 
 ```python
@@ -83,9 +77,7 @@ StratifiedGroupedSplit(n_splits=5, *, group_col=None, random_state=None)
 Groups can also be supplied as an array via `split(X, y, groups=site_ids)` instead of by
 column name.
 
----
-
-## 3. `ShiftEvaluator`
+## `ShiftEvaluator`
 
 ```python
 ShiftEvaluator(
@@ -111,14 +103,14 @@ report = evaluator.run(
 ```
 
 !!! warning "Pass a factory, not a fitted model"
-    Each fold needs an unfitted estimator. Reusing one instance leaks the previous fold's
-    state.
+ Each fold needs an unfitted estimator. Reusing one instance leaks the previous fold's
+ state.
 
 !!! warning "Drop the split-defining columns"
-    Without `drop_split_columns`, the model can read the very column that defines the split
-    and learn the cut point instead of the signal.
+ Without `drop_split_columns`, the model can read the very column that defines the split
+ and learn the cut point instead of the signal.
 
-### 3.1 A complete run
+### A complete run
 
 ```python
 from tabtune import TabularPipeline
@@ -152,9 +144,7 @@ ShiftReport(TabICLv2, task=classification, metric=roc_auc_score)
 
 A negative gap means worse under shift, whichever direction the metric runs.
 
----
-
-## 4. Reading a `ShiftReport`
+## Reading a `ShiftReport`
 
 | Method | Returns |
 |---|---|
@@ -177,13 +167,11 @@ for metric in ("accuracy", "roc_auc_score", "ece"):
 ```
 
 !!! note "Check `failures()` before quoting any aggregate"
-    With the default `error_score='record'` a fold can fail for ordinary reasons (a class
-    missing from a temporal fold, say) and the report keeps going. The aggregate is over the
-    folds that succeeded.
+ With the default `error_score='record'` a fold can fail for ordinary reasons (a class
+ missing from a temporal fold, say) and the report keeps going. The aggregate is over the
+ folds that succeeded.
 
----
-
-## 5. Comparing models under shift
+## Comparing models under shift
 
 ```python
 from tabtune.evaluation import shift_gap
@@ -198,11 +186,9 @@ for name, factory in [("TabICLv2", f1), ("OrionMSP", f2)]:
     print(name, shift_gap(iid, shifted, "roc_auc_score"))
 ```
 
----
+## Shared metrics
 
-## 6. Shared metrics
-
-Every number TabTune reports — accuracy, ROC AUC, RMSE, ECE, Brier — is computed by
+Every number TabTune reports, accuracy, ROC AUC, RMSE, ECE, Brier, is computed by
 `tabtune.evaluation.metrics`, so the pipeline, the leaderboard, the benchmark CSV and the
 shift report agree by construction rather than by coincidence.
 
@@ -215,9 +201,7 @@ from tabtune.evaluation import (
 )
 ```
 
----
-
-## 7. Caching pays off here
+## Caching pays off here
 
 Shift sweeps query the same test rows repeatedly. Enabling a disk cache on the factory's
 pipeline avoids recomputing them:
@@ -228,10 +212,8 @@ lambda: TabularPipeline("TabICLv2", cache="disk")
 
 See [Prediction Caching](caching.md).
 
----
+## See also
 
-## See Also
-
-- [Uncertainty Quantification](uncertainty.md) — conformal coverage also degrades under shift
+- [Uncertainty Quantification](uncertainty.md), conformal coverage also degrades under shift
 - [Model Comparison](leaderboard.md)
 - Runnable example: `examples/15_shift_aware_evaluation.py`

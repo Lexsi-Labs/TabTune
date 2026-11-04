@@ -1,10 +1,10 @@
-# Orion BIX
+# Orion-BiX
 
-Orion BIX (Biaxial Interaction eXpert) enhances scalable ICL with biaxial (row × column) interaction modules to better capture complex feature dependencies.
+Orion-BiX (Lexsi Labs) adds biaxial interaction modules to scalable in-context learning: a row-by-column block that lets feature-feature and sample-sample dependencies be modelled together. Classification only, MIT weights.
 
-## Key ideas
-- Biaxial interaction layers improve feature–feature and sample–sample coupling
-- Robust ensembling across transformed feature orders
+## What it does differently
+- Biaxial interaction layers improve feature-feature and sample-sample coupling
+- Reliable ensembling across transformed feature orders
 - Designed for accuracy on complex datasets while remaining scalable
 
 ## When to use
@@ -20,8 +20,8 @@ Orion BIX (Biaxial Interaction eXpert) enhances scalable ICL with biaxial (row �
 - `batch_size` (int): ensemble batch size
 
 ## Fine‑tuning parameters (via TuningManager)
-- `epochs` (int): 3–8 typical
-- `learning_rate` (float): 1e‑5 – 3e‑4 (AdamW)
+- `epochs` (int): 3-8 typical
+- `learning_rate` (float): 1e‑5 - 3e‑4 (AdamW)
 - `support_size` / `query_size`: episodic context/query sizes
 - `n_episodes` (int): total adaptation episodes
 - `batch_size` (int): episode batch size
@@ -66,4 +66,4 @@ peft_pipe.fit(X_train, y_train)
 ## Notes & caveats
 - Slightly higher memory than OrionMSP due to biaxial layers
 - Increase `n_estimators` for more stable calibration; reduce for speed
-- Ensure preprocessing/encodings are consistent between splits
+- Make sure preprocessing/encodings are consistent between splits

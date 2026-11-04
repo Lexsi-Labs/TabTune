@@ -1,7 +1,5 @@
 # Typed Configuration
 
-*New in TabTune 0.2.0.*
-
 Every knob TabTune exposes is described by a **pydantic** schema. That gives validation,
 IDE completion, YAML/JSON round-tripping, and a single home for defaults that were
 previously duplicated across fine-tuning loops, `get_params()` and the docs.
@@ -9,9 +7,9 @@ previously duplicated across fine-tuning loops, `get_params()` and the docs.
 An experiment becomes a file you can commit.
 
 !!! success "Fully backward compatible"
-    `TabularPipeline` still accepts plain dicts for `tuning_params`, `processor_params` and
-    `model_params`, and unrecognised keys are still forwarded to the model rather than
-    dropped. The difference is that a typo now **warns** instead of vanishing.
+ `TabularPipeline` still accepts plain dicts for `tuning_params`, `processor_params` and
+ `model_params`, and unrecognised keys are still forwarded to the model rather than
+ dropped. The difference is that a typo now **warns** instead of vanishing.
 
 ```python
 from tabtune.config import (
@@ -20,9 +18,7 @@ from tabtune.config import (
 )
 ```
 
----
-
-## 1. From YAML
+## From YAML
 
 ```yaml
 # experiments/tabiclv2_finetune.yaml
@@ -61,12 +57,10 @@ cfg.resolved_finetune_mode()        # 'meta-learning'
 ```
 
 !!! tip "Use `strict=True` in CI"
-    In strict mode an unknown key is an error, so a stale config fails the job rather than
-    quietly running something else. Outside CI, `strict=False` (the default) warns.
+ In strict mode an unknown key is an error, so a stale config fails the job rather than
+ quietly running something else. Outside CI, `strict=False` (the default) warns.
 
----
-
-## 2. Loader functions
+## Loader functions
 
 | Function | Purpose |
 |---|---|
@@ -75,9 +69,7 @@ cfg.resolved_finetune_mode()        # 'meta-learning'
 | `dump_config(config)` | Back to a plain `dict` |
 | `save_config(config, path)` | Write YAML/JSON; returns the `Path` |
 
----
-
-## 3. `PipelineConfig`
+## `PipelineConfig`
 
 | Field | Type | Default |
 |---|---|---|
@@ -108,9 +100,7 @@ cfg.resolved_finetune_mode()
 cfg.to_dict(drop_none=True)
 ```
 
----
-
-## 4. `TuningConfig`
+## `TuningConfig`
 
 | Field | Type | Default | Constraint |
 |---|---|---|---|
@@ -137,9 +127,7 @@ cfg.to_dict(drop_none=True)
 
 Finetune-mode aliases (`'tbt'` → `'turn_by_turn'`, etc.) are normalised on validation.
 
----
-
-## 5. `PeftConfig`
+## `PeftConfig`
 
 | Field | Type | Default | Constraint |
 |---|---|---|---|
@@ -156,22 +144,18 @@ tuning:
     lora_dropout: 0.1
 ```
 
----
-
-## 6. `ProcessorConfig`
+## `ProcessorConfig`
 
 | Field | Allowed values |
 |---|---|
 | `imputation_strategy` | `mean`, `median`, `most_frequent`, `iterative`, `knn`, `none` |
 | `categorical_encoding` | `onehot`, `ordinal`, `target`, `hashing`, `binary` |
-| `scaling_strategy` | `standard`, `minmax`, `robust`, `power_transform`, `none` |
+| `scaling_strategy` | `standard`, `minmax`, `reliable`, `power_transform`, `none` |
 | `resampling_strategy` | `smote`, `random_over`, `random_under`, `tomek`, `kmeans`, `knn` |
 | `feature_selection_strategy` | `variance`, `select_k_best_anova`, `select_k_best_chi2` |
 | `correlation_threshold` | `float` in `(0, 1]` |
 
----
-
-## 7. `ContextSamplingConfig`
+## `ContextSamplingConfig`
 
 Controls support/query construction for meta-learning models.
 
@@ -189,9 +173,7 @@ Controls support/query construction for meta-learning models.
 
 See [Resampling Strategies](resampling.md).
 
----
-
-## 8. Building configs in Python
+## Building configs in Python
 
 ```python
 from tabtune.config import PipelineConfig, TuningConfig, PeftConfig, save_config
@@ -212,9 +194,7 @@ cfg = PipelineConfig(
 save_config(cfg, "experiments/run.yaml")
 ```
 
----
+## See also
 
-## See Also
-
-- [Model Registry](registry.md) — what `validate_against_registry()` checks
-- [API: TabularPipeline](../api/pipeline.md)
+- [Model Registry](registry.md), what `validate_against_registry()` checks
+- [API: TabularPipeline](../reference/pipeline.md)

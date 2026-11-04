@@ -1,144 +1,252 @@
-site_name: TabTune Documentation
-site_description: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models
-site_author: Lexsi Labs
-repo_url: https://github.com/Lexsi-Labs/TabTune
+site_name: TabTune
+site_description: Inference and fine-tuning of tabular and time series foundation models behind one scikit-learn style API.
+site_url: https://tabtune.lexsi.ai/
 repo_name: Lexsi-Labs/TabTune
-
-# Disable "Edit on ..." link; keep repo link in header
-edit_uri: null
+repo_url: https://github.com/Lexsi-Labs/TabTune
+# No "Edit on GitHub" link: the docs branch layout is not the main branch layout.
+edit_uri: ""
+copyright: >
+  Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
 
 theme:
-  name: cinder
-  custom_dir: docs/_overrides
-  logo: assets/tabtune.svg
-  favicon: assets/lexsilabs.ico
-  highlightjs: true
-  hljs_languages:
-    - python
-    - yaml
-  navigation_depth: 3
-  
-nav:
-  - Getting Started:
-      - Installation: getting-started/installation.md
-      - Quick Start: getting-started/quick-start.md
-      - Basic Concepts: getting-started/basic-concepts.md
-  
-  - User Guide:
-      - TabularPipeline Overview: user-guide/pipeline-overview.md
-      - Data Processing: user-guide/data-processing.md
-      - Tuning Strategies: user-guide/tuning-strategies.md
-      - Resampling Strategies: user-guide/resampling.md
-      - Model Selection: user-guide/model-selection.md
-      - Saving and Loading: user-guide/saving-loading.md
-      - Model Comparison: user-guide/leaderboard.md
-      - Troubleshooting: user-guide/troubleshooting.md
-      - Ensembling Strategies: user-guide/ensembling.md
-      - Distillation: user-guide/distillation.md
-      - Causal Inference: user-guide/causal.md
-      - Model Registry & Licensing: user-guide/registry.md
-      - Uncertainty & Conformal Prediction: user-guide/uncertainty.md
-      - Shift-Aware Evaluation: user-guide/shift-evaluation.md
-      - Typed Configuration: user-guide/configuration.md
-      - Prediction Caching: user-guide/caching.md
-
-
-  - Models:
-      - Overview: models/overview.md
-      - TabPFN: models/tabpfn.md
-      - TabPFN v3: models/tabpfnv3.md
-      - TabICL: models/tabicl.md
-      - TabICL v2: models/tabiclv2.md
-      - Orion MSP: models/orion-msp.md
-      - Orion MSP V1.5: models/orionmsp1.5.md
-      - Orion BIX: models/orion-bix.md
-      - TabDPT: models/tabdpt.md
-      - Mitra: models/mitra.md
-      - ConTextTab: models/contexttab.md
-      - Limix: models/limix.md
-      - TabFM: models/tabfm.md
-      - xRFM: models/xrfm.md
-      - iLTM: models/iltm.md
-      - EXAONE Tabular: models/exaone.md
-
-  - Regression:
-      - Regression Overview: regression/regression.md
-      - Regression Data Processing: regression/regression_data_processing.md
-    
-
-  - Advanced Topics:
-      - PEFT & LoRA: advanced/peft-lora.md
-      - Custom Preprocessing: advanced/custom-preprocessing.md
-      - Hyperparameter Tuning: advanced/hyperparameter-tuning.md
-      - Memory Optimization: advanced/memory-optimization.md
-      - Multi-GPU Training: advanced/multi-gpu.md
-  
-  - API Reference:
-      - TabularPipeline: api/pipeline.md
-      - DataProcessor: api/data-processor.md
-      - TuningManager: api/tuning-manager.md
-      - TabularLeaderboard: api/leaderboard.md
-      - PEFT Utils: api/peft-utils.md
-      - Model Registry: api/registry.md
-      - Configuration: api/config.md
-      - Uncertainty: api/uncertainty.md
-      - Evaluation: api/evaluation.md
-      - Prediction Cache: api/caching.md
-      - TabularEnsemble: api/ensemble.md
-      - TabDistiller: api/distillation.md
-      - CausalAnalysis: api/causal.md
-  
-  - Examples:
-      - Classification Tasks: examples/classification.md
-      - Regression Tasks: examples/regression.md
-      - PEFT Fine-Tuning: examples/peft-examples.md
-      - Benchmarking: examples/benchmarking.md
-  
-  - Project:
-      - Contributing:
-          - Development Setup: contributing/setup.md
-          - Code Standards: contributing/standards.md
-          - Adding New Models: contributing/new-models.md
-          - Documentation Guide: contributing/documentation.md
-      - About:
-          - Release Notes: about/release-notes.md
-          - Roadmap: about/roadmap.md
-          - FAQ: about/faq.md
-          - License: about/license.md
+  name: material
+  logo: assets/tabtune-logo-on-dark.svg   # transparent; the header is ink in both schemes
+  favicon: assets/favicon.ico
+  font:
+    text: Schibsted Grotesk
+    code: IBM Plex Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.prune
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
 
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:mermaid2.fence_mermaid
-  - pymdownx.tabbed
-  - pymdownx.details
-  - pymdownx.emoji
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
   - toc:
       permalink: true
-  - tables
 
 extra_css:
-  - assets/overrides.css
+  - assets/extra.css
+
+extra_javascript:
+  - assets/extra.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+# Pages link to repository paths (../examples, ../tabtune) that resolve on GitHub but
+# live outside the built site tree. Nav validation stays strict; cross-tree links are
+# informational so `mkdocs build --strict` passes on a clean checkout.
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: info
+    anchors: info
+    absolute_links: info
+    unrecognized_links: info
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Basic Concepts: getting-started/basic-concepts.md
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - TabularPipeline: user-guide/pipeline.md
+    - Data Processing: user-guide/data-processing.md
+    - Tuning Strategies: user-guide/tuning-strategies.md
+    - Validated Fine-Tuning: user-guide/fine-tuning.md
+    - Resampling: user-guide/resampling.md
+    - Regression: user-guide/regression.md
+    - Model Selection: user-guide/model-selection.md
+    - Model Registry & Licensing: user-guide/registry.md
+    - Saving & Loading: user-guide/saving-loading.md
+    - Leaderboard: user-guide/leaderboard.md
+    - Ensembling: user-guide/ensembling.md
+    - Distillation: user-guide/distillation.md
+    - Uncertainty: user-guide/uncertainty.md
+    - Shift-Aware Evaluation: user-guide/shift-evaluation.md
+    - Causal Inference: user-guide/causal.md
+    - Typed Configuration: user-guide/configuration.md
+    - Prediction Caching: user-guide/caching.md
+    - Logging: user-guide/logging.md
+    - Troubleshooting: user-guide/troubleshooting.md
+  - Models:
+    - Overview: models/overview.md
+    - TabPFN v2: models/tabpfn.md
+    - TabPFN v2.6: models/tabpfnv26.md
+    - TabPFN v3: models/tabpfnv3.md
+    - TabPFN v3.5 & v3.5-fast: models/tabpfnv35.md
+    - TabICL: models/tabicl.md
+    - TabICL v2: models/tabiclv2.md
+    - Orion-MSP: models/orion-msp.md
+    - Orion-MSP v1.5: models/orion-msp-v15.md
+    - Orion-BiX: models/orion-bix.md
+    - Mitra: models/mitra.md
+    - Mitra v2: models/mitrav2.md
+    - ConTextTab: models/contexttab.md
+    - TabDPT: models/tabdpt.md
+    - LimiX: models/limix.md
+    - LimiX-2: models/limixv2.md
+    - TabFM: models/tabfm.md
+    - xRFM: models/xrfm.md
+    - iLTM: models/iltm.md
+    - EXAONE Tabular: models/exaone.md
+    - Causilo: models/causilo.md
+    - TabLDM: models/tabldm.md
+    - Kumo Tabular: models/kumo-tabular.md
+    - TabAbax: models/tababax.md
+  - Time Series:
+    - Overview: timeseries/overview.md
+    - Models: timeseries/models.md
+    - Timestral: models/timestral.md
+    - T0: models/t0.md
+    - Tasks: timeseries/tasks.md
+    - Fine-Tuning: timeseries/fine-tuning.md
+    - Compare, Combine, Select: timeseries/comparison.md
+    - Tabular Models as Forecasters: timeseries/tabular-forecasters.md
+    - Series Histories as Features: timeseries/series-features.md
+  - API Reference:
+    - Architecture: reference/architecture.md
+    - CLI: reference/cli.md
+    - TabularPipeline: reference/pipeline.md
+    - DataProcessor: reference/data-processor.md
+    - TuningManager: reference/tuning-manager.md
+    - PEFT Utilities: reference/peft-utils.md
+    - Model Registry: reference/registry.md
+    - Configuration: reference/config.md
+    - Evaluation: reference/evaluation.md
+    - Uncertainty: reference/uncertainty.md
+    - Prediction Cache: reference/caching.md
+    - TabularEnsemble: reference/ensemble.md
+    - TabDistiller: reference/distillation.md
+    - CausalAnalysis: reference/causal.md
+    - TabularLeaderboard: reference/leaderboard.md
+    - Time Series: reference/timeseries.md
+  - Advanced Topics:
+    - PEFT & LoRA: advanced/peft-lora.md
+    - Custom Preprocessing: advanced/custom-preprocessing.md
+    - Hyperparameter Tuning: advanced/hyperparameter-tuning.md
+    - Memory Optimization: advanced/memory-optimization.md
+    - Multi-GPU Training: advanced/multi-gpu.md
+  - Tutorials:
+    - Features: features.md
+    - Notebooks: tutorials/notebooks.md
+    - Classification: tutorials/classification.md
+    - Regression: tutorials/regression.md
+    - PEFT Fine-Tuning: tutorials/peft.md
+    - Benchmarking: tutorials/benchmarking.md
+  - Community:
+    - FAQ: community/faq.md
+    - Roadmap: community/roadmap.md
+    - Known Issues: community/known-issues.md
+    - Changelog: community/changelog.md
+    - Contributing: community/contributing.md
+    - Code of Conduct: community/code-of-conduct.md
+    - Security: community/security.md
+    - License: community/license.md
+
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Lexsi-Labs/TabTune
+      name: TabTune on GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/tabtune/
+      name: TabTune on PyPI
+    - icon: fontawesome/solid/file-lines
+      link: https://arxiv.org/abs/2511.02802
+      name: TabTune paper on arXiv
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/dSB62Q7A
+      name: Lexsi Labs on Discord
+    - icon: fontawesome/brands/github
+      link: https://github.com/Lexsi-Labs
+      name: Lexsi Labs on GitHub
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/Lexsi_labs
+      name: Lexsi Labs on X
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/lexsi-labs/
+      name: Lexsi Labs on LinkedIn
+    - icon: simple/huggingface
+      link: https://huggingface.co/Lexsi
+      name: Lexsi Labs on Hugging Face
+    - icon: fontawesome/solid/globe
+      link: https://lexsi.ai
+      name: lexsi.ai
+
+hooks:
+  - hooks/quiet_griffe.py
 
 plugins:
   - search
-  - mermaid2:
-      javascript: https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js
-      arguments:
-        securityLevel: 'loose'
-        startOnLoad: false
+  - autorefs
   - mkdocstrings:
       handlers:
         python:
           options:
-            show_source: true
-extra_javascript:               
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
+            show_source: false
+            show_root_heading: true
+            heading_level: 3
+            docstring_style: google
+            members_order: source
+            show_signature_annotations: true
+            docstring_options:
+              warn_unknown_params: false

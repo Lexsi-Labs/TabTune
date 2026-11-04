@@ -1,25 +1,21 @@
-# TabTune Causal Module
+# Causal Inference
 
-## 1. Overview
+## Overview
 
-The TabTune Causal module provides a unified, production-ready API for **causal inference with tabular foundation models (TFMs)**. Instead of asking *"what will happen?"* (prediction), it answers *"what happens if we intervene?"* (causation) — estimating the effect of a treatment on an outcome while adjusting for confounders.
+`tabtune.causal` does causal inference with a tabular foundation model as the nuisance learner.
 
-The module wraps any TabTune TFM as a nuisance learner inside best-in-class causal estimators (DoubleML, EconML, DoWhy), so the same models you use for prediction become the engine for **double machine learning, meta-learners, and causal forests**. It follows the disciplined three-step causal workflow — **Identify → Estimate → Refute** — and adds first-class **sensitive-attribute audits** for fairness-critical deployments.
+The module wraps any TabTune TFM as a nuisance learner inside the standard causal estimators (DoubleML, EconML, DoWhy), so the same models you use for prediction become the engine for **double machine learning, meta-learners, and causal forests**. It follows the disciplined three-step causal workflow, **Identify → Estimate → Refute**, and adds first-class **sensitive-attribute audits** for fairness-critical deployments.
 
-The module integrates seamlessly with TabTune's `TabularPipeline` and follows TabTune's conventions for configuration, fitting, evaluation, and rich logging.
-
-### Key Features
+### What it does
 
 - **Six estimators** spanning the full spectrum: Double ML (default), S/T/X/R-Learners, and honest Causal Forests.
-- **Unified API** — the `CausalAnalysis` class handles every estimator with a consistent, `TabularPipeline`-style interface.
-- **Any TFM as a nuisance learner** — TabPFN, TabPFNv26, TabICLv2, Mitra, OrionMSP, TabDPT, and more drop straight in.
-- **The full causal discipline** — formal identification, effect estimation with confidence intervals, and a battery of refutation checks built in.
-- **Fairness audits** — proxy detection and counterfactual-fairness checks run alongside refutation, producing a compliance-ready HTML report.
-- **Heterogeneous effects** — per-row CATE estimation and single-row counterfactual prediction.
-- **Multi-model ranking** — `CausalLeaderboard` ranks `(estimator × TFM)` combinations by stability and refuter pass-rate.
-- **Production-grade** — comprehensive input validation, graceful degradation when optional backends are missing, verbose logging, and serialisable reports.
-
----
+- **Unified API**, the `CausalAnalysis` class handles every estimator with a consistent, `TabularPipeline`-style interface.
+- **Any TFM as a nuisance learner**, TabPFN, TabPFNv26, TabICLv2, Mitra, OrionMSP and TabDPT drop straight in.
+- **The full causal discipline**, formal identification, effect estimation with confidence intervals, and a battery of refutation checks built in.
+- **Fairness audits**, proxy detection and counterfactual-fairness checks run alongside refutation, producing a compliance-ready HTML report.
+- **Heterogeneous effects**, per-row CATE estimation and single-row counterfactual prediction.
+- **Multi-model ranking**, `CausalLeaderboard` ranks `(estimator × TFM)` combinations by stability and refuter pass-rate.
+- **Production-grade**, complete input validation, graceful degradation when optional backends are missing, verbose logging, and serialisable reports.
 
 <!-- ## 2. Installation & Setup
 
@@ -55,7 +51,7 @@ pip install dowhy causal-learn
 
 > **Compatibility note.** Some older `econml` releases pin `scikit-learn<1.6`. If you hit a resolver conflict against TabTune's `scikit-learn>=1.6`, pin `econml==0.15.1` (sklearn-1.6-compatible) or relax sklearn to `>=1.5,<1.7`. -->
 
-### File Structure
+### File structure
 
 ```
 tabtune/causal/
@@ -78,11 +74,9 @@ tests/
 └── test_causal.py           # Unit + integration tests
 ```
 
----
+## Quick start
 
-## 2. Quick Start
-
-### Estimating a Treatment Effect with Double ML (Recommended Default)
+### Estimating a treatment effect with double ML (recommended default)
 
 ```python
 from tabtune.causal import CausalAnalysis
@@ -110,7 +104,7 @@ print(result["effect"])        # ATE, std error, confidence interval
 print(result["refutation"])    # placebo / RCC / subset / sensitivity checks
 ```
 
-### Heterogeneous Effects with a Causal Forest
+### Heterogeneous effects with a causal Forest
 
 ```python
 ca = CausalAnalysis(
@@ -129,7 +123,7 @@ cate = ca.predict_cate(X_test)               # per-row treatment effect
 print("Mean CATE:", cate.mean())
 ```
 
-### Fairness Audit + HTML Report
+### Fairness audit + HTML report
 
 ```python
 ca = CausalAnalysis(
@@ -152,19 +146,17 @@ ca.evaluate(
 )
 ```
 
----
-
-## 3. Architecture
+## Architecture
 
 ```
 CausalAnalysis (orchestrator)
 │
 ├── fit(X, y)
-│   ├── Step 1 — Identify
+│   ├── Step 1 - Identify
 │   │   ├── GraphBuilder  → DAG (user-supplied / inferred / default)
 │   │   └── Identifier    → estimand + adjustment set (DoWhy or fallback)
 │   │
-│   └── Step 2 — Estimate
+│   └── Step 2 - Estimate
 │       ├── Build outcome + treatment nuisance learners (TFM → sklearn adapter)
 │       ├── Instantiate estimator via ESTIMATOR_REGISTRY[estimator]
 │       └── Cross-fit the estimator on the data
@@ -183,47 +175,43 @@ CausalAnalysis (orchestrator)
 ```
 
 Every estimator follows the same internal contract:
-- `fit(df)` — fit nuisance learners and compute the causal estimate.
-- `ate(confidence_level)` — return ATE, standard error, and confidence interval.
-- `cate(X_query)` — per-row treatment effects (X/R-Learner, Causal Forest).
-- `counterfactual(row, intervention)` — single-row counterfactual prediction.
+- `fit(df)`, fit nuisance learners and compute the causal estimate.
+- `ate(confidence_level)`, return ATE, standard error, and confidence interval.
+- `cate(X_query)`, per-row treatment effects (X/R-Learner, Causal Forest).
+- `counterfactual(row, intervention)`, single-row counterfactual prediction.
 
-### The TFM → sklearn Bridge
+### The TFM → sklearn bridge
 
-Causal libraries expect scikit-learn-style estimators with `.fit / .predict / .predict_proba`. The `_TabTuneSklearnAdapter` wraps any `TabularPipeline` into that interface and is **clone-safe** — `sklearn.clone()` round-trips it correctly, which is mandatory because DoubleML and EconML clone nuisance learners internally during cross-fitting. The adapter reports the correct `_estimator_type` and `__sklearn_tags__()` so downstream libraries call `predict_proba` for the treatment model and `predict` for the outcome model.
+Causal libraries expect scikit-learn-style estimators with `.fit / .predict / .predict_proba`. The `_TabTuneSklearnAdapter` wraps any `TabularPipeline` into that interface and is **clone-safe**, `sklearn.clone()` round-trips it correctly, which is mandatory because DoubleML and EconML clone nuisance learners internally during cross-fitting. The adapter reports the correct `_estimator_type` and `__sklearn_tags__()` so downstream libraries call `predict_proba` for the treatment model and `predict` for the outcome model.
 
----
+## The causal discipline
 
-## 4. The Causal Discipline
+A predictive model answers *"given these features, what is Y?"*. A causal model answers *"if we **set** T to this value, how does Y change?"*, a fundamentally harder question that requires assumptions data alone cannot verify. The module enforces the standard three-step discipline that keeps those assumptions explicit.
 
-A predictive model answers *"given these features, what is Y?"*. A causal model answers *"if we **set** T to this value, how does Y change?"* — a fundamentally harder question that requires assumptions data alone cannot verify. The module enforces the standard three-step discipline that keeps those assumptions explicit.
+### Step 1, identify
 
-### Step 1 — Identify
-
-Before estimating anything, the module asks whether the effect is even *identifiable* from the observed data. `GraphBuilder` constructs a causal DAG (supplied by you, inferred via the PC algorithm, or the canonical "confounders cause T and Y; T causes Y" default). `Identifier` then derives the estimand — typically a **backdoor adjustment** set — using DoWhy when installed, or a d-separation fallback otherwise.
+Before estimating anything, the module asks whether the effect is even *identifiable* from the observed data. `GraphBuilder` constructs a causal DAG (supplied by you, inferred via the PC algorithm, or the canonical "confounders cause T and Y; T causes Y" default). `Identifier` then derives the estimand, typically a **backdoor adjustment** set, using DoWhy when installed, or a d-separation fallback otherwise.
 
 If the effect is not identifiable, the module warns loudly and you should treat downstream numbers with caution.
 
-### Step 2 — Estimate
+### Step 2, estimate
 
-The chosen estimator fits two nuisance models — one for the outcome `E[Y | X]` and one for the treatment propensity `E[T | X]` — using your TFM, then combines them into a debiased estimate of the **Average Treatment Effect (ATE)** with a confidence interval. For multi-level treatments, per-level contrasts are reported.
+The chosen estimator fits two nuisance models, one for the outcome `E[Y | X]` and one for the treatment propensity `E[T | X]`, using your TFM, then combines them into a debiased estimate of the **Average Treatment Effect (ATE)** with a confidence interval. For multi-level treatments, per-level contrasts are reported.
 
-### Step 3 — Refute
+### Step 3, refute
 
-A point estimate is meaningless without stress tests. The `Refuter` perturbs the problem and checks the estimate behaves sensibly — a placebo treatment should yield ≈ 0, an injected noise confounder should barely move the estimate, and so on. Refuters that pass don't *prove* correctness, but refuters that fail prove something is wrong.
+A point estimate is meaningless without stress tests. The `Refuter` perturbs the problem and checks the estimate behaves sensibly, a placebo treatment should yield ≈ 0, an injected noise confounder should barely move the estimate, and so on. Refuters that pass don't *prove* correctness, but refuters that fail prove something is wrong.
 
----
-
-## 5. Estimator Reference
+## Estimator reference
 
 All estimators are selected via the `estimator="..."` argument of `CausalAnalysis` and registered in `ESTIMATOR_REGISTRY`.
 
-### 5.1 Double Machine Learning (Default)
+### Double machine learning (default)
 
 **Class:** `DMLEstimator`
 **Estimator key:** `"dml"`
 
-The default and most robust estimator. Fits an outcome model `g(X) = E[Y|X]` and a treatment model `m(X) = E[T|X]`, residualises both, and regresses the residuals to recover a Neyman-orthogonal ATE. Cross-fitting removes overfitting bias.
+The default and most reliable estimator. Fits an outcome model `g(X) = E[Y|X]` and a treatment model `m(X) = E[T|X]`, residualises both, and regresses the residuals to recover a Neyman-orthogonal ATE. Cross-fitting removes overfitting bias.
 
 - **Binary / continuous treatment** → `doubleml.DoubleMLPLR` (partially linear regression).
 - **Multi-level discrete treatment** → `doubleml.DoubleMLAPOS` (Average Potential Outcomes), reporting one contrast per treatment level.
@@ -242,13 +230,11 @@ The default and most robust estimator. Fits an outcome model `g(X) = E[Y|X]` and
 
 `ate`, `std_error`, `ci_lower`, `ci_upper`, `p_value`, `confidence_level`, `n_samples`, plus `per_level` and `treatment_levels` for multi-level treatments.
 
-#### When To Use
+#### When to use
 
 The reliable default. Strongest theoretical guarantees, works for binary, continuous, and multi-level treatments, and is what you should reach for unless you specifically need per-row heterogeneous effects.
 
----
-
-### 5.2 S-Learner
+### S-Learner
 
 **Class:** `SLearner`
 **Estimator key:** `"s_learner"`
@@ -257,39 +243,33 @@ A **single** model trained on `[X, T]` with treatment as an extra feature. CATE 
 
 > Meta-learners (S/T/X/R) currently require a **binary `{0, 1}` treatment**. For multi-level treatments use `"dml"` or `"causal_forest"`.
 
-#### When To Use
+#### When to use
 
 Quick baseline, or when the treatment effect is large and the dataset is small.
 
----
-
-### 5.3 T-Learner
+### T-Learner
 
 **Class:** `TLearner`
 **Estimator key:** `"t_learner"`
 
-**Two** models, one per treatment arm. CATE is the difference between the two arms' predictions. Robust when both arms have ample data; degrades on heavily imbalanced treatments.
+**Two** models, one per treatment arm. CATE is the difference between the two arms' predictions. Reliable when both arms have ample data; degrades on heavily imbalanced treatments.
 
-#### When To Use
+#### When to use
 
 Balanced treatment assignment with enough data in each arm.
 
----
-
-### 5.4 X-Learner
+### X-Learner
 
 **Class:** `XLearner`
 **Estimator key:** `"x_learner"`
 
 Propensity-weighted combination of T-Learner residuals, designed specifically for **imbalanced treatments**. Imputes treatment effects on each arm, then blends them using the propensity score.
 
-#### When To Use
+#### When to use
 
 When one treatment arm is much smaller than the other.
 
----
-
-### 5.5 R-Learner
+### R-Learner
 
 **Class:** `RLearner`
 **Estimator key:** `"r_learner"`
@@ -303,13 +283,11 @@ Residualises both T and Y against X (DML-style), then fits a single CATE model o
 | `n_folds` | int | `5` | Cross-fitting folds |
 | `final_model` | estimator | `GradientBoostingRegressor` | Final CATE regressor on residuals |
 
-#### When To Use
+#### When to use
 
-When you want a state-of-the-art CATE estimator and have a moderately sized dataset.
+When you want a strong CATE estimator and have a moderately sized dataset.
 
----
-
-### 5.6 Causal Forest
+### Causal Forest
 
 **Class:** `CausalForestEstimator`
 **Estimator key:** `"causal_forest"`
@@ -330,13 +308,11 @@ An ensemble of honest causal trees (`econml.grf.CausalForest`) where splits maxi
 
 `cate(X_query, return_ci=True)` returns a dict with `point`, `ci_lower`, and `ci_upper` arrays.
 
-#### When To Use
+#### When to use
 
 Non-parametric heterogeneous effects, especially when you want per-row confidence intervals and don't want to assume a functional form.
 
----
-
-## 6. Refutation Reference
+## Refutation reference
 
 Run via `evaluate(include=("refutation", ...))` or `evaluate_refutation()`. The default battery runs four checks; each returns a `pass` flag and the rule it was judged against.
 
@@ -351,7 +327,7 @@ The placebo and random-common-cause checks each trigger one estimator refit; the
 
 > **Cost note.** Each refit re-runs the full cross-fitted estimator, which fits nuisance TFMs `n_folds × 2` times (× number of treatment levels for multi-level DML). On a 5-level treatment with `n_folds=5`, the default battery is roughly 200 TFM fits. Reduce `n_folds` or pass a smaller `checks` tuple to speed it up.
 
-#### Refuter `run()` Parameters
+#### Refuter `run()` parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -360,24 +336,22 @@ The placebo and random-common-cause checks each trigger one estimator refit; the
 | `n_subset_iters` | int | `2` | Number of subset refits |
 | `seed` | int | `0` | RNG seed |
 
----
-
-## 7. Sensitive-Attribute Audits
+## Sensitive-attribute audits
 
 Supply `sensitive=[...]` at construction to enable two fairness audits that run alongside refutation.
 
-### 7.1 Proxy Auditor
+### Proxy auditor
 
 **Class:** `ProxyAuditor`
 
-Detects confounders that act as **proxies** for a sensitive attribute — features that leak protected information even when the sensitive attribute itself is excluded. Each confounder is scored against each sensitive attribute (Spearman for numeric–numeric, eta² for numeric–categorical, Cramér's V for categorical–categorical), and features above `threshold` (default `0.5`) are flagged.
+Detects confounders that act as **proxies** for a sensitive attribute, features that leak protected information even when the sensitive attribute itself is excluded. Each confounder is scored against each sensitive attribute (Spearman for numeric-numeric, eta² for numeric-categorical, Cramér's V for categorical-categorical), and features above `threshold` (default `0.5`) are flagged.
 
 ```python
 report = ca.evaluate_proxy()
 # report["per_attribute"]["gender"]["flagged"] → [{"feature": "zip_code", "score": 0.71}, ...]
 ```
 
-### 7.2 Counterfactual Fairness
+### Counterfactual fairness
 
 **Class:** `CounterfactualFairness`
 
@@ -390,9 +364,7 @@ report = ca.evaluate_counterfactual_fairness()
 
 Both audits feed the HTML report when `output_path` is supplied to `evaluate()`.
 
----
-
-## 8. CausalAnalysis API Reference
+## CausalAnalysis API reference
 
 ### Constructor
 
@@ -417,7 +389,7 @@ CausalAnalysis(
 )
 ```
 
-### Treatment Model Override
+### Treatment model override
 
 `treatment_model` accepts a sub-dict mirroring `TabularPipeline`, letting the treatment propensity model differ from the outcome model:
 
@@ -441,19 +413,17 @@ When omitted, the treatment model uses the same TFM as the outcome model.
 | `predict_counterfactual(row, intervention)` | `dict` | Single-row counterfactual prediction |
 | `get_params(deep=True)` | `dict` | sklearn-style parameter dict |
 
-### `include` Options for `evaluate()`
+### `include` options for `evaluate()`
 
 `"effect"` (always included), `"identification"`, `"refutation"`, `"proxy"`, `"counterfactual_fairness"`. The audits are silently skipped if `sensitive` was not provided.
 
-### Output Formats
+### Output formats
 
-- `"rich"` — pretty-prints through the TabTune logger **and** returns the dict.
-- `"json"` — prints a JSON dump and returns the dict.
-- `"silent"` — returns the dict with no side effects.
+- `"rich"`, pretty-prints through the TabTune logger **and** returns the dict.
+- `"json"`, prints a JSON dump and returns the dict.
+- `"silent"`, returns the dict with no side effects.
 
----
-
-## 9. CausalLeaderboard API Reference
+## CausalLeaderboard API reference
 
 Rank multiple `(estimator × TFM)` configurations on the same data.
 
@@ -484,24 +454,22 @@ print(ranked)   # DataFrame: label, model_name, estimator, ate, ci_*, refuter_pa
 | `add_model(model_name, task_type, estimator="dml", tuning_strategy="inference", treatment_model=None, estimator_params=None, label=None)` | `self` | Register one configuration (chainable) |
 | `run(X, y, rank_by="refuter_pass_rate", include_refutation=True, include_proxy=False, include_counterfactual_fairness=False, verbose=True)` | `DataFrame` | Fit every entry; return a ranked table |
 
-### `rank_by` Options
+### `rank_by` options
 
 `"refuter_pass_rate"` (descending), `"ate_stability"` (ascending bootstrap-CI width), `"ci_width"` (ascending).
 
----
-
-## 10. Estimator Selection Guide
+## Estimator selection guide
 
 | Estimator | Best For | Treatment | Heterogeneous effects |
 |-----------|----------|-----------|----------------------|
-| **Double ML** | General-purpose default; robust ATE | binary / continuous / multi-level | Approximate (binary) |
+| **Double ML** | General-purpose default; reliable ATE | binary / continuous / multi-level | Approximate (binary) |
 | **S-Learner** | Quick baseline; large effects | binary | Yes |
 | **T-Learner** | Balanced arms with ample data | binary | Yes |
 | **X-Learner** | Imbalanced treatment assignment | binary | Yes |
-| **R-Learner** | State-of-the-art CATE | binary | Yes |
+| **R-Learner** | Current best CATE | binary | Yes |
 | **Causal Forest** | Non-parametric CATE with CIs | binary | Yes (with intervals) |
 
-### Decision Flowchart
+### Decision flowchart
 
 ```mermaid
 flowchart LR
@@ -518,9 +486,7 @@ flowchart LR
     I -->|No| K[t_learner]
 ```
 
----
-
-## 11. References
+## References
 
 | # | Paper | Component |
 |---|-------|-----------|

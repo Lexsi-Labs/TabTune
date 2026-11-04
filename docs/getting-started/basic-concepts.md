@@ -1,274 +1,100 @@
 # Basic Concepts
 
-This page introduces the core ideas, architecture, and workflow used across TabTune. Understanding these concepts will help you effectively use TabTune for your tabular machine learning tasks.
+The vocabulary every other page assumes. Four objects, two tasks, three strategies.
 
----
+## `TabularPipeline`: the object you instantiate
 
-## 1. Tasks
+```python
+TabularPipeline(
+    model_name="TabICL",            # any registry name or alias
+    task_type="classification",     # or "regression"
+    tuning_strategy="inference",    # "inference" | "finetune" | "peft"
+    tuning_params={...},            # epochs, learning_rate, peft_config, finetune_mode ...
+    processor_params={...},         # overrides for the DataProcessor
+    model_params={...},             # passed to the model constructor
+)
+```
 
-TabTune currently focuses on **classification** tasks:
+It owns a `DataProcessor`, a `TuningManager` and the model, and exposes the scikit-learn
+verbs: `fit`, `predict`, `predict_proba`, `evaluate`, `save`, `load`. Regression adds
+`predict_quantiles` and `predict_intervals`. Three keyword-only arguments control the
+guards: `envelope_mode`, `license_mode` and `cache`. The full signature is on the
+[TabularPipeline](../user-guide/pipeline.md) page.
 
-- **Classification**: Multi-class and binary classification (fully supported)
-- **Regression**: Planned for future releases
+## `DataProcessor`: preprocessing that depends on the model
 
----
+Tabular foundation models disagree about input. TabPFN wants integer-encoded categoricals
+and tolerates NaN; ConTextTab wants the raw strings because it embeds them; Mitra wants no
+NaN at all; Kumo, LimiX-2 and TabAbax run their own preprocessing inside the model and
+want the frame untouched. `DataProcessor` resolves this per model through a preprocessor
+key in the registry (`tabpfn_special`, `contexttab_special`, `kumo_special` and so on), so
+you pass the same DataFrame every time. You can still override imputation, scaling and
+encoding with `processor_params`. See [Data Processing](../user-guide/data-processing.md).
 
-## 2. Core Components
+## `TuningManager`: the strategy dispatcher
 
-TabTune is built on four main components that work together seamlessly:
+`fit()` hands the preprocessed data and the model to the `TuningManager`, which runs the
+chosen strategy:
 
-### 2.1 TabularPipeline
+| Strategy | What happens in `fit()` | When |
+|---|---|---|
+| `inference` | Nothing trains. The training rows become the in-context support set. | Baselines, small data, no GPU. |
+| `finetune` | Every parameter updates. Modes: `meta-learning` (episodes), `sft` (one split), `turn_by_turn` (regression), `native` (the vendor's loop). | You have a GPU and more than a few thousand rows. |
+| `peft` | LoRA adapters train; the base weights stay frozen. | Same gains as `finetune` at a fraction of the memory. |
 
-The main user-facing interface that provides a scikit-learn-compatible API.
+Each model declares which strategies and modes it supports; the registry refuses the rest
+before anything loads. See [Tuning Strategies](../user-guide/tuning-strategies.md).
 
-**Key Methods:**
-- `.fit(X, y)`: Train/preprocess the pipeline on training data
-- `.predict(X)`: Generate predictions on new data
-- `.predict_proba(X)`: Get probability predictions (classification)
-- `.evaluate(X, y)`: Calculate performance metrics
-- `.save(path)`: Serialize the entire pipeline
-- `.load(path)`: Load a saved pipeline
+## The registry: facts about a checkpoint without loading it
 
-**Purpose**: Simplifies the entire workflow into a single, easy-to-use interface.
+`tabtune.registry` is a torch-free table of `ModelSpec` records. Each one carries the
+model's tasks, strategies, fine-tuning modes, a `CapabilityEnvelope` (class, feature, row
+and cell limits; whether it reads NaN, text or categoricals natively) and a `LicenseSpec`
+for the weights.
 
-### 2.2 DataProcessor
+```python
+from tabtune.registry import list_models, get_model_spec
 
-A smart, model-aware data preparation engine that automatically handles preprocessing based on your chosen model.
+[s.name for s in list_models(task="regression", strategy="peft", commercial_ok=True)]
+get_model_spec("Kumo").license.name     # 'OpenMDW-1.1 (weights) / Apache-2.0 (code)'
+```
 
-**Responsibilities:**
-- **Imputation**: Handle missing values (mean, median, mode, etc.)
-- **Scaling**: Normalize numerical features (standard, min-max, robust)
-- **Encoding**: Transform categorical features (one-hot, ordinal, target encoding)
-- **Model-Specific Processing**: Apply specialized transformations for each model type
-- **Feature Selection**: Optional dimensionality reduction
+The pipeline consults it in its constructor, which is why a licence problem or a class-count
+mismatch fails in milliseconds and not after a multi-gigabyte download. See
+[Model Registry](../user-guide/registry.md).
 
-**Key Feature**: Automatically selects the correct preprocessing strategy based on `model_name`, eliminating manual configuration.
+## Tasks
 
-### 2.3 TuningManager
+`classification` (binary and multiclass) and `regression`. The registry says which models
+support which; TabICL, Orion-MSP and Orion-BiX are classification only. Time
+series has its own pipeline and its own tasks (forecasting, anomaly detection, imputation,
+embedding); see [Time Series](../timeseries/overview.md).
 
-The computational core that manages model adaptation and training strategies.
+## In-context learning, in one paragraph
 
-**Strategies:**
-- **`inference`**: Zero-shot predictions using pre-trained weights (no training)
-- **`base-ft`**: Full fine-tuning of all model parameters
-- **`peft`**: Parameter-efficient fine-tuning using LoRA adapters (memory-efficient)
+Most models here are in-context learners. They were pretrained on millions of synthetic
+tables to predict query rows given labelled support rows, in a single forward pass. At
+inference, your training set is the support set and your test rows are the queries. No
+weights change. Fine-tuning these models means training on episodes that look like that
+forward pass: a support set and a query set sampled from your data. That is what
+`finetune_mode="meta-learning"` does, and it is why the support size, the query size and
+whether the episode resembles the inference context all matter. The
+[Validated Fine-Tuning](../user-guide/fine-tuning.md) page explains how the newer loop
+keeps the result at least as good as zero-shot.
 
-**Purpose**: Abstracts away complex training loops, episodic fine-tuning, and optimization details.
-
-### 2.4 TabularLeaderboard
-
-A benchmarking tool for comparing multiple models and strategies on the same dataset splits.
-
-**Features:**
-- Compare multiple models simultaneously
-- Test different tuning strategies
-- Rank results by any metric
-- Export results for analysis
-
-**Purpose**: Streamline model selection and hyperparameter exploration.
-
----
-
-## 3. Component Relationships
+## The lifecycle
 
 ```mermaid
-flowchart TB
-    A[Raw Data: X, y] --> B[TabularPipeline]
-    B --> C[DataProcessor]
-    C --> D{Model-Specific?}
-    D -->|Yes| E[Custom Preprocessor]
-    D -->|No| F[Standard Pipeline]
-    E --> G[Transformed Data]
-    F --> G
-    G --> H[TuningManager]
-    H --> I{Strategy?}
-    I -->|inference| J[Load Pre-trained]
-    I -->|base-ft| K[Full Fine-tuning]
-    I -->|peft| L[LoRA Fine-tuning]
-    J --> M[Trained Model]
-    K --> M
-    L --> M
-    M --> N[Predictions / Metrics]
-    
-    style B fill:#e1f5ff
-    style C fill:#fff4e1
-    style H fill:#f0e1ff
-    style M fill:#e1ffe1
+flowchart LR
+    A[Choose model<br/>registry] --> B[Construct pipeline<br/>envelope + licence check]
+    B --> C[fit<br/>preprocess, then strategy]
+    C --> D[predict / evaluate<br/>metrics, calibration, fairness]
+    D --> E[save / load]
+    D --> F[Compare: leaderboard<br/>Combine: ensemble<br/>Compress: distill]
 ```
 
-**Flow Explanation:**
-1. Raw data enters `TabularPipeline`
-2. `DataProcessor` applies model-aware preprocessing
-3. `TuningManager` executes the chosen training strategy
-4. Final model generates predictions and metrics
+## Next steps
 
----
-
-## 4. Workflow
-
-Here's the typical workflow for using TabTune:
-
-### Step 1: Prepare Your Data
-
-```python
-import pandas as pd
-from sklearn.model_selection import train_test_split
-
-# Load your data
-df = pd.read_csv('your_data.csv')
-X = df.drop('target', axis=1)  # Features
-y = df['target']  # Labels
-
-# Split into train/test
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-```
-
-### Step 2: Initialize the Pipeline
-
-```python
-from tabtune import TabularPipeline
-
-pipeline = TabularPipeline(
-    model_name="TabICL",              # Choose your model
-    task_type="classification",        # Task type
-    tuning_strategy="base-ft",         # Training strategy
-    tuning_params={
-        "device": "cuda",
-        "epochs": 5,
-        "learning_rate": 2e-5
-    }
-)
-```
-
-### Step 3: Train the Model
-
-```python
-# This automatically:
-# 1. Fits the DataProcessor (learns preprocessing transformations)
-# 2. Applies preprocessing to training data
-# 3. Trains the model using TuningManager
-pipeline.fit(X_train, y_train)
-```
-
-### Step 4: Make Predictions
-
-```python
-# Generate predictions
-predictions = pipeline.predict(X_test)
-
-# Get probability scores
-probabilities = pipeline.predict_proba(X_test)
-
-# Evaluate performance
-metrics = pipeline.evaluate(X_test, y_test)
-print(f"Accuracy: {metrics['accuracy']:.4f}")
-print(f"F1 Score: {metrics['f1_score']:.4f}")
-```
-
-### Step 5: Save and Reload
-
-```python
-# Save the entire pipeline (including preprocessing and model state)
-pipeline.save("my_pipeline.joblib")
-
-# Later, reload for inference
-loaded_pipeline = TabularPipeline.load("my_pipeline.joblib")
-new_predictions = loaded_pipeline.predict(new_data)
-```
-
----
-
-## 5. Models
-
-TabTune supports multiple state-of-the-art tabular foundation models:
-
-| Model | Family | Best Use Case |
-|-------|--------|---------------|
-| **TabPFN** | PFN/ICL | Small datasets (<10K rows), quick baselines |
-| **TabICL** | Scalable ICL | General-purpose, balanced performance |
-| **OrionMSP** | Scalable ICL | Large datasets, strong generalization |
-| **OrionBix** | Scalable ICL | High-accuracy requirements |
-| **TabDPT** | Denoising Transformer | Very large datasets (>100K rows) |
-| **Mitra** | 2D Attention | Complex patterns, mixed data types |
-| **ContextTab** | Semantic ICL | Text-heavy tabular features |
-
-See the [Models Overview](../models/overview.md) for detailed comparisons and selection guidance.
-
----
-
-## 6. Tuning Strategies Explained
-
-### Inference (`inference`)
-- **What**: Uses pre-trained model weights without any training
-- **When**: Quick baselines, zero-shot evaluation
-- **Training Time**: 0 seconds
-- **Memory**: Minimal
-
-### Base Fine-Tuning (`base-ft`)
-- **What**: Updates all model parameters during training
-- **When**: Maximum accuracy is priority, ample compute resources
-- **Training Time**: Moderate to long (depending on dataset size)
-- **Memory**: High (requires full model in memory)
-
-### PEFT (`peft`)
-- **What**: Parameter-efficient fine-tuning using LoRA adapters
-- **When**: Memory-constrained environments, fast iteration
-- **Training Time**: Faster than base-ft
-- **Memory**: Low (only adapter weights updated)
-
-See [Tuning Strategies](../user-guide/tuning-strategies.md) for detailed comparisons.
-
----
-
-## 7. Key Principles
-
-1. **Model-Aware Processing**: The `DataProcessor` automatically selects optimal preprocessing based on your chosen model
-2. **Unified API**: Same interface (`.fit()`, `.predict()`) for all models and strategies
-3. **Automatic Optimization**: `TuningManager` handles complex training loops, learning rate schedules, and optimization
-4. **Reproducibility**: Save entire pipelines (including preprocessing) for consistent results
-
----
-
-## 8. Next Steps
-
-- **[Installation Guide](installation.md)**: Set up TabTune in your environment
-- **[Quick Start](quick-start.md)**: Run your first end-to-end example
-- **[Pipeline Overview](../user-guide/pipeline-overview.md)**: Deep dive into TabularPipeline
-- **[Model Selection](../user-guide/model-selection.md)**: Choose the right model for your task
-- **[Tuning Strategies](../user-guide/tuning-strategies.md)**: Understand training options
-
----
-
-## 9. Common Patterns
-
-### Pattern 1: Quick Baseline
-```python
-pipeline = TabularPipeline(model_name="TabPFN", tuning_strategy="inference")
-pipeline.fit(X_train, y_train)
-metrics = pipeline.evaluate(X_test, y_test)
-```
-
-### Pattern 2: Production Model
-```python
-pipeline = TabularPipeline(
-    model_name="OrionBix",
-    tuning_strategy="base-ft",
-    tuning_params={"epochs": 10, "learning_rate": 2e-5}
-)
-pipeline.fit(X_train, y_train)
-pipeline.save("production_model.joblib")
-```
-
-### Pattern 3: Memory-Efficient Training
-```python
-pipeline = TabularPipeline(
-    model_name="TabICL",
-    tuning_strategy="peft",
-    tuning_params={"peft_config": {"r": 8}}
-)
-pipeline.fit(X_train, y_train)
-```
-
-Understanding these basic concepts will help you effectively leverage TabTune's capabilities for your tabular machine learning projects.
+- **[User Guide Overview](../user-guide/overview.md)**: which page to open for what you
+  are trying to do.
+- **[Models](../models/overview.md)**: the capability matrix.

@@ -1,27 +1,23 @@
-# Mitra: 2D Cross-Attention for Tabular Data
+# Mitra
 
-Mitra (also known as Tab2D) is a sophisticated tabular model featuring 2D cross-attention mechanisms for modeling both row-wise and column-wise dependencies. This document provides comprehensive guidance for using Mitra with TabTune.
+Mitra, AWS's Tab2D, attends over rows and columns at once: every cell sees its row and its column in the same layer. It was pretrained on a mix of synthetic priors, and it is one of the few models here whose weights are Apache-2.0. [Mitra v2](mitrav2.md) is the second set of weights on the same architecture.
 
----
+## Introduction
 
-## 1. Introduction
+**Mitra**
 
-**What is Mitra?**
+What it does differently:
 
-Mitra is an advanced in-context learning model that captures complex interactions through:
+- 2D Cross-Attention: Simultaneous row (sample) and column (feature) modeling
+- Synthetic Priors: Pre-trained representations for tabular data
+- Mixed-Type Feature Handling: Natural support for numerical and categorical data
+- Episodic Training: Task-specific adaptation via meta-learning
 
-- **2D Cross-Attention**: Simultaneous row (sample) and column (feature) modeling
-- **Synthetic Priors**: Pre-trained representations for tabular data
-- **Mixed-Type Feature Handling**: Natural support for numerical and categorical data
-- **Episodic Training**: Task-specific adaptation via meta-learning
+The idea: one attention layer over both axes, so a cell sees its row and its column at the same time.
 
-**Key Innovation**: 2D attention mechanism simultaneously models relationships both across rows (samples) and columns (features), enabling superior pattern discovery.
+## Architecture
 
----
-
-## 2. Architecture
-
-### 2.1 High-Level Design
+### High-level design
 
 ```mermaid
 flowchart LR
@@ -37,26 +33,26 @@ flowchart LR
 <!-- ### 2.2 Core Components
 
 1. **Feature Embedder** (`x_embedding`)
-   - Encodes each feature independently
-   - Learns feature-specific representations
-   - Handles mixed data types
+ - Encodes each feature independently
+ - Learns feature-specific representations
+ - Handles mixed data types
 
 2. **Row Embedder** (implicit)
-   - Sample-level representations
-   - Position and context encoding
-   - Sample-specific patterns
+ - Sample-level representations
+ - Position and context encoding
+ - Sample-specific patterns
 
 3. **2D Cross-Attention** (`layers`)
-   - Feature-to-sample attention
-   - Sample-to-feature attention
-   - Bidirectional interaction modeling
+ - Feature-to-sample attention
+ - Sample-to-feature attention
+ - Bidirectional interaction modeling
 
 4. **Prediction Head** (`final_layer`)
-   - Aggregates 2D representations
-   - Outputs class logits
-   - Task-specific predictions -->
+ - Aggregates 2D representations
+ - Outputs class logits
+ - Task-specific predictions -->
 
-### 2.3 2D Attention Mechanism
+### 2D attention mechanism
 
 ```
 Row Embeddings         Feature Embeddings
@@ -70,7 +66,7 @@ Row Embeddings         Feature Embeddings
           Output
 ```
 
-### 2.4 Synthetic Priors
+### Synthetic priors
 
 Mitra incorporates synthetic prior knowledge:
 - Pre-trained on diverse tabular data
@@ -78,11 +74,9 @@ Mitra incorporates synthetic prior knowledge:
 - Accelerates learning on new tasks
 - Improves generalization
 
----
+## Inference parameters
 
-## 3. Inference Parameters
-
-### 3.1 Complete Parameter Reference
+### Complete parameter reference
 
 ```python
 model_params = {
@@ -99,7 +93,7 @@ model_params = {
 }
 ```
 
-### 3.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -110,21 +104,19 @@ model_params = {
 | `dropout` | float | 0.1 | 0.0-0.3 | Dropout probability |
 | `seed` | int | 42 | 0+ | Random seed |
 
-### 3.3 Architecture Tuning
+### Architecture tuning
 
 | Config | Speed | Accuracy | Memory |
 |--------|-------|----------|--------|
-| Small: d_model=32, num_layers=1 | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐ |
-| Medium: d_model=64, num_layers=2 | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Large: d_model=128, num_layers=4 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Small: d_model=32, num_layers=1 | | | |
+| Medium: d_model=64, num_layers=2 | | | |
+| Large: d_model=128, num_layers=4 | | | |
 
----
-
-## 4. Fine-Tuning with Mitra
+## Fine-tuning with Mitra
 
 Mitra uses episodic fine-tuning for task-specific adaptation.
 
-### 4.1 Fine-Tuning Parameters
+### Fine-tuning parameters
 
 ```python
 tuning_params = {
@@ -144,7 +136,7 @@ tuning_params = {
 }
 ```
 
-### 4.2 Key Parameters
+### Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -154,7 +146,7 @@ tuning_params = {
 | `steps_per_epoch` | int | 50 | Gradient updates per epoch |
 | `batch_size` | int | 4 | Episodes per batch (keep small) |
 
-### 4.3 Why Small Batch Size?
+### Why small batch size?
 
 Mitra's 2D attention is computationally expensive:
 - Attention complexity: \(O(n^2)\) for both rows and columns
@@ -162,7 +154,7 @@ Mitra's 2D attention is computationally expensive:
 - Empirically: batch_size=4-8 is optimal
 - Larger: Use gradient accumulation instead
 
-### 4.4 Fine-Tuning Guidelines
+### Fine-tuning guidelines
 
 **Support/Query Balance**:
 ```
@@ -180,9 +172,7 @@ query_size = 128    # Balance for gradient signal
 - Medium dataset (100K): 1000 episodes
 - Large dataset (500K): 2000 episodes
 
----
-
-## 5. LoRA Target Modules
+## LoRA target modules
 
 When using PEFT, Mitra targets these modules:
 
@@ -194,7 +184,7 @@ target_modules = [
 ]
 ```
 
-### 5.1 Default PEFT Configuration
+### Default PEFT configuration
 
 ```python
 peft_config = {
@@ -205,7 +195,7 @@ peft_config = {
 }
 ```
 
-### 5.2 PEFT Rank Guidelines
+### PEFT rank guidelines
 
 | Rank | Memory | Speed | Accuracy |
 |------|--------|-------|----------|
@@ -213,11 +203,9 @@ peft_config = {
 | r=8 | Low | Moderate | Better |
 | r=16 | Moderate | Slower | Best |
 
----
+## Usage patterns
 
-## 6. Usage Patterns
-
-### 6.1 Inference Only
+### Inference only
 
 ```python
 from tabtune import TabularPipeline
@@ -236,12 +224,12 @@ pipeline.fit(X_train, y_train)  # Preprocessing only
 predictions = pipeline.predict(X_test)
 ```
 
-### 6.2 Base Fine-Tuning
+### Base fine-tuning
 
 ```python
 pipeline = TabularPipeline(
     model_name='Mitra',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,
@@ -257,7 +245,7 @@ pipeline.fit(X_train, y_train)
 metrics = pipeline.evaluate(X_test, y_test)
 ```
 
-### 6.3 PEFT Fine-Tuning
+### PEFT fine-tuning
 
 ```python
 pipeline = TabularPipeline(
@@ -281,12 +269,12 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 6.4 Architecture Customization
+### Architecture customization
 
 ```python
 pipeline = TabularPipeline(
     model_name='Mitra',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     model_params={
         'd_model': 128,      # Larger embeddings
         'num_layers': 4,     # More layers
@@ -300,11 +288,9 @@ pipeline = TabularPipeline(
 )
 ```
 
----
+## Complete examples
 
-## 7. Complete Examples
-
-### 7.1 Basic Workflow
+### Basic workflow
 
 ```python
 from tabtune import TabularPipeline
@@ -324,7 +310,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Train with Mitra
 pipeline = TabularPipeline(
     model_name='Mitra',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 3,
@@ -342,7 +328,7 @@ print(f"Accuracy: {metrics['accuracy']:.4f}")
 print(f"F1 Score: {metrics['f1_score']:.4f}")
 ```
 
-### 7.2 PEFT for Memory Constraints
+### PEFT for memory constraints
 
 ```python
 # Use PEFT when memory is limited
@@ -368,7 +354,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 7.3 Architecture Search
+### Architecture search
 
 ```python
 from tabtune import TabularLeaderboard
@@ -379,7 +365,7 @@ lb = TabularLeaderboard(X_train, X_test, y_train, y_test)
 # Small model
 lb.add_model(
     'Mitra',
-    'base-ft',
+    'finetune',
     name='Mitra-Small',
     model_params={
         'd_model': 32,
@@ -391,7 +377,7 @@ lb.add_model(
 # Medium model
 lb.add_model(
     'Mitra',
-    'base-ft',
+    'finetune',
     name='Mitra-Medium',
     model_params={
         'd_model': 64,
@@ -403,7 +389,7 @@ lb.add_model(
 # Large model
 lb.add_model(
     'Mitra',
-    'base-ft',
+    'finetune',
     name='Mitra-Large',
     model_params={
         'd_model': 128,
@@ -415,7 +401,7 @@ lb.add_model(
 lb.run(rank_by='accuracy')
 ```
 
-### 7.4 Production Deployment - Saving using joblib
+### Production deployment - saving using joblib
 
 ```python
 import joblib
@@ -423,7 +409,7 @@ import joblib
 # Train optimal model
 pipeline = TabularPipeline(
     model_name='Mitra',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
         'epochs': 5,
@@ -444,20 +430,18 @@ loaded = TabularPipeline.load('mitra_production.joblib')
 predictions = loaded.predict(X_new)
 ```
 
----
+## Performance characteristics
 
-## 8. Performance Characteristics
-
-### 8.1 Speed Benchmarks
+### Speed benchmarks
 
 | Operation | Time | Notes |
 |-----------|------|-------|
 | Inference (batch=1000) | 3-5s | 2D attention overhead |
-| Base FT (3 epochs, 100K) | 45-60m | Slow but powerful |
+| Base FT (3 epochs, 100K) | 45-60m | Slow but capable |
 | PEFT (3 epochs, 100K) | 20-30m | Better speed |
 | Prediction latency | 20-100ms | Per sample |
 
-### 8.2 Memory Usage
+### Memory usage
 
 | Scenario | Memory | GPU VRAM |
 |----------|--------|---------|
@@ -474,32 +458,10 @@ predictions = loaded.predict(X_new)
 | Medium | 100K | 89% |
 | Large | 500K | 91% |
  -->
----
 
-## 9. Best Practices
+## Troubleshooting
 
-### ✅ Do's
-
-- ✅ Use small batch sizes (2-4)
-- ✅ Start with medium architecture (d_model=64)
-- ✅ Monitor memory usage actively
-- ✅ Use PEFT on constrained systems
-- ✅ Increase support/query sizes for pattern discovery
-- ✅ Use synthetic priors (faster convergence)
-
-### ❌ Don'ts
-
-- ❌ Don't use large batch sizes (causes OOM)
-- ❌ Don't use very large models on small GPUs
-- ❌ Don't skip warmup steps
-- ❌ Don't disable gradient clipping
-- ❌ Don't train for too many epochs (overfit risk)
-
----
-
-## 10. Troubleshooting
-
-### Issue: "CUDA out of memory"
+### "CUDA out of memory"
 **Solution 1**: Reduce batch size
 ```python
 tuning_params = {
@@ -514,7 +476,7 @@ tuning_params = {
 tuning_strategy = 'peft'
 ```
 
-### Issue: "Training very slow"
+### "Training very slow"
 **Solution**: Reduce model size
 ```python
 model_params = {
@@ -523,7 +485,7 @@ model_params = {
 }
 ```
 
-### Issue: "Low accuracy"
+### "Low accuracy"
 **Solution**: Increase support set size
 ```python
 tuning_params = {
@@ -533,7 +495,7 @@ tuning_params = {
 }
 ```
 
-### Issue: "Overfitting on small datasets"
+### "Overfitting on small datasets"
 **Solution**: Use regularization
 ```python
 tuning_params = {
@@ -542,9 +504,7 @@ tuning_params = {
 }
 ```
 
----
-
-## 11. Comparison with Other Models
+## Comparison with other models
 
 | Aspect | Mitra | TabICL | TabDPT | OrionMSP | OrionBix |
 |--------|-------|--------|--------|-----------|------------|
@@ -552,13 +512,11 @@ tuning_params = {
 | Memory | Very High | Moderate | High | Moderate-High | High |
 | Accuracy | Excellent | Good | Excellent | Very Good | Very Good |
 | Complexity | Complex | Simple | Medium | Medium | Medium |
-| Small Data | Good | Good | Okay | ⚠️ | Good |
+| Small Data | Good | Good | Okay | | Good |
 | Large Data | Good | Good | Excellent | Excellent | Good |
-| PEFT | ✅ Full | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| PEFT | Full | Full | Full | Full | Full |
 
----
-
-## 12. Quick Reference
+## Quick reference
 
 | Use Case | Config | Batch Size | Support |
 |----------|--------|-----------|---------|
@@ -568,11 +526,9 @@ tuning_params = {
 | Memory limited | PEFT, r=4 | 2 | 64 |
 | Max accuracy | d_model=128, layers=4 | 4 | 512 |
 
----
-
 <!-- ## 13. Advanced Topics
 
-### 13.1 Attention Visualization
+### Attention visualization
 
 ```python
 # Inspect attention patterns
@@ -585,7 +541,7 @@ print(f"Attention shape: {attention_weights.shape}")
 print(f"Min: {attention_weights.min():.4f}, Max: {attention_weights.max():.4f}")
 ```
 
-### 13.2 Feature Importance via Attention
+### Feature importance via attention
 
 ```python
 # Use attention weights for feature importance
@@ -596,15 +552,3 @@ top_features = np.argsort(feature_importance)[-10:]
 print(f"Top 10 features: {X_test.columns[top_features]}")
 ```
  -->
----
-
-## 13. Next Steps
-
-- [Model Selection](../user-guide/model-selection.md) - Compare with other models
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Fine-tuning details
-- [Advanced PEFT](../advanced/peft-lora.md) - LoRA optimization
-- [TabularLeaderboard](../user-guide/leaderboard.md) - Benchmark Mitra
-
----
-
-Mitra excels at capturing complex 2D patterns in structured tabular data. Use it when maximum accuracy and pattern discovery are priorities!

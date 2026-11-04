@@ -2,7 +2,7 @@
 
 **TabICLv2** is the second generation of `soda-inria`'s scalable tabular in-context learner.
 It keeps the two-stage column-then-row attention that made TabICL work and adds **QASSMax**
-normalisation plus a **native quantile regression head** — so unlike TabICL v1, it does
+normalisation plus a **native quantile regression head**, so unlike TabICL v1, it does
 regression natively rather than by transfer.
 
 ```python
@@ -19,41 +19,35 @@ print(pipeline.evaluate(X_test, y_test))
 
 Aliases: `TabICL-v2`, `TabICL2`.
 
----
-
-## 1. What changed from v1
+## What changed from v1
 
 | | TabICL | TabICLv2 |
 |---|---|---|
 | Attention | Column-then-row | Column-then-row + **QASSMax** normalisation |
-| Regression | ❌ | ✅ native **quantile** head |
+| Regression | | native **quantile** head |
 | Row ceiling | undeclared | 500,000 (via CPU/disk KV-cache offloading) |
 | Feature ceiling | undeclared | 2,000 |
-| PEFT | ✅ | ❌ — use `finetune` |
+| PEFT | |, use `finetune` |
 | Licence | BSD-3-Clause | BSD-3-Clause |
 
 !!! success "Commercially deployable"
-    BSD-3-Clause weights. TabICLv2 is one of the registry's default
-    `commercial_alternatives` when another model's licence blocks you.
+ BSD-3-Clause weights. TabICLv2 is one of the registry's default
+ `commercial_alternatives` when another model's licence blocks you.
 
----
-
-## 2. Envelope
+## Envelope
 
 | Constraint | Value | Severity |
 |---|---:|---|
 | `max_features` | `2,000` | warn |
 | `max_rows` | `500,000` | warn |
-| `native_nan` | yes | — |
+| `native_nan` | yes |, |
 
-Upstream supports 500k rows via **CPU/disk offloading of the KV cache** — see
+Upstream supports 500k rows via **CPU/disk offloading of the KV cache**, see
 `offload_mode` below.
 
----
+## Model parameters
 
-## 3. Model parameters
-
-### 3.1 Classification
+### Classification
 
 ```python
 model_params = {
@@ -98,14 +92,12 @@ model_params = {
 | `allow_auto_download` | bool | `True` | Fetch weights from the Hub |
 | `n_jobs` | int | `None` | Worker processes |
 
-### 3.2 Regression
+### Regression
 
 The regressor takes the same parameters minus `class_shuffle_method`, `softmax_temperature`,
 `average_logits` and `support_many_classes`, and defaults to the regression checkpoint.
 
----
-
-## 4. Scaling to 500k rows
+## Scaling to 500k rows
 
 ```python
 pipeline = TabularPipeline(
@@ -122,24 +114,22 @@ pipeline = TabularPipeline(
 ```
 
 !!! tip "If you hit OOM"
-    In order: lower `batch_size`, lower `n_estimators`, set `offload_mode` explicitly, then
-    fall back to context sampling via
-    `processor_params={'context_sampling_strategy': 'stratified', 'context_size': 100_000}`.
+ In order: lower `batch_size`, lower `n_estimators`, set `offload_mode` explicitly, then
+ fall back to context sampling via
+ `processor_params={'context_sampling_strategy': 'stratified', 'context_size': 100_000}`.
 
----
-
-## 5. Supported strategies
+## Supported strategies
 
 | Task | Strategy | Modes |
 |---|---|---|
-| Classification | `inference` | — |
+| Classification | `inference` |, |
 | Classification | `finetune` | `meta-learning` (default), `sft`, `turn_by_turn` |
-| Regression | `inference` | — |
-| Regression | `finetune` | `turn_by_turn` (default) — episodic MSE training |
+| Regression | `inference` |, |
+| Regression | `finetune` | `turn_by_turn` (default), episodic MSE training |
 
 !!! warning "No PEFT"
-    `tuning_strategy='peft'` is not supported for TabICLv2. Use `'finetune'`.
-    `check_envelope` / `validate_request` will tell you this before weights load.
+ `tuning_strategy='peft'` is not supported for TabICLv2. Use `'finetune'`.
+ `check_envelope` / `validate_request` will tell you this before weights load.
 
 ```python
 pipeline = TabularPipeline(
@@ -150,9 +140,7 @@ pipeline = TabularPipeline(
 )
 ```
 
----
-
-## 6. Quantiles and intervals
+## Quantiles and intervals
 
 TabICLv2's native quantile head is exposed through the pipeline:
 
@@ -172,14 +160,12 @@ lo, hi = cr.predict_interval(X_test)
 
 See [Uncertainty Quantification](../user-guide/uncertainty.md).
 
----
-
-## 7. When to use TabICLv2
+## When to use TabICLv2
 
 **Good fit**
 
-- **Commercial deployment** — BSD-3-Clause
-- Large tables: 10k–500k rows, up to 2,000 features
+- **Commercial deployment**, BSD-3-Clause
+- Large tables: 10k-500k rows, up to 2,000 features
 - Regression where you want native quantiles
 - A strong general-purpose default across both tasks
 
@@ -189,10 +175,8 @@ See [Uncertainty Quantification](../user-guide/uncertainty.md).
 - Beyond 2,000 features
 - Very small datasets where TabPFN's prior is stronger
 
----
+## See also
 
-## See Also
-
-- [TabICL](tabicl.md) — the v1 model
+- [TabICL](tabicl.md), the v1 model
 - [Model Overview](overview.md)
 - Runnable example: notebook 13 in the [examples table](../index.md)

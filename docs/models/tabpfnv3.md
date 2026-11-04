@@ -1,14 +1,12 @@
-# TabPFN v3: Latest Prior-Fitted Network
+# TabPFN v3
 
-TabPFN v3 is the newest release of PriorLabs' Prior-Fitted Network family, integrated into TabTune as the model name **`TabPFNv3`**. It builds on the in-context learning paradigm of earlier TabPFN versions with an updated architecture and checkpoints, and ships with **full inference and fine-tuning support** for both classification and regression. This document is an in-depth guide to using TabPFN v3 with TabTune.
+TabPFN v3 (`TabPFNv3`) re-architects the PFN: a column distribution embedding, row aggregation, then in-context learning over compressed rows. The limits move from 10 classes, 500 features and 10,000 rows to 160 classes, 20,000 features and a million rows under a 200M-cell budget. Inference and every fine-tuning mode, both tasks.
 
----
+## Introduction
 
-## 1. Introduction
+**TabPFN v3**
 
-**What is TabPFN v3?**
-
-TabPFN v3 is a transformer trained via in-context learning on large collections of synthetic tabular datasets. Like its predecessors it approximates Bayesian posterior inference in a single forward pass, but v3 introduces an updated backbone (`architectures/tabpfn_v3.py`, registered as `"tabpfn_v3"`) and new default checkpoints (`v3_default`) hosted on the `Prior-Labs/tabpfn_3` repository.
+Like earlier versions it approximates Bayesian posterior inference in a single forward pass. v3 introduces a new backbone (`architectures/tabpfn_v3.py`, registered as `"tabpfn_v3"`) and new default checkpoints.
 
 It is well suited for:
 
@@ -20,13 +18,11 @@ It is well suited for:
 **Relationship to TabPFN v2.6**: v3 is a separate model entry in TabTune. The existing `TabPFNv26` integration is left untouched; `TabPFNv3` is added alongside it with its own vendored model tree, so you can compare the two directly.
 
 !!! note "Model name"
-    Use `model_name="TabPFNv3"` in `TabularPipeline`. The v3 default classifier and regressor checkpoints are loaded automatically — no manual version flag is required.
+ Use `model_name="TabPFNv3"` in `TabularPipeline`. The v3 default classifier and regressor checkpoints are loaded automatically, no manual version flag is required.
 
----
+## Architecture
 
-## 2. Architecture
-
-### 2.1 High-Level Design
+### High-level design
 
 ```mermaid
 flowchart LR
@@ -37,14 +33,14 @@ flowchart LR
     E --> F[Predictions + Uncertainty]
 ```
 
-### 2.2 Core Components
+### Core components
 
 1. **Feature Encoder** (`x_embed`): projects tabular features into the embedding space
 2. **Target Encoders** (`col_y_encoder` / `icl_y_encoder`): encode context labels for in-context conditioning
 3. **ICL Transformer Blocks** (`icl_blocks`): stacked attention layers with `q/k/v/out_projection` over support + query samples
-4. **Heads**: classification logits, or a bar-distribution head for regression (mean + full predictive distribution)
+4. Heads: classification logits, or a bar-distribution head for regression (mean + full predictive distribution)
 
-### 2.3 Inference Process
+### Inference process
 
 ```
 1. Encode support set (training data) as context
@@ -54,11 +50,9 @@ flowchart LR
 5. Generate predictions with uncertainty
 ```
 
----
+## Inference parameters
 
-## 3. Inference Parameters
-
-### 3.1 Complete Parameter Reference
+### Complete parameter reference
 
 ```python
 model_params = {
@@ -71,22 +65,22 @@ model_params = {
 }
 ```
 
-### 3.2 Parameter Descriptions
+### Parameter descriptions
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| `n_estimators` | int | 8 | 1-32 | Number of ensemble members; higher = more robust |
+| `n_estimators` | int | 8 | 1-32 | Number of ensemble members; higher = more reliable |
 | `softmax_temperature` | float | 0.9 | 0.1-2.0 | Scaling of logits before softmax; lower = sharper predictions |
 | `average_logits` | bool | True | True/False | Average logits vs probabilities across ensemble |
 | `ignore_pretraining_limits` | bool | True | True/False | Permit inputs above pretraining size limits |
 | `device` | str | 'cuda' | cuda/cpu | Compute device |
 | `random_state` | int | 42 | 0+ | Random seed for reproducibility |
 
-### 3.3 Parameter Tuning Guidelines
+### Parameter tuning guidelines
 
 **Ensemble Size (`n_estimators`)**:
 - `4-8`: Fast inference, good uncertainty
-- `8-16`: More robust predictions, slower
+- `8-16`: More reliable predictions, slower
 
 **Temperature (`softmax_temperature`)**:
 - `< 0.5`: Very confident predictions (may overfit)
@@ -97,9 +91,7 @@ model_params = {
 - `True`: Better for class imbalance
 - `False`: Better for probability calibration
 
----
-
-## 4. Fine-Tuning with TabPFN v3
+## Fine-tuning with TabPFN v3
 
 Unlike the experimental status of fine-tuning on the original TabPFN, **TabPFN v3 supports the full TabTune fine-tuning surface**: native (PriorLabs finetuner), meta-learning, SFT, and PEFT/LoRA for classification, and native + turn-by-turn for regression.
 
@@ -110,9 +102,9 @@ Unlike the experimental status of fine-tuning on the original TabPFN, **TabPFN v
 | Regression | `finetune` | `native` (default), `turn_by_turn` |
 
 !!! warning "Native fine-tuning trains the v3 checkpoint"
-    The upstream PriorLabs `FinetunedTabPFN*` classes default to an older checkpoint internally. TabTune's v3 integration pins `ModelVersion.V3` in native mode so fine-tuning updates the **v3** weights, not an earlier version.
+ The upstream PriorLabs `FinetunedTabPFN*` classes default to an older checkpoint internally. TabTune's v3 integration pins `ModelVersion.V3` in native mode so fine-tuning updates the **v3** weights, not an earlier version.
 
-### 4.1 Fine-Tuning Parameters
+### Fine-tuning parameters
 
 ```python
 tuning_params = {
@@ -128,14 +120,14 @@ tuning_params = {
 }
 ```
 
-### 4.2 Fine-Tuning Best Practices
+### Fine-tuning best practices
 
-- **Learning Rate**: Start with `1e-5`; raise cautiously
-- **Epochs**: `3-5` for meta-learning/SFT; up to `30` for native with early stopping
-- **Batch Size**: `64-256` episodes work well for meta-learning
-- **Mode choice**: `native` for the strongest single-task adaptation; `meta-learning` to preserve in-context generalization; `sft` for fast task specialization
+- Learning Rate: Start with `1e-5`; raise cautiously
+- Epochs: `3-5` for meta-learning/SFT; up to `30` for native with early stopping
+- Batch Size: `64-256` episodes work well for meta-learning
+- Mode choice: `native` for the strongest single-task adaptation; `meta-learning` to preserve in-context generalization; `sft` for fast task specialization
 
-### 4.3 Native Fine-Tuning (Classification)
+### Native fine-tuning (classification)
 
 ```python
 from tabtune import TabularPipeline
@@ -158,7 +150,7 @@ metrics = pipeline.evaluate(X_test, y_test)
 print(f"Accuracy: {metrics['accuracy']:.4f}")
 ```
 
-### 4.4 Meta-Learning Fine-Tuning (default)
+### Meta-learning fine-tuning (default)
 
 ```python
 pipeline = TabularPipeline(
@@ -176,7 +168,7 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 4.5 SFT (Supervised Fine-Tuning)
+### SFT (supervised fine-tuning)
 
 ```python
 pipeline = TabularPipeline(
@@ -193,10 +185,10 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
-### 4.6 Regression Fine-Tuning
+### Regression fine-tuning
 
 ```python
-# Native (default) — PriorLabs FinetunedTabPFNRegressor, bar-distribution loss
+# Native (default) - PriorLabs FinetunedTabPFNRegressor, bar-distribution loss
 pipeline = TabularPipeline(
     model_name='TabPFNv3',
     task_type='regression',
@@ -210,7 +202,7 @@ pipeline = TabularPipeline(
 )
 pipeline.fit(X_train, y_train)
 
-# Turn-by-turn — lightweight episodic regression loop
+# Turn-by-turn - lightweight episodic regression loop
 pipeline = TabularPipeline(
     model_name='TabPFNv3',
     task_type='regression',
@@ -225,11 +217,9 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
----
+## Inference-only usage
 
-## 5. Inference-Only Usage
-
-### 5.1 Zero-Shot Predictions
+### Zero-shot predictions
 
 ```python
 from tabtune import TabularPipeline
@@ -246,7 +236,7 @@ predictions = pipeline.predict(X_test)
 probabilities = pipeline.predict_proba(X_test)
 ```
 
-### 5.2 Regression Inference
+### Regression inference
 
 ```python
 pipeline = TabularPipeline(
@@ -259,15 +249,13 @@ pipeline.fit(X_train, y_train)
 y_hat = pipeline.predict(X_test)
 ```
 
----
+## PEFT (LoRA) support
 
-## 6. PEFT (LoRA) Support
+### Status
 
-### 6.1 Status
+**Supported.** TabPFN v3 ships a dedicated LoRA target configuration (`MODEL_LORA_TARGETS["TabPFNv3"]`) covering the attention projections (`q/k/v/out_projection`), the input embedding (`x_embed`), and the ICL blocks. The dynamic-dimension target encoders (`col_y_encoder` / `icl_y_encoder`) are intentionally excluded from adapter wrapping for stability.
 
-**✅ Supported.** TabPFN v3 ships a dedicated LoRA target configuration (`MODEL_LORA_TARGETS["TabPFNv3"]`) covering the attention projections (`q/k/v/out_projection`), the input embedding (`x_embed`), and the ICL blocks. The dynamic-dimension target encoders (`col_y_encoder` / `icl_y_encoder`) are intentionally excluded from adapter wrapping for stability.
-
-### 6.2 Usage
+### Usage
 
 ```python
 pipeline = TabularPipeline(
@@ -290,13 +278,11 @@ pipeline.fit(X_train, y_train)
 ```
 
 !!! note "Native + PEFT"
-    PEFT applies to the meta-learning and SFT loops. Native mode trains full weights via the PriorLabs finetuner; if a `peft_config` is supplied in native mode it is ignored with a warning.
+ PEFT applies to the meta-learning and SFT loops. Native mode trains full weights via the PriorLabs finetuner; if a `peft_config` is supplied in native mode it is ignored with a warning.
 
----
+## Usage scenarios
 
-## 7. Usage Scenarios
-
-### 7.1 Quick Baseline
+### Quick baseline
 
 ```python
 from tabtune import TabularPipeline
@@ -311,7 +297,7 @@ baseline = pipeline.evaluate(X_test, y_test)
 print(f"Baseline accuracy: {baseline['accuracy']:.4f}")
 ```
 
-### 7.2 Small/Medium Dataset Adaptation
+### Small/Medium Dataset adaptation
 
 ```python
 pipeline = TabularPipeline(
@@ -323,11 +309,9 @@ pipeline = TabularPipeline(
 pipeline.fit(X_train, y_train)
 ```
 
----
+## Limitations and constraints
 
-## 8. Limitations and Constraints
-
-### 8.1 Data Constraints
+### Data constraints
 
 | Constraint | Guidance | Impact |
 |-----------|----------|--------|
@@ -338,45 +322,41 @@ pipeline.fit(X_train, y_train)
 
 Use `ignore_pretraining_limits=True` (default in TabTune) to permit inputs above the pretraining limits at the cost of speed/memory.
 
-### 8.2 Feature Type Constraints
+### Feature type constraints
 
-- **Supported**: Numerical, categorical, mixed (handled by the `tabpfn_special` preprocessor)
-- **Not Supported**: Raw text, images, native time-series
+- Supported: Numerical, categorical, mixed (handled by the `tabpfn_special` preprocessor)
+- Not Supported: Raw text, images, native time-series
 
-### 8.3 Task Type Constraints
+### Task type constraints
 
-- ✅ Binary Classification
-- ✅ Multi-class Classification
-- ✅ Regression
-- ❌ Multi-output / Multi-label
+- Binary Classification
+- Multi-class Classification
+- Regression
+- Multi-output / Multi-label
 
----
+## Troubleshooting
 
-## 9. Troubleshooting
-
-### Issue: "Out of memory during fine-tuning"
+### "Out of memory during fine-tuning"
 **Solution**: Lower `batch_size`, reduce `n_estimators`, or use PEFT.
 
 ```python
 tuning_params = {'batch_size': 64, 'finetune_mode': 'meta-learning'}
 ```
 
-### Issue: "Native fine-tuning seems to use an old checkpoint"
-**Solution**: TabTune pins `ModelVersion.V3` automatically. Ensure you are on the `TabPFNv3` model entry (not `TabPFNv26`) and that the v3 default checkpoint downloaded from `Prior-Labs/tabpfn_3`.
+### "Native fine-tuning seems to use an old checkpoint"
+**Solution**: TabTune pins `ModelVersion.V3` automatically. Make sure you are on the `TabPFNv3` model entry (not `TabPFNv26`) and that the v3 default checkpoint downloaded from `Prior-Labs/tabpfn_3`.
 
-### Issue: "PEFT has no effect in native mode"
+### "PEFT has no effect in native mode"
 **Solution**: Native mode trains full weights. Use `finetune_mode='meta-learning'` (or `'sft'`) together with `tuning_strategy='peft'`.
 
-### Issue: "Predictions too confident (low uncertainty)"
+### "Predictions too confident (low uncertainty)"
 **Solution**: Increase temperature.
 
 ```python
 model_params = {'softmax_temperature': 1.5}
 ```
 
----
-
-## 10. Complete Example Workflow
+## Complete example workflow
 
 ```python
 from tabtune import TabularPipeline, TabularLeaderboard
@@ -418,29 +398,13 @@ lb.add_model('TabPFNv26', 'inference', name='TabPFNv26-Inference')
 lb.run(rank_by='accuracy')
 ```
 
----
-
-## 11. Quick Reference
+## Quick reference
 
 | Task | Strategy | Mode | Notes |
 |------|----------|------|-------|
-| Instant baseline | inference | — | Zero-shot, with uncertainty |
+| Instant baseline | inference |, | Zero-shot, with uncertainty |
 | Strongest single-task | finetune | native | V3-pinned PriorLabs finetuner + early stopping |
 | Preserve generalization | finetune | meta-learning | Episodic (default) |
 | Fast specialization | finetune | sft | Single-episode supervised |
 | Memory-efficient | peft | meta-learning/sft | LoRA adapters |
 | Regression | finetune | native / turn_by_turn | Bar-distribution loss |
-
----
-
-## 12. Next Steps
-
-- [Model Selection](../user-guide/model-selection.md) - Compare with other models
-- [Tuning Strategies](../user-guide/tuning-strategies.md) - Fine-tuning details
-- [PEFT & LoRA](../advanced/peft-lora.md) - Parameter-efficient fine-tuning
-- [TabPFN](tabpfn.md) - The original Prior-Fitted Network
-- [API Reference](../api/pipeline.md) - Complete API docs
-
----
-
-TabPFN v3 brings the latest Prior-Fitted Network into TabTune with first-class fine-tuning. Use it as a strong baseline and as a fully adaptable model for classification and regression.
