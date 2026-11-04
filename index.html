@@ -1,906 +1,1642 @@
-<!DOCTYPE html>
 
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
-<meta content="Lexsi Labs" name="author"/>
-<link href="img/favicon.ico" rel="shortcut icon"/>
-<title>Home - TabTune Documentation</title>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
-<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
-<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
-<link href="css/bootstrap-custom.min.css" rel="stylesheet"/>
-<link href="css/base.min.css" rel="stylesheet"/>
-<link href="css/cinder.min.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
-<link href="assets/_mkdocstrings.css" rel="stylesheet"/>
-<link href="assets/overrides.css" rel="stylesheet"/>
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-        <![endif]-->
-<link href="./assets/lexsilabs.ico" rel="icon"/>
-<link href="./assets/lexsilabs.ico" rel="shortcut icon"/>
-</head>
-<body class="homepage">
-<div class="navbar navbar-default navbar-fixed-top" role="navigation">
-<div class="container">
-<!-- Collapsed navigation -->
-<div class="navbar-header">
-<!-- Expander button -->
-<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<!-- Main title -->
-<a class="navbar-brand" href=".">TabTune Documentation</a>
-</div>
-<!-- Expanded navigation -->
-<div class="navbar-collapse collapse">
-<!-- Main navigation -->
-<ul class="nav navbar-nav">
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="getting-started/installation/">Installation</a>
-</li>
-<li>
-<a href="getting-started/quick-start/">Quick Start</a>
-</li>
-<li>
-<a href="getting-started/basic-concepts/">Basic Concepts</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="user-guide/pipeline-overview/">TabularPipeline Overview</a>
-</li>
-<li>
-<a href="user-guide/data-processing/">Data Processing</a>
-</li>
-<li>
-<a href="user-guide/tuning-strategies/">Tuning Strategies</a>
-</li>
-<li>
-<a href="user-guide/resampling/">Resampling Strategies</a>
-</li>
-<li>
-<a href="user-guide/model-selection/">Model Selection</a>
-</li>
-<li>
-<a href="user-guide/saving-loading/">Saving and Loading</a>
-</li>
-<li>
-<a href="user-guide/leaderboard/">Model Comparison</a>
-</li>
-<li>
-<a href="user-guide/troubleshooting/">Troubleshooting</a>
-</li>
-<li>
-<a href="user-guide/ensembling/">Ensembling Strategies</a>
-</li>
-<li>
-<a href="user-guide/distillation/">Distillation</a>
-</li>
-<li>
-<a href="user-guide/causal/">Causal Inference</a>
-</li>
-<li>
-<a href="user-guide/registry/">Model Registry &amp; Licensing</a>
-</li>
-<li>
-<a href="user-guide/uncertainty/">Uncertainty &amp; Conformal Prediction</a>
-</li>
-<li>
-<a href="user-guide/shift-evaluation/">Shift-Aware Evaluation</a>
-</li>
-<li>
-<a href="user-guide/configuration/">Typed Configuration</a>
-</li>
-<li>
-<a href="user-guide/caching/">Prediction Caching</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="models/overview/">Overview</a>
-</li>
-<li>
-<a href="models/tabpfn/">TabPFN</a>
-</li>
-<li>
-<a href="models/tabpfnv3/">TabPFN v3</a>
-</li>
-<li>
-<a href="models/tabicl/">TabICL</a>
-</li>
-<li>
-<a href="models/tabiclv2/">TabICL v2</a>
-</li>
-<li>
-<a href="models/orion-msp/">Orion MSP</a>
-</li>
-<li>
-<a href="models/orionmsp1.5/">Orion MSP V1.5</a>
-</li>
-<li>
-<a href="models/orion-bix/">Orion BIX</a>
-</li>
-<li>
-<a href="models/tabdpt/">TabDPT</a>
-</li>
-<li>
-<a href="models/mitra/">Mitra</a>
-</li>
-<li>
-<a href="models/contexttab/">ConTextTab</a>
-</li>
-<li>
-<a href="models/limix/">Limix</a>
-</li>
-<li>
-<a href="models/tabfm/">TabFM</a>
-</li>
-<li>
-<a href="models/xrfm/">xRFM</a>
-</li>
-<li>
-<a href="models/iltm/">iLTM</a>
-</li>
-<li>
-<a href="models/exaone/">EXAONE Tabular</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="regression/regression/">Regression Overview</a>
-</li>
-<li>
-<a href="regression/regression_data_processing/">Regression Data Processing</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="advanced/peft-lora/">PEFT &amp; LoRA</a>
-</li>
-<li>
-<a href="advanced/custom-preprocessing/">Custom Preprocessing</a>
-</li>
-<li>
-<a href="advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-<li>
-<a href="advanced/memory-optimization/">Memory Optimization</a>
-</li>
-<li>
-<a href="advanced/multi-gpu/">Multi-GPU Training</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="api/pipeline/">TabularPipeline</a>
-</li>
-<li>
-<a href="api/data-processor/">DataProcessor</a>
-</li>
-<li>
-<a href="api/tuning-manager/">TuningManager</a>
-</li>
-<li>
-<a href="api/leaderboard/">TabularLeaderboard</a>
-</li>
-<li>
-<a href="api/peft-utils/">PEFT Utils</a>
-</li>
-<li>
-<a href="api/registry/">Model Registry</a>
-</li>
-<li>
-<a href="api/config/">Configuration</a>
-</li>
-<li>
-<a href="api/uncertainty/">Uncertainty</a>
-</li>
-<li>
-<a href="api/evaluation/">Evaluation</a>
-</li>
-<li>
-<a href="api/caching/">Prediction Cache</a>
-</li>
-<li>
-<a href="api/ensemble/">TabularEnsemble</a>
-</li>
-<li>
-<a href="api/distillation/">TabDistiller</a>
-</li>
-<li>
-<a href="api/causal/">CausalAnalysis</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="examples/classification/">Classification Tasks</a>
-</li>
-<li>
-<a href="examples/regression/">Regression Tasks</a>
-</li>
-<li>
-<a href="examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-<li>
-<a href="examples/benchmarking/">Benchmarking</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Contributing</a>
-<ul class="dropdown-menu">
-<li>
-<a href="contributing/setup/">Development Setup</a>
-</li>
-<li>
-<a href="contributing/standards/">Code Standards</a>
-</li>
-<li>
-<a href="contributing/new-models/">Adding New Models</a>
-</li>
-<li>
-<a href="contributing/documentation/">Documentation Guide</a>
-</li>
-</ul>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">About</a>
-<ul class="dropdown-menu">
-<li>
-<a href="about/release-notes/">Release Notes</a>
-</li>
-<li>
-<a href="about/roadmap/">Roadmap</a>
-</li>
-<li>
-<a href="about/faq/">FAQ</a>
-</li>
-<li>
-<a href="about/license/">License</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
-<i class="fas fa-search"></i> Search
-                        </a>
-</li>
-<li>
-<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/index.md">Edit on Lexsi-Labs/TabTune</a>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="container">
-<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-<ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#welcome-to-tabtune">🚀 Welcome to TabTune</a></li>
-<li class="first-level"><a href="#core-features">⭐ Core Features</a></li>
-<li class="first-level"><a href="#whats-new-in-v020">🚀 What's New in v0.2.0</a></li>
-<li class="first-level"><a href="#supported-models">📊 Supported Models</a></li>
-<li class="second-level"><a href="#deployment-awareness">🧭 Deployment awareness</a></li>
-<li class="first-level"><a href="#quick-start">⚡ Quick Start</a></li>
-<li class="first-level"><a href="#why-tabtune">📝 Why TabTune?</a></li>
-<li class="second-level"><a href="#google-colab-support">Google Colab Support</a></li>
-<li class="first-level"><a href="#explore-the-documentation">📑 Explore the Documentation</a></li>
-<li class="first-level"><a href="#example-notebooks">🏆 Example Notebooks</a></li>
-<li class="first-level"><a href="#project-structure">📂 Project Structure</a></li>
-<li class="first-level"><a href="#developed-by-lexsi-labs">🏢 Developed by Lexsi Labs</a></li>
-<li class="first-level"><a href="#license">🗃️ License</a></li>
-<li class="first-level"><a href="#join-community-contribute">📫 Join Community / Contribute</a></li>
-</ul>
-</div></div>
-<div class="col-md-9" role="main">
-<div style="text-align: center;">
-<img alt="TabTune Logo" src="assets/tabtune.svg" style="width: 600px; height: auto;"/>
-</div>
-<div style="text-align: center;">
-<a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg"/></a>
-<a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.6+-red.svg"/></a>
-<a href="https://github.com/Lexsi-Labs/TabTune"><img src="https://img.shields.io/badge/docs-available-green.svg"/></a>
-<a href="https://arxiv.org/abs/2511.02802"><img src="https://img.shields.io/badge/arXiv-2511.02802-b31b1b.svg"/></a>
-<a href="https://discord.gg/dSB62Q7A"><img src="https://img.shields.io/badge/Discord-%235865F2.svg?&amp;logo=discord&amp;logoColor=white"/></a>
-</div>
-<hr/>
-<p><strong>TabTune</strong> is a powerful and flexible Python library designed to simplify the training and fine-tuning of modern foundation models on tabular data.<br/>
-It provides a high-level, scikit-learn-compatible API that abstracts away the complexities of data preprocessing, model-specific training loops, and benchmarking, letting you focus on delivering results.</p>
-<p>Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced architectures, TabTune streamlines your workflow for tabular deep learning.</p>
-<hr/>
-<h2 id="welcome-to-tabtune">🚀 Welcome to TabTune<a class="headerlink" href="#welcome-to-tabtune" title="Permanent link">¶</a></h2>
-<p><strong>This documentation provides a complete, production-ready framework for tabular foundation models.</strong></p>
-<p><strong>Core Components:</strong></p>
-<ul>
-<li><strong>Unified API (<code>TabularPipeline</code>):</strong> Single, scikit-learn-compatible interface for all models with <code>.fit()</code>, <code>.predict()</code>, <code>.save()</code>, and <code>.load()</code> methods.</li>
-<li><strong>Smart Data Processing (<code>DataProcessor</code>):</strong> Model-aware preprocessing that automatically handles imputation, scaling, categorical encoding, and feature transformations for each model.</li>
-<li><strong>Flexible Tuning (<code>TuningManager</code>):</strong> Three tuning strategies—zero-shot <code>inference</code>, supervised fine-tuning (<code>base-ft</code>) with full parameter updates, and memory-efficient <code>peft</code> (LoRA) adapters. Supports episodic meta-learning for ICL models.</li>
-<li><strong>Model Comparison (<code>TabularLeaderboard</code>):</strong> Systematic benchmarking tool for comparing multiple models and strategies on your datasets.</li>
-<li><strong>Ensembling Module (<code>TabularEnsemble</code>):</strong> Unified framework to combine multiple tabular foundation models using six strategies, including weighted averaging, stacking, and deep ensembles for improved accuracy and uncertainty estimation.</li>
-<li><strong>🆕 Model Registry (<code>tabtune.registry</code>):</strong> A torch-free record of every checkpoint's <strong>capability envelope</strong> and <strong>weight licence</strong>, checked before any weights load. Answers "will this model accept my data?" and "can I actually deploy this?" in milliseconds.</li>
-<li><strong>🆕 Uncertainty (<code>tabtune.uncertainty</code>):</strong> Split conformal prediction and post-hoc recalibration, with a distribution-free marginal coverage guarantee.</li>
-<li><strong>🆕 Shift-Aware Evaluation (<code>tabtune.evaluation</code>):</strong> Temporal and grouped splits plus a <code>ShiftEvaluator</code> that reports the IID-to-shift gap.</li>
-<li><strong>🆕 Typed Configuration (<code>tabtune.config</code>):</strong> Pydantic schemas for every knob, so an experiment is a YAML file you can commit.</li>
-</ul>
-<p><strong>Key Capabilities:</strong></p>
-<ul>
-<li>✅ <strong>Multiple Training Paradigms:</strong> Supports supervised fine-tuning (SFT) with full parameter updates, episodic meta-learning for in-context learning models, and parameter-efficient PEFT strategies.</li>
-<li>✅ <strong>PEFT (LoRA) Support:</strong> Full parameter-efficient fine-tuning for TabICL, OrionMSP, OrionMSPv1.5, OrionBix, TabDPT, Mitra, TabFM, TabPFNv3 and iLTM; experimental for TabPFN, TabPFNv2.6 and ContextTab.</li>
-<li>✅ <strong>Meta-Learning Integration:</strong> Episodic training with support/query sets for ICL models (TabICL, TabICLv2, OrionMSP, OrionBix, Mitra, TabDPT, TabFM, iLTM, EXAONE) enabling fast task adaptation.</li>
-<li>✅ <strong>Deployment Awareness:</strong> Capability envelopes and weight licences are enforced before a multi-gigabyte download, not after.</li>
-<li>✅ <strong>Lazy Imports:</strong> <code>import tabtune</code> costs milliseconds and pulls in neither torch nor transformers; heavy modules load on first attribute access.</li>
-<li>✅ <strong>Comprehensive Documentation:</strong> Extensive guides, API references, troubleshooting, and model-specific documentation.</li>
-<li>✅ <strong>Production Ready:</strong> Model serialization, reproducible training, and deployment-ready pipelines.</li>
-<li>✅ <strong>Extensible Architecture:</strong> Modular design for easy integration of custom processors and models.</li>
-</ul>
-<hr/>
-<h2 id="core-features">⭐ Core Features<a class="headerlink" href="#core-features" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong>Unified API:</strong> Single interface for model training, inference, and evaluation across multiple tabular model families.</li>
-<li><strong>Automated Preprocessing:</strong> Model-aware data processing for feature scaling, encoding, imputation, and transformation.</li>
-<li><strong>Flexible Fine-Tuning:</strong> Choose between zero-shot inference, full fine-tuning, or memory-efficient PEFT strategies.</li>
-<li><strong>Model Comparison:</strong> Built-in leaderboard for systematic benchmarking and strategy evaluation.</li>
-<li><strong>Extensible Design:</strong> Modular codebase for easy integration of custom data processors and models.</li>
-</ul>
-<hr/>
-<h2 id="whats-new-in-v020">🚀 What's New in v0.2.0<a class="headerlink" href="#whats-new-in-v020" title="Permanent link">¶</a></h2>
-<ul>
-<li>
-<p>✅ <strong>EXAONE Tabular (LG AI Research)</strong> — Full support for the Cross-axis Summary Transformer (CAST). TabTune vendors the complete inference runtime, including the ECOC decomposition for &gt;10 classes, the attention-based feature selector and the CUDA execution planner.</p>
-</li>
-<li>
-<p>✅ <strong>xRFM and iLTM — two non-transformer models.</strong> <strong>xRFM</strong> is a Recursive Feature Machine (kernel method with AGOP feature learning) that trains from scratch with no pretrained weights, making it the only bundled model that works air-gapped out of the box. <strong>iLTM</strong> uses a hypernetwork to generate MLP ensembles conditioned on dataset embeddings.</p>
-</li>
-<li>
-<p>✅ <strong>TabFM (Google Research)</strong> — Hybrid attention: alternating row/column blocks, row compression to CLS tokens, then a causal ICL transformer. Full PEFT support.</p>
-</li>
-<li>
-<p>✅ <strong>Model Registry</strong> — A torch-free registry recording each checkpoint's <strong>capability envelope</strong> (class, feature, row and cell limits) and <strong>weight licence</strong>. Both are checked before any weights load. See <a href="user-guide/registry/">Model Registry</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Uncertainty Quantification</strong> — Split conformal prediction (<code>ConformalClassifier</code>, <code>ConformalRegressor</code>) with a distribution-free marginal coverage guarantee, post-hoc <code>Recalibrator</code>, and a one-call <code>uncertainty_report()</code> covering ECE/MCE/Brier, coverage, set sizes and size-stratified coverage. See <a href="user-guide/uncertainty/">Uncertainty</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Shift-Aware Evaluation</strong> — <code>TemporalSplit</code>, <code>GroupedSplit</code> and <code>StratifiedGroupedSplit</code>, plus a <code>ShiftEvaluator</code> that reports the <strong>IID-to-shift gap</strong> — the number that predicts production behaviour, rather than the IID score that does not. See <a href="user-guide/shift-evaluation/">Shift-Aware Evaluation</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Typed Configuration</strong> — Pydantic schemas for every knob, with YAML round-tripping and <code>validate_against_registry()</code> for CI. Plain dicts still work; a typo now warns instead of vanishing. See <a href="user-guide/configuration/">Configuration</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Prediction Caching</strong> — <code>cache='memory'</code> or <code>'disk'</code> collapses <code>evaluate()</code>'s three redundant forward passes into one. See <a href="user-guide/caching/">Caching</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Causal Inference Module</strong> — Treatment effect estimation through a unified <code>CausalAnalysis</code> API with six estimators (DML, S/T/X/R-Learner, Causal Forest), formal identification, refutation, proxy-attribute auditing and counterfactual fairness. See <a href="user-guide/causal/">Causal Inference</a>.</p>
-</li>
-<li>
-<p>✅ <strong>Distillation</strong> — <code>TabDistiller</code> compresses any TFM teacher into a LightGBM, XGBoost, CatBoost or MLP student, with single- and multi-teacher support. See <a href="user-guide/distillation/">Distillation</a>.</p>
-</li>
-</ul>
-<hr/>
-<h2 id="supported-models">📊 Supported Models<a class="headerlink" href="#supported-models" title="Permanent link">¶</a></h2>
-<p><strong>16 models across seven architectural families.</strong> The registry is the source of truth —
-call <code>tabtune.registry.list_model_names()</code> rather than hardcoding this list.</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
-<th>Family / Paradigm</th>
-<th>Key Innovation</th>
-<th>Supported Strategies</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>TabPFN-v2</strong></td>
-<td>PFN / ICL</td>
-<td>Approximates Bayesian inference on synthetic data</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT*, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>TabPFN-v2.6</strong></td>
-<td>PFN / ICL</td>
-<td>Prior Labs release with native finetuning API</td>
-<td>Inference, Meta-Learning FT, SFT, Native FT, PEFT*, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>TabPFN-v3</strong></td>
-<td>PFN / ICL</td>
-<td>Column embedding → row aggregation → ICL over compressed rows; 160 classes, 20k features</td>
-<td>Inference, Meta-Learning FT, SFT, Native FT, PEFT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>TabICL</strong></td>
-<td>Scalable ICL</td>
-<td>Two-stage column-then-row attention</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT</td>
-</tr>
-<tr>
-<td><strong>TabICLv2</strong></td>
-<td>Scalable ICL</td>
-<td>QASSMax normalisation + native quantile regression head</td>
-<td>Inference, FT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>OrionMSP v1.0</strong></td>
-<td>Scalable ICL</td>
-<td>Multi-Scale Sparse Attention</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT</td>
-</tr>
-<tr>
-<td><strong>OrionMSP v1.5</strong></td>
-<td>Scalable ICL</td>
-<td>Stabilized prototype refinement</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT</td>
-</tr>
-<tr>
-<td><strong>OrionBix</strong></td>
-<td>Scalable ICL</td>
-<td>Tabular Bi-Axial In-Context Learning</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT</td>
-</tr>
-<tr>
-<td><strong>Mitra</strong></td>
-<td>Scalable ICL</td>
-<td>2D attention (row &amp; column), mixed synthetic priors</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>ContextTab</strong></td>
-<td>Semantics-Aware ICL</td>
-<td>Modality-specific embeddings; first-class text and datetime</td>
-<td>Inference, Full FT, PEFT*, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>TabDPT</strong></td>
-<td>Denoising Transformer</td>
-<td>Denoising pretraining + retrieval-based context</td>
-<td>Inference, Meta-Learning FT, SFT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>LimiX</strong></td>
-<td>Probabilistic / ICL</td>
-<td>Likelihood-based mixture modelling; uncertainty-aware</td>
-<td>Inference, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>TabFM</strong></td>
-<td>Hybrid-Attention ICL (Google)</td>
-<td>Alternating row/column attention → CLS compression → causal ICL</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>xRFM</strong></td>
-<td>Kernel / Feature Learning</td>
-<td>AGOP feature learning, tree-partitioned EigenPro. <strong>No pretrained weights</strong></td>
-<td>Inference, Refit, Refine, PEFT†, Regression</td>
-</tr>
-<tr>
-<td><strong>iLTM</strong></td>
-<td>Hypernetwork</td>
-<td>Hypernetwork generates MLP ensembles from dataset embeddings</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT, Regression, Regression FT</td>
-</tr>
-<tr>
-<td><strong>EXAONE Tabular</strong></td>
-<td>Cross-Axis ICL (LG AI Research)</td>
-<td>CAST; ~21M params, 8-member ensemble, ECOC for &gt;10 classes</td>
-<td>Inference, Meta-Learning FT, SFT, PEFT‡, Regression‡‡</td>
-</tr>
-</tbody>
-</table>
-<p>* PEFT is experimental for TabPFN, TabPFN-v2.6 and ContextTab; <code>inference</code> is fully supported.
-† xRFM's <code>peft</code> is low-rank adaptation of the learned <strong>M</strong> matrix, not LoRA over linear layers.
-‡ EXAONE's projections are raw <code>nn.Parameter</code> tensors, so the LoRA injector wraps zero adapters and the run proceeds as a full fine-tune.
-‡‡ EXAONE regression needs a locally supplied checkpoint — LG AI Research publishes only the classification weights.</p>
-<p>See <a href="models/overview/">Model Overview</a> for envelopes, licences and selection guidance.</p>
-<hr/>
-<h3 id="deployment-awareness">🧭 Deployment awareness<a class="headerlink" href="#deployment-awareness" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Inference and fine-tuning of tabular and time series foundation models behind one scikit-learn style API.">
+      
+      
+      
+        <link rel="canonical" href="https://tabtune.lexsi.ai/">
+      
+      
+      
+        <link rel="next" href="getting-started/installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>TabTune</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
 
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabFM"</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
-    <span class="n">envelope_mode</span><span class="o">=</span><span class="s2">"error"</span><span class="p">,</span>        <span class="c1"># 'error' | 'warn' (default) | 'ignore'</span>
-    <span class="n">license_mode</span><span class="o">=</span><span class="s2">"commercial"</span><span class="p">,</span>    <span class="c1"># 'research' (default) | 'commercial' | 'ignore'</span>
-    <span class="n">cache</span><span class="o">=</span><span class="s2">"memory"</span><span class="p">,</span>               <span class="c1"># 'memory' | 'disk' | None</span>
-<span class="p">)</span>
-</code></pre></div>
-<hr/>
-<h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">openml</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
 
-<span class="c1"># Load dataset</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">openml</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="mi">42178</span><span class="p">)</span>
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">default_target_attribute</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Schibsted+Grotesk:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Schibsted Grotesk";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="assets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
 
-<span class="c1"># Init and fit pipeline</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"finetune"</span><span class="p">,</span>
-    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
-<span class="p">)</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#one-api-for-tabular-foundation-models" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
 
-<span class="c1"># Save and load pipeline for prediction</span>
-<span class="n">pipeline</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"churn_pipeline.joblib"</span><span class="p">)</span>
-<span class="n">loaded_pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"churn_pipeline.joblib"</span><span class="p">)</span>
-<span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
-</code></pre></div>
-<hr/>
-<h2 id="why-tabtune">📝 Why TabTune?<a class="headerlink" href="#why-tabtune" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong>No Boilerplate:</strong> Avoids repetitive code for model-specific data loading, training, and inference.</li>
-<li><strong>Consistent Results:</strong> Automates best practices for tabular DL research and model selection.</li>
-<li><strong>Fast Iteration:</strong> Easily compare new models with your data, using the same consistent API.</li>
-<li><strong>Production Ready:</strong> Model and config serialization for robust deployment and reproducibility.</li>
-<li><strong>Community-Driven:</strong> Extensible design and open contribution policy.</li>
-</ul>
-<hr/>
-<h3 id="google-colab-support">Google Colab Support<a class="headerlink" href="#google-colab-support" title="Permanent link">¶</a></h3>
-<ul>
-<li>TabTune auto-detects Colab sessions, skipping optional IPython-heavy integrations (e.g., rich leaderboard display) so installs succeed with Colab’s preinstalled packages.</li>
-<li>In Colab, install with <code>pip install "tabtune[colab]"</code> to keep core runtime packages (NumPy, pandas, scikit-learn, IPython) on the versions Colab expects.</li>
-<li>For richer notebook display helpers outside Colab, opt into <code>pip install "tabtune[interactive]"</code>.</li>
-</ul>
-<hr/>
-<h2 id="explore-the-documentation">📑 Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong><a href="getting-started/installation/">Getting Started</a>:</strong> Installation, setup, and basic usage.</li>
-<li><strong><a href="user-guide/pipeline-overview/">User Guide</a>:</strong> In-depth tutorials for each component.</li>
-<li><strong><a href="user-guide/registry/">Model Registry</a>:</strong> Capability envelopes and weight licensing.</li>
-<li><strong><a href="user-guide/uncertainty/">Uncertainty</a>:</strong> Conformal prediction and recalibration.</li>
-<li><strong><a href="user-guide/shift-evaluation/">Shift-Aware Evaluation</a>:</strong> Temporal and grouped splits, and the shift gap.</li>
-<li><strong><a href="user-guide/configuration/">Configuration</a>:</strong> Typed YAML configs.</li>
-<li><strong><a href="models/overview/">Supported Models</a>:</strong> Model details and design notes.</li>
-<li><strong><a href="advanced/peft-lora/">Advanced Topics</a>:</strong> PEFT/LoRA, custom preprocessing, and more.</li>
-<li><strong><a href="api/pipeline/">API Reference</a>:</strong> Complete Python API and class/method details.</li>
-<li><strong><a href="examples/classification/">Examples &amp; Benchmarks</a>:</strong> End-to-end code notebooks.</li>
-</ul>
-<hr/>
-<h2 id="example-notebooks">🏆 Example Notebooks<a class="headerlink" href="#example-notebooks" title="Permanent link">¶</a></h2>
-<p>Example notebooks showcasing the library's features in depth.</p>
-<table>
-<thead>
-<tr>
-<th>Serial No.</th>
-<th>Name</th>
-<th>Task Performed</th>
-<th>Link To Notebook</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Unified API</td>
-<td>Showcasing A Unified API Across Multiple Models</td>
-<td><a href="https://colab.research.google.com/drive/1KcaSdYRjZnMlb0MLmQ5IlnbPDiuEr1Ld?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>2</td>
-<td>Automated Model-Aware Preprocessing</td>
-<td>The Automated preprocessing system explained</td>
-<td><a href="https://colab.research.google.com/drive/12BQ12VJrxtTDslgjnjm26yi3a0PYXqZT?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>3</td>
-<td>Fine-Tuning Strategies</td>
-<td>TabTune's four fine-tuning strategies</td>
-<td><a href="https://colab.research.google.com/drive/1QixfiNCjF1IQV9NooMipPpnH4ETcEQwg?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>4</td>
-<td>Model Comparison</td>
-<td>Model Comparison with TabularLeaderboard</td>
-<td><a href="https://colab.research.google.com/drive/1PZW3iPQOvwh0kroGytMzYTGc6ZVUzuvg?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>5</td>
-<td>Checkpoint Management</td>
-<td>Checkpoint Management - Save/Load Pipelines</td>
-<td><a href="https://colab.research.google.com/drive/1DBTGEPpYLJjU9Aj7lzHoX3JtwaNOC0jn?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>6</td>
-<td>Advanced Usage</td>
-<td>PEFT Configuration and Hybrid Strategies</td>
-<td><a href="https://colab.research.google.com/drive/1V3XGLeKrXSJwavaULMncZiM7uVE8sz0h?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>7</td>
-<td>Resampling</td>
-<td>Resampling Strategies</td>
-<td><a href="https://colab.research.google.com/drive/1EHGrrSm7EalVRvzkH1RUHsNSLzmn10lM?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>8</td>
-<td>Regression - 1</td>
-<td>Introduction to Regression - Inference</td>
-<td><a href="https://colab.research.google.com/drive/1lBt0QZWqlwhEg2ul_nVPAeC-w3Are0At"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>9</td>
-<td>Regression - 2</td>
-<td>Introduction to Regression - Finetune</td>
-<td><a href="https://colab.research.google.com/drive/1FFuaRBDtJZFAQF-JDIxRAjtgOZ1rmHd1?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>10</td>
-<td>Evaluation Metrics</td>
-<td>Evaluation Metrics involved</td>
-<td><a href="https://colab.research.google.com/drive/18TxyTyBGAGrIVf6zLjURDChG0vM4V02M?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>11</td>
-<td>Benchmarking</td>
-<td>Standard Benchmarking Techniques</td>
-<td><a href="https://colab.research.google.com/drive/1lcoVMPz_3X5_5taNdB9doTGoN05krNRw?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>12</td>
-<td>TabPFNv2.6</td>
-<td>TabPFNv2.6 — Classification and Regression</td>
-<td><a href="https://colab.research.google.com/drive/1-5fh2kU9sDidXmm095489f3sxNLssW_M"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>13</td>
-<td>TabICLv2</td>
-<td>TabICLv2 — Classification and Regression</td>
-<td><a href="https://colab.research.google.com/drive/13lv9Z5QNzaAp_2ArkTXGRKDjDFbKAq3Q"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>14</td>
-<td>Ensembling Strategies</td>
-<td>TabTune's 6 Ensembling Strategies</td>
-<td><a href="https://colab.research.google.com/drive/19TUTBuJ1VNIbp5hLdU4D64c2_RfwFQC8"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>15</td>
-<td>Distillation</td>
-<td>With Single and Multi Teachers</td>
-<td><a href="https://colab.research.google.com/drive/1Fo2zH7jDgYjkYhgI33SyuVgnrhMsdvUH"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>16</td>
-<td>Causal Inference</td>
-<td>Estimate Treatment Effect using TFMs</td>
-<td><a href="https://colab.research.google.com/drive/1CWYo3ynOxw0ysV4iDz_8VNCBjMK3WIyd?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>17</td>
-<td>EXAONE Model</td>
-<td>End-to-end usecase of the EXAONE Model</td>
-<td><a href="https://colab.research.google.com/drive/1RR-mhJkGW0xpAU0si76ru-1NuggPKDNH#scrollTo=89s93vNcnSk0"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-</tbody>
-</table>
-<hr/>
-<h2 id="project-structure">📂 Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code>tabtune/
-├── Dataprocess/          # model-aware preprocessing (+ regression/ subpackage)
-├── models/               # 16 vendored model families
-├── TabularPipeline/      # the unified .fit/.predict/.evaluate API
-├── TuningManager/        # inference / finetune / peft strategies
-├── TabularLeaderboard/   # model comparison (+ HTML &amp; Pareto reports)
-├── registry/             # 🆕 capability envelopes + weight licences (torch-free)
-├── config/               # 🆕 pydantic schemas, YAML load/save
-├── uncertainty/          # 🆕 conformal prediction + recalibration
-├── evaluation/           # 🆕 shared metrics, shift-aware splits, ShiftEvaluator
-├── caching/              # 🆕 prediction cache (memory / disk)
-├── resampling/           # context / support-query sampling
-├── ensemble/             # six ensembling strategies
-├── distillation/         # TabDistiller + students &amp; exporters
-├── causal/               # CausalAnalysis, estimators, refutation, audit
-├── benchmarking/         # benchmark suites and result handling
-├── data/                 # dataset loaders (OpenML, TabArena, TabZilla, TALENT)
-├── _internal/            # device, sklearn compat, deprecation helpers
-├── logger.py
-└── run.py
-</code></pre></div>
-<p>See <a href="user-guide/pipeline-overview/">User Guide</a> for a full file/module breakdown.</p>
-<hr/>
-<h2 id="developed-by-lexsi-labs">🏢 Developed by Lexsi Labs<a class="headerlink" href="#developed-by-lexsi-labs" title="Permanent link">¶</a></h2>
-<div style="text-align: center; margin: 30px 0;">
-<img alt="Lexsi Labs Logo" src="assets/lexsi-labs-logo.svg" style="height: 390px; width: auto; margin-bottom: 20px; position: relative;"/>
-<p style="font-size: 1.1em; color: #666; margin-top: 10px;">
-    Created by the team at <strong>Lexsi Labs</strong>, TabTune extends frontier AI research into the tabular domain.
-  </p>
-</div>
-<hr/>
-<h2 id="license">🗃️ License<a class="headerlink" href="#license" title="Permanent link">¶</a></h2>
-<p>This project is released under the MIT License.<br/>
-Please cite appropriately if used in academic or production projects.</p>
-<p><strong>BibTeX Citation:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">tanna2025tabtuneunifiedlibraryinference</span><span class="p">,</span>
-<span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}</span><span class="p">,</span><span class="w"> </span>
-<span class="w">      </span><span class="na">author</span><span class="p">=</span><span class="s">{Aditya Tanna and Pratinav Seth and Mohamed Bouadi and Utsav Avaiya and Vinay Kumar Sankarapu}</span><span class="p">,</span>
-<span class="w">      </span><span class="na">year</span><span class="p">=</span><span class="s">{2025}</span><span class="p">,</span>
-<span class="w">      </span><span class="na">eprint</span><span class="p">=</span><span class="s">{2511.02802}</span><span class="p">,</span>
-<span class="w">      </span><span class="na">archivePrefix</span><span class="p">=</span><span class="s">{arXiv}</span><span class="p">,</span>
-<span class="w">      </span><span class="na">primaryClass</span><span class="p">=</span><span class="s">{cs.LG}</span><span class="p">,</span>
-<span class="w">      </span><span class="na">url</span><span class="p">=</span><span class="s">{https://arxiv.org/abs/2511.02802}</span><span class="p">,</span><span class="w"> </span>
-<span class="p">}</span>
-</code></pre></div>
-<hr/>
-<h2 id="join-community-contribute">📫 Join Community / Contribute<a class="headerlink" href="#join-community-contribute" title="Permanent link">¶</a></h2>
-<ul>
-<li>Issues and discussions are welcomed on the <a href="https://github.com/Lexsi-Labs/TabTune/issues">GitHub issue tracker</a>.</li>
-<li>Please see the <strong>Contributing</strong> section for contribution standards, code reviews, and documentation tips.</li>
-</ul>
-<hr/>
-<p><strong>Get started with TabTune and accelerate your tabular deep learning workflows today!</strong></p></div>
-</div>
-<footer class="col-md-12 text-center">
-<hr/>
-<p>
-<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-</p>
-</footer>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="js/bootstrap-3.0.3.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>var base_url = "."</script>
-<script src="js/base.js"></script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="search/main.js"></script>
-<script>
-        // Initialize Mermaid v9.x after DOM loads
-        // The mermaid2 plugin loads the library and sets window.mermaidConfig
-        (function() {
-            function initMermaid() {
-                if (typeof mermaid !== 'undefined') {
-                    // Get configuration from plugin or use defaults
-                    const config = window.mermaidConfig || {
-                        securityLevel: 'loose',
-                        startOnLoad: false
-                    };
-                    
-                    // Initialize mermaid with config
-                    mermaid.initialize(config);
-                    
-                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
-                    if (typeof mermaid.run === 'function') {
-                        mermaid.run();
-                    } else {
-                        // Fallback for older API - manually initialize elements
-                        const mermaidElements = document.querySelectorAll('.mermaid');
-                        if (mermaidElements.length > 0) {
-                            mermaid.init(undefined, mermaidElements);
-                        }
-                    }
-                } else {
-                    // Retry if mermaid library hasn't loaded yet
-                    setTimeout(initMermaid, 100);
-                }
-            }
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="TabTune" class="md-header__button md-logo" aria-label="TabTune" data-md-component="logo">
+      
+  <img src="assets/tabtune-logo-on-dark.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TabTune
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
-            // Wait for DOM and scripts to be ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMermaid);
-            } else {
-                // DOM already loaded, but scripts might not be
-                setTimeout(initMermaid, 100);
-            }
-        })();
-    </script>
-<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
-<div class="modal-header">
-<button class="close" data-dismiss="modal" type="button">
-<span aria-hidden="true">×</span>
-<span class="sr-only">Close</span>
-</button>
-<h4 class="modal-title" id="searchModalLabel">Search</h4>
-</div>
-<div class="modal-body">
-<p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-<form>
-<div class="form-group">
-<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
-</div>
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
 </form>
-<div id="mkdocs-search-results"></div>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="modal-footer">
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lexsi-Labs/TabTune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/TabTune
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="user-guide/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="models/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="timeseries/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Time Series
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="reference/architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="advanced/peft-lora/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="features/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="community/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="TabTune" class="md-nav__button md-logo" aria-label="TabTune" data-md-component="logo">
+      
+  <img src="assets/tabtune-logo-on-dark.svg" alt="logo">
+
+    </a>
+    TabTune
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lexsi-Labs/TabTune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/TabTune
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#start-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start here
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-first-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation and first run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contact
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="getting-started/installation/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="user-guide/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="models/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="timeseries/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time Series
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="reference/architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="advanced/peft-lora/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Topics
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="community/faq/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#start-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start here
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-first-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation and first run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contact
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+
+<div class="tt-hero">
+<p><img class="tt-hero-mark tt-hero-mark--light" src="assets/tabtune-logo-on-light.svg" alt="TabTune">
+<img class="tt-hero-mark tt-hero-mark--dark" src="assets/tabtune-logo-on-dark.svg" alt="TabTune"></p>
+<h1 class="tt-hero-title" id="one-api-for-tabular-foundation-models">One API for <em>tabular</em> foundation models<a class="headerlink" href="#one-api-for-tabular-foundation-models" title="Permanent link">&para;</a></h1>
+<p class="tt-tagline">
+TabTune runs and fine-tunes 24 tabular foundation models and 11 time series foundation
+models behind one scikit-learn style pipeline: <code>fit</code>, <code>predict</code>,
+<code>evaluate</code>, <code>save</code>, <code>load</code>. Preprocessing, training loops
+and licence checks are the library's job, not yours.
+</p>
+<p><a class="md-button md-button--primary" href="getting-started/installation/">Get started</a>
+<a class="md-button" href="https://github.com/Lexsi-Labs/TabTune">View on GitHub</a></p>
+<p class="tt-chips">
+<span>v0.2.2</span>
+<span>Python 3.10+</span>
+<span>PyTorch 2.7+</span>
+<span>24 tabular models</span>
+<span>11 time series models</span>
+<span>MIT code, per-checkpoint weight licences</span>
+</p>
 </div>
+<pre class="mermaid"><code>flowchart LR
+    X[(DataFrame)] --&gt; DP[DataProcessor&lt;br/&gt;model-aware preprocessing]
+    DP --&gt; TM[TuningManager&lt;br/&gt;inference · finetune · peft]
+    TM --&gt; M[Model&lt;br/&gt;one of 24 vendored TFMs]
+    M --&gt; P[predict · predict_proba&lt;br/&gt;evaluate · uncertainty]
+    R[(Registry&lt;br/&gt;envelopes + licences)] -. checked before any download .-&gt; TM
+    LB[TabularLeaderboard] -. runs many pipelines .-&gt; TM
+    TS[(Long time series frame)] --&gt; TSP[TimeSeriesPipeline&lt;br/&gt;forecast · anomalies · impute · embed]</code></pre>
+<p>A tabular foundation model (TFM) is a network pretrained on synthetic tables that predicts a
+new table's targets in context, with no gradient step. TabTune vendors the model code of every
+supported checkpoint, so one <code>pip install -e .</code> gives you TabPFN, TabICL, Mitra, Orion, Kumo
+and the rest without installing their packages, and the same <code>TabularPipeline</code> call drives
+all of them.</p>
+<p>There are two parts:</p>
+<ol>
+<li><strong>The tabular pipeline.</strong> <code>DataProcessor</code> prepares the frame the way the chosen model
+   expects it, <code>TuningManager</code> runs zero-shot inference, full fine-tuning or LoRA, and the
+   torch-free registry checks class counts, feature counts and weight licences before a
+   checkpoint is downloaded. Around it sit a leaderboard, six ensembling strategies,
+   distillation into GBDT or MLP students, conformal uncertainty, shift-aware evaluation
+   and a causal inference module.</li>
+<li><strong>The time series pipeline</strong>, added in 0.2.1. Same pattern, eleven vendored forecasters
+   plus every tabular model as a forecaster and five statistical baselines. Forecasting,
+   anomaly detection, imputation and embeddings from one fitted model.</li>
+</ol>
+<div class="grid cards">
+<ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m0 4v3h4V7zm6 0v3h4V7zm10 3V7h-4v3zM4 12v3h4v-3zm0 8h4v-3H4zm6-8v3h4v-3zm0 8h4v-3h-4zm10 0v-3h-4v3zm0-8h-4v3h4z"/></svg></span> <strong>24 tabular models, one call</strong></p>
+<hr />
+<p>TabPFN v2 to v3.5, TabICL, Orion-MSP, Orion-BiX, Mitra, ConTextTab, TabDPT,
+LimiX, TabFM, xRFM, iLTM, EXAONE, Causilo, TabLDM, Kumo. See <a href="models/overview/">Models</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 3H5v6h2zm12 0h-2v10h2zM3 13h2v8h2v-8h2v-2H3zm12-6h-2V3h-2v4H9v2h6zm-4 14h2V11h-2zm4-6v2h2v4h2v-4h2v-2z"/></svg></span> <strong>Three tuning strategies</strong></p>
+<hr />
+<p><code>inference</code> (zero-shot), <code>finetune</code> (episodic, SFT or native) and <code>peft</code> (LoRA on the
+layers that matter). See <a href="user-guide/tuning-strategies/">Tuning Strategies</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 11c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V5l9-4 9 4zm-9 10c3.75-1 7-5.46 7-9.78V6.3l-7-3.12L5 6.3v4.92C5 15.54 8.25 20 12 21m-2-4-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9"/></svg></span> <strong>Checks before downloads</strong></p>
+<hr />
+<p>A capability envelope and a weight licence per checkpoint, queried in milliseconds.
+<code>license_mode="commercial"</code> refuses research-only weights. See
+<a href="user-guide/registry/">Model Registry</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m3 14 .5.07L8.07 9.5a1.95 1.95 0 0 1 .52-1.91c.78-.79 2.04-.79 2.82 0 .53.52.7 1.26.52 1.91l2.57 2.57.5-.07c.18 0 .35 0 .5.07l3.57-3.57C19 8.35 19 8.18 19 8a2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 1-2 2c-.18 0-.35 0-.5-.07l-3.57 3.57c.07.15.07.32.07.5a2 2 0 0 1-2 2 2 2 0 0 1-2-2l.07-.5-2.57-2.57c-.32.07-.68.07-1 0L4.93 15.5 5 16a2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2"/></svg></span> <strong>Time series</strong></p>
+<hr />
+<p>Chronos, Chronos-Bolt, Chronos-2, TimesFM 3, Toto 1 and 2, TiRex, TiRex-2, Time-MoE,
+Timestral and T0, with conformal intervals, covariates and backtesting. See
+<a href="timeseries/overview/">Time Series</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 19v1h18v2H2V2h2v15c3 0 6-2 8.1-5.6 3-5 6.3-7.4 9.9-7.4v2c-2.8 0-5.5 2.1-8.1 6.5C11.3 16.6 7.7 19 4 19"/></svg></span> <strong>Uncertainty you can ship</strong></p>
+<hr />
+<p>Split conformal prediction sets and intervals, temperature recalibration and one
+report with ECE, coverage and set sizes. See <a href="user-guide/uncertainty/">Uncertainty</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3c-1.27 0-2.4.8-2.82 2H3v2h1.95L2 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L6.05 7h3.12c.33.85.98 1.5 1.83 1.83V20H2v2h20v-2h-9V8.82c.85-.32 1.5-.97 1.82-1.82h3.13L15 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3l-2.95-7H21V5h-6.17C14.4 3.8 13.27 3 12 3m0 2a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m-6.5 5.25L7 14H4zm13 0L20 14h-3z"/></svg></span> <strong>Compare, combine, compress</strong></p>
+<hr />
+<p><code>TabularLeaderboard</code> ranks models and strategies, <code>TabularEnsemble</code> combines them,
+<code>TabDistiller</code> turns a teacher into a LightGBM or MLP student.</p>
+</li>
+</ul>
 </div>
+<h2 id="start-here">Start here<a class="headerlink" href="#start-here" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="getting-started/installation/">Installation</a></strong>: one clone and one <code>pip install</code>,
+  plus the optional extras.</li>
+<li><strong><a href="getting-started/quickstart/">Quick Start</a></strong>: fit, evaluate, save and reload a
+  pipeline on an OpenML dataset.</li>
+<li><strong><a href="getting-started/basic-concepts/">Basic Concepts</a></strong>: the four objects every page
+  assumes you know.</li>
+<li><strong><a href="features/">Features</a></strong>: every capability on one page, each linked to the guide
+  and the example that runs it.</li>
+<li><strong><a href="models/overview/">Models</a></strong>: the capability matrix, the licence table and a page
+  per model.</li>
+<li><strong><a href="community/known-issues/">Known Issues</a></strong>: what does not work yet, in plain words.
+  Read it before assuming a documented path runs end to end on your hardware.</li>
+</ul>
+<h2 id="installation-and-first-run">Installation and first run<a class="headerlink" href="#installation-and-first-run" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Lexsi-Labs/TabTune.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>TabTune
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">pipe</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">pipe</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+</code></pre></div>
+<p>Swap <code>"TabICL"</code> for any name in <code>tabtune.registry.list_model_names()</code> and nothing else
+changes.</p>
+<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/Lexsi-Labs/TabTune/issues">report bugs and request features</a></li>
+<li><strong>Discord</strong>: <a href="https://discord.gg/dSB62Q7A">Lexsi Labs</a></li>
+<li><strong>Security</strong>: see <a href="community/security/">Security</a> for how to report a vulnerability</li>
+<li><strong>Email</strong>: <a href="mailto:hello@lexsi.ai">hello@lexsi.ai</a></li>
+</ul>
+<h2 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>
+<p>If you use TabTune in your research, please cite:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nc">@misc</span><span class="p">{</span><span class="nl">tanna2025tabtuneunifiedlibraryinference</span><span class="p">,</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{TabTune: A Unified Library for Inference and Fine-Tuning Tabular Foundation Models}</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">      </span><span class="na">author</span><span class="p">=</span><span class="s">{Aditya Tanna and Pratinav Seth and Mohamed Bouadi and Utsav Avaiya and Vinay Kumar Sankarapu}</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">      </span><span class="na">year</span><span class="p">=</span><span class="s">{2025}</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="na">eprint</span><span class="p">=</span><span class="s">{2511.02802}</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="na">archivePrefix</span><span class="p">=</span><span class="s">{arXiv}</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">      </span><span class="na">primaryClass</span><span class="p">=</span><span class="s">{cs.LG}</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="na">url</span><span class="p">=</span><span class="s">{https://arxiv.org/abs/2511.02802}</span><span class="p">,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
+<div align="center">
+<p><a href="https://lexsi.ai/">
+<img class="tt-on-light" src="assets/lexsilogodark.png" width="300" alt="Lexsi Labs">
+<img class="tt-on-dark" src="assets/lexsilogowhite.png" width="300" alt="Lexsi Labs">
+</a></p>
+<p><a href="https://www.lexsi.ai">https://www.lexsi.ai</a></p>
+<p>Paris 🇫🇷 · Mumbai 🇮🇳 · London 🇬🇧</p>
 </div>
-</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+        
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+        
+          
+          <a href="getting-started/installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Installation
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
 </div>
-<div class="modal-body">
-<table class="table">
-<thead>
-<tr>
-<th style="width: 20%;">Keys</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="help shortcut"><kbd>?</kbd></td>
-<td>Open this help</td>
-</tr>
-<tr>
-<td class="next shortcut"><kbd>n</kbd></td>
-<td>Next page</td>
-</tr>
-<tr>
-<td class="prev shortcut"><kbd>p</kbd></td>
-<td>Previous page</td>
-</tr>
-<tr>
-<td class="search shortcut"><kbd>s</kbd></td>
-<td>Search</td>
-</tr>
-</tbody>
-</table>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs/TabTune" target="_blank" rel="noopener" title="TabTune on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://pypi.org/project/tabtune/" target="_blank" rel="noopener" title="TabTune on PyPI" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://arxiv.org/abs/2511.02802" target="_blank" rel="noopener" title="TabTune paper on arXiv" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0h149.5c17 0 33.3 6.7 45.3 18.7l106.5 106.6c12 12 18.7 28.3 18.7 45.3V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm208-5.5V152c0 13.3 10.7 24 24 24h93.5zM120 256c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://discord.gg/dSB62Q7A" target="_blank" rel="noopener" title="Lexsi Labs on Discord" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs" target="_blank" rel="noopener" title="Lexsi Labs on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://x.com/Lexsi_labs" target="_blank" rel="noopener" title="Lexsi Labs on X" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.linkedin.com/company/lexsi-labs/" target="_blank" rel="noopener" title="Lexsi Labs on LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://huggingface.co/Lexsi" target="_blank" rel="noopener" title="Lexsi Labs on Hugging Face" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.49 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://lexsi.ai" target="_blank" rel="noopener" title="lexsi.ai" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
 </div>
-<div class="modal-footer">
-</div>
-</div>
-</div>
-</div>
-</body>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="assets/extra.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
 </html>
-<!--
-MkDocs version : 1.6.1
-Build Date UTC : 2026-09-10 09:19:15.951252+00:00
--->

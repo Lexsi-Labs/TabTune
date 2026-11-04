@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" role="img" aria-label="TabTune">
+  <g font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace" font-size="118" letter-spacing="-4" fill="#ffffff">
+    <text x="18" y="112" font-weight="700">tab</text>
+    <text x="300" y="112" font-weight="400">tune</text>
+  </g>
+  <rect x="18" y="132" width="549" height="7" fill="#818CF8" opacity="0.8"/>
+  <g fill="#818CF8">
+    <rect x="258" y="46" width="16" height="16" rx="2" opacity="0.6"/>
+    <rect x="258" y="70" width="16" height="16" rx="2" opacity="0.5"/>
+    <rect x="258" y="94" width="16" height="16" rx="2" opacity="0.4"/>
+  </g>
+</svg>

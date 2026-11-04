@@ -1,758 +1,3159 @@
-<!DOCTYPE html>
 
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="A Unified Library for Inference and Fine-Tuning Tabular Foundation Models" name="description"/>
-<meta content="Lexsi Labs" name="author"/>
-<link href="../../img/favicon.ico" rel="shortcut icon"/>
-<title>Troubleshooting - TabTune Documentation</title>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
-<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
-<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
-<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
-<link href="../../css/base.min.css" rel="stylesheet"/>
-<link href="../../css/cinder.min.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
-<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
-<link href="../../assets/overrides.css" rel="stylesheet"/>
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-        <![endif]-->
-<link href="../../assets/lexsilabs.ico" rel="icon"/>
-<link href="../../assets/lexsilabs.ico" rel="shortcut icon"/>
-</head>
-<body>
-<div class="navbar navbar-default navbar-fixed-top" role="navigation">
-<div class="container">
-<!-- Collapsed navigation -->
-<div class="navbar-header">
-<!-- Expander button -->
-<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<!-- Main title -->
-<a class="navbar-brand" href="../..">TabTune Documentation</a>
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Inference and fine-tuning of tabular and time series foundation models behind one scikit-learn style API.">
+      
+      
+      
+        <link rel="canonical" href="https://tabtune.lexsi.ai/user-guide/troubleshooting/">
+      
+      
+        <link rel="prev" href="../logging/">
+      
+      
+        <link rel="next" href="../../models/overview/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Troubleshooting - TabTune</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Schibsted+Grotesk:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Schibsted Grotesk";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#troubleshooting" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="TabTune" class="md-header__button md-logo" aria-label="TabTune" data-md-component="logo">
+      
+  <img src="../../assets/tabtune-logo-on-dark.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TabTune
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Troubleshooting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<!-- Expanded navigation -->
-<div class="navbar-collapse collapse">
-<!-- Main navigation -->
-<ul class="nav navbar-nav">
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../getting-started/installation/">Installation</a>
-</li>
-<li>
-<a href="../../getting-started/quick-start/">Quick Start</a>
-</li>
-<li>
-<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
-</li>
-</ul>
-</li>
-<li class="dropdown active">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../pipeline-overview/">TabularPipeline Overview</a>
-</li>
-<li>
-<a href="../data-processing/">Data Processing</a>
-</li>
-<li>
-<a href="../tuning-strategies/">Tuning Strategies</a>
-</li>
-<li>
-<a href="../resampling/">Resampling Strategies</a>
-</li>
-<li>
-<a href="../model-selection/">Model Selection</a>
-</li>
-<li>
-<a href="../saving-loading/">Saving and Loading</a>
-</li>
-<li>
-<a href="../leaderboard/">Model Comparison</a>
-</li>
-<li class="active">
-<a href="./">Troubleshooting</a>
-</li>
-<li>
-<a href="../ensembling/">Ensembling Strategies</a>
-</li>
-<li>
-<a href="../distillation/">Distillation</a>
-</li>
-<li>
-<a href="../causal/">Causal Inference</a>
-</li>
-<li>
-<a href="../registry/">Model Registry &amp; Licensing</a>
-</li>
-<li>
-<a href="../uncertainty/">Uncertainty &amp; Conformal Prediction</a>
-</li>
-<li>
-<a href="../shift-evaluation/">Shift-Aware Evaluation</a>
-</li>
-<li>
-<a href="../configuration/">Typed Configuration</a>
-</li>
-<li>
-<a href="../caching/">Prediction Caching</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Models <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../models/overview/">Overview</a>
-</li>
-<li>
-<a href="../../models/tabpfn/">TabPFN</a>
-</li>
-<li>
-<a href="../../models/tabpfnv3/">TabPFN v3</a>
-</li>
-<li>
-<a href="../../models/tabicl/">TabICL</a>
-</li>
-<li>
-<a href="../../models/tabiclv2/">TabICL v2</a>
-</li>
-<li>
-<a href="../../models/orion-msp/">Orion MSP</a>
-</li>
-<li>
-<a href="../../models/orionmsp1.5/">Orion MSP V1.5</a>
-</li>
-<li>
-<a href="../../models/orion-bix/">Orion BIX</a>
-</li>
-<li>
-<a href="../../models/tabdpt/">TabDPT</a>
-</li>
-<li>
-<a href="../../models/mitra/">Mitra</a>
-</li>
-<li>
-<a href="../../models/contexttab/">ConTextTab</a>
-</li>
-<li>
-<a href="../../models/limix/">Limix</a>
-</li>
-<li>
-<a href="../../models/tabfm/">TabFM</a>
-</li>
-<li>
-<a href="../../models/xrfm/">xRFM</a>
-</li>
-<li>
-<a href="../../models/iltm/">iLTM</a>
-</li>
-<li>
-<a href="../../models/exaone/">EXAONE Tabular</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Regression <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../regression/regression/">Regression Overview</a>
-</li>
-<li>
-<a href="../../regression/regression_data_processing/">Regression Data Processing</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../advanced/peft-lora/">PEFT &amp; LoRA</a>
-</li>
-<li>
-<a href="../../advanced/custom-preprocessing/">Custom Preprocessing</a>
-</li>
-<li>
-<a href="../../advanced/hyperparameter-tuning/">Hyperparameter Tuning</a>
-</li>
-<li>
-<a href="../../advanced/memory-optimization/">Memory Optimization</a>
-</li>
-<li>
-<a href="../../advanced/multi-gpu/">Multi-GPU Training</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../api/pipeline/">TabularPipeline</a>
-</li>
-<li>
-<a href="../../api/data-processor/">DataProcessor</a>
-</li>
-<li>
-<a href="../../api/tuning-manager/">TuningManager</a>
-</li>
-<li>
-<a href="../../api/leaderboard/">TabularLeaderboard</a>
-</li>
-<li>
-<a href="../../api/peft-utils/">PEFT Utils</a>
-</li>
-<li>
-<a href="../../api/registry/">Model Registry</a>
-</li>
-<li>
-<a href="../../api/config/">Configuration</a>
-</li>
-<li>
-<a href="../../api/uncertainty/">Uncertainty</a>
-</li>
-<li>
-<a href="../../api/evaluation/">Evaluation</a>
-</li>
-<li>
-<a href="../../api/caching/">Prediction Cache</a>
-</li>
-<li>
-<a href="../../api/ensemble/">TabularEnsemble</a>
-</li>
-<li>
-<a href="../../api/distillation/">TabDistiller</a>
-</li>
-<li>
-<a href="../../api/causal/">CausalAnalysis</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../examples/classification/">Classification Tasks</a>
-</li>
-<li>
-<a href="../../examples/regression/">Regression Tasks</a>
-</li>
-<li>
-<a href="../../examples/peft-examples/">PEFT Fine-Tuning</a>
-</li>
-<li>
-<a href="../../examples/benchmarking/">Benchmarking</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Contributing</a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../contributing/setup/">Development Setup</a>
-</li>
-<li>
-<a href="../../contributing/standards/">Code Standards</a>
-</li>
-<li>
-<a href="../../contributing/new-models/">Adding New Models</a>
-</li>
-<li>
-<a href="../../contributing/documentation/">Documentation Guide</a>
-</li>
-</ul>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">About</a>
-<ul class="dropdown-menu">
-<li>
-<a href="../../about/release-notes/">Release Notes</a>
-</li>
-<li>
-<a href="../../about/roadmap/">Roadmap</a>
-</li>
-<li>
-<a href="../../about/faq/">FAQ</a>
-</li>
-<li>
-<a href="../../about/license/">License</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
-<i class="fas fa-search"></i> Search
-                        </a>
-</li>
-<li>
-<a href="../leaderboard/" rel="prev">
-<i class="fas fa-arrow-left"></i> Previous
-                        </a>
-</li>
-<li>
-<a href="../ensembling/" rel="next">
-                            Next <i class="fas fa-arrow-right"></i>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lexsi-Labs/TabTune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/TabTune
+  </div>
 </a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../models/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../timeseries/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Time Series
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../advanced/peft-lora/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../features/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../community/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="TabTune" class="md-nav__button md-logo" aria-label="TabTune" data-md-component="logo">
+      
+  <img src="../../assets/tabtune-logo-on-dark.svg" alt="logo">
+
+    </a>
+    TabTune
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lexsi-Labs/TabTune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/TabTune
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../getting-started/installation/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TabularPipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Processing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tuning-strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tuning Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fine-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validated Fine-Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Registry & Licensing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../saving-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Saving & Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../leaderboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Leaderboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ensembling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ensembling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uncertainty/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncertainty
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shift-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shift-Aware Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../causal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Typed Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../caching/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prediction Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#common-import-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common import errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common import errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modulenotfounderror-no-module-named-tabtune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModuleNotFoundError: no module named 'tabtune'
+      
+    </span>
+  </a>
+  
 </li>
-<li>
-<a href="https://github.com/Lexsi-Labs/TabTune/edit/master/docs/user-guide/troubleshooting.md">Edit on Lexsi-Labs/TabTune</a>
+        
+          <li class="md-nav__item">
+  <a href="#importerror-cannot-import-tabularpipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImportError: cannot import TabularPipeline
+      
+    </span>
+  </a>
+  
 </li>
-</ul>
-</div>
-</div>
-</div>
-<div class="container">
-<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-<ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#troubleshooting-guide">Troubleshooting Guide</a></li>
-<li class="second-level"><a href="#common-import-errors">Common Import Errors</a></li>
-<li class="third-level"><a href="#modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'</a></li>
-<li class="third-level"><a href="#importerror-cannot-import-tabularpipeline">ImportError: Cannot import TabularPipeline</a></li>
-<li class="third-level"><a href="#importerror-no-module-named-torch">ImportError: No module named 'torch'</a></li>
-<li class="second-level"><a href="#cudagpu-issues">CUDA/GPU Issues</a></li>
-<li class="third-level"><a href="#cuda-out-of-memory">CUDA out of memory</a></li>
-<li class="third-level"><a href="#cuda-device-not-found">CUDA device not found</a></li>
-<li class="third-level"><a href="#gpu-not-being-used">GPU not being used</a></li>
-<li class="second-level"><a href="#memory-errors">Memory Errors</a></li>
-<li class="third-level"><a href="#out-of-memory-during-training">Out of memory during training</a></li>
-<li class="third-level"><a href="#memory-leak-during-training">Memory leak during training</a></li>
-<li class="second-level"><a href="#model-loading-failures">Model Loading Failures</a></li>
-<li class="third-level"><a href="#model-checkpoint-not-found">Model checkpoint not found</a></li>
-<li class="third-level"><a href="#model-state-dict-mismatch">Model state dict mismatch</a></li>
-<li class="second-level"><a href="#preprocessing-errors">Preprocessing Errors</a></li>
-<li class="third-level"><a href="#valueerror-found-array-with-0-samples">ValueError: Found array with 0 sample(s)</a></li>
-<li class="third-level"><a href="#categorical-encoding-mismatch">Categorical encoding mismatch</a></li>
-<li class="third-level"><a href="#data-type-mismatches">Data type mismatches</a></li>
-<li class="second-level"><a href="#training-convergence-issues">Training Convergence Issues</a></li>
-<li class="third-level"><a href="#model-not-converging-loss-not-decreasing">Model not converging / Loss not decreasing</a></li>
-<li class="third-level"><a href="#overfitting">Overfitting</a></li>
-<li class="third-level"><a href="#underfitting">Underfitting</a></li>
-<li class="second-level"><a href="#peft-specific-problems">PEFT-Specific Problems</a></li>
-<li class="third-level"><a href="#peft-not-working-falling-back-to-base-ft">PEFT not working / Falling back to base-ft</a></li>
-<li class="third-level"><a href="#peft-model-size-larger-than-expected">PEFT model size larger than expected</a></li>
-<li class="second-level"><a href="#data-format-errors">Data Format Errors</a></li>
-<li class="third-level"><a href="#valueerror-input-must-be-pandas-dataframe">ValueError: Input must be pandas DataFrame</a></li>
-<li class="third-level"><a href="#shape-mismatch-errors">Shape mismatch errors</a></li>
-<li class="third-level"><a href="#missing-target-column">Missing target column</a></li>
-<li class="second-level"><a href="#version-compatibility-issues">Version Compatibility Issues</a></li>
-<li class="third-level"><a href="#pytorch-version-conflicts">PyTorch version conflicts</a></li>
-<li class="third-level"><a href="#scikit-learn-version-issues">scikit-learn version issues</a></li>
-<li class="third-level"><a href="#python-version-too-old">Python version too old</a></li>
-<li class="second-level"><a href="#evaluation-prediction-errors">Evaluation &amp; Prediction Errors</a></li>
-<li class="third-level"><a href="#predict_proba-returns-incorrect-shape">predict_proba returns incorrect shape</a></li>
-<li class="third-level"><a href="#all-predictions-are-the-same-class">All predictions are the same class</a></li>
-<li class="second-level"><a href="#performance-issues">Performance Issues</a></li>
-<li class="third-level"><a href="#training-is-very-slow">Training is very slow</a></li>
-<li class="third-level"><a href="#inference-is-slow">Inference is slow</a></li>
-<li class="second-level"><a href="#getting-help">Getting Help</a></li>
-</ul>
-</div></div>
-<div class="col-md-9" role="main">
-<h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">¶</a></h1>
-<p>This guide addresses common errors, issues, and solutions when using TabTune.</p>
-<hr/>
-<h2 id="common-import-errors">Common Import Errors<a class="headerlink" href="#common-import-errors" title="Permanent link">¶</a></h2>
-<h3 id="modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: No module named 'tabtune'<a class="headerlink" href="#modulenotfounderror-no-module-named-tabtune" title="Permanent link">¶</a></h3>
+        
+          <li class="md-nav__item">
+  <a href="#importerror-no-module-named-torch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImportError: no module named 'torch'
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cudagpu-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA/GPU issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CUDA/GPU issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cuda-out-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA out of memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cuda-device-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA device not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu-not-being-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU not being used
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#out-of-memory-during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of memory during training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-leak-during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory leak during training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-loading-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model loading failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model loading failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-checkpoint-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model checkpoint not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-state-dict-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model state dict mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preprocessing-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preprocessing errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#valueerror-found-array-with-0-samples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ValueError: found array with 0 sample(s)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#categorical-encoding-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Categorical encoding mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-type-mismatches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data type mismatches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-convergence-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training convergence issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Training convergence issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-not-converging-loss-not-decreasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model not converging / loss not decreasing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overfitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overfitting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#underfitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Underfitting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#peft-specific-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT-specific problems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PEFT-specific problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#peft-not-working-falling-back-to-finetune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT not working / falling back to finetune
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#peft-model-size-larger-than-expected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT model size larger than expected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data format errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#valueerror-input-must-be-pandas-dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ValueError: input must be pandas DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shape-mismatch-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shape mismatch errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing-target-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Missing target column
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-compatibility-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version compatibility issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version compatibility issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pytorch-version-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyTorch version conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scikit-learn-version-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scikit-learn version issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-too-old" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version too old
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-prediction-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation &amp; prediction errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluation &amp; prediction errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict_proba-returns-incorrect-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict_proba returns incorrect shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all-predictions-are-the-same-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All predictions are the same class
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-is-very-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training is very slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inference-is-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference is slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../models/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../timeseries/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time Series
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../advanced/peft-lora/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Topics
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../community/faq/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#common-import-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common import errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common import errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modulenotfounderror-no-module-named-tabtune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModuleNotFoundError: no module named 'tabtune'
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#importerror-cannot-import-tabularpipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImportError: cannot import TabularPipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#importerror-no-module-named-torch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImportError: no module named 'torch'
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cudagpu-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA/GPU issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CUDA/GPU issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cuda-out-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA out of memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cuda-device-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CUDA device not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu-not-being-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU not being used
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#out-of-memory-during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of memory during training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-leak-during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory leak during training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-loading-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model loading failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model loading failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-checkpoint-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model checkpoint not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-state-dict-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model state dict mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preprocessing-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preprocessing errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#valueerror-found-array-with-0-samples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ValueError: found array with 0 sample(s)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#categorical-encoding-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Categorical encoding mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-type-mismatches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data type mismatches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-convergence-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training convergence issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Training convergence issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-not-converging-loss-not-decreasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model not converging / loss not decreasing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overfitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overfitting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#underfitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Underfitting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#peft-specific-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT-specific problems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PEFT-specific problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#peft-not-working-falling-back-to-finetune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT not working / falling back to finetune
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#peft-model-size-larger-than-expected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PEFT model size larger than expected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data format errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#valueerror-input-must-be-pandas-dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ValueError: input must be pandas DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shape-mismatch-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shape mismatch errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing-target-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Missing target column
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-compatibility-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version compatibility issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version compatibility issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pytorch-version-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyTorch version conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scikit-learn-version-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scikit-learn version issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-too-old" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version too old
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-prediction-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation &amp; prediction errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluation &amp; prediction errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict_proba-returns-incorrect-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict_proba returns incorrect shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all-predictions-are-the-same-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All predictions are the same class
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-is-very-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training is very slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inference-is-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference is slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
+<p>The errors people actually hit, each with its cause and its fix. If yours is not here, check <a href="../../community/known-issues/">Known Issues</a>, then open an <a href="https://github.com/Lexsi-Labs/TabTune/issues">issue</a> with the traceback.</p>
+<h2 id="common-import-errors">Common import errors<a class="headerlink" href="#common-import-errors" title="Permanent link">&para;</a></h2>
+<h3 id="modulenotfounderror-no-module-named-tabtune">ModuleNotFoundError: no module named 'tabtune'<a class="headerlink" href="#modulenotfounderror-no-module-named-tabtune" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: TabTune is not installed or not in your Python path.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>TabTune
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>TabTune
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div></p>
 <p><strong>Verify installation</strong>:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tabtune</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tabtune</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">tabtune</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">tabtune</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="importerror-cannot-import-tabularpipeline">ImportError: Cannot import TabularPipeline<a class="headerlink" href="#importerror-cannot-import-tabularpipeline" title="Permanent link">¶</a></h3>
+<h3 id="importerror-cannot-import-tabularpipeline">ImportError: cannot import TabularPipeline<a class="headerlink" href="#importerror-cannot-import-tabularpipeline" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: Incorrect import path or installation issue.</p>
 <p><strong>Solution</strong>: Use the correct import:
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>  <span class="c1"># ✅ Correct</span>
-<span class="c1"># NOT: from TabularPipeline.pipeline import TabularPipeline  # ❌ Old path</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">tabtune</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularPipeline</span>  <span class="c1"># Correct</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># NOT: from TabularPipeline.pipeline import TabularPipeline  # Old path</span>
 </code></pre></div></p>
-<h3 id="importerror-no-module-named-torch">ImportError: No module named 'torch'<a class="headerlink" href="#importerror-no-module-named-torch" title="Permanent link">¶</a></h3>
+<h3 id="importerror-no-module-named-torch">ImportError: no module named 'torch'<a class="headerlink" href="#importerror-no-module-named-torch" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: PyTorch is not installed.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># For CPU only</span>
-pip<span class="w"> </span>install<span class="w"> </span>torch
-
-<span class="c1"># For GPU support (CUDA 11.8)</span>
-pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># For CPU only</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pip<span class="w"> </span>install<span class="w"> </span>torch
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># For GPU support (CUDA 11.8)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
 </code></pre></div></p>
-<hr/>
-<h2 id="cudagpu-issues">CUDA/GPU Issues<a class="headerlink" href="#cudagpu-issues" title="Permanent link">¶</a></h2>
-<h3 id="cuda-out-of-memory">CUDA out of memory<a class="headerlink" href="#cuda-out-of-memory" title="Permanent link">¶</a></h3>
+<h2 id="cudagpu-issues">CUDA/GPU issues<a class="headerlink" href="#cudagpu-issues" title="Permanent link">&para;</a></h2>
+<h3 id="cuda-out-of-memory">CUDA out of memory<a class="headerlink" href="#cuda-out-of-memory" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: <code>RuntimeError: CUDA out of memory</code></p>
 <p><strong>Solutions</strong>:</p>
 <ol>
 <li>
 <p><strong>Use PEFT strategy</strong> (recommended):
-   <div class="highlight"><pre><span></span><code><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
-    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"peft"</span><span class="p">,</span>  <span class="c1"># Uses 40-60% less memory</span>
-    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"peft_config"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}}</span>  <span class="c1"># Lower rank = less memory</span>
-<span class="p">)</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"peft"</span><span class="p">,</span>  <span class="c1"># Uses 40-60% less memory</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"peft_config"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}}</span>  <span class="c1"># Lower rank = less memory</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Reduce batch size</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Default is often 8 or 16</span>
+<p>Reduce batch size:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Default is often 8 or 16</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Use a smaller model</strong>:</p>
+<p>Use a smaller model:</p>
 </li>
 <li>Switch from TabDPT to TabICL</li>
 <li>
 <p>Switch from OrionBix to TabICL</p>
 </li>
 <li>
-<p><strong>Process in chunks</strong>:
-   <div class="highlight"><pre><span></span><code><span class="c1"># Split dataset into smaller batches</span>
-<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
-    <span class="n">X_chunk</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
-    <span class="n">y_chunk</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
-    <span class="c1"># Process chunk</span>
+<p>Process in chunks:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Split dataset into smaller batches</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">X_chunk</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">y_chunk</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="c1"># Process chunk</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Clear GPU cache</strong>:
-   <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+<p>Clear GPU cache:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
 </code></pre></div></p>
 </li>
 <li>
 <p><strong>Use CPU instead</strong> (slower but no memory limits):
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cpu"</span><span class="p">}</span>
 </code></pre></div></p>
 </li>
 </ol>
-<h3 id="cuda-device-not-found">CUDA device not found<a class="headerlink" href="#cuda-device-not-found" title="Permanent link">¶</a></h3>
+<h3 id="cuda-device-not-found">CUDA device not found<a class="headerlink" href="#cuda-device-not-found" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: <code>RuntimeError: CUDA error: no kernel image is available</code></p>
 <p><strong>Cause</strong>: PyTorch version doesn't match your GPU's CUDA version.</p>
 <p><strong>Solution</strong>:
 1. Check your CUDA version: <code>nvidia-smi</code>
 2. Install matching PyTorch:
-   <div class="highlight"><pre><span></span><code><span class="c1"># For CUDA 11.8</span>
-pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
-
-<span class="c1"># For CUDA 12.1</span>
-pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># For CUDA 11.8</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># For CUDA 12.1</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
 </code></pre></div></p>
-<h3 id="gpu-not-being-used">GPU not being used<a class="headerlink" href="#gpu-not-being-used" title="Permanent link">¶</a></h3>
+<h3 id="gpu-not-being-used">GPU not being used<a class="headerlink" href="#gpu-not-being-used" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Training runs on CPU despite having GPU.</p>
 <p><strong>Check</strong>:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current device: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'CPU'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA available: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Current device: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'CPU'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
 <p><strong>Solution</strong>: Explicitly set device in <code>tuning_params</code>:
-<div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="s2">"cuda"</span><span class="p">}</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="memory-errors">Memory Errors<a class="headerlink" href="#memory-errors" title="Permanent link">¶</a></h2>
-<h3 id="out-of-memory-during-training">Out of memory during training<a class="headerlink" href="#out-of-memory-during-training" title="Permanent link">¶</a></h3>
+<h2 id="memory-errors">Memory errors<a class="headerlink" href="#memory-errors" title="Permanent link">&para;</a></h2>
+<h3 id="out-of-memory-during-training">Out of memory during training<a class="headerlink" href="#out-of-memory-during-training" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: Dataset too large or batch size too high.</p>
 <p><strong>Solutions</strong>:
 1. Reduce batch size: <code>tuning_params={"batch_size": 2}</code>
 2. Use gradient accumulation:
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"gradient_accumulation_steps"</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Effective batch size = 16</span>
-<span class="p">}</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="s2">"batch_size"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="s2">"gradient_accumulation_steps"</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># Effective batch size = 16</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
 </code></pre></div>
-3. Use PEFT instead of base-ft
+3. Use PEFT instead of finetune
 4. Reduce dataset size for testing</p>
-<h3 id="memory-leak-during-training">Memory leak during training<a class="headerlink" href="#memory-leak-during-training" title="Permanent link">¶</a></h3>
+<h3 id="memory-leak-during-training">Memory leak during training<a class="headerlink" href="#memory-leak-during-training" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Memory usage increases over epochs.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Add periodic cleanup</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
-
-<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
-    <span class="c1"># Training code</span>
-    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Add periodic cleanup</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="c1"># Training code</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="model-loading-failures">Model Loading Failures<a class="headerlink" href="#model-loading-failures" title="Permanent link">¶</a></h2>
-<h3 id="model-checkpoint-not-found">Model checkpoint not found<a class="headerlink" href="#model-checkpoint-not-found" title="Permanent link">¶</a></h3>
+<h2 id="model-loading-failures">Model loading failures<a class="headerlink" href="#model-loading-failures" title="Permanent link">&para;</a></h2>
+<h3 id="model-checkpoint-not-found">Model checkpoint not found<a class="headerlink" href="#model-checkpoint-not-found" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: <code>FileNotFoundError</code> when loading checkpoint.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Check if checkpoint exists</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Checkpoint not found: </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="c1"># Use inference mode instead</span>
-    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Check if checkpoint exists</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">):</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Checkpoint not found: </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="c1"># Use inference mode instead</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"TabPFN"</span><span class="p">,</span> <span class="n">tuning_strategy</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="model-state-dict-mismatch">Model state dict mismatch<a class="headerlink" href="#model-state-dict-mismatch" title="Permanent link">¶</a></h3>
+<h3 id="model-state-dict-mismatch">Model state dict mismatch<a class="headerlink" href="#model-state-dict-mismatch" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: <code>RuntimeError: Error(s) in loading state_dict</code></p>
 <p><strong>Cause</strong>: Checkpoint from different model version or architecture.</p>
 <p><strong>Solution</strong>:
 - Use checkpoints saved from the same TabTune version
 - Or start fresh training without loading checkpoint</p>
-<hr/>
-<h2 id="preprocessing-errors">Preprocessing Errors<a class="headerlink" href="#preprocessing-errors" title="Permanent link">¶</a></h2>
-<h3 id="valueerror-found-array-with-0-samples">ValueError: Found array with 0 sample(s)<a class="headerlink" href="#valueerror-found-array-with-0-samples" title="Permanent link">¶</a></h3>
+<h2 id="preprocessing-errors">Preprocessing errors<a class="headerlink" href="#preprocessing-errors" title="Permanent link">&para;</a></h2>
+<h3 id="valueerror-found-array-with-0-samples">ValueError: found array with 0 sample(s)<a class="headerlink" href="#valueerror-found-array-with-0-samples" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: Empty dataset after preprocessing/filtering.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Check data before preprocessing</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Data shape: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Null values: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="c1"># Ensure sufficient samples after train/test split</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Train samples: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Check data before preprocessing</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Data shape: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Null values: </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="c1"># Ensure sufficient samples after train/test split</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="p">)</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Train samples: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="categorical-encoding-mismatch">Categorical encoding mismatch<a class="headerlink" href="#categorical-encoding-mismatch" title="Permanent link">¶</a></h3>
+<h3 id="categorical-encoding-mismatch">Categorical encoding mismatch<a class="headerlink" href="#categorical-encoding-mismatch" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Errors during prediction about unseen categories.</p>
 <p><strong>Cause</strong>: Test set contains categories not seen during training.</p>
 <p><strong>Solution</strong>:
-- Ensure train/test split preserves all categories
+- Make sure train/test split preserves all categories
 - Use <code>stratify=y</code> in train_test_split for classification
 - Check for new categories in test set:
-  <div class="highlight"><pre><span></span><code><span class="n">train_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-<span class="n">test_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-<span class="n">unseen</span> <span class="o">=</span> <span class="n">test_cats</span> <span class="o">-</span> <span class="n">train_cats</span>
-<span class="k">if</span> <span class="n">unseen</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unseen categories: </span><span class="si">{</span><span class="n">unseen</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">train_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">test_cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="s1">'column'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">unseen</span> <span class="o">=</span> <span class="n">test_cats</span> <span class="o">-</span> <span class="n">train_cats</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">if</span> <span class="n">unseen</span><span class="p">:</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unseen categories: </span><span class="si">{</span><span class="n">unseen</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="data-type-mismatches">Data type mismatches<a class="headerlink" href="#data-type-mismatches" title="Permanent link">¶</a></h3>
+<h3 id="data-type-mismatches">Data type mismatches<a class="headerlink" href="#data-type-mismatches" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Type errors during preprocessing.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Ensure correct types</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">'col1'</span><span class="p">:</span> <span class="s1">'float64'</span><span class="p">,</span> <span class="s1">'col2'</span><span class="p">:</span> <span class="s1">'category'</span><span class="p">})</span>
-
-<span class="c1"># Or let DataProcessor handle it</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
-    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"override_types"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>  <span class="c1"># Auto-detect</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Ensure correct types</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">'col1'</span><span class="p">:</span> <span class="s1">'float64'</span><span class="p">,</span> <span class="s1">'col2'</span><span class="p">:</span> <span class="s1">'category'</span><span class="p">})</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># Or let DataProcessor handle it</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">TabularPipeline</span><span class="p">(</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"TabICL"</span><span class="p">,</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"override_types"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>  <span class="c1"># Auto-detect</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="p">)</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="training-convergence-issues">Training Convergence Issues<a class="headerlink" href="#training-convergence-issues" title="Permanent link">¶</a></h2>
-<h3 id="model-not-converging-loss-not-decreasing">Model not converging / Loss not decreasing<a class="headerlink" href="#model-not-converging-loss-not-decreasing" title="Permanent link">¶</a></h3>
+<h2 id="training-convergence-issues">Training convergence issues<a class="headerlink" href="#training-convergence-issues" title="Permanent link">&para;</a></h2>
+<h3 id="model-not-converging-loss-not-decreasing">Model not converging / loss not decreasing<a class="headerlink" href="#model-not-converging-loss-not-decreasing" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Loss plateaus or increases.</p>
 <p><strong>Solutions</strong>:</p>
 <ol>
 <li>
-<p><strong>Lower learning rate</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">}</span>  <span class="c1"># Default might be too high</span>
+<p>Lower learning rate:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">}</span>  <span class="c1"># Default might be too high</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Reduce epochs</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>  <span class="c1"># Start small</span>
+<p>Reduce epochs:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"epochs"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>  <span class="c1"># Start small</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Check data quality</strong>:</p>
+<p>Check data quality:</p>
 </li>
-<li>Ensure labels are correct</li>
+<li>Make sure labels are correct</li>
 <li>Check for data leakage</li>
 <li>
 <p>Verify train/test split</p>
 </li>
 <li>
-<p><strong>Try different model</strong>:</p>
+<p>Try different model:</p>
 </li>
 <li>Some models work better for certain datasets</li>
 <li>
 <p>Use TabularLeaderboard to compare</p>
 </li>
 <li>
-<p><strong>Warmup learning rate</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
-    <span class="s2">"warmup_steps"</span><span class="p">:</span> <span class="mi">100</span>
-<span class="p">}</span>
+<p>Warmup learning rate:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">tuning_params</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">2e-5</span><span class="p">,</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="s2">"warmup_steps"</span><span class="p">:</span> <span class="mi">100</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="p">}</span>
 </code></pre></div></p>
 </li>
 </ol>
-<h3 id="overfitting">Overfitting<a class="headerlink" href="#overfitting" title="Permanent link">¶</a></h3>
+<h3 id="overfitting">Overfitting<a class="headerlink" href="#overfitting" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: High training accuracy, low validation accuracy.</p>
 <p><strong>Solutions</strong>:
-1. <strong>Reduce epochs</strong>: <code>tuning_params={"epochs": 3}</code>
-2. <strong>Lower learning rate</strong>: <code>tuning_params={"learning_rate": 1e-5}</code>
-3. <strong>Use PEFT</strong>: Often generalizes better than base-ft
-4. <strong>More training data</strong>: Collect or use data augmentation
-5. <strong>Early stopping</strong>: Implement callback to stop when validation loss increases</p>
-<h3 id="underfitting">Underfitting<a class="headerlink" href="#underfitting" title="Permanent link">¶</a></h3>
+1. Reduce epochs: <code>tuning_params={"epochs": 3}</code>
+2. Lower learning rate: <code>tuning_params={"learning_rate": 1e-5}</code>
+3. Use PEFT: Often generalizes better than finetune
+4. More training data: Collect or use data augmentation
+5. Early stopping: Implement callback to stop when validation loss increases</p>
+<h3 id="underfitting">Underfitting<a class="headerlink" href="#underfitting" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Both training and validation accuracy are low.</p>
 <p><strong>Solutions</strong>:
-1. <strong>Train longer</strong>: Increase <code>epochs</code>
-2. <strong>Higher learning rate</strong>: <code>tuning_params={"learning_rate": 5e-4}</code>
-3. <strong>Use base-ft</strong>: Full fine-tuning may be needed
-4. <strong>Larger model</strong>: Try TabDPT or OrionBix instead of TabICL
-5. <strong>Feature engineering</strong>: Add relevant features</p>
-<hr/>
-<h2 id="peft-specific-problems">PEFT-Specific Problems<a class="headerlink" href="#peft-specific-problems" title="Permanent link">¶</a></h2>
-<h3 id="peft-not-working-falling-back-to-base-ft">PEFT not working / Falling back to base-ft<a class="headerlink" href="#peft-not-working-falling-back-to-base-ft" title="Permanent link">¶</a></h3>
+1. Train longer: Increase <code>epochs</code>
+2. Higher learning rate: <code>tuning_params={"learning_rate": 5e-4}</code>
+3. Use finetune: Full fine-tuning may be needed
+4. Larger model: Try TabDPT or OrionBix instead of TabICL
+5. Feature engineering: Add relevant features</p>
+<h2 id="peft-specific-problems">PEFT-specific problems<a class="headerlink" href="#peft-specific-problems" title="Permanent link">&para;</a></h2>
+<h3 id="peft-not-working-falling-back-to-finetune">PEFT not working / falling back to finetune<a class="headerlink" href="#peft-not-working-falling-back-to-finetune" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Warning messages about PEFT compatibility.</p>
 <p><strong>Cause</strong>: Some models have experimental PEFT support.</p>
 <p><strong>Solution</strong>:
 - TabPFN and ContextTab have experimental PEFT
-- Use <code>base-ft</code> strategy for these models
+- Use <code>finetune</code> strategy for these models
 - Or check PEFT configuration:
-  <div class="highlight"><pre><span></span><code><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"r"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># Rank (lower = less memory, but may affect performance)</span>
-    <span class="s2">"lora_alpha"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-    <span class="s2">"lora_dropout"</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
-    <span class="s2">"target_modules"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"query"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">]</span>  <span class="c1"># Model-specific</span>
-<span class="p">}</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="s2">"r"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># Rank (lower = less memory, but may affect performance)</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="s2">"lora_alpha"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>    <span class="s2">"lora_dropout"</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    <span class="s2">"target_modules"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"query"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">]</span>  <span class="c1"># Model-specific</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="p">}</span>
 </code></pre></div></p>
-<h3 id="peft-model-size-larger-than-expected">PEFT model size larger than expected<a class="headerlink" href="#peft-model-size-larger-than-expected" title="Permanent link">¶</a></h3>
+<h3 id="peft-model-size-larger-than-expected">PEFT model size larger than expected<a class="headerlink" href="#peft-model-size-larger-than-expected" title="Permanent link">&para;</a></h3>
 <p><strong>Cause</strong>: Incorrect target modules or high rank.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Use lower rank</span>
-<span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Instead of default 8</span>
-
-<span class="c1"># Check actual model size</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="n">total_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-<span class="n">trainable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total_params</span><span class="si">}</span><span class="s2">, Trainable: </span><span class="si">{</span><span class="n">trainable</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Use lower rank</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">peft_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"r"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>  <span class="c1"># Instead of default 8</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Check actual model size</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="n">total_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="n">trainable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total_params</span><span class="si">}</span><span class="s2">, Trainable: </span><span class="si">{</span><span class="n">trainable</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="data-format-errors">Data Format Errors<a class="headerlink" href="#data-format-errors" title="Permanent link">¶</a></h2>
-<h3 id="valueerror-input-must-be-pandas-dataframe">ValueError: Input must be pandas DataFrame<a class="headerlink" href="#valueerror-input-must-be-pandas-dataframe" title="Permanent link">¶</a></h3>
+<h2 id="data-format-errors">Data format errors<a class="headerlink" href="#data-format-errors" title="Permanent link">&para;</a></h2>
+<h3 id="valueerror-input-must-be-pandas-dataframe">ValueError: input must be pandas DataFrame<a class="headerlink" href="#valueerror-input-must-be-pandas-dataframe" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Error when passing numpy arrays.</p>
 <p><strong>Solution</strong>: Convert to DataFrame:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">feature_names</span><span class="p">)</span>
-<span class="n">y_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">feature_names</span><span class="p">)</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="n">y_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 </code></pre></div></p>
-<h3 id="shape-mismatch-errors">Shape mismatch errors<a class="headerlink" href="#shape-mismatch-errors" title="Permanent link">¶</a></h3>
+<h3 id="shape-mismatch-errors">Shape mismatch errors<a class="headerlink" href="#shape-mismatch-errors" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Dimension errors during prediction.</p>
 <p><strong>Cause</strong>: Feature count differs between train and test.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Ensure same features</span>
-<span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-<span class="c1"># Or use pipeline's built-in handling</span>
-<span class="c1"># TabTune automatically handles this</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Ensure same features</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="c1"># Or use pipeline's built-in handling</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="c1"># TabTune automatically handles this</span>
 </code></pre></div></p>
-<h3 id="missing-target-column">Missing target column<a class="headerlink" href="#missing-target-column" title="Permanent link">¶</a></h3>
+<h3 id="missing-target-column">Missing target column<a class="headerlink" href="#missing-target-column" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: KeyError when accessing target.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Ensure target is separate Series</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span>  <span class="c1"># ✅ Correct</span>
-<span class="c1"># NOT: y = df[['target']]  # ❌ DataFrame instead of Series</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Ensure target is separate Series</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span>  <span class="c1"># Correct</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="c1"># NOT: y = df[['target']]  # DataFrame instead of Series</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="version-compatibility-issues">Version Compatibility Issues<a class="headerlink" href="#version-compatibility-issues" title="Permanent link">¶</a></h2>
-<h3 id="pytorch-version-conflicts">PyTorch version conflicts<a class="headerlink" href="#pytorch-version-conflicts" title="Permanent link">¶</a></h3>
+<h2 id="version-compatibility-issues">Version compatibility issues<a class="headerlink" href="#version-compatibility-issues" title="Permanent link">&para;</a></h2>
+<h3 id="pytorch-version-conflicts">PyTorch version conflicts<a class="headerlink" href="#pytorch-version-conflicts" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Errors about tensor operations or CUDA compatibility.</p>
 <p><strong>Solution</strong>: Check and match versions:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PyTorch: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">cuda</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PyTorch: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CUDA: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">cuda</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
 <p>Update if needed:
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>torch
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>torch
 </code></pre></div></p>
-<h3 id="scikit-learn-version-issues">scikit-learn version issues<a class="headerlink" href="#scikit-learn-version-issues" title="Permanent link">¶</a></h3>
+<h3 id="scikit-learn-version-issues">scikit-learn version issues<a class="headerlink" href="#scikit-learn-version-issues" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Deprecation warnings or API errors.</p>
 <p><strong>Solution</strong>: Use compatible version:
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>scikit-learn<span class="o">==</span><span class="m">1</span>.7
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>pip<span class="w"> </span>install<span class="w"> </span>scikit-learn<span class="o">==</span><span class="m">1</span>.7
 </code></pre></div></p>
-<h3 id="python-version-too-old">Python version too old<a class="headerlink" href="#python-version-too-old" title="Permanent link">¶</a></h3>
+<h3 id="python-version-too-old">Python version too old<a class="headerlink" href="#python-version-too-old" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Syntax errors or unsupported features.</p>
 <p><strong>Solution</strong>: TabTune requires Python 3.10+. Upgrade Python:
-<div class="highlight"><pre><span></span><code><span class="c1"># Using conda</span>
-conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>tabtune<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
-conda<span class="w"> </span>activate<span class="w"> </span>tabtune
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># Using conda</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>tabtune<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>conda<span class="w"> </span>activate<span class="w"> </span>tabtune
 </code></pre></div></p>
-<hr/>
-<h2 id="evaluation-prediction-errors">Evaluation &amp; Prediction Errors<a class="headerlink" href="#evaluation-prediction-errors" title="Permanent link">¶</a></h2>
-<h3 id="predict_proba-returns-incorrect-shape">predict_proba returns incorrect shape<a class="headerlink" href="#predict_proba-returns-incorrect-shape" title="Permanent link">¶</a></h3>
+<h2 id="evaluation-prediction-errors">Evaluation &amp; prediction errors<a class="headerlink" href="#evaluation-prediction-errors" title="Permanent link">&para;</a></h2>
+<h3 id="predict_proba-returns-incorrect-shape">predict_proba returns incorrect shape<a class="headerlink" href="#predict_proba-returns-incorrect-shape" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Shape mismatch or wrong number of classes.</p>
 <p><strong>Solution</strong>:
-<div class="highlight"><pre><span></span><code><span class="c1"># Check class count</span>
-<span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">custom_preprocessor_</span><span class="o">.</span><span class="n">label_encoder_</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected </span><span class="si">{</span><span class="n">n_classes</span><span class="si">}</span><span class="s2"> classes"</span><span class="p">)</span>
-<span class="n">probabilities</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got shape: </span><span class="si">{</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># Should be (n_samples, n_classes)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Check class count</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">custom_preprocessor_</span><span class="o">.</span><span class="n">label_encoder_</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected </span><span class="si">{</span><span class="n">n_classes</span><span class="si">}</span><span class="s2"> classes"</span><span class="p">)</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="n">probabilities</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got shape: </span><span class="si">{</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># Should be (n_samples, n_classes)</span>
 </code></pre></div></p>
-<h3 id="all-predictions-are-the-same-class">All predictions are the same class<a class="headerlink" href="#all-predictions-are-the-same-class" title="Permanent link">¶</a></h3>
+<h3 id="all-predictions-are-the-same-class">All predictions are the same class<a class="headerlink" href="#all-predictions-are-the-same-class" title="Permanent link">&para;</a></h3>
 <p><strong>Symptoms</strong>: Model predicts only one class for all samples.</p>
 <p><strong>Possible causes</strong>:
 1. Model not trained (using inference with poor weights)
 2. Severe class imbalance
 3. Data preprocessing issue</p>
 <p><strong>Solutions</strong>:
-1. <strong>Fine-tune the model</strong>: Use <code>base-ft</code> or <code>peft</code>
-2. <strong>Check class distribution</strong>:
-   <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+1. Fine-tune the model: Use <code>finetune</code> or <code>peft</code>
+2. Check class distribution:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
 </code></pre></div>
-3. <strong>Use resampling</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"resampling_strategy"</span><span class="p">:</span> <span class="s2">"smote"</span><span class="p">}</span>
+3. Use resampling:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">processor_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"resampling_strategy"</span><span class="p">:</span> <span class="s2">"smote"</span><span class="p">}</span>
 </code></pre></div>
-4. <strong>Inspect predictions</strong>:
-   <div class="highlight"><pre><span></span><code><span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique predictions: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prediction distribution: </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+4. Inspect predictions:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique predictions: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prediction distribution: </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></p>
-<hr/>
-<h2 id="performance-issues">Performance Issues<a class="headerlink" href="#performance-issues" title="Permanent link">¶</a></h2>
-<h3 id="training-is-very-slow">Training is very slow<a class="headerlink" href="#training-is-very-slow" title="Permanent link">¶</a></h3>
+<h2 id="performance-issues">Performance issues<a class="headerlink" href="#performance-issues" title="Permanent link">&para;</a></h2>
+<h3 id="training-is-very-slow">Training is very slow<a class="headerlink" href="#training-is-very-slow" title="Permanent link">&para;</a></h3>
 <p><strong>Solutions</strong>:
-1. <strong>Use GPU</strong>: <code>tuning_params={"device": "cuda"}</code>
-2. <strong>Reduce dataset size</strong>: Test with subset first
-3. <strong>Use inference mode</strong>: For quick baselines
-4. <strong>Optimize batch size</strong>: Larger batches (if memory allows)
-5. <strong>Use PEFT</strong>: Faster than base-ft</p>
-<h3 id="inference-is-slow">Inference is slow<a class="headerlink" href="#inference-is-slow" title="Permanent link">¶</a></h3>
+1. Use GPU: <code>tuning_params={"device": "cuda"}</code>
+2. Reduce dataset size: Test with subset first
+3. Use inference mode: For quick baselines
+4. Optimize batch size: Larger batches (if memory allows)
+5. Use PEFT: Faster than finetune</p>
+<h3 id="inference-is-slow">Inference is slow<a class="headerlink" href="#inference-is-slow" title="Permanent link">&para;</a></h3>
 <p><strong>Solutions</strong>:
-1. <strong>Batch predictions</strong>: Process multiple samples at once
-2. <strong>Use GPU</strong>: <code>tuning_params={"device": "cuda"}</code>
+1. Batch predictions: Process multiple samples at once
+2. Use GPU: <code>tuning_params={"device": "cuda"}</code>
 3. <strong>Reduce n_estimators</strong> (for ensemble models):
-   <div class="highlight"><pre><span></span><code><span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_estimators"</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>  <span class="c1"># Instead of default 16 or 32</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"n_estimators"</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>  <span class="c1"># Instead of default 16 or 32</span>
 </code></pre></div>
-4. <strong>Cache preprocessing</strong>: Save and load preprocessed data</p>
-<hr/>
-<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">¶</a></h2>
+4. Cache preprocessing: Save and load preprocessed data</p>
+<h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <p>If you encounter an issue not covered here:</p>
 <ol>
 <li>
-<p><strong>Check the logs</strong>: TabTune provides detailed logging
-   <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<p>Check the logs: TabTune provides detailed logging
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Reproduce with minimal example</strong>: Create smallest code that reproduces the issue</p>
+<p>Reproduce with minimal example: Create smallest code that reproduces the issue</p>
 </li>
 <li>
-<p><strong>Check GitHub Issues</strong>: Search <a href="https://github.com/Lexsi-Labs/TabTune_Internal/issues">TabTune_Internal Issues</a></p>
+<p>Check GitHub Issues: Search <a href="https://github.com/Lexsi-Labs/TabTune_Internal/issues">TabTune_Internal Issues</a></p>
 </li>
 <li>
-<p><strong>Open new issue</strong>: Include:</p>
+<p>Open new issue: Include:</p>
 </li>
 <li>TabTune version</li>
 <li>Python version</li>
@@ -762,135 +3163,202 @@ conda<span class="w"> </span>activate<span class="w"> </span>tabtune
 <p>System information</p>
 </li>
 <li>
-<p><strong>Review documentation</strong>: Check relevant guides:</p>
+<p>Review documentation: Check relevant guides:</p>
 </li>
 <li><a href="../../getting-started/installation/">Installation</a></li>
-<li><a href="../pipeline-overview/">User Guide</a></li>
-<li><a href="../../about/faq/">FAQ</a></li>
-</ol></div>
-</div>
-<footer class="col-md-12 text-center">
-<hr/>
-<p>
-<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-</p>
-</footer>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="../../js/bootstrap-3.0.3.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>var base_url = "../.."</script>
-<script src="../../js/base.js"></script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="../../search/main.js"></script>
-<script>
-        // Initialize Mermaid v9.x after DOM loads
-        // The mermaid2 plugin loads the library and sets window.mermaidConfig
-        (function() {
-            function initMermaid() {
-                if (typeof mermaid !== 'undefined') {
-                    // Get configuration from plugin or use defaults
-                    const config = window.mermaidConfig || {
-                        securityLevel: 'loose',
-                        startOnLoad: false
-                    };
-                    
-                    // Initialize mermaid with config
-                    mermaid.initialize(config);
-                    
-                    // Render all mermaid diagrams - mermaid.run() automatically finds .mermaid elements
-                    if (typeof mermaid.run === 'function') {
-                        mermaid.run();
-                    } else {
-                        // Fallback for older API - manually initialize elements
-                        const mermaidElements = document.querySelectorAll('.mermaid');
-                        if (mermaidElements.length > 0) {
-                            mermaid.init(undefined, mermaidElements);
-                        }
-                    }
-                } else {
-                    // Retry if mermaid library hasn't loaded yet
-                    setTimeout(initMermaid, 100);
-                }
-            }
-            
-            // Wait for DOM and scripts to be ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMermaid);
-            } else {
-                // DOM already loaded, but scripts might not be
-                setTimeout(initMermaid, 100);
-            }
-        })();
-    </script>
-<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
-<div class="modal-header">
-<button class="close" data-dismiss="modal" type="button">
-<span aria-hidden="true">×</span>
-<span class="sr-only">Close</span>
+<li><a href="../pipeline/">User Guide</a></li>
+<li><a href="../../community/faq/">FAQ</a></li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
 </button>
-<h4 class="modal-title" id="searchModalLabel">Search</h4>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../logging/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Logging">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Logging
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../models/overview/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
 </div>
-<div class="modal-body">
-<p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-<form>
-<div class="form-group">
-<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs/TabTune" target="_blank" rel="noopener" title="TabTune on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://pypi.org/project/tabtune/" target="_blank" rel="noopener" title="TabTune on PyPI" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://arxiv.org/abs/2511.02802" target="_blank" rel="noopener" title="TabTune paper on arXiv" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0h149.5c17 0 33.3 6.7 45.3 18.7l106.5 106.6c12 12 18.7 28.3 18.7 45.3V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm208-5.5V152c0 13.3 10.7 24 24 24h93.5zM120 256c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://discord.gg/dSB62Q7A" target="_blank" rel="noopener" title="Lexsi Labs on Discord" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs" target="_blank" rel="noopener" title="Lexsi Labs on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://x.com/Lexsi_labs" target="_blank" rel="noopener" title="Lexsi Labs on X" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.linkedin.com/company/lexsi-labs/" target="_blank" rel="noopener" title="Lexsi Labs on LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://huggingface.co/Lexsi" target="_blank" rel="noopener" title="Lexsi Labs on Hugging Face" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.49 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://lexsi.ai" target="_blank" rel="noopener" title="lexsi.ai" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
 </div>
-</form>
-<div id="mkdocs-search-results"></div>
-</div>
-<div class="modal-footer">
-</div>
-</div>
-</div>
-</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-</div>
-<div class="modal-body">
-<table class="table">
-<thead>
-<tr>
-<th style="width: 20%;">Keys</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="help shortcut"><kbd>?</kbd></td>
-<td>Open this help</td>
-</tr>
-<tr>
-<td class="next shortcut"><kbd>n</kbd></td>
-<td>Next page</td>
-</tr>
-<tr>
-<td class="prev shortcut"><kbd>p</kbd></td>
-<td>Previous page</td>
-</tr>
-<tr>
-<td class="search shortcut"><kbd>s</kbd></td>
-<td>Search</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="modal-footer">
-</div>
-</div>
-</div>
-</div>
-</body>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../assets/extra.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
 </html>
