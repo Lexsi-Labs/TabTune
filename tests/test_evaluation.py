@@ -135,6 +135,17 @@ def test_grouped_split_accepts_explicit_group_array(grouped_frame):
     assert len(folds) == 5
 
 
+@pytest.mark.parametrize("tz", [None, "UTC"])
+def test_grouped_split_holds_out_datetime_groups(tz):
+    days = pd.date_range("2024-01-01", periods=4, freq="D", tz=tz, unit="ns").repeat(3)
+    frame = pd.DataFrame({"day": days, "f": range(len(days))})
+    seen: list[int] = []
+    for train_idx, test_idx in GroupedSplit(2, group_col="day").split(frame):
+        assert set(days[train_idx]).isdisjoint(set(days[test_idx]))
+        seen.extend(test_idx.tolist())
+    assert sorted(seen) == list(range(len(frame)))
+
+
 def test_grouped_split_rejects_too_few_groups():
     frame = pd.DataFrame({"g": ["a", "a", "b", "b"], "f": range(4)})
     with pytest.raises(ValueError, match="distinct groups"):

@@ -214,7 +214,7 @@ class GroupedSplit:
         folds = np.array_split(order, self.n_splits)
         indices = np.arange(len(keys))
         for fold in folds:
-            held_out = set(unique[fold].tolist())
+            held_out = set(unique[fold])
             mask = np.array([k in held_out for k in keys])
             yield indices[~mask], indices[mask]
 
