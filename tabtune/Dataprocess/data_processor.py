@@ -31,6 +31,9 @@ from .iltm_preprocessor import ILTMPreprocessor
 from .exaone_preprocessor import EXAONEPreprocessor
 from .causilo_preprocessor import CausiloPreprocessor
 from .tabldm_preprocessor import TabLDMPreprocessor
+from .limixv2_preprocessor import LimiXV2Preprocessor
+from .kumo_preprocessor import KumoTabularPreprocessor
+from .tababax_preprocessor import TabAbaxPreprocessor
 from .regression.base_processor import RegressionDataProcessor
 from .regression.tabpfn_processor import TabPFNRegressionProcessor
 from .regression.contexttab_processor import ContextTabRegressionProcessor
@@ -76,6 +79,9 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         'EXAONETabular': {'categorical_encoding': 'exaone_special'},
         'Causilo': {'categorical_encoding': 'causilo_special'},
         'TabLDM': {'categorical_encoding': 'tabldm_special'},
+        'LimiXv2': {'categorical_encoding': 'limixv2_special'},
+        'KumoTabular': {'categorical_encoding': 'kumo_special'},
+        'TabAbax': {'categorical_encoding': 'tababax_special'},
     }
 
     def __init__(
@@ -227,6 +233,9 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             'exaone_special': EXAONEPreprocessor,
             'causilo_special': CausiloPreprocessor,
             'tabldm_special': TabLDMPreprocessor,
+            'limixv2_special': LimiXV2Preprocessor,
+            'kumo_special': KumoTabularPreprocessor,
+            'tababax_special': TabAbaxPreprocessor,
         }
         if self.categorical_encoding in special_encoders:
             logger.info(f"[DataProcessor] Using special preprocessor for: {self.model_name}")
@@ -239,6 +248,10 @@ class DataProcessor(BaseEstimator, TransformerMixin):
                 return PreprocessorClass(task_type=self.task_type)
             if self.categorical_encoding == 'tabldm_special':
                 # TabLDM needs task_type to decide whether to label-encode the target.
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding in ('limixv2_special', 'kumo_special'):
+                return PreprocessorClass(task_type=self.task_type)
+            if self.categorical_encoding == 'tababax_special':
                 return PreprocessorClass(task_type=self.task_type)
             if self.categorical_encoding == 'xrfm_special':
                 # XRFM preprocessor needs task_type (label-encode target for classification).
@@ -331,6 +344,16 @@ class DataProcessor(BaseEstimator, TransformerMixin):
             if target_scaling is None:
                 target_scaling = 'none'
             return EXAONERegressionProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'KumoTabular':
+            # Standardises the target itself and predicts in the original space.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
+        elif self.model_name == 'LimiXv2':
+            # Scales the target itself and predicts in the original space.
+            if target_scaling is None:
+                target_scaling = 'none'
+            return RegressionDataProcessor(target_scaling_strategy=target_scaling)
         elif self.model_name == 'TabLDM':
             if target_scaling is None:
                 target_scaling = 'none'

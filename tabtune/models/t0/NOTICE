@@ -1,0 +1,16 @@
+T0 (tfc-t0)
+Copyright 2026 The Forecasting Company
+
+This product includes software developed at Datadog (https://www.datadoghq.com/),
+Copyright 2025 Datadog, Inc., licensed under the Apache License 2.0.
+Source: https://github.com/DataDog/toto
+
+This product includes software derived from Chronos-2 by Amazon.com, Inc. or
+its affiliates, Copyright Amazon.com, Inc. All Rights Reserved, licensed under
+the Apache License 2.0.
+Source: https://github.com/amazon-science/chronos-forecasting
+
+The MLX runtime's rotary position implementation follows the behavior of
+rotary-embedding-torch, Copyright (c) 2020 Phil Wang, licensed under the MIT
+License.
+Source: https://github.com/lucidrains/rotary-embedding-torch

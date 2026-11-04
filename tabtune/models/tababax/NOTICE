@@ -1,0 +1,88 @@
+TabAbax
+Copyright 2026 TabAbax
+
+This file contains attribution and license notices for third-party
+components included in this distribution. It must be retained with
+redistributions where required by the applicable licenses.
+
+TabAbax-original packaging is Apache-2.0. See LICENSES/Apache-2.0.txt.
+The checkpoint weights are not in this source distribution. They are
+CC-BY-NC-4.0 and are not licensed for commercial use.
+
+TabICL-derived portions
+-----------------------
+
+The inference implementation is derived from TabICL v2:
+
+https://github.com/soda-inria/tabicl
+
+Copyright (c) 2025, Soda team @ Inria
+
+Those portions remain under the BSD 3-Clause License.
+See LICENSES/BSD-3-Clause.txt.
+
+The comparison tag is v2.2.0, commit 0dbff3ec8fc68c123c87af77b0ea8b25cd2d23f3.
+That commit is the version this distribution was compared against. It is not a
+record of the commit that was originally copied.
+See PROVENANCE.md for which files match that version and which are modified.
+`_model/inference.py`, `_model/embedding.py`, `_model/interaction.py`,
+`_model/model.py`, and the listed `_sklearn` modules are modified derivatives,
+not unchanged copies.
+
+TabICL-derived files:
+
+- src/tababax/_model/
+- src/tababax/_sklearn/base.py
+- src/tababax/_sklearn/classifier.py
+- src/tababax/_sklearn/regressor.py
+- src/tababax/_sklearn/preprocessing.py
+- src/tababax/_sklearn/sklearn_utils.py
+- src/tababax/_torch_devices.py
+
+preprocessing.py and sklearn_utils.py also contain the additional
+third-party portions listed below. Those portions are not TabICL's
+own code.
+
+Additional third-party portions
+--------------------------------
+
+Rotary positional embedding code in
+src/tababax/_model/rope.py is based on:
+
+https://github.com/lucidrains/rotary-embedding-torch
+
+Copyright (c) 2021 Phil Wang
+
+Licensed under the MIT License.
+See LICENSES/MIT.txt.
+
+src/tababax/_sklearn/sklearn_utils.py contains code adapted from
+scikit-learn:
+
+https://github.com/scikit-learn/scikit-learn/blob/1eb422d6c5/sklearn/utils/validation.py
+
+Copyright (c) 2007-2024 The scikit-learn developers.
+All rights reserved.
+
+The adapted portions are distributed under the BSD 3-Clause License.
+The complete scikit-learn license, copyright line included, is reproduced in
+LICENSES/scikit-learn-BSD-3-Clause.txt and ships with the package.
+
+Parts of src/tababax/_sklearn/preprocessing.py are adapted from:
+
+TabR:
+https://github.com/yandex-research/tabular-dl-tabr/blob/75105013189c76bc4f247633c2fb856bc948e579/lib/data.py
+
+Copyright (c) 2023 Authors of
+"TabR: Unlocking the Power of Retrieval-Augmented Tabular Deep Learning"
+
+Licensed under the MIT License.
+
+PyTabKit:
+https://github.com/dholzmueller/pytabkit/blob/949bf81e3964f65a33dd2c252c3713c239c17b2d/pytabkit/models/utils.py
+
+Licensed under the Apache License, Version 2.0.
+See LICENSES/Apache-2.0.txt.
+
+TabICL already carried these secondary attributions. They are repeated
+here because this distribution still contains the code.

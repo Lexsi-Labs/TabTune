@@ -40,9 +40,9 @@ pytestmark = pytest.mark.unit
 
 
 def test_registry_is_populated():
-    assert len(MODEL_REGISTRY) == 21
+    assert len(MODEL_REGISTRY) == 24
     for expected in (
-        "TabPFN", "TabPFNv3", "TabPFNv35", "TabPFNv35Fast", "Causilo", "TabLDM", "MitraV2", "TabICLv2",
+        "TabPFN", "TabPFNv3", "TabPFNv35", "TabPFNv35Fast", "Causilo", "TabLDM", "LimiXv2", "KumoTabular", "TabAbax", "MitraV2", "TabICLv2",
         "Mitra", "TabFM", "OrionMSP", "XRFM", "ILTM", "EXAONETabular",
     ):
         assert expected in MODEL_REGISTRY

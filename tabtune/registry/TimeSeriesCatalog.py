@@ -269,6 +269,78 @@ TS_MODEL_SPECS: tuple[TimeSeriesModelSpec, ...] = (
         ),
     ),
 
+    # Timestral
+    TimeSeriesModelSpec(
+        name="Timestral",
+        family="timestral",
+        adapter="tabtune.models.TimeSeries.timestral:TimestralAdapter",
+        aliases=("Timestral-209M", "Mistral-Timestral"),
+        tasks=_EMBEDDING_TASKS,
+        strategies=_TRAINABLE,
+        default_checkpoint="mistralai/Timestral-209M",
+        checkpoints=(
+            "mistralai/Timestral-5M",
+            "mistralai/Timestral-28M",
+            "mistralai/Timestral-123M",
+            "mistralai/Timestral-209M",
+        ),
+        max_context=32768,
+        native_missing=True,
+        supports_multivariate=True,
+        supports_covariates=True,
+        supports_categorical_covariates=True,
+        license=LicenseSpec(
+            name="Apache-2.0 (code) / Modified MIT (weights)",
+            commercial_use_ok=None,
+            url="https://huggingface.co/mistralai/Timestral-209M/blob/main/LICENSE",
+            notes=(
+                "The code is Apache-2.0. The weights are under Mistral AI's Modified MIT "
+                "license in each model repository; read its terms before commercial use."
+            ),
+        ),
+        commercial_alternatives=("Chronos2", "ChronosBolt"),
+        paper="https://mistral.ai/news/timestral",
+        summary=(
+            "Causal patch transformer trained with Decoupled Horizon Forecasting: multivariate "
+            "targets, past-only, known-future and categorical covariates, 21 quantiles, "
+            "32768-step context."
+        ),
+    ),
+
+    # T0
+    TimeSeriesModelSpec(
+        name="T0",
+        family="t0",
+        adapter="tabtune.models.TimeSeries.t0:T0Adapter",
+        aliases=("t0-gamma", "TFC-T0", "T0-Forecaster"),
+        tasks=_EMBEDDING_TASKS,
+        strategies=_TRAINABLE,
+        default_checkpoint="theforecastingcompany/t0-gamma",
+        checkpoints=(
+            "theforecastingcompany/t0-alpha",
+            "theforecastingcompany/t0-beta",
+            "theforecastingcompany/t0-gamma",
+        ),
+        native_missing=True,
+        supports_multivariate=True,
+        supports_covariates=True,
+        license=LicenseSpec(
+            name="Apache-2.0 (code); weight license not verified",
+            commercial_use_ok=None,
+            url="https://huggingface.co/theforecastingcompany/t0-gamma",
+            notes=(
+                "The code is Apache-2.0 and the package tags its checkpoints apache-2.0; "
+                "confirm the weight license on the model card before commercial use."
+            ),
+        ),
+        commercial_alternatives=("Chronos2", "Toto1"),
+        paper="https://arxiv.org/abs/2609.24559",
+        summary=(
+            "Patch transformer with factorised time and group attention (Toto and Chronos-2 "
+            "lineage): multivariate targets and known-future covariates, quantiles at any level."
+        ),
+    ),
+
     # Time-MoE
     TimeSeriesModelSpec(
         name="TimeMoE",

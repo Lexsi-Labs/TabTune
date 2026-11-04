@@ -570,7 +570,7 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
                 "(Sept 2026): Apache-2.0 sections 1-9 plus section 10, which requires "
                 "displaying 'Built with StableAI LimiX' and a name starting with 'LimiX' for "
                 "derived models you distribute; internal research use triggers neither. "
-                "LimiX-2 weights are non-commercial and are not used by TabTune. "
+                "LimiX-2 weights are non-commercial and are exposed as the separate 'LimiXv2' entry. "
                 "Checked 2026-09-28 against the GitHub LICENSE.txt and README; the Hugging "
                 "Face license file itself could not be fetched."
             ),
@@ -578,6 +578,128 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
         commercial_alternatives=_COMMERCIAL_FALLBACKS,
         paper="https://arxiv.org/abs/2509.03505",
         weights="limix-ldm-ai/LimiX",
+    ),
+    # --------------------------------------------------------- Kumo Tabular
+    ModelSpec(
+        name="KumoTabular",
+        family="icl",
+        aliases=("Kumo-Tabular", "Kumo", "NVIDIA-Kumo-Tabular", "KumoTab"),
+        summary=(
+            "NVIDIA Kumo Tabular (28M-215M parameters): interleaved column/row "
+            "encoder with induced set attention and Fourier cell embeddings, "
+            "then an in-context learning transformer with length-aware "
+            "attention temperature. Pretrained on synthetic tables only."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=frozenset({"inference", "finetune", "peft"}),
+        finetune_modes=frozenset({"meta-learning"}),
+        preprocessor_key="kumo_special",
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_categorical=True,
+            notes=(
+                "Ten classes per forward pass; more are handled with "
+                "error-correcting output codes at inference (fine-tuning is "
+                "limited to ten). The recipe keeps the first 500 columns after "
+                "shuffling. Pretraining covered contexts up to 60,000 rows and "
+                "100 columns; accuracy may degrade far beyond that. Regression "
+                "predicts 999 quantiles; predict() returns their mean."
+            ),
+        ),
+        license=LicenseSpec(
+            name="OpenMDW-1.1 (weights) / Apache-2.0 (code)",
+            commercial_use_ok=True,
+            url="https://huggingface.co/nvidia/Kumo-Tabular",
+            notes=(
+                "The weights are released under the OpenMDW License Agreement "
+                "v1.1 for commercial use; the structured-data-models code is "
+                "Apache-2.0, with the TabFM-derived cell embedding under "
+                "Apache-2.0 as well. Checked 2026-09-29."
+            ),
+        ),
+        paper="https://huggingface.co/blog/nvidia/kumo-tabular",
+        weights="nvidia/Kumo-Tabular",
+    ),
+    # -------------------------------------------------------------- LimiX-2
+    ModelSpec(
+        name="LimiXv2",
+        family="probabilistic-icl",
+        aliases=("LimiX-2", "LimiX2", "LimiXV2", "Limix-2"),
+        summary=(
+            "400M-parameter LimiX-2: contextual mechanism network pretrained with "
+            "context-conditional masked modelling on SCM priors; one model for "
+            "classification, regression and imputation."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=frozenset({"inference", "finetune", "peft"}),
+        finetune_modes=frozenset({"meta-learning"}),
+        preprocessor_key="limixv2_special",
+        envelope=CapabilityEnvelope(
+            max_classes=10,
+            native_nan=True,
+            native_categorical=True,
+            notes=(
+                "The classification head has ten slots; the predictor rejects "
+                "more classes. Categorical encoding, datetime expansion and "
+                "per-member normalisation run inside the model's own pipeline."
+            ),
+        ),
+        license=LicenseSpec(
+            name="StableAI LimiX License v1.0 (code) / LimiX Non-Commercial License (weights)",
+            commercial_use_ok=False,
+            requires_attribution=True,
+            url="https://github.com/limix-ldm-ai/LimiX",
+            notes=(
+                "Code: Apache-2.0 terms plus Section 10. Redistributors must show "
+                "\"Built with StableAI LimiX\", and distributed fine-tuned or "
+                "distilled models must have names starting with \"LimiX\". The "
+                "LimiX-2 weights are non-commercial. LimiX-16M stays the separate "
+                "'Limix' entry with its own (commercial) terms."
+            ),
+        ),
+        commercial_alternatives=_COMMERCIAL_FALLBACKS,
+        paper="https://arxiv.org/abs/2609.17488",
+        weights="stableai-org/LimiX-2",
+    ),
+    # -------------------------------------------------------------- TabAbax
+    ModelSpec(
+        name="TabAbax",
+        family="icl",
+        aliases=("Tab-Abax", "TabAbax-v1", "BaiRong-TabAbax"),
+        summary=(
+            "BaiRong TabAbax: a TabICLv2-derived in-context model with learnable "
+            "Fourier feature embeddings, a row interaction that keeps every feature "
+            "token and a second column/row interaction round before the ICL head. "
+            "Eight dataset-view ensemble members by default."
+        ),
+        classification_strategies=_ICL_CLS,
+        regression_strategies=frozenset({"inference", "finetune", "peft"}),
+        finetune_modes=frozenset({"meta-learning"}),
+        preprocessor_key="tababax_special",
+        envelope=CapabilityEnvelope(
+            native_nan=True,
+            native_categorical=True,
+            notes=(
+                "Ten native class slots; more classes use mixed-radix ensembling and "
+                "hierarchical classification at inference (fine-tuning is limited to "
+                "ten). String and categorical columns are encoded inside fit, and large "
+                "tables are offloaded to CPU or disk memory automatically."
+            ),
+        ),
+        license=LicenseSpec(
+            name="CC-BY-NC-4.0 (weights) / BSD-3-Clause, MIT and Apache-2.0 (code)",
+            commercial_use_ok=False,
+            requires_attribution=True,
+            url="https://huggingface.co/tababax-ai/TabAbax",
+            notes=(
+                "The checkpoints are CC-BY-NC-4.0 and not licensed for commercial use. "
+                "TabICL-derived code stays BSD-3-Clause; see the vendored NOTICE and "
+                "PROVENANCE.md."
+            ),
+        ),
+        commercial_alternatives=("TabICLv2", "Mitra", "KumoTabular"),
+        paper="https://arxiv.org/abs/2611.00562",
+        weights="tababax-ai/TabAbax",
     ),
     # ---------------------------------------------------------------- TabFM
     ModelSpec(

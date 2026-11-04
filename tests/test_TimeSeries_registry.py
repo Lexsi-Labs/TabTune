@@ -50,7 +50,7 @@ def test_chronos_is_registered():
 
 
 def test_tabular_registry_is_untouched():
-    assert len(MODEL_REGISTRY) == 21
+    assert len(MODEL_REGISTRY) == 24
     assert "Chronos" not in MODEL_REGISTRY
 
 
@@ -229,7 +229,7 @@ def test_capability_flags_are_reported_and_default_to_off():
 def test_two_families_coexist_with_distinct_adapters_and_licenses():
     """The registry holds more than one family; nothing about it is Chronos-specific."""
     specs = {spec.name: spec for spec in list_time_series_models()}
-    assert {"chronos", "timesfm", "toto", "xlstm", "time-moe", "tabular-icl", "baseline"} == {
+    assert {"chronos", "timesfm", "toto", "xlstm", "time-moe", "timestral", "t0", "tabular-icl", "baseline"} == {
         spec.family for spec in specs.values()
     }
 

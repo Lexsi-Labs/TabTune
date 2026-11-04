@@ -1,0 +1,15 @@
+TabAbax contains code under multiple licenses.
+
+- TabICL-derived portions: BSD-3-Clause
+- TabR-derived portions: MIT
+- rotary-embedding-torch portions: MIT
+- scikit-learn-derived portions: BSD-3-Clause
+- PyTabKit-derived portions: Apache-2.0
+- TabAbax-original packaging and integration code: Apache-2.0
+
+See NOTICE and the files under LICENSES/.
+Model checkpoints are distributed separately under CC-BY-NC-4.0
+and are not licensed for commercial use.
+
+This file is a directory of those licenses. It is not a statement that
+the whole repository is Apache-2.0.
