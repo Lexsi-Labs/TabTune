@@ -241,6 +241,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: [docs_api]   # 0.2.2 source snapshot; see docs_api/README.md
           options:
             show_source: false
             show_root_heading: true
