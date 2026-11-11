@@ -329,8 +329,9 @@ class GreedyEnsembleSelection:
         Number of greedy iterations (default 50).
     task_type : str
         ``"classification"`` or ``"regression"``.
-    metric : str
-        Validation metric to maximise / minimise.
+    metric : str or None
+        Validation metric to maximise / minimise. If omitted or ``None``,
+        defaults to ``"accuracy"`` for classification and ``"r2"`` for regression.
     with_replacement : bool
         If ``True`` (default) a model can be selected more than once.
 
@@ -346,7 +347,7 @@ class GreedyEnsembleSelection:
         self,
         ensemble_size: int = 50,
         task_type: str = "classification",
-        metric: str = "accuracy",
+        metric: Optional[str] = None,
         with_replacement: bool = True,
     ) -> None:
         if ensemble_size < 1:
@@ -358,7 +359,9 @@ class GreedyEnsembleSelection:
             )
         self.ensemble_size = ensemble_size
         self.task_type = task_type
-        self.metric = metric
+        self.metric = metric if metric is not None else (
+            "r2" if task_type == "regression" else "accuracy"
+        )
         self.with_replacement = with_replacement
         self.weights_: Optional[Dict[str, float]] = None
         self.model_names_: Optional[List[str]] = None

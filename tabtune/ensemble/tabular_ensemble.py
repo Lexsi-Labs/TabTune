@@ -99,8 +99,9 @@ class TabularEnsemble:
     task_type : str
         ``"classification"`` or ``"regression"``.
 
-    metric : str
-        Metric for weight optimisation.
+    metric : str or None
+        Metric for weight optimisation. If omitted or ``None``, defaults to
+        ``"accuracy"`` for classification and ``"r2"`` for regression.
 
         * Classification: ``"accuracy"``, ``"log_loss"``, ``"f1_score"``
         * Regression: ``"mse"``, ``"rmse"``, ``"r2"``, ``"mae"``
@@ -160,7 +161,7 @@ class TabularEnsemble:
         models: List[Dict[str, Any]],
         ensemble_strategy: str = "greedy_selection",
         task_type: str = "classification",
-        metric: str = "accuracy",
+        metric: Optional[str] = None,
         cv_folds: int = 5,
         holdout_fraction: float = 0.2,
         meta_learner: str = "lr",
@@ -199,7 +200,9 @@ class TabularEnsemble:
         self.models = models
         self.ensemble_strategy = ensemble_strategy
         self.task_type = task_type
-        self.metric = metric
+        self.metric = metric if metric is not None else (
+            "r2" if task_type == "regression" else "accuracy"
+        )
         self.cv_folds = cv_folds
         self.holdout_fraction = holdout_fraction
         self.meta_learner = meta_learner
