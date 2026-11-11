@@ -202,6 +202,15 @@ markers = [
     "model_timestral: tests of the Timestral adapter",
     "model_t0: tests of the T0 adapter",
     "episodic_finetune: tests of the validated episodic fine-tuning driver",
+    "calibration: tests for calibration functionality",
+    "fairness: tests for fairness evaluation functionality",
+    "finetuning: tests for model fine-tuning",
+    "leaderboard: tests for leaderboard functionality",
+    "model_exaone: tests for EXAONE model functionality",
+    "model_iltm: tests for ILTM model functionality",
+    "model_tabfm: tests for TabFM model functionality",
+    "model_xrfm: tests for XRFM model functionality",
+    "requires_gpu: tests that require a GPU",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:pythonjsonlogger.*",
