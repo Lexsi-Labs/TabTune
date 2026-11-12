@@ -579,3 +579,34 @@ class TestTrainingFrameGuard:
         model, X, y = pipeline_like
         conformal = ConformalClassifier(model, alpha=0.1).calibrate(X[:50], y[:50])
         assert conformal.q_hat_ is not None
+
+
+class _ThreeClassModel:
+    """Fixed probabilities over classes [0, 1, 2], as in issue #48."""
+
+    classes_ = np.array([0, 1, 2])
+
+    def predict_proba(self, X):
+        return np.tile([0.7, 0.2, 0.1], (len(X), 1))
+
+
+def test_uncertainty_report_uses_the_estimators_classes_when_y_test_lacks_one():
+    X = np.zeros((30, 2))
+    y_two = np.array([0, 1] * 15)
+    y_three = np.array([0, 1, 2] * 10)
+    without_cal = uncertainty_report(_ThreeClassModel(), X, y_two)
+    with_cal = uncertainty_report(_ThreeClassModel(), X, y_two, X_cal=X + 1, y_cal=y_three)
+    for key in ("ece", "mce", "brier"):
+        assert np.isfinite(without_cal[key])
+        assert without_cal[key] == pytest.approx(with_cal[key])
+
+
+def test_uncertainty_report_warns_when_columns_cannot_be_matched(caplog):
+    class NoClasses:
+        def predict_proba(self, X):
+            return np.tile([0.7, 0.2, 0.1], (len(X), 1))
+
+    with caplog.at_level("WARNING"):
+        report = uncertainty_report(NoClasses(), np.zeros((30, 2)), np.array([0, 1] * 15))
+    assert np.isnan(report["ece"])
+    assert any("Pass X_cal" in r.getMessage() for r in caplog.records)

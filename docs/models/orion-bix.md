@@ -2,6 +2,8 @@
 
 Orion BIX (Biaxial Interaction eXpert) enhances scalable ICL with biaxial (row × column) interaction modules to better capture complex feature dependencies.
 
+**Task support:** classification only. `TabularPipeline(model_name="OrionBix", task_type="regression")` raises `UnsupportedTaskError` when the pipeline is built; for regression see [Regression](../regression/regression.md).
+
 ## Key ideas
 - Biaxial interaction layers improve feature–feature and sample–sample coupling
 - Robust ensembling across transformed feature orders
