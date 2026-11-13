@@ -57,8 +57,7 @@ pipeline = TabularPipeline(
     tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
-        'epochs': 5,
-        'learning_rate': 2e-5
+        'epochs': 1
     }
 )
 
