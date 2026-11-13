@@ -91,6 +91,42 @@ def _get_metric_fn(
     return metrics[metric_name]
 
 
+def _labels_to_column_indices(
+    y: np.ndarray, n_columns: int, classes: Optional[Any] = None
+) -> np.ndarray:
+    """Map classification labels to probability-column indices.
+
+    With ``classes`` (the label of each column, in column order) the labels
+    are looked up there. Without it they must already be whole numbers in
+    ``0..n_columns-1``; anything else raises instead of being scored against
+    the wrong columns.
+    """
+    y = np.asarray(y)
+    if classes is not None:
+        classes = np.asarray(classes)
+        if len(classes) != n_columns:
+            raise ValueError(
+                f"classes has {len(classes)} entries but the probabilities have "
+                f"{n_columns} columns."
+            )
+        index = {c: i for i, c in enumerate(classes.tolist())}
+        unknown = sorted({v for v in y.tolist() if v not in index}, key=str)
+        if unknown:
+            raise ValueError(f"y_val labels not in classes: {unknown[:10]}")
+        return np.array([index[v] for v in y.tolist()], dtype=int)
+    if y.dtype.kind in "iub" or (
+        y.dtype.kind == "f" and np.all(np.isfinite(y)) and np.all(y == np.round(y))
+    ):
+        idx = y.astype(int)
+        if idx.size == 0 or (idx.min() >= 0 and idx.max() < n_columns):
+            return idx
+    raise ValueError(
+        "y_val must hold probability-column indices 0.."
+        f"{n_columns - 1}, or pass classes= (the label of each column, e.g. a "
+        "fitted model's classes_) to map the original labels."
+    )
+
+
 def _probas_to_preds(probas: np.ndarray) -> np.ndarray:
     """Convert a ``(n, k)`` probability matrix to ``(n,)`` class predictions."""
     if probas.ndim != 2:
@@ -329,8 +365,9 @@ class GreedyEnsembleSelection:
         Number of greedy iterations (default 50).
     task_type : str
         ``"classification"`` or ``"regression"``.
-    metric : str
-        Validation metric to maximise / minimise.
+    metric : str or None
+        Validation metric to maximise / minimise. If omitted or ``None``,
+        defaults to ``"accuracy"`` for classification and ``"r2"`` for regression.
     with_replacement : bool
         If ``True`` (default) a model can be selected more than once.
 
@@ -346,7 +383,7 @@ class GreedyEnsembleSelection:
         self,
         ensemble_size: int = 50,
         task_type: str = "classification",
-        metric: str = "accuracy",
+        metric: Optional[str] = None,
         with_replacement: bool = True,
     ) -> None:
         if ensemble_size < 1:
@@ -358,7 +395,9 @@ class GreedyEnsembleSelection:
             )
         self.ensemble_size = ensemble_size
         self.task_type = task_type
-        self.metric = metric
+        self.metric = metric if metric is not None else (
+            "r2" if task_type == "regression" else "accuracy"
+        )
         self.with_replacement = with_replacement
         self.weights_: Optional[Dict[str, float]] = None
         self.model_names_: Optional[List[str]] = None
@@ -935,6 +974,7 @@ class CascadeStackingEnsemble:
         model_outputs_per_level: List[Dict[str, np.ndarray]],
         y_val: np.ndarray,
         model_names: Optional[List[str]] = None,
+        classes: Optional[np.ndarray] = None,
     ) -> "CascadeStackingEnsemble":
         """Fit the cascade by applying final GES across all level outputs.
 
@@ -948,8 +988,16 @@ class CascadeStackingEnsemble:
             One dict per level.  Each dict maps stacker names to their
             ``(n_val, n_classes)`` probability arrays on the validation set.
         y_val : array-like
+            Classification: labels already encoded as probability-column
+            indices ``0..n_classes-1``, or original labels together with
+            ``classes``.
         model_names : list[str] or None
             Base model names (used for labelling).
+        classes : array-like or None
+            Classification only: the label of each probability column, in
+            column order (e.g. a fitted model's ``classes_``). Used to map
+            original ``y_val`` labels to column indices. It is not inferred
+            from ``y_val``, which may lack some classes.
 
         Returns
         -------
@@ -958,7 +1006,9 @@ class CascadeStackingEnsemble:
         Raises
         ------
         ValueError
-            If no stacker outputs are provided.
+            If no stacker outputs are provided, or (classification) if
+            ``y_val`` holds labels that are not column indices and
+            ``classes`` is not given or does not contain them.
         """
         y_val = _to_numpy(y_val)
         self.model_names_ = model_names or []
@@ -983,6 +1033,9 @@ class CascadeStackingEnsemble:
 
         if not val_blocks:
             raise ValueError("[CascadeStackingEnsemble] No stacker outputs provided.")
+
+        if self.task_type == "classification":
+            y_val = _labels_to_column_indices(y_val, val_blocks[0].shape[1], classes)
 
         _, _, ges_weights = self._greedy_select_blocks(
             val_blocks, val_blocks, y_val, self.ges_size,

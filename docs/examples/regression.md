@@ -52,13 +52,12 @@ y = df['price']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 pipeline = TabularPipeline(
-    model_name='TabICL',
+    model_name='TabICLv2',
     task_type='regression',
-    tuning_strategy='base-ft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
-        'epochs': 5,
-        'learning_rate': 2e-5
+        'epochs': 1
     }
 )
 
@@ -94,7 +93,7 @@ def cross_validate_regression(X, y, model_name, params, k=5):
         pipeline = TabularPipeline(
             model_name=model_name,
             task_type='regression',
-            tuning_strategy='base-ft',
+            tuning_strategy='finetune',
             tuning_params=params
         )
 
@@ -129,13 +128,12 @@ X, y, _, _ = dataset.get_data(target=dataset.default_target_attribute)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 pipeline = TabularPipeline(
-    model_name='OrionMSP1.5',
+    model_name='TabPFN',
     task_type='regression',
-    tuning_strategy='peft',
+    tuning_strategy='finetune',
     tuning_params={
         'device': 'cuda',
-        'epochs': 5,
-        'peft_config': {'r': 8}
+        'epochs': 5
     }
 )
 
