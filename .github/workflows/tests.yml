@@ -4,9 +4,10 @@
 # (download model weights), slow, and integration (end-to-end, heavy).
 # Everything runs on CPU only; CUDA is hidden from torch.
 #
-# Also deselected by node id (they fail the same way on main, so they are not
-# caused by pull requests; the first two hang on a CPU runner):
-#   tests/test_distillation.py::test_2 and ::test_12
+# tests/test_distillation.py is marked slow and weights (it fits real teachers),
+# so it is excluded by the marker expression.
+# Also deselected by node id (it fails the same way on main, so it is not
+# caused by pull requests):
 #   tests/test_exaone_model.py ... test_model_output_is_bit_identical_with_and_without_row_chunking
 # A per-test timeout stops any other hang from eating the whole job.
 name: Tests
@@ -44,7 +45,5 @@ jobs:
       - name: Run CPU tests
         run: >
           pytest tests -q -p no:cacheprovider --timeout=300
-          --deselect tests/test_distillation.py::test_2
-          --deselect tests/test_distillation.py::test_12
           --deselect "tests/test_exaone_model.py::TestChunkedFeatureAttention::test_model_output_is_bit_identical_with_and_without_row_chunking"
           -m "not gpu and not requires_gpu and not weights and not slow and not integration"

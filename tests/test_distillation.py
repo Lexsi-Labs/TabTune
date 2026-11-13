@@ -21,6 +21,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_classification, make_regression
 warnings.filterwarnings("ignore")
 
+# Fits real TabPFN / TabICLv2 teachers (weights downloaded from the Hugging Face
+# Hub); about 17 minutes on a CPU runner.
+pytestmark = [pytest.mark.slow, pytest.mark.weights]
+
 from tabtune import TabularPipeline
 from tabtune.logger import setup_logger
 from tabtune.distillation import TabDistiller
