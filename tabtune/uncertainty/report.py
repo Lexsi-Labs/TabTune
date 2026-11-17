@@ -98,12 +98,18 @@ def uncertainty_report(
     """Summarise a fitted pipeline's uncertainty behaviour in one dict.
 
     For classification the calibration block (``ece``, ``mce``, ``brier``) is
-    always computed, reusing :func:`tabtune.evaluation.metrics.calibration_metrics`
+    always returned, reusing :func:`tabtune.evaluation.metrics.calibration_metrics`
     so the numbers agree with ``evaluate()`` and the leaderboard. When a
     calibration split is also given, a :class:`ConformalClassifier` is fitted
     on it and evaluated on the test split, adding ``coverage``,
     ``avg_set_size``, ``sscs`` (see :func:`size_stratified_coverage`) and
     ``alpha``.
+
+    The calibration block needs the label of each probability column. It is
+    taken from the calibration split's conformal fit, else from the
+    estimator's own ``classes_``, else from the classes in ``y_test``. If
+    ``y_test`` lacks a class and neither of the others is available, the
+    block is NaN and a warning is logged; pass ``X_cal``/``y_cal`` then.
 
     For regression there are no probabilities to score, so the report *requires*
     the calibration split and returns ``coverage``, ``avg_width`` and ``alpha``
@@ -160,6 +166,22 @@ def uncertainty_report(
     if X_cal is not None:
         conformal_probe.calibrate(X_cal, y_cal)
         labels = conformal_probe.classes_
+    else:
+        # A scikit-learn estimator's own ``classes_`` gives the column order in the
+        # label space it was fitted on. TabularPipeline has no ``classes_`` of its
+        # own (its model's can be the encoded space), so it is not used here.
+        own = getattr(pipeline, "classes_", None)
+        if own is not None and len(own) == proba.shape[1]:
+            labels = np.asarray(own)
+        else:
+            n_test = len(np.unique(np.asarray(getattr(y_test, "values", y_test))))
+            if n_test != proba.shape[1]:
+                logger.warning(
+                    "[uncertainty_report] y_test has %d classes but predict_proba has %d "
+                    "columns, so the columns cannot be matched to labels: ece, mce and "
+                    "brier are NaN. Pass X_cal and y_cal to resolve the class order.",
+                    n_test, proba.shape[1],
+                )
 
     calibration = calibration_metrics(y_test, proba, n_bins=n_bins, labels=labels)
     out: dict[str, float] = {

@@ -2,6 +2,8 @@
 
 OrionMSP is a scalable in-context learning model that leverages multi‑scale synthetic priors and episodic adaptation for robust tabular classification.
 
+**Task support:** classification only. `TabularPipeline(model_name="OrionMSP", task_type="regression")` raises `UnsupportedTaskError` when the pipeline is built; for regression see [Regression](../regression/regression.md).
+
 ## Key ideas
 - Multi‑scale synthetic priors to initialize inductive biases
 - Column‑then‑row attention for efficient context reasoning

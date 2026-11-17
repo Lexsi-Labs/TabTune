@@ -2,6 +2,8 @@
 
 TabICL is a scalable, ensemble-based in-context learning model designed for general-purpose tabular classification. This document provides comprehensive guidance for using TabICL with TabTune.
 
+**Task support:** classification only. `TabularPipeline(model_name="TabICL", task_type="regression")` raises `UnsupportedTaskError` when the pipeline is built; for regression see [Regression](../regression/regression.md).
+
 ---
 
 ## 1. Introduction

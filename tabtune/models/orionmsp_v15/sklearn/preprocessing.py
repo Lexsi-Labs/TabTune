@@ -20,16 +20,21 @@ from sklearn.preprocessing import (
     QuantileTransformer,
     RobustScaler,
 )
-from sklearn.utils.validation import check_is_fitted, check_X_y
+from sklearn.utils.validation import check_is_fitted
 
-# scikit-learn removed check_array(force_all_finite=...) in 1.8; the shim
-# accepts either spelling so this file works across the supported range.
-from ...._internal.sklearn_compat import check_array
+# scikit-learn renamed force_all_finite -> ensure_all_finite in 1.6 and removed
+# the old name in 1.8, on both check_array and check_X_y. The shim accepts
+# either spelling. check_X_y must go through it too: this module's
+# _validate_data backport (installed once sklearn drops BaseEstimator._validate_data,
+# which 1.8 did) calls check_X_y(..., force_all_finite="allow-nan").
+from ...._internal.sklearn_compat import check_array, check_X_y
 
 # -----------------------------------------------------------------------------
 # sklearn compatibility shim:
-# Older scikit-learn versions don't have BaseEstimator._validate_data.
-# We implement it using sklearn validators so your existing code works unchanged.
+# BaseEstimator._validate_data is missing on very old scikit-learn and was
+# removed again in 1.8. Install a small backport so fit/transform keep working.
+# Validators go through tabtune._internal.sklearn_compat so force_all_finite
+# still works after that argument was removed.
 # -----------------------------------------------------------------------------
 if not hasattr(BaseEstimator, "_validate_data"):
     def _validate_data(self, X, y=None, reset=True, **kwargs):

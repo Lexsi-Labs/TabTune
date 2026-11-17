@@ -7,6 +7,7 @@ OrionMSP v1.5 (a.k.a. `orionmsp_v15` in TabTune) is an in-context learning (ICL)
 - **ICL predictor with optional thinking tokens**
 - **Inference-time acceleration via KV caching**
 
+**Task support:** classification only. `TabularPipeline(model_name="OrionMSP1.5", task_type="regression")` raises `UnsupportedTaskError` when the pipeline is built; for regression see [Regression](../regression/regression.md).
 
 ---
 

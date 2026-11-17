@@ -20,7 +20,7 @@ SCHEMA = TimeSeriesSchema(target="target", item_id="item_id")
 @pytest.mark.parametrize(
     ("freq", "benchmark", "natural"),
     [("h", 24, 24), ("D", 1, 7), ("W-SUN", 1, 52), ("MS", 12, 12), ("QS", 4, 4), ("15min", 96, 4),
-     ("B", 5, 5), ("YS", 1, 1), ("s", 3600, 60), ("7h", 1, 1)],
+     ("B", 5, 5), ("YS", 1, 1), ("s", 3600, 60), ("7h", 1, 1), ("ms", 1, 1), ("4ms", 1, 1)],
 )
 def test_season_length_conventions(freq, benchmark, natural):
     assert season_length(freq) == benchmark
